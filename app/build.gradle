@@ -19,14 +19,18 @@ android {
             proguardFiles 'proguard-project.txt'
         }
         debug {
-            minifyEnabled true
-            shrinkResources true
+            minifyEnabled false
+            shrinkResources false
             proguardFiles 'proguard-project.txt'
         }
     }
 
     lintOptions {
         abortOnError false
+    }
+
+    sourceSets.main {
+        assets.srcDirs = ['src/main/assets', 'src/main/web/tool_androidkit']
     }
 }
 
