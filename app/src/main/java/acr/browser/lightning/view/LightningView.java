@@ -5,6 +5,7 @@
 package acr.browser.lightning.view;
 
 import android.annotation.SuppressLint;
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.ActivityNotFoundException;
@@ -62,9 +63,10 @@ import acr.browser.lightning.utils.AdBlock;
 import acr.browser.lightning.utils.IntentUtils;
 import acr.browser.lightning.utils.Utils;
 
-public class LightningView {
+public class LightningView implements ILightningTab {
 
 	private final Title mTitle;
+	private final boolean mIsCustomWebView;
 	private WebView mWebView;
 	private BrowserController mBrowserController;
 	private GestureDetector mGestureDetector;
@@ -91,10 +93,16 @@ public class LightningView {
 
 	@SuppressWarnings("deprecation")
 	@SuppressLint("NewApi")
-	public LightningView(Activity activity, String url, boolean darkTheme) {
+	public LightningView(final Activity activity, String url, final boolean darkTheme, final WebView overrideWebView) {
 
 		mActivity = activity;
-		mWebView = new WebView(activity);
+		if (overrideWebView != null) {
+			mWebView = overrideWebView;
+			mIsCustomWebView = true;
+		} else {
+			mWebView = new WebView(activity);
+			mIsCustomWebView = false;
+		}
 		mTitle = new Title(activity, darkTheme);
 		mAdBlock = AdBlock.getInstance(activity.getApplicationContext());
 
@@ -122,30 +130,33 @@ public class LightningView {
 			mWebView.getRootView().setBackgroundDrawable(null);
 		}
 		mWebView.setScrollbarFadingEnabled(true);
-		mWebView.setSaveEnabled(true);
-		mWebView.setWebChromeClient(new LightningChromeClient(activity));
-		mWebView.setWebViewClient(new LightningWebClient(activity));
-		mWebView.setDownloadListener(new LightningDownloadListener(activity));
-		mGestureDetector = new GestureDetector(activity, new CustomGestureListener());
-		mWebView.setOnTouchListener(new TouchListener());
-		mDefaultUserAgent = mWebView.getSettings().getUserAgentString();
-		mSettings = mWebView.getSettings();
-		initializeSettings(mWebView.getSettings(), activity);
-		initializePreferences(activity);
 
-		if (url != null) {
-			if (!url.trim().isEmpty()) {
-				mWebView.loadUrl(url);
+		if (overrideWebView == null) {
+			mWebView.setSaveEnabled(true);
+			mWebView.setWebChromeClient(new LightningChromeClient(activity));
+			mWebView.setWebViewClient(new LightningWebClient(activity));
+			mWebView.setDownloadListener(new LightningDownloadListener(activity));
+			mGestureDetector = new GestureDetector(activity, new CustomGestureListener());
+			mWebView.setOnTouchListener(new TouchListener());
+			mDefaultUserAgent = mWebView.getSettings().getUserAgentString();
+			mSettings = mWebView.getSettings();
+			initializeSettings(mWebView.getSettings(), activity);
+			initializePreferences(activity);
+
+			if (url != null) {
+				if (!url.trim().isEmpty()) {
+					mWebView.loadUrl(url);
+				} else {
+					// don't load anything, the user is looking for a blank tab
+				}
 			} else {
-				// don't load anything, the user is looking for a blank tab
-			}
-		} else {
-			if (mHomepage.startsWith("about:home")) {
-				mWebView.loadUrl(getHomepage());
-			} else if (mHomepage.startsWith("about:bookmarks")) {
-				mBrowserController.openBookmarkPage(mWebView);
-			} else {
-				mWebView.loadUrl(mHomepage);
+				if (mHomepage.startsWith("about:home")) {
+					mWebView.loadUrl(getHomepage());
+				} else if (mHomepage.startsWith("about:bookmarks")) {
+					mBrowserController.openBookmarkPage(mWebView);
+				} else {
+					mWebView.loadUrl(mHomepage);
+				}
 			}
 		}
 	}
@@ -362,6 +373,7 @@ public class LightningView {
 
 	@SuppressWarnings("deprecation")
 	@SuppressLint({ "SetJavaScriptEnabled", "NewApi" })
+	@TargetApi(21)
 	public void initializeSettings(WebSettings settings, Context context) {
 		if (API < 18) {
 			settings.setAppCacheMaxSize(Long.MAX_VALUE);
