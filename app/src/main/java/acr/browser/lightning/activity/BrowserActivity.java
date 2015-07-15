@@ -1253,7 +1253,9 @@ public class BrowserActivity extends ThemableActivity implements BrowserControll
 		mBrowserFrame.addView(mCurrentView.getWebView(), MATCH_PARENT);
 		// Remove browser frame background to reduce overdraw
 		mBrowserFrame.setBackgroundColor(0);
-		mCurrentView.requestFocus();
+		if (mCurrentView != mSearchContainer) {
+			mCurrentView.requestFocus();
+		}
 		mCurrentView.onResume();
 
 		// Use a delayed handler to make the transition smooth
