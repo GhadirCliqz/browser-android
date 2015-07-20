@@ -372,6 +372,7 @@ public class BrowserActivity extends ThemableActivity implements BrowserControll
 
 	private void cliqzSearch (final String query) {
 		if (mCurrentView != mSearchContainer) {
+			Log.d(Constants.TAG, "Switching back to cliqz view");
 			mPreSearchTab = mCurrentView;
 			showTab(mSearchContainer);
 		}
@@ -384,7 +385,8 @@ public class BrowserActivity extends ThemableActivity implements BrowserControll
 	public void onUrlClicked(String url) {
 		if (mPreSearchTab != null) {
 			showTab(mPreSearchTab);
-			mCurrentView.loadUrl(url);
+			mPreSearchTab.loadUrl(url);
+			mPreSearchTab = null;
 		}
 
 	}
@@ -437,7 +439,7 @@ public class BrowserActivity extends ThemableActivity implements BrowserControll
 
 		public class FocusChangeListener implements OnFocusChangeListener {
 			@Override
-			public void onFocusChange(View v, final boolean hasFocus) {
+			public void onFocusChange(final View v, final boolean hasFocus) {
 				if (!hasFocus && mCurrentView != null) {
 					if (mCurrentView.getProgress() < 100) {
 						setIsLoading();
@@ -452,9 +454,16 @@ public class BrowserActivity extends ThemableActivity implements BrowserControll
 					} else {
 						mSearch.setText(url);
 					}
-					((EditText) v).selectAll(); // Hack to make sure
-															// the text gets
-															// selected
+					mSearch.post(new Runnable() {
+
+						@Override
+						public void run() {
+							((EditText) v).selectAll(); // Hack to make sure
+							// the text gets
+							// selected
+						}
+					});
+
 					mIcon = mCopyIcon;
 					mSearch.setCompoundDrawables(null, null, mCopyIcon, null);
 				}
@@ -529,6 +538,7 @@ public class BrowserActivity extends ThemableActivity implements BrowserControll
 				final String q = charSequence.toString();
 
 				if (mCurrentView != null && q.equals(mCurrentView.getUrl())) {
+					Log.d(Constants.TAG, "Not searching because it is current URL");
 					return;
 				}
 				if (!q.isEmpty()) {
@@ -1235,15 +1245,18 @@ public class BrowserActivity extends ThemableActivity implements BrowserControll
 		// Set the background color so the color mode color doesn't show through
 		mBrowserFrame.setBackgroundColor(mBackgroundColor);
 		if (view == null) {
+			Log.d(Constants.TAG, "showTab: Refusing to show null tab");
 			return;
 		}
 		mBrowserFrame.removeAllViews();
 		if (mCurrentView != null) {
 			mCurrentView.setForegroundTab(false);
 			mCurrentView.onPause();
+			Log.d(Constants.TAG, "showTab: Pausing current view " + mCurrentView.getUrl());
 		}
 		mCurrentView = view;
 		mCurrentView.setForegroundTab(true);
+		Log.d(Constants.TAG, "showTab: New view " + mCurrentView.getUrl(), new Exception());
 		if (mCurrentView.getWebView() != null) {
 			updateUrl(mCurrentView.getUrl(), true);
 			updateProgress(mCurrentView.getProgress());

@@ -446,7 +446,7 @@ public class LightningView implements ILightningTab {
 	}
 
 	public synchronized void stopLoading() {
-		if (mWebView != null) {
+		if (mWebView != null && !mIsCustomWebView) {
 			mWebView.stopLoading();
 		}
 	}
@@ -544,7 +544,7 @@ public class LightningView implements ILightningTab {
 			return;
 		}
 
-		if (mWebView != null) {
+		if (mWebView != null && !mIsCustomWebView) {
 			mWebView.reload();
 		}
 	}
@@ -593,7 +593,7 @@ public class LightningView implements ILightningTab {
 	}
 
 	public synchronized void goBack() {
-		if (mWebView != null) {
+		if (mWebView != null && !mIsCustomWebView) {
 			mWebView.goBack();
 		}
 	}
@@ -607,17 +607,17 @@ public class LightningView implements ILightningTab {
 	}
 
 	public synchronized void goForward() {
-		if (mWebView != null) {
+		if (mWebView != null && !mIsCustomWebView) {
 			mWebView.goForward();
 		}
 	}
 
 	public boolean canGoBack() {
-		return mWebView != null && mWebView.canGoBack();
+		return mWebView != null && mWebView.canGoBack() && !mIsCustomWebView;
 	}
 
 	public boolean canGoForward() {
-		return mWebView != null && mWebView.canGoForward();
+		return mWebView != null && mWebView.canGoForward() && !mIsCustomWebView;
 	}
 
 	public WebView getWebView() {
@@ -635,7 +635,7 @@ public class LightningView implements ILightningTab {
 			return;
 		}
 
-		if (mWebView != null) {
+		if (mWebView != null && !mIsCustomWebView) {
 			mWebView.loadUrl(url);
 		}
 	}

@@ -25,6 +25,7 @@ import android.webkit.JavascriptInterface;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
+import android.webkit.WebViewClient;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -77,11 +78,16 @@ public class WebSearchView extends WebView implements ILightningTab {
         public void onUrlClicked(final String url);
     }
 
-    /* private WebViewClient mWebViewClient = new WebViewClient() {
-        public void onPageFinished (WebView view, String url) {
+    private WebViewClient mWebViewClient = new WebViewClient() {
+        /* public void onPageFinished (WebView view, String url) {
             executeJS("_cliqzLoadCSS('content/skin/android.css');");
+        } */
+
+        public boolean shouldOverrideUrlLoading(final WebView wv, final String url) {
+            Log.d (TAG, "New url: " + url);
+            return true;
         }
-    }; */
+    };
     private Location mLocation;
     private Location mLastLocation;
     private String mUrl;
@@ -109,6 +115,8 @@ public class WebSearchView extends WebView implements ILightningTab {
     public void setup() {
         // Make extra sure web performance is nice on scrolling. Can this actually be harmful?
         setLayerType(View.LAYER_TYPE_HARDWARE, null);
+
+        setWebViewClient(mWebViewClient);
 
         // Web view settings
         WebSettings webSettings = getSettings();
