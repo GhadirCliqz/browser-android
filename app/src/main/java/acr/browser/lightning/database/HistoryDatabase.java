@@ -54,6 +54,10 @@ public class HistoryDatabase extends SQLiteOpenHelper {
 				+ " INTEGER PRIMARY KEY," + KEY_URL + " TEXT," + KEY_TITLE + " TEXT,"
 				+ KEY_TIME_VISITED + " INTEGER" + ")";
 		db.execSQL(CREATE_HISTORY_TABLE);
+		final String CREATE_HISTORY_INDEX_URL = "CREATE INDEX IF NOT EXISTS urlIndex ON " +
+				TABLE_HISTORY + "(" + KEY_URL + " COLLATE NOCASE)";
+		db.execSQL(CREATE_HISTORY_INDEX_URL);
+
 	}
 
 	// Upgrading database
@@ -116,11 +120,14 @@ public class HistoryDatabase extends SQLiteOpenHelper {
 		return m;
 	}
 
-	public List<HistoryItem> findItemsContaining(String search) {
+	public List<HistoryItem> findItemsContaining(final String search, int limit) {
+		if (limit <= 0) {
+			limit = 5;
+		}
 		List<HistoryItem> itemList = new ArrayList<>();
 		String selectQuery = "SELECT * FROM " + TABLE_HISTORY + " WHERE " + KEY_TITLE + " LIKE '%"
 				+ search + "%' OR " + KEY_URL + " LIKE '%" + search + "%' " + "ORDER BY "
-				+ KEY_TIME_VISITED + " DESC LIMIT 5";
+				+ KEY_TIME_VISITED + " DESC LIMIT " + limit;
 		Cursor cursor = mDatabase.rawQuery(selectQuery, null);
 
 		int n = 0;

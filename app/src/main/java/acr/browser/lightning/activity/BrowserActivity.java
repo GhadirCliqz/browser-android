@@ -223,6 +223,7 @@ public class BrowserActivity extends ThemableActivity implements BrowserControll
 
 		mSearchView = new WebSearchView(this);
 		mSearchView.setResultListener(this);
+
 		mSearchContainer = new LightningView(this, "", false, mSearchView);
 
 		mClickHandler = new ClickHandler(this);
@@ -259,6 +260,7 @@ public class BrowserActivity extends ThemableActivity implements BrowserControll
 		mDrawerListRight.setOnItemLongClickListener(new BookmarkItemLongClickListener());
 
 		mHistoryDatabase = HistoryDatabase.getInstance(getApplicationContext());
+		mSearchView.setHistoryDatabase(mHistoryDatabase);
 
 		// set display options of the ActionBar
 		actionBar.setDisplayShowTitleEnabled(false);

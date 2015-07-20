@@ -29,7 +29,12 @@ import android.webkit.WebView;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
+import java.util.List;
+
 import acr.browser.lightning.BuildConfig;
+import acr.browser.lightning.database.HistoryDatabase;
+import acr.browser.lightning.database.HistoryItem;
 import acr.browser.lightning.view.ILightningTab;
 
 /**
@@ -48,6 +53,7 @@ public class WebSearchView extends WebView implements ILightningTab {
     private int mLastScrollPosition = 0;
     private boolean mFirstHide = true;
     private IWebSearchResult mResultClickedListener;
+    private HistoryDatabase mHistoryDatabase;
 
     public class WebClickedRunnable implements Runnable {
 
@@ -84,6 +90,10 @@ public class WebSearchView extends WebView implements ILightningTab {
         super(context);
 
         setup();
+    }
+
+    public void setHistoryDatabase(final HistoryDatabase db) {
+        mHistoryDatabase = db;
     }
 
     public void setResultListener(final IWebSearchResult cb) {
@@ -219,6 +229,28 @@ public class WebSearchView extends WebView implements ILightningTab {
             post(mWebClickedRunnable);
 
             return false;
+        }
+
+        @JavascriptInterface
+        public String searchHistory(final String query) {
+            if (mHistoryDatabase != null) {
+                final List<HistoryItem> items = mHistoryDatabase.findItemsContaining(query, 100);
+                try {
+                    final StringBuilder sb = new StringBuilder(items.size() * 100);
+                    sb.append("[");
+                    String sep = "";
+                    for (final HistoryItem item : items) {
+                        sb.append(sep);
+                        item.toJsonString(sb);
+                        sep = ",";
+                    }
+                    sb.append("]");
+                    return sb.toString();
+                } catch (Exception e) {
+                    Log.e(TAG, "Cannot serialize History", e);
+                }
+            }
+            return "[]";
         }
 
         /**
