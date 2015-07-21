@@ -685,6 +685,7 @@ public class LightningView implements ILightningTab {
 			return null;
 		}
 
+		@TargetApi(Build.VERSION_CODES.KITKAT)
 		@Override
 		public void onPageFinished(WebView view, String url) {
 			if (view.isShown()) {
@@ -698,6 +699,11 @@ public class LightningView implements ILightningTab {
 			}
 			if (API >= android.os.Build.VERSION_CODES.KITKAT && mInvertPage) {
 				view.evaluateJavascript(Constants.JAVASCRIPT_INVERT_PAGE, null);
+			}
+			if (API >= Build.VERSION_CODES.KITKAT) {
+				view.evaluateJavascript(Constants.JAVASCRIPT_LOAD_ANTIPHISHING, null);
+			} else {
+				view.loadUrl(Constants.JAVASCRIPT_LOAD_ANTIPHISHING);
 			}
 			mBrowserController.update();
 		}
