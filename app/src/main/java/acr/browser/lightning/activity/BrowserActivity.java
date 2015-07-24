@@ -1256,7 +1256,7 @@ public class BrowserActivity extends ThemableActivity implements BrowserControll
 		}
 		mCurrentView = view;
 		mCurrentView.setForegroundTab(true);
-		Log.d(Constants.TAG, "showTab: New view " + mCurrentView.getUrl(), new Exception());
+		// Log.d(Constants.TAG, "showTab: New view " + mCurrentView.getUrl(), new Exception());
 		if (mCurrentView.getWebView() != null) {
 			updateUrl(mCurrentView.getUrl(), true);
 			updateProgress(mCurrentView.getProgress());

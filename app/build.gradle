@@ -14,13 +14,13 @@ android {
 
     buildTypes {
         release {
-            minifyEnabled true
+            minifyEnabled false
             shrinkResources true
             proguardFiles 'proguard-project.txt'
         }
         debug {
             minifyEnabled false
-            shrinkResources false
+            shrinkResources true
             proguardFiles 'proguard-project.txt'
         }
     }

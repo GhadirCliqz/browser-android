@@ -46,11 +46,14 @@ import android.webkit.WebViewClient;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 
+import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.URISyntaxException;
 
 import acr.browser.lightning.R;
@@ -67,6 +70,7 @@ public class LightningView implements ILightningTab {
 
 	private final Title mTitle;
 	private final boolean mIsCustomWebView;
+	private String mAntiPhishingSrc;
 	private WebView mWebView;
 	private BrowserController mBrowserController;
 	private GestureDetector mGestureDetector;
@@ -96,6 +100,25 @@ public class LightningView implements ILightningTab {
 	public LightningView(final Activity activity, String url, final boolean darkTheme, final WebView overrideWebView) {
 
 		mActivity = activity;
+
+		try {
+			final InputStream is = activity.getAssets().open("js/CliqzAntiPhishing.js");
+			final BufferedReader reader = new BufferedReader(new InputStreamReader(is));
+			final StringBuffer sb = new StringBuffer(1000);
+
+			// do reading, usually loop until end of file reading
+			String line = reader.readLine();
+			while ((line = reader.readLine()) != null) {
+				sb.append(line);
+			}
+			mAntiPhishingSrc = sb.toString();
+
+		} catch (IOException e) {
+			Log.e(Constants.TAG, "Cannot load antiphishing", e);
+		}
+
+
+
 		if (overrideWebView != null) {
 			mWebView = overrideWebView;
 			mIsCustomWebView = true;
@@ -666,8 +689,24 @@ public class LightningView implements ILightningTab {
 			mActivity = context;
 		}
 
+		@TargetApi(Build.VERSION_CODES.LOLLIPOP)
 		@Override
 		public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
+			final String url = request.getUrl().toString();
+			if (url.startsWith("http://antiphishing.clyqz.com/")) {
+				try {
+					return new WebResourceResponse("application/json", "utf-8", mWebView.getContext().getContentResolver().openInputStream(request.getUrl()));
+				} catch (IOException e) {
+					Log.e(Constants.TAG, "Cannot load antiphishing API", e);
+				}
+			}
+			if (url.equals("cliqz://js/CliqzAntiPhishing.js")) {
+				try {
+					return new WebResourceResponse("application/javascript", "utf-8", mWebView.getContext().getAssets().open("js/CliqzAntiPhishing.js"));
+				} catch (IOException e) {
+					Log.e(Constants.TAG, "Cannot load antiphishing", e);
+				}
+			}
 			if (mAdBlock.isAd(request.getUrl().getHost())) {
 				ByteArrayInputStream EMPTY = new ByteArrayInputStream("".getBytes());
 				return new WebResourceResponse("text/plain", "utf-8", EMPTY);
@@ -678,6 +717,20 @@ public class LightningView implements ILightningTab {
 
 		@Override
 		public WebResourceResponse shouldInterceptRequest(WebView view, String url) {
+			if (url.startsWith("http://antiphishing.clyqz.com/")) {
+				try {
+					return new WebResourceResponse("application/json", "utf-8", mWebView.getContext().getContentResolver().openInputStream(Uri.parse(url)));
+				} catch (IOException e) {
+					Log.e(Constants.TAG, "Cannot load antiphishing API", e);
+				}
+			}
+			if (url.equals("cliqz://js/CliqzAntiPhishing.js")) {
+				try {
+					return new WebResourceResponse("application/javascript", "utf-8", mWebView.getContext().getAssets().open("js/CliqzAntiPhishing.js"));
+				} catch (IOException e) {
+					Log.e(Constants.TAG, "Cannot load antiphishing", e);
+				}
+			}
 			if (mAdBlock.isAd(url)) {
 				ByteArrayInputStream EMPTY = new ByteArrayInputStream("".getBytes());
 				return new WebResourceResponse("text/plain", "utf-8", EMPTY);
@@ -775,6 +828,7 @@ public class LightningView implements ILightningTab {
 				if (Math.abs(mZoomScale - newScale) > 0.01f) {
 					mIsRunning = view.postDelayed(new Runnable() {
 
+						@TargetApi(Build.VERSION_CODES.KITKAT)
 						@Override
 						public void run() {
 							mZoomScale = newScale;
