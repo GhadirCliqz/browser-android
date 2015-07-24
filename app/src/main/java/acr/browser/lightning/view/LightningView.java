@@ -101,24 +101,6 @@ public class LightningView implements ILightningTab {
 
 		mActivity = activity;
 
-		try {
-			final InputStream is = activity.getAssets().open("js/CliqzAntiPhishing.js");
-			final BufferedReader reader = new BufferedReader(new InputStreamReader(is));
-			final StringBuffer sb = new StringBuffer(1000);
-
-			// do reading, usually loop until end of file reading
-			String line = reader.readLine();
-			while ((line = reader.readLine()) != null) {
-				sb.append(line);
-			}
-			mAntiPhishingSrc = sb.toString();
-
-		} catch (IOException e) {
-			Log.e(Constants.TAG, "Cannot load antiphishing", e);
-		}
-
-
-
 		if (overrideWebView != null) {
 			mWebView = overrideWebView;
 			mIsCustomWebView = true;
@@ -163,7 +145,7 @@ public class LightningView implements ILightningTab {
 			mWebView.setOnTouchListener(new TouchListener());
 			mDefaultUserAgent = mWebView.getSettings().getUserAgentString();
 			mSettings = mWebView.getSettings();
-			initializeSettings(mWebView.getSettings(), activity);
+			initializeSettings(mWebView.getSettings(), activity, url);
 			initializePreferences(activity);
 
 			if (url != null) {
@@ -185,7 +167,8 @@ public class LightningView implements ILightningTab {
 	}
 
 	public String getHomepage() {
-		StringBuilder homepageBuilder = new StringBuilder();
+		return Constants.HOMEPAGE;
+		/* StringBuilder homepageBuilder = new StringBuilder();
 		homepageBuilder.append(StartPage.HEAD);
 		String icon;
 		String searchUrl;
@@ -276,14 +259,14 @@ public class LightningView implements ILightningTab {
 			e.printStackTrace();
 		}
 
-		return Constants.FILE + homepage;
+		return Constants.FILE + homepage; */
 	}
 
 	@SuppressWarnings("deprecation")
 	@SuppressLint({ "NewApi", "SetJavaScriptEnabled" })
 	public synchronized void initializePreferences(Context context) {
 		mPreferences = PreferenceManager.getInstance();
-		mHomepage = mPreferences.getHomepage();
+		mHomepage = Constants.HOMEPAGE;
 		mAdBlock.updatePreference();
 		if (mSettings == null && mWebView != null) {
 			mSettings = mWebView.getSettings();
@@ -397,7 +380,7 @@ public class LightningView implements ILightningTab {
 	@SuppressWarnings("deprecation")
 	@SuppressLint({ "SetJavaScriptEnabled", "NewApi" })
 	@TargetApi(21)
-	public void initializeSettings(WebSettings settings, Context context) {
+	public void initializeSettings(WebSettings settings, Context context, String url) {
 		if (API < 18) {
 			settings.setAppCacheMaxSize(Long.MAX_VALUE);
 		}
@@ -424,8 +407,9 @@ public class LightningView implements ILightningTab {
 		settings.setAllowFileAccess(true);
 		settings.setDefaultTextEncodingName("utf-8");
 		if (API > 16) {
-			settings.setAllowFileAccessFromFileURLs(false);
-			settings.setAllowUniversalAccessFromFileURLs(false);
+			final boolean allowAllAccess = url == null || url.startsWith("file");
+			settings.setAllowFileAccessFromFileURLs(allowAllAccess);
+			settings.setAllowUniversalAccessFromFileURLs(allowAllAccess);
 		}
 
 		settings.setAppCachePath(context.getDir("appcache", 0).getPath());
@@ -659,7 +643,15 @@ public class LightningView implements ILightningTab {
 		}
 
 		if (mWebView != null && !mIsCustomWebView) {
+			// mWebView.loadDataWithBaseURL("file:///android_asset/");
 			mWebView.loadUrl(url);
+
+			if (API > 16) {
+				final boolean allowAllAccess = url.startsWith("file");
+				final WebSettings settings = mWebView.getSettings();
+				settings.setAllowFileAccessFromFileURLs(allowAllAccess);
+				settings.setAllowUniversalAccessFromFileURLs(allowAllAccess);
+			}
 		}
 	}
 
@@ -702,7 +694,7 @@ public class LightningView implements ILightningTab {
 			}
 			if (url.equals("cliqz://js/CliqzAntiPhishing.js")) {
 				try {
-					return new WebResourceResponse("application/javascript", "utf-8", mWebView.getContext().getAssets().open("js/CliqzAntiPhishing.js"));
+					return new WebResourceResponse("application/javascript", "utf-8", mWebView.getContext().getAssets().open("tool_androidkit/js/CliqzAntiPhishing.js"));
 				} catch (IOException e) {
 					Log.e(Constants.TAG, "Cannot load antiphishing", e);
 				}
@@ -726,7 +718,7 @@ public class LightningView implements ILightningTab {
 			}
 			if (url.equals("cliqz://js/CliqzAntiPhishing.js")) {
 				try {
-					return new WebResourceResponse("application/javascript", "utf-8", mWebView.getContext().getAssets().open("js/CliqzAntiPhishing.js"));
+					return new WebResourceResponse("application/javascript", "utf-8", mWebView.getContext().getAssets().open("tool_androidkit/js/CliqzAntiPhishing.js"));
 				} catch (IOException e) {
 					Log.e(Constants.TAG, "Cannot load antiphishing", e);
 				}
