@@ -543,6 +543,11 @@ public class BrowserActivity extends ThemableActivity implements BrowserControll
 				}
 				if (!q.isEmpty()) {
 					cliqzSearch(q);
+				} else {
+					if (mCurrentView == mSearchContainer) {
+						showTab(mPreSearchTab);
+						mPreSearchTab = null;
+					}
 				}
 			}
 
