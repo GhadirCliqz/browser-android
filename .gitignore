@@ -26,6 +26,7 @@ gradle.properties
 # Intellij project files
 *.ipr
 *.iws
+*.iml
 .idea/
 
 # Gradle
