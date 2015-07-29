@@ -5,6 +5,7 @@
 package acr.browser.lightning.view;
 
 import android.annotation.SuppressLint;
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.ActivityNotFoundException;
@@ -32,6 +33,7 @@ import android.view.View.OnTouchListener;
 import android.webkit.CookieManager;
 import android.webkit.GeolocationPermissions;
 import android.webkit.HttpAuthHandler;
+import android.webkit.JavascriptInterface;
 import android.webkit.SslErrorHandler;
 import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
@@ -45,26 +47,34 @@ import android.webkit.WebViewClient;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 
+import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.URISyntaxException;
+import java.util.List;
 
 import acr.browser.lightning.R;
 import acr.browser.lightning.constant.Constants;
 import acr.browser.lightning.constant.StartPage;
 import acr.browser.lightning.controller.BrowserController;
+import acr.browser.lightning.database.HistoryDatabase;
+import acr.browser.lightning.database.HistoryItem;
 import acr.browser.lightning.download.LightningDownloadListener;
 import acr.browser.lightning.preference.PreferenceManager;
 import acr.browser.lightning.utils.AdBlock;
 import acr.browser.lightning.utils.IntentUtils;
 import acr.browser.lightning.utils.Utils;
 
-public class LightningView {
+public class LightningView implements ILightningTab {
 
 	private final Title mTitle;
+	private final boolean mIsCustomWebView;
+	private String mAntiPhishingSrc;
 	private WebView mWebView;
 	private BrowserController mBrowserController;
 	private GestureDetector mGestureDetector;
@@ -88,13 +98,24 @@ public class LightningView {
 			0, 0, -1.0f, 0, 255, // blue
 			0, 0, 0, 1.0f, 0 // alpha
 	};
+	private HistoryDatabase mHistoryDatabase;
+	private String mUrl;
 
 	@SuppressWarnings("deprecation")
 	@SuppressLint("NewApi")
-	public LightningView(Activity activity, String url, boolean darkTheme) {
+	public LightningView(final Activity activity, String url, final boolean darkTheme, final WebView overrideWebView, final HistoryDatabase database) {
 
 		mActivity = activity;
-		mWebView = new WebView(activity);
+		mHistoryDatabase = database;
+		mUrl = url;
+
+		if (overrideWebView != null) {
+			mWebView = overrideWebView;
+			mIsCustomWebView = true;
+		} else {
+			mWebView = new WebView(activity);
+			mIsCustomWebView = false;
+		}
 		mTitle = new Title(activity, darkTheme);
 		mAdBlock = AdBlock.getInstance(activity.getApplicationContext());
 
@@ -122,36 +143,40 @@ public class LightningView {
 			mWebView.getRootView().setBackgroundDrawable(null);
 		}
 		mWebView.setScrollbarFadingEnabled(true);
-		mWebView.setSaveEnabled(true);
-		mWebView.setWebChromeClient(new LightningChromeClient(activity));
-		mWebView.setWebViewClient(new LightningWebClient(activity));
-		mWebView.setDownloadListener(new LightningDownloadListener(activity));
-		mGestureDetector = new GestureDetector(activity, new CustomGestureListener());
-		mWebView.setOnTouchListener(new TouchListener());
-		mDefaultUserAgent = mWebView.getSettings().getUserAgentString();
-		mSettings = mWebView.getSettings();
-		initializeSettings(mWebView.getSettings(), activity);
-		initializePreferences(activity);
 
-		if (url != null) {
-			if (!url.trim().isEmpty()) {
-				mWebView.loadUrl(url);
+		if (overrideWebView == null) {
+			mWebView.setSaveEnabled(true);
+			mWebView.setWebChromeClient(new LightningChromeClient(activity));
+			mWebView.setWebViewClient(new LightningWebClient(activity));
+			mWebView.setDownloadListener(new LightningDownloadListener(activity));
+			mGestureDetector = new GestureDetector(activity, new CustomGestureListener());
+			mWebView.setOnTouchListener(new TouchListener());
+			mDefaultUserAgent = mWebView.getSettings().getUserAgentString();
+			mSettings = mWebView.getSettings();
+			initializeSettings(mWebView.getSettings(), activity, url);
+			initializePreferences(activity);
+
+			if (url != null) {
+				if (!url.trim().isEmpty()) {
+					mWebView.loadUrl(url);
+				} else {
+					// don't load anything, the user is looking for a blank tab
+				}
 			} else {
-				// don't load anything, the user is looking for a blank tab
-			}
-		} else {
-			if (mHomepage.startsWith("about:home")) {
-				mWebView.loadUrl(getHomepage());
-			} else if (mHomepage.startsWith("about:bookmarks")) {
-				mBrowserController.openBookmarkPage(mWebView);
-			} else {
-				mWebView.loadUrl(mHomepage);
+				if (mHomepage.startsWith("about:home")) {
+					mWebView.loadUrl(getHomepage());
+				} else if (mHomepage.startsWith("about:bookmarks")) {
+					mBrowserController.openBookmarkPage(mWebView);
+				} else {
+					mWebView.loadUrl(mHomepage);
+				}
 			}
 		}
 	}
 
 	public String getHomepage() {
-		StringBuilder homepageBuilder = new StringBuilder();
+		return Constants.HOMEPAGE;
+		/* StringBuilder homepageBuilder = new StringBuilder();
 		homepageBuilder.append(StartPage.HEAD);
 		String icon;
 		String searchUrl;
@@ -242,14 +267,14 @@ public class LightningView {
 			e.printStackTrace();
 		}
 
-		return Constants.FILE + homepage;
+		return Constants.FILE + homepage; */
 	}
 
 	@SuppressWarnings("deprecation")
 	@SuppressLint({ "NewApi", "SetJavaScriptEnabled" })
 	public synchronized void initializePreferences(Context context) {
 		mPreferences = PreferenceManager.getInstance();
-		mHomepage = mPreferences.getHomepage();
+		mHomepage = Constants.HOMEPAGE;
 		mAdBlock.updatePreference();
 		if (mSettings == null && mWebView != null) {
 			mSettings = mWebView.getSettings();
@@ -360,9 +385,14 @@ public class LightningView {
 		}
 	}
 
+	public void setHistoryDatabase(final HistoryDatabase db) {
+		mHistoryDatabase = db;
+	}
+
 	@SuppressWarnings("deprecation")
 	@SuppressLint({ "SetJavaScriptEnabled", "NewApi" })
-	public void initializeSettings(WebSettings settings, Context context) {
+	@TargetApi(21)
+	public void initializeSettings(WebSettings settings, Context context, String url) {
 		if (API < 18) {
 			settings.setAppCacheMaxSize(Long.MAX_VALUE);
 		}
@@ -388,15 +418,61 @@ public class LightningView {
 		settings.setAllowContentAccess(true);
 		settings.setAllowFileAccess(true);
 		settings.setDefaultTextEncodingName("utf-8");
-		if (API > 16) {
-			settings.setAllowFileAccessFromFileURLs(false);
-			settings.setAllowUniversalAccessFromFileURLs(false);
-		}
+		setAccessFromUrl(url, settings);
 
 		settings.setAppCachePath(context.getDir("appcache", 0).getPath());
 		settings.setGeolocationDatabasePath(context.getDir("geolocation", 0).getPath());
 		if (API < Build.VERSION_CODES.KITKAT) {
 			settings.setDatabasePath(context.getDir("databases", 0).getPath());
+		}
+	}
+
+	@TargetApi(Build.VERSION_CODES.JELLY_BEAN)
+	private void setAccessFromUrl(final String url, final WebSettings settings) {
+		final boolean allowAllAccess = url == null || url.startsWith("file");
+		if (API > 16) {
+			settings.setAllowFileAccessFromFileURLs(allowAllAccess);
+			settings.setAllowUniversalAccessFromFileURLs(allowAllAccess);
+		}
+		if (allowAllAccess) {
+			mWebView.addJavascriptInterface(new JsBridge(), "cliqzBridge");
+		}
+
+	}
+
+	public class JsBridge {
+
+		private String historyToJSON(final List<HistoryItem> items) {
+			// Don't allow history access to web sites
+			if (mWebView == null) {
+				return "[]";
+			}
+			if (mUrl != null && !mUrl.startsWith("file:")) {
+				return "[]";
+			}
+			final StringBuilder sb = new StringBuilder(items.size() * 100);
+			sb.append("[");
+			String sep = "";
+			for (final HistoryItem item : items) {
+				sb.append(sep);
+				item.toJsonString(sb);
+				sep = ",";
+			}
+			sb.append("]");
+			return sb.toString();
+		}
+
+		@JavascriptInterface
+		public String getTopSites() {
+			if (mHistoryDatabase != null) {
+				final List<HistoryItem> items = mHistoryDatabase.getTopSites(20);
+				try {
+					return historyToJSON(items);
+				} catch (Exception e) {
+					Log.e(Constants.TAG, "Cannot serialize History", e);
+				}
+			}
+			return "[]";
 		}
 	}
 
@@ -434,7 +510,7 @@ public class LightningView {
 	}
 
 	public synchronized void stopLoading() {
-		if (mWebView != null) {
+		if (mWebView != null && !mIsCustomWebView) {
 			mWebView.stopLoading();
 		}
 	}
@@ -532,7 +608,7 @@ public class LightningView {
 			return;
 		}
 
-		if (mWebView != null) {
+		if (mWebView != null && !mIsCustomWebView) {
 			mWebView.reload();
 		}
 	}
@@ -581,7 +657,7 @@ public class LightningView {
 	}
 
 	public synchronized void goBack() {
-		if (mWebView != null) {
+		if (mWebView != null && !mIsCustomWebView) {
 			mWebView.goBack();
 		}
 	}
@@ -595,17 +671,17 @@ public class LightningView {
 	}
 
 	public synchronized void goForward() {
-		if (mWebView != null) {
+		if (mWebView != null && !mIsCustomWebView) {
 			mWebView.goForward();
 		}
 	}
 
 	public boolean canGoBack() {
-		return mWebView != null && mWebView.canGoBack();
+		return mWebView != null && mWebView.canGoBack() && !mIsCustomWebView;
 	}
 
 	public boolean canGoForward() {
-		return mWebView != null && mWebView.canGoForward();
+		return mWebView != null && mWebView.canGoForward() && !mIsCustomWebView;
 	}
 
 	public WebView getWebView() {
@@ -623,8 +699,15 @@ public class LightningView {
 			return;
 		}
 
-		if (mWebView != null) {
+		if (mWebView != null && !mIsCustomWebView) {
+			mUrl = url;
+			// mWebView.loadDataWithBaseURL("file:///android_asset/");
 			mWebView.loadUrl(url);
+
+			if (API > 16) {
+				final WebSettings settings = mWebView.getSettings();
+				setAccessFromUrl(url, settings);
+			}
 		}
 	}
 
@@ -654,8 +737,24 @@ public class LightningView {
 			mActivity = context;
 		}
 
+		@TargetApi(Build.VERSION_CODES.LOLLIPOP)
 		@Override
 		public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
+			final String url = request.getUrl().toString();
+			if (url.startsWith("http://antiphishing.clyqz.com/")) {
+				try {
+					return new WebResourceResponse("application/json", "utf-8", mWebView.getContext().getContentResolver().openInputStream(request.getUrl()));
+				} catch (IOException e) {
+					Log.e(Constants.TAG, "Cannot load antiphishing API", e);
+				}
+			}
+			if (url.equals("cliqz://js/CliqzAntiPhishing.js")) {
+				try {
+					return new WebResourceResponse("application/javascript", "utf-8", mWebView.getContext().getAssets().open("tool_androidkit/js/CliqzAntiPhishing.js"));
+				} catch (IOException e) {
+					Log.e(Constants.TAG, "Cannot load antiphishing", e);
+				}
+			}
 			if (mAdBlock.isAd(request.getUrl().getHost())) {
 				ByteArrayInputStream EMPTY = new ByteArrayInputStream("".getBytes());
 				return new WebResourceResponse("text/plain", "utf-8", EMPTY);
@@ -666,6 +765,20 @@ public class LightningView {
 
 		@Override
 		public WebResourceResponse shouldInterceptRequest(WebView view, String url) {
+			if (url.startsWith("http://antiphishing.clyqz.com/")) {
+				try {
+					return new WebResourceResponse("application/json", "utf-8", mWebView.getContext().getContentResolver().openInputStream(Uri.parse(url)));
+				} catch (IOException e) {
+					Log.e(Constants.TAG, "Cannot load antiphishing API", e);
+				}
+			}
+			if (url.equals("cliqz://js/CliqzAntiPhishing.js")) {
+				try {
+					return new WebResourceResponse("application/javascript", "utf-8", mWebView.getContext().getAssets().open("tool_androidkit/js/CliqzAntiPhishing.js"));
+				} catch (IOException e) {
+					Log.e(Constants.TAG, "Cannot load antiphishing", e);
+				}
+			}
 			if (mAdBlock.isAd(url)) {
 				ByteArrayInputStream EMPTY = new ByteArrayInputStream("".getBytes());
 				return new WebResourceResponse("text/plain", "utf-8", EMPTY);
@@ -673,6 +786,7 @@ public class LightningView {
 			return null;
 		}
 
+		@TargetApi(Build.VERSION_CODES.KITKAT)
 		@Override
 		public void onPageFinished(WebView view, String url) {
 			if (view.isShown()) {
@@ -686,6 +800,11 @@ public class LightningView {
 			}
 			if (API >= android.os.Build.VERSION_CODES.KITKAT && mInvertPage) {
 				view.evaluateJavascript(Constants.JAVASCRIPT_INVERT_PAGE, null);
+			}
+			if (API >= Build.VERSION_CODES.KITKAT) {
+				view.evaluateJavascript(Constants.JAVASCRIPT_LOAD_ANTIPHISHING, null);
+			} else {
+				view.loadUrl(Constants.JAVASCRIPT_LOAD_ANTIPHISHING);
 			}
 			mBrowserController.update();
 		}
@@ -757,6 +876,7 @@ public class LightningView {
 				if (Math.abs(mZoomScale - newScale) > 0.01f) {
 					mIsRunning = view.postDelayed(new Runnable() {
 
+						@TargetApi(Build.VERSION_CODES.KITKAT)
 						@Override
 						public void run() {
 							mZoomScale = newScale;

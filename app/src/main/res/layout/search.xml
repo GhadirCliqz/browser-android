@@ -15,7 +15,7 @@
     android:focusableInTouchMode="true"
     android:gravity="center" >
 
-    <AutoCompleteTextView
+    <EditText
         android:id="@+id/search"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -33,6 +33,6 @@
         android:textColor="@color/gray_dark"
         android:textColorHint="@color/hint_text"
         android:textCursorDrawable="@null" >
-    </AutoCompleteTextView>
+    </EditText>
 
 </LinearLayout>

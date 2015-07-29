@@ -4,6 +4,7 @@
 /local.properties
 /.idea/workspace.xml
 /build
+app/app.iml
 
 # External tool builders
 .externalToolBuilders/

@@ -43,7 +43,9 @@ import android.support.v4.widget.DrawerLayout.DrawerListener;
 import android.support.v7.app.ActionBar;
 import android.support.v7.graphics.Palette;
 import android.support.v7.widget.Toolbar;
+import android.text.Editable;
 import android.text.TextUtils;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -92,6 +94,8 @@ import android.widget.TextView.OnEditorActionListener;
 import android.widget.Toast;
 import android.widget.VideoView;
 
+import com.cliqz.search.WebSearchView;
+
 import net.i2p.android.ui.I2PAndroidHelper;
 
 import java.io.File;
@@ -130,7 +134,7 @@ import acr.browser.lightning.view.LightningView;
 import info.guardianproject.onionkit.ui.OrbotHelper;
 import info.guardianproject.onionkit.web.WebkitProxy;
 
-public class BrowserActivity extends ThemableActivity implements BrowserController, OnClickListener {
+public class BrowserActivity extends ThemableActivity implements BrowserController, OnClickListener, WebSearchView.IWebSearchResult {
 
 	// Layout
 	private DrawerLayout mDrawerLayout;
@@ -139,14 +143,17 @@ public class BrowserActivity extends ThemableActivity implements BrowserControll
 	private ListView mDrawerListLeft, mDrawerListRight;
 	private LinearLayout mDrawerLeft, mDrawerRight, mUiLayout, mToolbarLayout;
 	private RelativeLayout mSearchBar;
+	private WebSearchView mSearchView;
 
 	// List
 	private final List<LightningView> mWebViews = new ArrayList<>();
 	private List<HistoryItem> mBookmarkList;
 	private LightningView mCurrentView;
+	private LightningView mSearchContainer;
+	private LightningView mPreSearchTab;
 
 	private AnimatedProgressBar mProgressBar;
-	private AutoCompleteTextView mSearch;
+	private EditText mSearch;
 	private ImageView mArrowImage;
 	private VideoView mVideoView;
 	private View mCustomView, mVideoProgressView;
@@ -154,7 +161,6 @@ public class BrowserActivity extends ThemableActivity implements BrowserControll
 	// Adapter
 	private BookmarkViewAdapter mBookmarkAdapter;
 	private LightningViewAdapter mTitleAdapter;
-	private SearchAdapter mSearchAdapter;
 
 	// Callback
 	private ClickHandler mClickHandler;
@@ -194,6 +200,8 @@ public class BrowserActivity extends ThemableActivity implements BrowserControll
 	private static final FrameLayout.LayoutParams COVER_SCREEN_PARAMS = new FrameLayout.LayoutParams(
 			LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
 
+
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -212,6 +220,11 @@ public class BrowserActivity extends ThemableActivity implements BrowserControll
 		mDarkTheme = mPreferences.getUseDarkTheme() || isIncognito();
 		mActivity = this;
 		mWebViews.clear();
+
+		mSearchView = new WebSearchView(this);
+		mSearchView.setResultListener(this);
+
+		mSearchContainer = new LightningView(this, "", false, mSearchView, mHistoryDatabase);
 
 		mClickHandler = new ClickHandler(this);
 		mBrowserFrame = (FrameLayout) findViewById(R.id.content_frame);
@@ -247,6 +260,7 @@ public class BrowserActivity extends ThemableActivity implements BrowserControll
 		mDrawerListRight.setOnItemLongClickListener(new BookmarkItemLongClickListener());
 
 		mHistoryDatabase = HistoryDatabase.getInstance(getApplicationContext());
+		mSearchView.setHistoryDatabase(mHistoryDatabase);
 
 		// set display options of the ActionBar
 		actionBar.setDisplayShowTitleEnabled(false);
@@ -277,7 +291,7 @@ public class BrowserActivity extends ThemableActivity implements BrowserControll
 		forward.setOnClickListener(this);
 
 		// create the search EditText in the ToolBar
-		mSearch = (AutoCompleteTextView) actionBar.getCustomView().findViewById(R.id.search);
+		mSearch = (EditText) actionBar.getCustomView().findViewById(R.id.search);
 		mUntitledTitle = getString(R.string.untitled);
 		mBackgroundColor = getResources().getColor(R.color.primary_color);
 		if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
@@ -302,6 +316,7 @@ public class BrowserActivity extends ThemableActivity implements BrowserControll
 		mSearch.setOnFocusChangeListener(search.new FocusChangeListener());
 		mSearch.setOnEditorActionListener(search.new EditorActionListener());
 		mSearch.setOnTouchListener(search.new TouchListener());
+		mSearch.addTextChangedListener(search.new SearchTextWatcher());
 
 		mSystemBrowser = getSystemBrowser();
 		Thread initialize = new Thread(new Runnable() {
@@ -323,7 +338,6 @@ public class BrowserActivity extends ThemableActivity implements BrowserControll
 				mBookmarkAdapter = new BookmarkViewAdapter(mActivity, R.layout.bookmark_list_item,
 						mBookmarkList);
 				mDrawerListRight.setAdapter(mBookmarkAdapter);
-				initializeSearchSuggestions(mSearch);
 			}
 
 		});
@@ -354,6 +368,27 @@ public class BrowserActivity extends ThemableActivity implements BrowserControll
 		}
 
 		checkForProxy();
+	}
+
+	private void cliqzSearch (final String query) {
+		if (mCurrentView != mSearchContainer) {
+			Log.d(Constants.TAG, "Switching back to cliqz view");
+			mPreSearchTab = mCurrentView;
+			showTab(mSearchContainer);
+		}
+
+		mSearchView.onQueryChanged(query);
+
+	}
+
+	@Override
+	public void onUrlClicked(String url) {
+		if (mPreSearchTab != null) {
+			showTab(mPreSearchTab);
+			mPreSearchTab.loadUrl(url);
+			mPreSearchTab = null;
+		}
+
 	}
 
 	private class SearchClass {
@@ -404,7 +439,7 @@ public class BrowserActivity extends ThemableActivity implements BrowserControll
 
 		public class FocusChangeListener implements OnFocusChangeListener {
 			@Override
-			public void onFocusChange(View v, final boolean hasFocus) {
+			public void onFocusChange(final View v, final boolean hasFocus) {
 				if (!hasFocus && mCurrentView != null) {
 					if (mCurrentView.getProgress() < 100) {
 						setIsLoading();
@@ -419,9 +454,16 @@ public class BrowserActivity extends ThemableActivity implements BrowserControll
 					} else {
 						mSearch.setText(url);
 					}
-					((AutoCompleteTextView) v).selectAll(); // Hack to make sure
-															// the text gets
-															// selected
+					mSearch.post(new Runnable() {
+
+						@Override
+						public void run() {
+							((EditText) v).selectAll(); // Hack to make sure
+							// the text gets
+							// selected
+						}
+					});
+
 					mIcon = mCopyIcon;
 					mSearch.setCompoundDrawables(null, null, mCopyIcon, null);
 				}
@@ -477,6 +519,41 @@ public class BrowserActivity extends ThemableActivity implements BrowserControll
 					InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
 					imm.hideSoftInputFromWindow(mSearch.getWindowToken(), 0);
 				}
+			}
+		}
+
+		public class SearchTextWatcher implements TextWatcher {
+
+			@Override
+			public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+			}
+
+			@Override
+			public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+				if (!mSearch.hasFocus()) {
+					return;
+				}
+
+				final String q = charSequence.toString();
+
+				if (mCurrentView != null && q.equals(mCurrentView.getUrl())) {
+					Log.d(Constants.TAG, "Not searching because it is current URL");
+					return;
+				}
+				if (!q.isEmpty()) {
+					cliqzSearch(q);
+				} else {
+					if (mCurrentView == mSearchContainer) {
+						showTab(mPreSearchTab);
+						mPreSearchTab = null;
+					}
+				}
+			}
+
+			@Override
+			public void afterTextChanged(Editable editable) {
+
 			}
 		}
 
@@ -935,7 +1012,7 @@ public class BrowserActivity extends ThemableActivity implements BrowserControll
 						mBookmarkList.add(bookmark);
 						Collections.sort(mBookmarkList, new SortIgnoreCase());
 						notifyBookmarkDataSetChanged();
-						mSearchAdapter.refreshBookmarks();
+						// mSearchAdapter.refreshBookmarks();
 					}
 				}
 				return true;
@@ -1099,7 +1176,7 @@ public class BrowserActivity extends ThemableActivity implements BrowserControll
 											.getUrl())) {
 										mBookmarkList.remove(position);
 										notifyBookmarkDataSetChanged();
-										mSearchAdapter.refreshBookmarks();
+										// mSearchAdapter.refreshBookmarks();
 										openBookmarks();
 									}
 								}
@@ -1173,15 +1250,18 @@ public class BrowserActivity extends ThemableActivity implements BrowserControll
 		// Set the background color so the color mode color doesn't show through
 		mBrowserFrame.setBackgroundColor(mBackgroundColor);
 		if (view == null) {
+			Log.d(Constants.TAG, "showTab: Refusing to show null tab");
 			return;
 		}
 		mBrowserFrame.removeAllViews();
 		if (mCurrentView != null) {
 			mCurrentView.setForegroundTab(false);
 			mCurrentView.onPause();
+			Log.d(Constants.TAG, "showTab: Pausing current view " + mCurrentView.getUrl());
 		}
 		mCurrentView = view;
 		mCurrentView.setForegroundTab(true);
+		// Log.d(Constants.TAG, "showTab: New view " + mCurrentView.getUrl(), new Exception());
 		if (mCurrentView.getWebView() != null) {
 			updateUrl(mCurrentView.getUrl(), true);
 			updateProgress(mCurrentView.getProgress());
@@ -1193,7 +1273,9 @@ public class BrowserActivity extends ThemableActivity implements BrowserControll
 		mBrowserFrame.addView(mCurrentView.getWebView(), MATCH_PARENT);
 		// Remove browser frame background to reduce overdraw
 		mBrowserFrame.setBackgroundColor(0);
-		mCurrentView.requestFocus();
+		if (mCurrentView != mSearchContainer) {
+			mCurrentView.requestFocus();
+		}
 		mCurrentView.onResume();
 
 		// Use a delayed handler to make the transition smooth
@@ -1267,7 +1349,7 @@ public class BrowserActivity extends ThemableActivity implements BrowserControll
 			return false;
 		}
 		mIsNewIntent = false;
-		LightningView startingTab = new LightningView(mActivity, url, mDarkTheme);
+		LightningView startingTab = new LightningView(mActivity, url, mDarkTheme, null, mHistoryDatabase);
 		if (mIdGenerator == 0) {
 			startingTab.resumeTimers();
 		}
@@ -1519,10 +1601,10 @@ public class BrowserActivity extends ThemableActivity implements BrowserControll
 	protected void onResume() {
 		super.onResume();
 		Log.d(Constants.TAG, "onResume");
-		if (mSearchAdapter != null) {
+		/* if (mSearchAdapter != null) {
 			mSearchAdapter.refreshPreferences();
 			mSearchAdapter.refreshBookmarks();
-		}
+		} */
 		if (mCurrentView != null) {
 			mCurrentView.resumeTimers();
 			mCurrentView.onResume();
@@ -2044,8 +2126,8 @@ public class BrowserActivity extends ThemableActivity implements BrowserControll
 		});
 
 		getUrl.setSelectAllOnFocus(true);
-		mSearchAdapter = new SearchAdapter(mActivity, mDarkTheme, isIncognito());
-		getUrl.setAdapter(mSearchAdapter);
+		// mSearchAdapter = new SearchAdapter(mActivity, mDarkTheme, isIncognito());
+		// getUrl.setAdapter(mSearchAdapter);
 	}
 
 	@Override
