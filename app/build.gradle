@@ -28,9 +28,13 @@ android {
     lintOptions {
         abortOnError false
     }
-
-    sourceSets.main {
-        assets.srcDirs = ['src/main/assets', 'src/main/web/']
+    sourceSets {
+        main {
+            assets.srcDirs += [
+                    '../external/navigation-extension/build/dev/android',
+                    '../external/fresh-tab/dist/web'
+            ]
+        }
     }
 }
 
@@ -40,6 +44,8 @@ dependencies {
         exclude module: 'support-v4'
         exclude module: 'android-support-v4'
     }
+    compile(project(':freshtab'))
+    compile(project(':navigation'))
     compile 'com.android.support:palette-v7:22.1.1'
     compile 'com.android.support:appcompat-v7:22.1.1'
     compile 'org.jsoup:jsoup:1.8.1'
