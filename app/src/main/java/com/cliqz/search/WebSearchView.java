@@ -239,21 +239,38 @@ public class WebSearchView extends WebView implements ILightningTab {
             return false;
         }
 
+        private String historyToJSON(final List<HistoryItem> items) {
+            final StringBuilder sb = new StringBuilder(items.size() * 100);
+            sb.append("[");
+            String sep = "";
+            for (final HistoryItem item : items) {
+                sb.append(sep);
+                item.toJsonString(sb);
+                sep = ",";
+            }
+            sb.append("]");
+            return sb.toString();
+        }
+
         @JavascriptInterface
         public String searchHistory(final String query) {
             if (mHistoryDatabase != null) {
                 final List<HistoryItem> items = mHistoryDatabase.findItemsContaining(query, 100);
                 try {
-                    final StringBuilder sb = new StringBuilder(items.size() * 100);
-                    sb.append("[");
-                    String sep = "";
-                    for (final HistoryItem item : items) {
-                        sb.append(sep);
-                        item.toJsonString(sb);
-                        sep = ",";
-                    }
-                    sb.append("]");
-                    return sb.toString();
+                    return historyToJSON(items);
+                } catch (Exception e) {
+                    Log.e(TAG, "Cannot serialize History", e);
+                }
+            }
+            return "[]";
+        }
+
+        @JavascriptInterface
+        public String getTopSites() {
+            if (mHistoryDatabase != null) {
+                final List<HistoryItem> items = mHistoryDatabase.getTopSites(20);
+                try {
+                    return historyToJSON(items);
                 } catch (Exception e) {
                     Log.e(TAG, "Cannot serialize History", e);
                 }
@@ -331,7 +348,6 @@ public class WebSearchView extends WebView implements ILightningTab {
 
             return environment.toString();
         }
-
     }
 
     /**

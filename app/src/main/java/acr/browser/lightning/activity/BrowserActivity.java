@@ -224,7 +224,7 @@ public class BrowserActivity extends ThemableActivity implements BrowserControll
 		mSearchView = new WebSearchView(this);
 		mSearchView.setResultListener(this);
 
-		mSearchContainer = new LightningView(this, "", false, mSearchView);
+		mSearchContainer = new LightningView(this, "", false, mSearchView, mHistoryDatabase);
 
 		mClickHandler = new ClickHandler(this);
 		mBrowserFrame = (FrameLayout) findViewById(R.id.content_frame);
@@ -1349,7 +1349,7 @@ public class BrowserActivity extends ThemableActivity implements BrowserControll
 			return false;
 		}
 		mIsNewIntent = false;
-		LightningView startingTab = new LightningView(mActivity, url, mDarkTheme, null);
+		LightningView startingTab = new LightningView(mActivity, url, mDarkTheme, null, mHistoryDatabase);
 		if (mIdGenerator == 0) {
 			startingTab.resumeTimers();
 		}
