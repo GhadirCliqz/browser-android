@@ -1,3 +1,9 @@
+/**
+ * THIS IS A DUMMY LIBRARY PROJECT
+ *
+ * This project only purpose is to run grunt and generate the specific asset folder for the
+ * navigation-extension javascipt module
+ */
 apply plugin: 'com.android.library'
 apply plugin: 'com.moowork.grunt'
 

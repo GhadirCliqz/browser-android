@@ -31,7 +31,7 @@ android {
     sourceSets {
         main {
             assets.srcDirs += [
-                    '../external/navigation-extension/build/dev/android',
+                    '../external/navigation-extension/build/dev/androidkit',
                     '../external/fresh-tab/dist/web'
             ]
         }
