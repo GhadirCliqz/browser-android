@@ -48,6 +48,25 @@
 	void openFileChooser(android.webkit.ValueCallback, java.lang.String, java.lang.String);
 }
 
+# Keep our Javascript bindings (CLIQZ)
+-keep public class com.cliqz.search.WebSearchView$JsBridge
+#-keepclassmembers class com.cliqz.search.WebSearchView$JsBridge {
+  # int isReady();
+ #  String searchHistory(java.lang.String);
+#   boolean openLink(java.lang.String);
+#}
+-keepattributes InnerClasses
+
+-keep public class * implements com.cliqz.search.WebSearchView$JsBridge
+
+-keepattributes JavascriptInterface
+
+-keepclassmembers class * {
+    @android.webkit.JavascriptInterface  <methods>;
+}
+
+# End of CLIQZ
+
 -keepclasseswithmembernames class * {
     native <methods>;
 }

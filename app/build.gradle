@@ -14,12 +14,12 @@ android {
 
     buildTypes {
         release {
-            minifyEnabled true
+            minifyEnabled false
             shrinkResources true
             proguardFiles 'proguard-project.txt'
         }
         debug {
-            minifyEnabled true
+            minifyEnabled false
             shrinkResources true
             proguardFiles 'proguard-project.txt'
         }
@@ -31,12 +31,11 @@ android {
     sourceSets {
         main {
             assets.srcDirs += [
-                    '../external/navigation-extension/build/dev/android',
+                    '../external/navigation-extension/build/dev/androidkit',
                     '../external/fresh-tab/dist/web'
             ]
         }
     }
-
 }
 
 dependencies {

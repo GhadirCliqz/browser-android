@@ -255,7 +255,7 @@ public class SearchAdapter extends BaseAdapter implements Filterable {
 			if (mDatabaseHandler == null) {
 				mDatabaseHandler = HistoryDatabase.getInstance(mContext.getApplicationContext());
 			}
-			mHistory = mDatabaseHandler.findItemsContaining(constraint.toString());
+			mHistory = mDatabaseHandler.findItemsContaining(constraint.toString(), 0);
 
 			results.count = 1;
 			return results;

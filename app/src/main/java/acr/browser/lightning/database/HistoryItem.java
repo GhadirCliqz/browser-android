@@ -45,6 +45,26 @@ public class HistoryItem implements Comparable<HistoryItem> {
 		this.mImageId = imageId;
 	}
 
+	public StringBuilder toJsonString(final StringBuilder sb) {
+		if (mUrl != null /*&& !url.isEmpty() && (
+                        (title.toLowerCase(locale).contains(q)) ||
+                                (url.toLowerCase(locale).contains(q))
+                        )*/) {
+			final String title;
+			if (mTitle.contains("\"")) {
+				title = mTitle.replace("\"", "\\\"");
+			} else {
+				title = mTitle;
+			}
+			sb.append("{\"title\":\"")
+					.append(title)
+					.append("\",\"url\":\"")
+					.append(mUrl)
+					.append("\", \"score\": 0}");
+		}
+		return sb;
+	}
+
 	// getting ID
 	public int getId() {
 		return this.mId;
