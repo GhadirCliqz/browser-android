@@ -7,7 +7,7 @@
 apply plugin: 'com.android.library'
 apply plugin: 'com.moowork.grunt'
 
-def navigationDir = file('../external/navigation-extension')
+def navigationDir = new File(projectDir, '../external/navigation-extension')
 
 android {
     compileSdkVersion 22
@@ -30,6 +30,7 @@ android {
 node {
     workDir = navigationDir
     nodeModulesDir = navigationDir
+    download = true
 }
 
 grunt {
@@ -38,7 +39,7 @@ grunt {
 
 grunt_build.dependsOn 'installGrunt'
 grunt_build.dependsOn 'npmInstall'
-build.dependsOn grunt_build
+preBuild.dependsOn grunt_build
 
 dependencies {
 }

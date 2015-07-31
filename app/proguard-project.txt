@@ -49,15 +49,15 @@
 }
 
 # Keep our Javascript bindings (CLIQZ)
--keep public class com.cliqz.search.WebSearchView$JsBridge
-#-keepclassmembers class com.cliqz.search.WebSearchView$JsBridge {
+-keep public class com.cliqz.browser.search.WebSearchView$JsBridge
+#-keepclassmembers class com.cliqz.browser.search.WebSearchView$JsBridge {
   # int isReady();
  #  String searchHistory(java.lang.String);
 #   boolean openLink(java.lang.String);
 #}
 -keepattributes InnerClasses
 
--keep public class * implements com.cliqz.search.WebSearchView$JsBridge
+-keep public class * implements com.cliqz.browser.search.WebSearchView$JsBridge
 
 -keepattributes JavascriptInterface
 
