@@ -94,7 +94,7 @@ import android.widget.TextView.OnEditorActionListener;
 import android.widget.Toast;
 import android.widget.VideoView;
 
-import com.cliqz.search.WebSearchView;
+import com.cliqz.browser.search.WebSearchView;
 
 import net.i2p.android.ui.I2PAndroidHelper;
 
@@ -126,7 +126,6 @@ import acr.browser.lightning.database.HistoryDatabase;
 import acr.browser.lightning.database.HistoryItem;
 import acr.browser.lightning.object.ClickHandler;
 import acr.browser.lightning.object.DrawerArrowDrawable;
-import acr.browser.lightning.object.SearchAdapter;
 import acr.browser.lightning.preference.PreferenceManager;
 import acr.browser.lightning.utils.Utils;
 import acr.browser.lightning.view.AnimatedProgressBar;

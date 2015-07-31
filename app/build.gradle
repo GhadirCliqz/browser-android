@@ -5,7 +5,7 @@ android {
     buildToolsVersion "22.0.1"
 
     defaultConfig {
-        applicationId "acr.browser.lightning"
+        applicationId "com.cliqz.browser"
         minSdkVersion 14
         targetSdkVersion 22
         versionCode 78

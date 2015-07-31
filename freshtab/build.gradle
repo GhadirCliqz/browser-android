@@ -7,7 +7,7 @@
 apply plugin: 'com.android.library'
 apply plugin: 'com.moowork.grunt'
 
-def freshtabDir = file('../external/fresh-tab')
+def freshtabDir = new File(projectDir, '../external/fresh-tab')
 
 android {
     compileSdkVersion 22
@@ -30,6 +30,7 @@ android {
 node {
     workDir = freshtabDir
     nodeModulesDir = freshtabDir
+    download = true
 }
 
 grunt {
@@ -38,7 +39,7 @@ grunt {
 
 grunt_build.dependsOn 'installGrunt'
 grunt_build.dependsOn 'npmInstall'
-build.dependsOn grunt_build
+preBuild.dependsOn grunt_build
 
 dependencies {
 }
