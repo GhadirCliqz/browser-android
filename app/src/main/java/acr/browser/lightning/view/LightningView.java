@@ -36,7 +36,9 @@ import android.webkit.HttpAuthHandler;
 import android.webkit.JavascriptInterface;
 import android.webkit.SslErrorHandler;
 import android.webkit.ValueCallback;
+import android.webkit.WebBackForwardList;
 import android.webkit.WebChromeClient;
+import android.webkit.WebHistoryItem;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebResourceResponse;
 import android.webkit.WebSettings;
@@ -658,6 +660,11 @@ public class LightningView implements ILightningTab {
 
 	public synchronized void goBack() {
 		if (mWebView != null && !mIsCustomWebView) {
+			final WebBackForwardList list = mWebView.copyBackForwardList();
+			if (list.getSize() > 1) {
+				final WebHistoryItem lastItem = list.getItemAtIndex(list.getCurrentIndex() - 1);
+				setAccessFromUrl(lastItem.getUrl(), mWebView.getSettings());
+			}
 			mWebView.goBack();
 		}
 	}

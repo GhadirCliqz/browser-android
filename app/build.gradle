@@ -32,7 +32,7 @@ android {
         main {
             assets.srcDirs += [
                     '../external/navigation-extension/build/dev/androidkit',
-                    '../external/fresh-tab/dist/web'
+                    '../external/fresh-tab/dist/mobile'
             ]
         }
     }
