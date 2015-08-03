@@ -47,6 +47,7 @@ import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.util.Patterns;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -71,6 +72,7 @@ import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.webkit.CookieManager;
 import android.webkit.CookieSyncManager;
+import android.webkit.URLUtil;
 import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient.CustomViewCallback;
 import android.webkit.WebIconDatabase;
@@ -95,6 +97,7 @@ import android.widget.Toast;
 import android.widget.VideoView;
 
 import com.cliqz.browser.search.WebSearchView;
+import com.google.common.collect.ImmutableSet;
 
 import net.i2p.android.ui.I2PAndroidHelper;
 
@@ -105,16 +108,20 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 
 import acr.browser.lightning.R;
 import acr.browser.lightning.constant.BookmarkPage;
@@ -369,7 +376,7 @@ public class BrowserActivity extends ThemableActivity implements BrowserControll
 		checkForProxy();
 	}
 
-	private void cliqzSearch (final String query) {
+	private void cliqzSearch(final String query) {
 		if (mCurrentView != mSearchContainer) {
 			Log.d(Constants.TAG, "Switching back to cliqz view");
 			mPreSearchTab = mCurrentView;
@@ -415,18 +422,27 @@ public class BrowserActivity extends ThemableActivity implements BrowserControll
 		}
 
 		public class EditorActionListener implements OnEditorActionListener {
+
+			// Simplify IME_ACTION detection
+			private final Set IME_ACTIONS = ImmutableSet.of(
+					EditorInfo.IME_ACTION_GO, EditorInfo.IME_ACTION_DONE,
+					EditorInfo.IME_ACTION_NEXT, EditorInfo.IME_ACTION_SEND,
+					EditorInfo.IME_ACTION_SEARCH
+			);
+
 			@Override
-			public boolean onEditorAction(TextView arg0, int actionId, KeyEvent arg2) {
-				// hide the keyboard and search the web when the enter key
-				// button is pressed
-				if (actionId == EditorInfo.IME_ACTION_GO || actionId == EditorInfo.IME_ACTION_DONE
-						|| actionId == EditorInfo.IME_ACTION_NEXT
-						|| actionId == EditorInfo.IME_ACTION_SEND
-						|| actionId == EditorInfo.IME_ACTION_SEARCH
-						|| (arg2.getAction() == KeyEvent.KEYCODE_ENTER)) {
-					InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+			public boolean onEditorAction(TextView textView, int actionId, KeyEvent keyEvent) {
+				final String searchText = textView.getText().toString();
+				final int keycode = keyEvent != null ? keyEvent.getAction() : -1;
+				if ((IME_ACTIONS.contains(actionId) ||
+						(keycode == KeyEvent.KEYCODE_ENTER)) &&
+						(Patterns.WEB_URL.matcher(textView.getText()).matches())) {
+					final InputMethodManager imm =
+							(InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
 					imm.hideSoftInputFromWindow(mSearch.getWindowToken(), 0);
-					searchTheWeb(mSearch.getText().toString());
+					// searchTheWeb(mSearch.getText().toString());
+					final String url = URLUtil.guessUrl(searchText);
+					onUrlClicked(url);
 					if (mCurrentView != null) {
 						mCurrentView.requestFocus();
 					}
