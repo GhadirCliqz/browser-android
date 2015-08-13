@@ -49,6 +49,8 @@ import android.webkit.WebViewClient;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 
+import com.cliqz.browser.api.impl.Telemetry;
+
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -118,6 +120,8 @@ public class LightningView implements ILightningTab {
 			mWebView = new WebView(activity);
 			mIsCustomWebView = false;
 		}
+		// CLIQZ
+		Telemetry.addToWebView(mWebView);
 		mTitle = new Title(activity, darkTheme);
 		mAdBlock = AdBlock.getInstance(activity.getApplicationContext());
 
@@ -748,16 +752,19 @@ public class LightningView implements ILightningTab {
 		@Override
 		public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
 			final String url = request.getUrl().toString();
-			if (url.startsWith("http://antiphishing.clyqz.com/")) {
+			final Context context = mWebView != null ? mWebView.getContext() : null;
+			if (url.startsWith("http://antiphishing.clyqz.com/") && context != null) {
 				try {
-					return new WebResourceResponse("application/json", "utf-8", mWebView.getContext().getContentResolver().openInputStream(request.getUrl()));
+					return new WebResourceResponse("application/json", "utf-8",
+							context.getContentResolver().openInputStream(request.getUrl()));
 				} catch (IOException e) {
 					Log.e(Constants.TAG, "Cannot load antiphishing API", e);
 				}
 			}
-			if (url.equals("cliqz://js/CliqzAntiPhishing.js")) {
+			if (url.equals("cliqz://js/CliqzAntiPhishing.js") && context != null) {
 				try {
-					return new WebResourceResponse("application/javascript", "utf-8", mWebView.getContext().getAssets().open("tool_androidkit/js/CliqzAntiPhishing.js"));
+					return new WebResourceResponse("application/javascript", "utf-8",
+							context.getAssets().open("tool_androidkit/js/CliqzAntiPhishing.js"));
 				} catch (IOException e) {
 					Log.e(Constants.TAG, "Cannot load antiphishing", e);
 				}
