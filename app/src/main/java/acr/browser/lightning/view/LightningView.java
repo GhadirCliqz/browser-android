@@ -49,22 +49,15 @@ import android.webkit.WebViewClient;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 
-import com.cliqz.browser.api.impl.Telemetry;
-
-import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.net.URISyntaxException;
 import java.util.List;
 
 import acr.browser.lightning.R;
 import acr.browser.lightning.constant.Constants;
-import acr.browser.lightning.constant.StartPage;
 import acr.browser.lightning.controller.BrowserController;
 import acr.browser.lightning.database.HistoryDatabase;
 import acr.browser.lightning.database.HistoryItem;
@@ -120,8 +113,6 @@ public class LightningView implements ILightningTab {
 			mWebView = new WebView(activity);
 			mIsCustomWebView = false;
 		}
-		// CLIQZ
-		Telemetry.addToWebView(mWebView);
 		mTitle = new Title(activity, darkTheme);
 		mAdBlock = AdBlock.getInstance(activity.getApplicationContext());
 
