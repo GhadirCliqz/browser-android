@@ -755,7 +755,7 @@ public class LightningView implements ILightningTab {
 			if (url.equals("cliqz://js/CliqzAntiPhishing.js") && context != null) {
 				try {
 					return new WebResourceResponse("application/javascript", "utf-8",
-							context.getAssets().open("tool_androidkit/js/CliqzAntiPhishing.js"));
+							context.getAssets().open("navigation/js/CliqzAntiPhishing.js"));
 				} catch (IOException e) {
 					Log.e(Constants.TAG, "Cannot load antiphishing", e);
 				}
@@ -806,11 +806,13 @@ public class LightningView implements ILightningTab {
 			if (API >= android.os.Build.VERSION_CODES.KITKAT && mInvertPage) {
 				view.evaluateJavascript(Constants.JAVASCRIPT_INVERT_PAGE, null);
 			}
+			/* TODO antiphishing is a nice feature, we have to replace this with a java version
 			if (API >= Build.VERSION_CODES.KITKAT) {
 				view.evaluateJavascript(Constants.JAVASCRIPT_LOAD_ANTIPHISHING, null);
 			} else {
 				view.loadUrl(Constants.JAVASCRIPT_LOAD_ANTIPHISHING);
 			}
+			*/
 			mBrowserController.update();
 		}
 

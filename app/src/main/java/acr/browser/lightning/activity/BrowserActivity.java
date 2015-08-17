@@ -429,21 +429,29 @@ public class BrowserActivity extends ThemableActivity implements BrowserControll
 
 			@Override
 			public boolean onEditorAction(TextView textView, int actionId, KeyEvent keyEvent) {
-				final String searchText = textView.getText().toString();
+				final CharSequence text = textView.getText();
 				final int keycode = keyEvent != null ? keyEvent.getAction() : -1;
-				if ((IME_ACTIONS.contains(actionId) ||
-						(keycode == KeyEvent.KEYCODE_ENTER)) &&
-						(Patterns.WEB_URL.matcher(textView.getText()).matches())) {
-					final InputMethodManager imm =
-							(InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-					imm.hideSoftInputFromWindow(mSearch.getWindowToken(), 0);
-					// searchTheWeb(mSearch.getText().toString());
-					final String url = URLUtil.guessUrl(searchText);
-					onUrlClicked(url);
-					if (mCurrentView != null) {
-						mCurrentView.requestFocus();
+				final boolean handled;
+				if (IME_ACTIONS.contains(actionId) || (keycode == KeyEvent.KEYCODE_ENTER)) {
+					if (Patterns.WEB_URL.matcher(text).matches()) {
+						final String url = URLUtil.guessUrl(text.toString());
+						onUrlClicked(url);
+						handled = true;
+					} else if (text.length() > 0) {
+						searchTheWeb(text.toString());
+						handled = true;
+					} else {
+						handled = false;
 					}
-					return true;
+					if (handled) {
+						final InputMethodManager imm =
+								(InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+						imm.hideSoftInputFromWindow(mSearch.getWindowToken(), 0);
+						if (mCurrentView != null) {
+							mCurrentView.requestFocus();
+						}
+						return true;
+					}
 				}
 				return false;
 			}
@@ -1644,6 +1652,9 @@ public class BrowserActivity extends ThemableActivity implements BrowserControll
 	 * checks if it is a search, url, etc.
 	 */
 	void searchTheWeb(String query) {
+		if (mPreSearchTab != null) {
+			showTab(mPreSearchTab);
+		}
 		if (query.equals("")) {
 			return;
 		}
