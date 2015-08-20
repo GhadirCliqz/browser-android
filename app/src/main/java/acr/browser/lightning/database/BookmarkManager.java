@@ -4,6 +4,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.os.Environment;
 import android.provider.Browser;
+import android.util.Log;
 import android.widget.Toast;
 
 import org.json.JSONException;
@@ -12,9 +13,12 @@ import org.json.JSONObject;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -29,6 +33,8 @@ import acr.browser.lightning.preference.PreferenceManager;
 import acr.browser.lightning.utils.Utils;
 
 public class BookmarkManager {
+
+	private static final String TAG = BookmarkManager.class.getSimpleName();
 
 	private final Context mContext;
 	private static final String TITLE = "title";
@@ -187,12 +193,20 @@ public class BookmarkManager {
 	 * @return
 	 */
 	public synchronized List<HistoryItem> getBookmarks(boolean sort) {
-		List<HistoryItem> bookmarks = new ArrayList<>();
-		File bookmarksFile = new File(mContext.getFilesDir(), FILE_BOOKMARKS);
+		final List<HistoryItem> bookmarks = new ArrayList<>();
+		final File bookmarksFile = new File(mContext.getFilesDir(), FILE_BOOKMARKS);
 		try {
-			BufferedReader bookmarksReader = new BufferedReader(new FileReader(bookmarksFile));
+			final InputStream inputStream;
+			if (bookmarksFile.exists() && bookmarksFile.isFile()) {
+				inputStream = new FileInputStream(bookmarksFile);
+			} else {
+				inputStream = mContext.getResources().openRawResource(R.raw.default_bookmarks);
+			}
+			final BufferedReader bookmarksReader =
+					new BufferedReader(new InputStreamReader(inputStream));
 			String line;
 			while ((line = bookmarksReader.readLine()) != null) {
+				try {
 				JSONObject object = new JSONObject(line);
 				HistoryItem item = new HistoryItem();
 				item.setTitle(object.getString(TITLE));
@@ -201,9 +215,12 @@ public class BookmarkManager {
 				item.setOrder(object.getInt(ORDER));
 				item.setImageId(R.drawable.ic_bookmark);
 				bookmarks.add(item);
+				} catch (JSONException e) {
+					Log.e(TAG, "Can't parse line " + line, e);
+				}
 			}
 			bookmarksReader.close();
-		} catch (IOException | JSONException e) {
+		} catch (IOException e) {
 			e.printStackTrace();
 		}
 		if (sort) {
@@ -411,17 +428,4 @@ public class BookmarkManager {
 		}
 
 	}
-
-	private static final String[] DEV = {"https://twitter.com/RestainoAnthony", "The Developer"};
-	private static final String[] FACEBOOK = {"https://www.facebook.com/", "Facebook"};
-	private static final String[] TWITTER = {"https://twitter.com", "Twitter"};
-	private static final String[] GOOGLE = {"https://www.google.com/", "Google"};
-	private static final String[] YAHOO = {"https://www.yahoo.com/", "Yahoo"};
-	public static final String[][] DEFAULT_BOOKMARKS = { 
-		DEV,
-		FACEBOOK,
-		TWITTER,
-		GOOGLE,
-		YAHOO
-	};
 }

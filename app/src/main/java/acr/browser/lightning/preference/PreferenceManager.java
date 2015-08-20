@@ -46,7 +46,6 @@ public class PreferenceManager {
 		public static final String INVERT_COLORS = "invertColors";
 		public static final String READING_TEXT_SIZE = "readingTextSize";
 		public static final String DARK_THEME = "darkTheme";
-		public static final String DEFAULT_BOOKMARKS = "defaultBookmarks";
 
 		public static final String USE_PROXY = "useProxy";
 		public static final String PROXY_CHOICE = "proxyChoice";
@@ -110,10 +109,6 @@ public class PreferenceManager {
 
 	public boolean getCookiesEnabled() {
 		return mPrefs.getBoolean(Name.COOKIES, true);
-	}
-
-	public boolean getDefaultBookmarks() {
-		return mPrefs.getBoolean(Name.DEFAULT_BOOKMARKS, true);
 	}
 
 	public String getDownloadDirectory() {
@@ -298,10 +293,6 @@ public class PreferenceManager {
 
 	public void setCookiesEnabled(boolean enable) {
 		putBoolean(Name.COOKIES, enable);
-	}
-
-	public void setDefaultBookmarks(boolean show) {
-		putBoolean(Name.DEFAULT_BOOKMARKS, show);
 	}
 
 	public void setDownloadDirectory(String directory) {
