@@ -2863,8 +2863,9 @@ public class BrowserActivity extends ThemableActivity implements BrowserControll
 				}
 				break;
 			case R.id.arrow_button:
-				if (mSearch != null && mSearch.hasFocus()) {
-					mCurrentView.requestFocus();
+				if (mPreSearchTab != null) {
+					showTab(mPreSearchTab);
+					mPreSearchTab = null;
 				} else {
 					mDrawerLayout.openDrawer(mDrawerLeft);
 				}
