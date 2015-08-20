@@ -8,8 +8,10 @@ android {
         applicationId "com.cliqz.browser"
         minSdkVersion 14
         targetSdkVersion 22
-        versionCode 78
-        versionName "4.0.10a"
+        versionCode 1
+        versionName "0.1"
+
+        buildConfigField 'String', 'LIGHTNING_VERSION_NAME', '"4.0.10a"'
     }
 
     buildTypes {

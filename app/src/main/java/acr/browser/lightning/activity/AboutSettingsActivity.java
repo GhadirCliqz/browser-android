@@ -4,20 +4,19 @@
 package acr.browser.lightning.activity;
 
 import android.content.Intent;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager.NameNotFoundException;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.View.OnClickListener;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import java.util.Locale;
+
+import acr.browser.lightning.BuildConfig;
 import acr.browser.lightning.R;
 
-public class AboutSettingsActivity extends ThemableSettingsActivity implements OnClickListener {
+public class AboutSettingsActivity extends ThemableSettingsActivity {
 
 	private int mEasterEggCounter;
 
@@ -34,50 +33,10 @@ public class AboutSettingsActivity extends ThemableSettingsActivity implements O
 	}
 
 	private void initialize() {
-		String code = "1.0";
-		try {
-			PackageInfo p = getPackageManager().getPackageInfo(getPackageName(), 0);
-			code = p.versionName;
-		} catch (NameNotFoundException e) {
-			e.printStackTrace();
-		}
-
+		final String version = getString(R.string.about_version_format,
+				BuildConfig.VERSION_NAME, BuildConfig.LIGHTNING_VERSION_NAME);
 		TextView versionCode = (TextView) findViewById(R.id.versionCode);
-		versionCode.setText(code);
-
-		RelativeLayout licenses = (RelativeLayout) findViewById(R.id.layoutLicense);
-		RelativeLayout source = (RelativeLayout) findViewById(R.id.layoutSource);
-		RelativeLayout version = (RelativeLayout) findViewById(R.id.layoutVersion);
-		licenses.setOnClickListener(this);
-		source.setOnClickListener(this);
-		version.setOnClickListener(this);
-	}
-
-	@Override
-	public void onClick(View view) {
-		switch (view.getId()) {
-			case R.id.layoutLicense:
-				// NOTE: In order to comply legally with open source licenses,
-				// it is advised that you leave this code so that the License
-				// Activity may be viewed by the user.
-				startActivity(new Intent(this, LicenseActivity.class));
-				break;
-			case R.id.layoutSource:
-				startActivity(new Intent(Intent.ACTION_VIEW,
-						Uri.parse("http://twitter.com/RestainoAnthony"), this, MainActivity.class));
-				finish();
-				break;
-			case R.id.layoutVersion:
-				mEasterEggCounter++;
-				if (mEasterEggCounter == 10) {
-					startActivity(new Intent(Intent.ACTION_VIEW,
-							Uri.parse("http://imgs.xkcd.com/comics/compiling.png"), this,
-							MainActivity.class));
-					finish();
-					mEasterEggCounter = 0;
-				}
-				break;
-		}
+		versionCode.setText(version);
 	}
 
 	@Override
@@ -86,4 +45,33 @@ public class AboutSettingsActivity extends ThemableSettingsActivity implements O
 		return true;
 	}
 
+	public void onContactClicked(View view) {
+		final Uri mailToUri = Uri.parse(
+				String.format(Locale.getDefault(),
+						"mailto:%s?subject=%s",
+						getString(R.string.feedback_at_cliqz_dot_com),
+						getString(R.string.feedback_mail_subject)
+				)
+		);
+		final Intent emailIntent = new Intent(Intent.ACTION_SENDTO);
+		emailIntent.setData(mailToUri);
+		startActivity(Intent.createChooser(emailIntent, getString(R.string.contact_cliqz)));
+	}
+
+	public void onVersionClicked(View view) {
+		mEasterEggCounter++;
+		if (mEasterEggCounter == 10) {
+			startActivity(new Intent(Intent.ACTION_VIEW,
+					Uri.parse("http://img-9gag-fun.9cache.com/photo/a0YZw3q_700b.jpg"), this,
+					MainActivity.class));
+			finish();
+			mEasterEggCounter = 0;
+		}
+	}
+
+	public void showUrl(View view) {
+		final String url = (String) view.getTag();
+		startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url), this, MainActivity.class));
+		finish();
+	}
 }
