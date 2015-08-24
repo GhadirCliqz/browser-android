@@ -16,11 +16,20 @@ public class HistoryItem implements Comparable<HistoryItem> {
 	private Bitmap mBitmap = null;
 	private int mImageId = 0;
 	private int mOrder = 0;
+    private boolean mIsFolder = false;
 
 	// Empty constructor
 	public HistoryItem() {
 
 	}
+
+    public HistoryItem(HistoryItem item) {
+        this.mUrl = item.mUrl;
+        this.mTitle = item.mTitle;
+        this.mFolder = item.mFolder;
+        this.mOrder = item.mOrder;
+        this.mIsFolder = item.mIsFolder;
+    }
 
 	// constructor
 	public HistoryItem(int id, String url, String title) {
@@ -126,6 +135,14 @@ public class HistoryItem implements Comparable<HistoryItem> {
 	public void setTitle(String title) {
 		this.mTitle = (title == null) ? "" : title;
 	}
+
+    public void setIsFolder(boolean isFolder) {
+        mIsFolder = isFolder;
+    }
+
+    public boolean isFolder() {
+        return mIsFolder;
+    }
 
 	@Override
 	public String toString() {

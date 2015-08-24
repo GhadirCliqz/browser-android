@@ -1,32 +1,12 @@
 package acr.browser.lightning.object;
 
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.FilenameFilter;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.net.URLEncoder;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserFactory;
-
-import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
-import android.content.res.Resources.Theme;
 import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -36,19 +16,42 @@ import android.widget.Filterable;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserFactory;
+
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.FilenameFilter;
+import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLEncoder;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Locale;
+
 import acr.browser.lightning.R;
 import acr.browser.lightning.database.BookmarkManager;
 import acr.browser.lightning.database.HistoryDatabase;
 import acr.browser.lightning.database.HistoryItem;
 import acr.browser.lightning.preference.PreferenceManager;
+import acr.browser.lightning.utils.ThemeUtils;
+import acr.browser.lightning.utils.Utils;
 
 public class SearchAdapter extends BaseAdapter implements Filterable {
 
-	private List<HistoryItem> mHistory;
-	private List<HistoryItem> mBookmarks;
-	private List<HistoryItem> mSuggestions;
-	private List<HistoryItem> mFilteredList;
-	private List<HistoryItem> mAllBookmarks;
+    private final List<HistoryItem> mHistory = new ArrayList<>();
+    private final List<HistoryItem> mBookmarks = new ArrayList<>();
+    private final List<HistoryItem> mSuggestions = new ArrayList<>();
+    private final List<HistoryItem> mFilteredList = new ArrayList<>();
+    private final List<HistoryItem> mAllBookmarks = new ArrayList<>();
+    private final Object mLock = new Object();
 	private HistoryDatabase mDatabaseHandler;
 	private final Context mContext;
 	private boolean mUseGoogle = true;
@@ -56,22 +59,21 @@ public class SearchAdapter extends BaseAdapter implements Filterable {
 	private final boolean mDarkTheme;
 	private final boolean mIncognito;
 	private final BookmarkManager mBookmarkManager;
+    private static final String CACHE_FILE_TYPE = ".sgg";
 	private static final String ENCODING = "ISO-8859-1";
 	private static final long INTERVAL_DAY = 86400000;
+    private static final int MAX_SUGGESTIONS = 5;
+    private final SuggestionsComparator mComparator = new SuggestionsComparator();
 	private final String mSearchSubtitle;
-	private static final int API = Build.VERSION.SDK_INT;
-	private final Theme mTheme;
 	private SearchFilter mFilter;
+    private final Drawable mSearchDrawable;
+    private final Drawable mHistoryDrawable;
+    private final Drawable mBookmarkDrawable;
 
 	public SearchAdapter(Context context, boolean dark, boolean incognito) {
 		mDatabaseHandler = HistoryDatabase.getInstance(context.getApplicationContext());
-		mTheme = context.getTheme();
-		mFilteredList = new ArrayList<>();
-		mHistory = new ArrayList<>();
-		mBookmarks = new ArrayList<>();
-		mSuggestions = new ArrayList<>();
 		mBookmarkManager = BookmarkManager.getInstance(context.getApplicationContext());
-		mAllBookmarks = mBookmarkManager.getBookmarks(true);
+        mAllBookmarks.addAll(mBookmarkManager.getAllBookmarks(true));
 		mUseGoogle = PreferenceManager.getInstance().getGoogleSearchSuggestionsEnabled();
 		mContext = context;
 		mSearchSubtitle = mContext.getString(R.string.suggestion);
@@ -85,6 +87,10 @@ public class SearchAdapter extends BaseAdapter implements Filterable {
 			}
 
 		});
+        mSearchDrawable = ThemeUtils.getThemedDrawable(context, R.drawable.ic_search, mDarkTheme);
+        mBookmarkDrawable = ThemeUtils.getThemedDrawable(context, R.drawable.ic_bookmark, mDarkTheme);
+        mHistoryDrawable = ThemeUtils.getThemedDrawable(context, R.drawable.ic_history, mDarkTheme);
+        delete.setPriority(Thread.MIN_PRIORITY);
 		delete.start();
 	}
 
@@ -102,33 +108,33 @@ public class SearchAdapter extends BaseAdapter implements Filterable {
 
 	private class NameFilter implements FilenameFilter {
 
-		private static final String ext = ".sgg";
-
 		@Override
 		public boolean accept(File dir, String filename) {
-			return filename.endsWith(ext);
+            return filename.endsWith(CACHE_FILE_TYPE);
 		}
 
 	}
 
 	public void refreshPreferences() {
 		mUseGoogle = PreferenceManager.getInstance().getGoogleSearchSuggestionsEnabled();
-		if (!mUseGoogle && mSuggestions != null) {
+        if (!mUseGoogle) {
+            synchronized (mSuggestions) {
 			mSuggestions.clear();
 		}
 	}
+        mDatabaseHandler = HistoryDatabase.getInstance(mContext.getApplicationContext());
+    }
 
 	public void refreshBookmarks() {
-		mAllBookmarks = mBookmarkManager.getBookmarks(true);
+        synchronized (mLock) {
+            mAllBookmarks.clear();
+            mAllBookmarks.addAll(mBookmarkManager.getAllBookmarks(true));
+        }
 	}
 
 	@Override
 	public int getCount() {
-		if (mFilteredList != null) {
 			return mFilteredList.size();
-		} else {
-			return 0;
-		}
 	}
 
 	@Override
@@ -141,78 +147,57 @@ public class SearchAdapter extends BaseAdapter implements Filterable {
 		return 0;
 	}
 
-	@SuppressWarnings("deprecation")
-	@SuppressLint("NewApi")
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
-		View row = convertView;
 		SuggestionHolder holder;
 
-		if (row == null) {
+        if (convertView == null) {
 			LayoutInflater inflater = ((Activity) mContext).getLayoutInflater();
-			row = inflater.inflate(R.layout.two_line_autocomplete, parent, false);
+            convertView = inflater.inflate(R.layout.two_line_autocomplete, parent, false);
 
 			holder = new SuggestionHolder();
-			holder.mTitle = (TextView) row.findViewById(R.id.title);
-			holder.mUrl = (TextView) row.findViewById(R.id.url);
-			holder.mImage = (ImageView) row.findViewById(R.id.suggestionIcon);
-			row.setTag(holder);
+            holder.mTitle = (TextView) convertView.findViewById(R.id.title);
+            holder.mUrl = (TextView) convertView.findViewById(R.id.url);
+            holder.mImage = (ImageView) convertView.findViewById(R.id.suggestionIcon);
+            convertView.setTag(holder);
 		} else {
-			holder = (SuggestionHolder) row.getTag();
+            holder = (SuggestionHolder) convertView.getTag();
 		}
-
-		HistoryItem web = mFilteredList.get(position);
+        HistoryItem web;
+        web = mFilteredList.get(position);
 		holder.mTitle.setText(web.getTitle());
 		holder.mUrl.setText(web.getUrl());
 
-		int imageId = R.drawable.ic_bookmark;
+        Drawable image;
 		switch (web.getImageId()) {
 			case R.drawable.ic_bookmark: {
-				if (!mDarkTheme) {
-					imageId = R.drawable.ic_bookmark;
-				} else {
+                if (mDarkTheme)
 					holder.mTitle.setTextColor(Color.WHITE);
-					imageId = R.drawable.ic_bookmark_dark;
-				}
+                image = mBookmarkDrawable;
 				break;
 			}
 			case R.drawable.ic_search: {
-				if (!mDarkTheme) {
-					imageId = R.drawable.ic_search;
-				} else {
+                if (mDarkTheme)
 					holder.mTitle.setTextColor(Color.WHITE);
-					imageId = R.drawable.ic_search_dark;
-				}
+                image = mSearchDrawable;
 				break;
 			}
 			case R.drawable.ic_history: {
-				if (!mDarkTheme) {
-					imageId = R.drawable.ic_history;
-				} else {
+                if (mDarkTheme)
 					holder.mTitle.setTextColor(Color.WHITE);
-					imageId = R.drawable.ic_history_dark;
+                image = mHistoryDrawable;
+                break;
 				}
+            default:
+                if (mDarkTheme)
+                    holder.mTitle.setTextColor(Color.WHITE);
+                image = mSearchDrawable;
 				break;
 			}
-		}
 
-		if (API < Build.VERSION_CODES.LOLLIPOP) {
-			holder.mImage.setImageDrawable(mContext.getResources().getDrawable(imageId));
-		} else {
-			holder.mImage.setImageDrawable(mContext.getResources().getDrawable(imageId, mTheme));
-		}
+        holder.mImage.setImageDrawable(image);
 
-		return row;
-	}
-
-	public void setContents(List<HistoryItem> list) {
-		if (mFilteredList != null) {
-			mFilteredList.clear();
-			mFilteredList.addAll(list);
-		} else {
-			mFilteredList = list;
-		}
-		notifyDataSetChanged();
+        return convertView;
 	}
 
 	@Override
@@ -223,7 +208,7 @@ public class SearchAdapter extends BaseAdapter implements Filterable {
 		return mFilter;
 	}
 
-	public class SearchFilter extends Filter {
+    private class SearchFilter extends Filter {
 
 		@Override
 		protected FilterResults performFiltering(CharSequence constraint) {
@@ -237,7 +222,9 @@ public class SearchAdapter extends BaseAdapter implements Filterable {
 			}
 
 			int counter = 0;
-			mBookmarks = new ArrayList<>();
+            synchronized (mBookmarks) {
+                mBookmarks.clear();
+                synchronized (mLock) {
 			for (int n = 0; n < mAllBookmarks.size(); n++) {
 				if (counter >= 5) {
 					break;
@@ -252,11 +239,16 @@ public class SearchAdapter extends BaseAdapter implements Filterable {
 				}
 
 			}
-			if (mDatabaseHandler == null) {
+                }
+            }
+            if (mDatabaseHandler == null || mDatabaseHandler.isClosed()) {
 				mDatabaseHandler = HistoryDatabase.getInstance(mContext.getApplicationContext());
 			}
-			mHistory = mDatabaseHandler.findItemsContaining(constraint.toString(), 0);
-
+            List<HistoryItem> historyList = mDatabaseHandler.findItemsContaining(constraint.toString(),0 );
+            synchronized (mHistory) {
+                mHistory.clear();
+                mHistory.addAll(historyList);
+            }
 			results.count = 1;
 			return results;
 		}
@@ -268,7 +260,12 @@ public class SearchAdapter extends BaseAdapter implements Filterable {
 
 		@Override
 		protected void publishResults(CharSequence constraint, FilterResults results) {
-			mFilteredList = getSuggestions();
+            synchronized (mFilteredList) {
+                mFilteredList.clear();
+                List<HistoryItem> filtered = getFilteredList();
+                Collections.sort(filtered, mComparator);
+                mFilteredList.addAll(filtered);
+            }
 			notifyDataSetChanged();
 		}
 
@@ -329,55 +326,61 @@ public class SearchAdapter extends BaseAdapter implements Filterable {
 			} catch (Exception e) {
 				return filter;
 			} finally {
-				if (fileInput != null) {
-					try {
-						fileInput.close();
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
+                Utils.close(fileInput);
 				}
-			}
 			return filter;
 		}
 
 		@Override
 		protected void onPostExecute(List<HistoryItem> result) {
-			mSuggestions = result;
-			mFilteredList = getSuggestions();
+            synchronized (mSuggestions) {
+                mSuggestions.clear();
+                mSuggestions.addAll(result);
+            }
+            synchronized (mFilteredList) {
+                mFilteredList.clear();
+                List<HistoryItem> filtered = getFilteredList();
+                Collections.sort(filtered, mComparator);
+                mFilteredList.addAll(filtered);
 			notifyDataSetChanged();
+            }
 			mIsExecuting = false;
 		}
 
 	}
 
 	private File downloadSuggestionsForQuery(String query) {
-		File cacheFile = new File(mContext.getCacheDir(), query.hashCode() + ".sgg");
+        File cacheFile = new File(mContext.getCacheDir(), query.hashCode() + CACHE_FILE_TYPE);
 		if (System.currentTimeMillis() - INTERVAL_DAY < cacheFile.lastModified()) {
 			return cacheFile;
 		}
 		if (!isNetworkConnected(mContext)) {
 			return cacheFile;
 		}
+        InputStream in = null;
+        FileOutputStream fos = null;
 		try {
 			URL url = new URL("http://google.com/complete/search?q=" + query
 					+ "&output=toolbar&hl=en");
 			HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 			connection.setDoInput(true);
 			connection.connect();
-			InputStream in = connection.getInputStream();
+            in = connection.getInputStream();
 
 			if (in != null) {
-				FileOutputStream fos = new FileOutputStream(cacheFile);
+                fos = new FileOutputStream(cacheFile);
 				int buffer;
 				while ((buffer = in.read()) != -1) {
 					fos.write(buffer);
 				}
 				fos.flush();
-				fos.close();
 			}
 			cacheFile.setLastModified(System.currentTimeMillis());
 		} catch (Exception e) {
 			e.printStackTrace();
+        } finally {
+            Utils.close(in);
+            Utils.close(fos);
 		}
 		return cacheFile;
 	}
@@ -396,37 +399,70 @@ public class SearchAdapter extends BaseAdapter implements Filterable {
 		return connectivity.getActiveNetworkInfo();
 	}
 
-	public List<HistoryItem> getSuggestions() {
-		List<HistoryItem> filteredList = new ArrayList<>();
+    //TODO Write simpler algorithm
+//    private List<HistoryItem> getSuggestions() {
+//        List<HistoryItem> filteredList = new ArrayList<>();
+//
+//        int suggestionsSize = mSuggestions.size();
+//        int historySize = mHistory.size();
+//        int bookmarkSize = mBookmarks.size();
+//
+//        int maxSuggestions = (bookmarkSize + historySize < 3) ? (5 - bookmarkSize - historySize) : (bookmarkSize < 2) ? (4 - bookmarkSize) : (historySize < 1) ? 3 : 2;
+//        int maxHistory = (suggestionsSize + bookmarkSize < 4) ? (5 - suggestionsSize - bookmarkSize) : 1;
+//        int maxBookmarks = (suggestionsSize + historySize < 3) ? (5 - suggestionsSize - historySize) : 2;
+//
+//        for (int n = 0; n < bookmarkSize && n < maxBookmarks; n++) {
+//            filteredList.add(mBookmarks.get(n));
+//        }
+//
+//        for (int n = 0; n < historySize && n < maxHistory; n++) {
+//            filteredList.add(mHistory.get(n));
+//        }
+//
+//        for (int n = 0; n < suggestionsSize && n < maxSuggestions; n++) {
+//            filteredList.add(mSuggestions.get(n));
+//        }
+//        return filteredList;
+//    }
 
-		int suggestionsSize = (mSuggestions == null) ? 0 : mSuggestions.size();
-		int historySize = (mHistory == null) ? 0 : mHistory.size();
-		int bookmarkSize = (mBookmarks == null) ? 0 : mBookmarks.size();
-
-		int maxSuggestions = (bookmarkSize + historySize < 3) ? (5 - bookmarkSize - historySize)
-				: (bookmarkSize < 2) ? (4 - bookmarkSize) : (historySize < 1) ? 3 : 2;
-		int maxHistory = (suggestionsSize + bookmarkSize < 4) ? (5 - suggestionsSize - bookmarkSize)
-				: 1;
-		int maxBookmarks = (suggestionsSize + historySize < 3) ? (5 - suggestionsSize - historySize)
-				: 2;
-
-		if (!mUseGoogle || mIncognito) {
-			maxHistory++;
-			maxBookmarks++;
+    private List<HistoryItem> getFilteredList() {
+        List<HistoryItem> list = new ArrayList<>();
+        synchronized (mBookmarks) {
+            synchronized (mHistory) {
+                synchronized (mSuggestions) {
+                    Iterator<HistoryItem> bookmark = mBookmarks.iterator();
+                    Iterator<HistoryItem> history = mHistory.iterator();
+                    Iterator<HistoryItem> suggestion = mSuggestions.listIterator();
+                    while (list.size() < MAX_SUGGESTIONS) {
+                        if (!bookmark.hasNext() && !suggestion.hasNext() && !history.hasNext()) {
+                            return list;
+                        }
+                        if (bookmark.hasNext()) {
+                            list.add(bookmark.next());
+                        }
+                        if (suggestion.hasNext() && list.size() < MAX_SUGGESTIONS) {
+                            list.add(suggestion.next());
+                        }
+                        if (history.hasNext() && list.size() < MAX_SUGGESTIONS) {
+                            list.add(history.next());
+                        }
+                    }
+                }
+            }
+		}
+        return list;
 		}
 
-		for (int n = 0; n < bookmarkSize && n < maxBookmarks; n++) {
-			filteredList.add(mBookmarks.get(n));
-		}
+    private class SuggestionsComparator implements Comparator<HistoryItem> {
 
-		for (int n = 0; n < historySize && n < maxHistory; n++) {
-			filteredList.add(mHistory.get(n));
+        @Override
+        public int compare(HistoryItem lhs, HistoryItem rhs) {
+            if (lhs.getImageId() == rhs.getImageId()) return 0;
+            if (lhs.getImageId() == R.drawable.ic_bookmark) return -1;
+            if (rhs.getImageId() == R.drawable.ic_bookmark) return 1;
+            if (lhs.getImageId() == R.drawable.ic_history) return -1;
+            return 1;
 		}
-
-		for (int n = 0; n < suggestionsSize && n < maxSuggestions; n++) {
-			filteredList.add(mSuggestions.get(n));
-		}
-		return filteredList;
 	}
 
 }

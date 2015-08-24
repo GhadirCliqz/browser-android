@@ -3,7 +3,6 @@ apply plugin: 'com.android.application'
 android {
     compileSdkVersion 22
     buildToolsVersion "22.0.1"
-
     defaultConfig {
         applicationId "com.cliqz.browser"
         minSdkVersion 14
@@ -11,22 +10,34 @@ android {
         versionCode 1
         versionName "0.1"
 
-        buildConfigField 'String', 'LIGHTNING_VERSION_NAME', '"4.0.10a"'
+        buildConfigField 'String', 'LIGHTNING_VERSION_NAME', '"4.1.1a"'
     }
 
     buildTypes {
         release {
-            minifyEnabled false
+            minifyEnabled true
             shrinkResources true
             proguardFiles 'proguard-project.txt'
         }
         debug {
             minifyEnabled false
-            shrinkResources true
+            shrinkResources false
             proguardFiles 'proguard-project.txt'
         }
     }
 
+    productFlavors {
+        lightningPlus {
+            buildConfigField "boolean", "FULL_VERSION", "true"
+            applicationId "acr.browser.lightning"
+            versionCode 80
+        }
+        lightningLite {
+            buildConfigField "boolean", "FULL_VERSION", "false"
+            applicationId "acr.browser.barebones"
+            versionCode 81
+        }
+    }
     lintOptions {
         abortOnError false
     }
@@ -36,21 +47,20 @@ android {
                     '../external/navigation-extension/build/dev/androidkit',
                     '../external/fresh-tab/dist/mobile'
             ]
-        }
+		}
     }
 }
 
 dependencies {
-    compile(project(':libnetcipher')) {
-        // Exclude any support-v4 modules because appcompat-v7 will import the latest
-        exclude module: 'support-v4'
-        exclude module: 'android-support-v4'
-    }
-    compile(project(':freshtab'))
-    compile(project(':navigation'))
-    compile 'com.android.support:palette-v7:22.1.1'
-    compile 'com.android.support:appcompat-v7:22.1.1'
+    compile 'com.android.support:palette-v7:22.2.1'
+    compile 'com.android.support:appcompat-v7:22.2.1'
+    compile 'com.android.support:design:22.2.1'
     compile 'org.jsoup:jsoup:1.8.1'
-    compile 'net.i2p.android:client:0.7@aar'
     compile 'com.google.guava:guava:18.0'
+    compile 'org.lucasr.twowayview:twowayview:0.1.4'
+    // Only Lightning Plus needs the proxy libraries
+    lightningPlusCompile 'net.i2p.android:client:0.7'
+    lightningPlusCompile(project(':libnetcipher'))
+    // git submodule foreach git reset --hard
+    // git submodule update --remote
 }

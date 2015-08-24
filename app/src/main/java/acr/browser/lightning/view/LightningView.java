@@ -7,7 +7,6 @@ package acr.browser.lightning.view;
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -22,6 +21,8 @@ import android.net.http.SslError;
 import android.os.Build;
 import android.os.Message;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.v7.app.AlertDialog;
 import android.text.InputType;
 import android.text.method.PasswordTransformationMethod;
 import android.util.Log;
@@ -30,6 +31,7 @@ import android.view.GestureDetector.SimpleOnGestureListener;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnTouchListener;
+import android.view.ViewConfiguration;
 import android.webkit.CookieManager;
 import android.webkit.GeolocationPermissions;
 import android.webkit.HttpAuthHandler;
@@ -65,6 +67,7 @@ import acr.browser.lightning.download.LightningDownloadListener;
 import acr.browser.lightning.preference.PreferenceManager;
 import acr.browser.lightning.utils.AdBlock;
 import acr.browser.lightning.utils.IntentUtils;
+import acr.browser.lightning.utils.ThemeUtils;
 import acr.browser.lightning.utils.Utils;
 
 public class LightningView implements ILightningTab {
@@ -73,13 +76,13 @@ public class LightningView implements ILightningTab {
 	private final boolean mIsCustomWebView;
 	private String mAntiPhishingSrc;
 	private WebView mWebView;
+    private boolean mIsIncognitoTab;
 	private BrowserController mBrowserController;
 	private GestureDetector mGestureDetector;
 	private final Activity mActivity;
-	private WebSettings mSettings;
-	private static String mHomepage;
 	private static String mDefaultUserAgent;
-	private static Bitmap mWebpageBitmap;
+    // TODO fix so that mWebpageBitmap can be static - static changes the icon when switching from light to dark and then back to light
+    private Bitmap mWebpageBitmap;
 	private static PreferenceManager mPreferences;
 	private final AdBlock mAdBlock;
 	private IntentUtils mIntentUtils;
@@ -87,9 +90,10 @@ public class LightningView implements ILightningTab {
 	private boolean isForegroundTab;
 	private boolean mTextReflow = false;
 	private boolean mInvertPage = false;
+    private boolean mToggleDesktop = false;
+    private static float mMaxFling;
 	private static final int API = android.os.Build.VERSION.SDK_INT;
-	private static final int SCROLL_UP_THRESHOLD = Utils.convertDpToPixels(10);
-	private static final int SCROLL_DOWN_THRESHOLD = Utils.convertDpToPixels(100);
+    private static final int SCROLL_UP_THRESHOLD = Utils.dpToPx(10);
 	private static final float[] mNegativeColorArray = { -1.0f, 0, 0, 0, 255, // red
 			0, -1.0f, 0, 0, 255, // green
 			0, 0, -1.0f, 0, 255, // blue
@@ -98,9 +102,8 @@ public class LightningView implements ILightningTab {
 	private HistoryDatabase mHistoryDatabase;
 	private String mUrl;
 
-	@SuppressWarnings("deprecation")
 	@SuppressLint("NewApi")
-	public LightningView(final Activity activity, String url, final boolean darkTheme, final WebView overrideWebView, final HistoryDatabase database) {
+	public LightningView(final Activity activity, String url, final boolean darkTheme, boolean isIncognito, final WebView overrideWebView, final HistoryDatabase database) {
 
 		mActivity = activity;
 		mHistoryDatabase = database;
@@ -113,10 +116,13 @@ public class LightningView implements ILightningTab {
 			mWebView = new WebView(activity);
 			mIsCustomWebView = false;
 		}
+        mIsIncognitoTab = isIncognito;
 		mTitle = new Title(activity, darkTheme);
 		mAdBlock = AdBlock.getInstance(activity.getApplicationContext());
 
-		mWebpageBitmap = Utils.getWebpageBitmap(activity.getResources(), darkTheme);
+        mWebpageBitmap = mTitle.mDefaultIcon;
+
+        mMaxFling = ViewConfiguration.get(activity).getScaledMaximumFlingVelocity();
 
 		try {
 			mBrowserController = (BrowserController) activity;
@@ -131,9 +137,9 @@ public class LightningView implements ILightningTab {
 		mWebView.setDrawingCacheEnabled(false);
 		mWebView.setWillNotCacheDrawing(true);
 		mWebView.setAlwaysDrawnWithCacheEnabled(false);
-		mWebView.setBackgroundColor(activity.getResources().getColor(android.R.color.white));
+        mWebView.setBackgroundColor(0);
 
-		if (API > 15) {
+        if (API >= Build.VERSION_CODES.JELLY_BEAN) {
 			mWebView.setBackground(null);
 			mWebView.getRootView().setBackground(null);
 		} else if (mWebView.getRootView() != null) {
@@ -142,208 +148,98 @@ public class LightningView implements ILightningTab {
 		mWebView.setScrollbarFadingEnabled(true);
 
 		if (overrideWebView == null) {
-			mWebView.setSaveEnabled(true);
-			mWebView.setWebChromeClient(new LightningChromeClient(activity));
-			mWebView.setWebViewClient(new LightningWebClient(activity));
-			mWebView.setDownloadListener(new LightningDownloadListener(activity));
-			mGestureDetector = new GestureDetector(activity, new CustomGestureListener());
-			mWebView.setOnTouchListener(new TouchListener());
-			mDefaultUserAgent = mWebView.getSettings().getUserAgentString();
-			mSettings = mWebView.getSettings();
-			initializeSettings(mWebView.getSettings(), activity, url);
-			initializePreferences(activity);
+		mWebView.setSaveEnabled(true);
+        mWebView.setNetworkAvailable(true);
+		mWebView.setWebChromeClient(new LightningChromeClient(activity));
+		mWebView.setWebViewClient(new LightningWebClient(activity));
+		mWebView.setDownloadListener(new LightningDownloadListener(activity));
+		mGestureDetector = new GestureDetector(activity, new CustomGestureListener());
+		mWebView.setOnTouchListener(new TouchListener());
+		mDefaultUserAgent = mWebView.getSettings().getUserAgentString();
+		initializeSettings(mWebView.getSettings(), activity, url);
 
-			if (url != null) {
-				if (!url.trim().isEmpty()) {
-					mWebView.loadUrl(url);
-				} else {
-					// don't load anything, the user is looking for a blank tab
-				}
+		if (url != null) {
+			if (!url.trim().isEmpty()) {
+				mWebView.loadUrl(url);
 			} else {
-				if (mHomepage.startsWith("about:home")) {
-					mWebView.loadUrl(getHomepage());
-				} else if (mHomepage.startsWith("about:bookmarks")) {
-					mBrowserController.openBookmarkPage(mWebView);
-				} else {
-					mWebView.loadUrl(mHomepage);
-				}
+				// don't load anything, the user is looking for a blank tab
 			}
+		} else {
+			mWebView.loadUrl(Constants.HOMEPAGE);
 		}
 	}
-
-	public String getHomepage() {
-		return Constants.HOMEPAGE;
-		/* StringBuilder homepageBuilder = new StringBuilder();
-		homepageBuilder.append(StartPage.HEAD);
-		String icon;
-		String searchUrl;
-		switch (mPreferences.getSearchChoice()) {
-			case 0:
-				// CUSTOM SEARCH
-				icon = "file:///android_asset/lightning.png";
-				searchUrl = mPreferences.getSearchUrl();
-				break;
-			case 1:
-				// GOOGLE_SEARCH;
-				icon = "file:///android_asset/google.png";
-				// "https://www.google.com/images/srpr/logo11w.png";
-				searchUrl = Constants.GOOGLE_SEARCH;
-				break;
-			case 2:
-				// ANDROID SEARCH;
-				icon = "file:///android_asset/ask.png";
-				searchUrl = Constants.ASK_SEARCH;
-				break;
-			case 3:
-				// BING_SEARCH;
-				icon = "file:///android_asset/bing.png";
-				// "http://upload.wikimedia.org/wikipedia/commons/thumb/b/b1/Bing_logo_%282013%29.svg/500px-Bing_logo_%282013%29.svg.png";
-				searchUrl = Constants.BING_SEARCH;
-				break;
-			case 4:
-				// YAHOO_SEARCH;
-				icon = "file:///android_asset/yahoo.png";
-				// "http://upload.wikimedia.org/wikipedia/commons/thumb/2/24/Yahoo%21_logo.svg/799px-Yahoo%21_logo.svg.png";
-				searchUrl = Constants.YAHOO_SEARCH;
-				break;
-			case 5:
-				// STARTPAGE_SEARCH;
-				icon = "file:///android_asset/startpage.png";
-				// "https://startpage.com/graphics/startp_logo.gif";
-				searchUrl = Constants.STARTPAGE_SEARCH;
-				break;
-			case 6:
-				// STARTPAGE_MOBILE
-				icon = "file:///android_asset/startpage.png";
-				// "https://startpage.com/graphics/startp_logo.gif";
-				searchUrl = Constants.STARTPAGE_MOBILE_SEARCH;
-				break;
-			case 7:
-				// DUCK_SEARCH;
-				icon = "file:///android_asset/duckduckgo.png";
-				// "https://duckduckgo.com/assets/logo_homepage.normal.v101.png";
-				searchUrl = Constants.DUCK_SEARCH;
-				break;
-			case 8:
-				// DUCK_LITE_SEARCH;
-				icon = "file:///android_asset/duckduckgo.png";
-				// "https://duckduckgo.com/assets/logo_homepage.normal.v101.png";
-				searchUrl = Constants.DUCK_LITE_SEARCH;
-				break;
-			case 9:
-				// BAIDU_SEARCH;
-				icon = "file:///android_asset/baidu.png";
-				// "http://www.baidu.com/img/bdlogo.gif";
-				searchUrl = Constants.BAIDU_SEARCH;
-				break;
-			case 10:
-				// YANDEX_SEARCH;
-				icon = "file:///android_asset/yandex.png";
-				// "http://upload.wikimedia.org/wikipedia/commons/thumb/9/91/Yandex.svg/600px-Yandex.svg.png";
-				searchUrl = Constants.YANDEX_SEARCH;
-				break;
-			default:
-				// DEFAULT GOOGLE_SEARCH;
-				icon = "file:///android_asset/google.png";
-				searchUrl = Constants.GOOGLE_SEARCH;
-				break;
-
-		}
-
-		homepageBuilder.append(icon);
-		homepageBuilder.append(StartPage.MIDDLE);
-		homepageBuilder.append(searchUrl);
-		homepageBuilder.append(StartPage.END);
-
-		File homepage = new File(mActivity.getFilesDir(), "homepage.html");
-		try {
-			FileWriter hWriter = new FileWriter(homepage, false);
-			hWriter.write(homepageBuilder.toString());
-			hWriter.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-
-		return Constants.FILE + homepage; */
 	}
 
-	@SuppressWarnings("deprecation")
-	@SuppressLint({ "NewApi", "SetJavaScriptEnabled" })
-	public synchronized void initializePreferences(Context context) {
+    /**
+     * Initialize the preference driven settings of the WebView
+     *
+     * @param settings the WebSettings object to use, you can pass in null
+     *                 if you don't have a reference to them
+     * @param context the context in which the WebView was created
+     */
+    @SuppressLint("NewApi")
+	public synchronized void initializePreferences(@Nullable WebSettings settings, Context context) {
+        if (settings == null && mWebView == null) {
+            return;
+        } else if (settings == null) {
+            settings = mWebView.getSettings();
+        }
 		mPreferences = PreferenceManager.getInstance();
-		mHomepage = Constants.HOMEPAGE;
+
+        settings.setDefaultTextEncodingName(mPreferences.getTextEncoding());
 		mAdBlock.updatePreference();
-		if (mSettings == null && mWebView != null) {
-			mSettings = mWebView.getSettings();
-		} else if (mSettings == null) {
-			return;
-		}
 
 		setColorMode(mPreferences.getRenderingMode());
 
-		if (!mBrowserController.isIncognito()) {
-			mSettings.setGeolocationEnabled(mPreferences.getLocationEnabled());
+        if (!mIsIncognitoTab) {
+            settings.setGeolocationEnabled(mPreferences.getLocationEnabled());
 		} else {
-			mSettings.setGeolocationEnabled(false);
+            settings.setGeolocationEnabled(false);
 		}
 		if (API < 19) {
 			switch (mPreferences.getFlashSupport()) {
 				case 0:
-					mSettings.setPluginState(PluginState.OFF);
+                    settings.setPluginState(PluginState.OFF);
 					break;
 				case 1:
-					mSettings.setPluginState(PluginState.ON_DEMAND);
+                    settings.setPluginState(PluginState.ON_DEMAND);
 					break;
 				case 2:
-					mSettings.setPluginState(PluginState.ON);
+                    settings.setPluginState(PluginState.ON);
 					break;
 				default:
 					break;
 			}
 		}
 
-		switch (mPreferences.getUserAgentChoice()) {
-			case 1:
-				if (API > 16) {
-					mSettings.setUserAgentString(WebSettings.getDefaultUserAgent(context));
-				} else {
-					mSettings.setUserAgentString(mDefaultUserAgent);
-				}
-				break;
-			case 2:
-				mSettings.setUserAgentString(Constants.DESKTOP_USER_AGENT);
-				break;
-			case 3:
-				mSettings.setUserAgentString(Constants.MOBILE_USER_AGENT);
-				break;
-			case 4:
-				mSettings.setUserAgentString(mPreferences.getUserAgentString(mDefaultUserAgent));
-				break;
-		}
+        setUserAgent(context, mPreferences.getUserAgentChoice());
 
-		if (mPreferences.getSavePasswordsEnabled() && !mBrowserController.isIncognito()) {
+        if (mPreferences.getSavePasswordsEnabled() && !mIsIncognitoTab) {
 			if (API < 18) {
-				mSettings.setSavePassword(true);
+                settings.setSavePassword(true);
 			}
-			mSettings.setSaveFormData(true);
+            settings.setSaveFormData(true);
 		} else {
 			if (API < 18) {
-				mSettings.setSavePassword(false);
+                settings.setSavePassword(false);
 			}
-			mSettings.setSaveFormData(false);
+            settings.setSaveFormData(false);
 		}
 
 		if (mPreferences.getJavaScriptEnabled()) {
-			mSettings.setJavaScriptEnabled(true);
-			mSettings.setJavaScriptCanOpenWindowsAutomatically(true);
+            settings.setJavaScriptEnabled(true);
+            settings.setJavaScriptCanOpenWindowsAutomatically(true);
+        } else {
+            settings.setJavaScriptEnabled(false);
+            settings.setJavaScriptCanOpenWindowsAutomatically(false);
 		}
 
 		if (mPreferences.getTextReflowEnabled()) {
 			mTextReflow = true;
-			mSettings.setLayoutAlgorithm(LayoutAlgorithm.NARROW_COLUMNS);
+            settings.setLayoutAlgorithm(LayoutAlgorithm.NARROW_COLUMNS);
 			if (API >= android.os.Build.VERSION_CODES.KITKAT) {
 				try {
-					mSettings.setLayoutAlgorithm(LayoutAlgorithm.TEXT_AUTOSIZING);
+                    settings.setLayoutAlgorithm(LayoutAlgorithm.TEXT_AUTOSIZING);
 				} catch (Exception e) {
 					// This shouldn't be necessary, but there are a number
 					// of KitKat devices that crash trying to set this
@@ -352,28 +248,35 @@ public class LightningView implements ILightningTab {
 			}
 		} else {
 			mTextReflow = false;
-			mSettings.setLayoutAlgorithm(LayoutAlgorithm.NORMAL);
+            settings.setLayoutAlgorithm(LayoutAlgorithm.NORMAL);
 		}
 
-		mSettings.setBlockNetworkImage(mPreferences.getBlockImagesEnabled());
-		mSettings.setSupportMultipleWindows(mPreferences.getPopupsEnabled());
-		mSettings.setUseWideViewPort(mPreferences.getUseWideViewportEnabled());
-		mSettings.setLoadWithOverviewMode(mPreferences.getOverviewModeEnabled());
+        settings.setBlockNetworkImage(mPreferences.getBlockImagesEnabled());
+        if (!mIsIncognitoTab) {
+            settings.setSupportMultipleWindows(mPreferences.getPopupsEnabled());
+        } else {
+            settings.setSupportMultipleWindows(false);
+        }
+        settings.setUseWideViewPort(mPreferences.getUseWideViewportEnabled());
+        settings.setLoadWithOverviewMode(mPreferences.getOverviewModeEnabled());
 		switch (mPreferences.getTextSize()) {
+            case 0:
+                settings.setTextZoom(200);
+                break;
 			case 1:
-				mSettings.setTextZoom(200);
+                settings.setTextZoom(150);
 				break;
 			case 2:
-				mSettings.setTextZoom(150);
+                settings.setTextZoom(125);
 				break;
 			case 3:
-				mSettings.setTextZoom(100);
+                settings.setTextZoom(100);
 				break;
 			case 4:
-				mSettings.setTextZoom(75);
+                settings.setTextZoom(75);
 				break;
 			case 5:
-				mSettings.setTextZoom(50);
+                settings.setTextZoom(50);
 				break;
 		}
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
@@ -385,30 +288,41 @@ public class LightningView implements ILightningTab {
 	public void setHistoryDatabase(final HistoryDatabase db) {
 		mHistoryDatabase = db;
 	}
-
-	@SuppressWarnings("deprecation")
-	@SuppressLint({ "SetJavaScriptEnabled", "NewApi" })
-	@TargetApi(21)
-	public void initializeSettings(WebSettings settings, Context context, String url) {
-		if (API < 18) {
+    /**
+     * Initialize the settings of the WebView that are intrinsic to Lightning and cannot
+     * be altered by the user. Distinguish between Incognito and Regular tabs here.
+     *
+     * @param settings the WebSettings object to use.
+     * @param context the Context which was used to construct the WebView.
+     */
+    @SuppressLint("NewApi")
+	private void initializeSettings(WebSettings settings, Context context, String url) {
+        if (API < Build.VERSION_CODES.JELLY_BEAN_MR2) {
 			settings.setAppCacheMaxSize(Long.MAX_VALUE);
 		}
-		if (API < 17) {
+        if (API < Build.VERSION_CODES.JELLY_BEAN_MR1) {
 			settings.setEnableSmoothTransition(true);
 		}
-		if (API > 16) {
+        if (API > Build.VERSION_CODES.JELLY_BEAN) {
 			settings.setMediaPlaybackRequiresUserGesture(true);
 		}
-		if (API >= Build.VERSION_CODES.LOLLIPOP && !mBrowserController.isIncognito()) {
+        if (API >= Build.VERSION_CODES.LOLLIPOP && !mIsIncognitoTab) {
 			settings.setMixedContentMode(WebSettings.MIXED_CONTENT_COMPATIBILITY_MODE);
 		} else if (API >= Build.VERSION_CODES.LOLLIPOP) {
 			// We're in Incognito mode, reject
 			settings.setMixedContentMode(WebSettings.MIXED_CONTENT_NEVER_ALLOW);
 		}
+        if (!mIsIncognitoTab) {
 		settings.setDomStorageEnabled(true);
 		settings.setAppCacheEnabled(true);
 		settings.setCacheMode(WebSettings.LOAD_DEFAULT);
 		settings.setDatabaseEnabled(true);
+        } else {
+            settings.setDomStorageEnabled(false);
+            settings.setAppCacheEnabled(false);
+            settings.setDatabaseEnabled(false);
+            settings.setCacheMode(WebSettings.LOAD_NO_CACHE);
+        }
 		settings.setSupportZoom(true);
 		settings.setBuiltInZoomControls(true);
 		settings.setDisplayZoomControls(false);
@@ -416,6 +330,10 @@ public class LightningView implements ILightningTab {
 		settings.setAllowFileAccess(true);
 		settings.setDefaultTextEncodingName("utf-8");
 		setAccessFromUrl(url, settings);
+        if (API >= Build.VERSION_CODES.JELLY_BEAN) {
+            settings.setAllowFileAccessFromFileURLs(false);
+            settings.setAllowUniversalAccessFromFileURLs(false);
+        }
 
 		settings.setAppCachePath(context.getDir("appcache", 0).getPath());
 		settings.setGeolocationDatabasePath(context.getDir("geolocation", 0).getPath());
@@ -473,20 +391,57 @@ public class LightningView implements ILightningTab {
 		}
 	}
 
+    public void toggleDesktopUA(@NonNull Context context) {
+        if (mWebView == null)
+            return;
+        if (!mToggleDesktop)
+            mWebView.getSettings().setUserAgentString(Constants.DESKTOP_USER_AGENT);
+        else
+            setUserAgent(context, mPreferences.getUserAgentChoice());
+        mToggleDesktop = !mToggleDesktop;
+    }
+
+    @SuppressLint("NewApi")
+	public void setUserAgent(Context context, int choice) {
+        if (mWebView == null) return;
+        WebSettings settings = mWebView.getSettings();
+        switch (choice) {
+            case 1:
+                if (API > Build.VERSION_CODES.JELLY_BEAN) {
+                    settings.setUserAgentString(WebSettings.getDefaultUserAgent(context));
+                } else {
+                    settings.setUserAgentString(mDefaultUserAgent);
+                }
+                break;
+            case 2:
+                settings.setUserAgentString(Constants.DESKTOP_USER_AGENT);
+                break;
+            case 3:
+                settings.setUserAgentString(Constants.MOBILE_USER_AGENT);
+                break;
+            case 4:
+                settings.setUserAgentString(mPreferences.getUserAgentString(mDefaultUserAgent));
+                break;
+        }
+    }
+
 	public boolean isShown() {
 		return mWebView != null && mWebView.isShown();
 	}
 
 	public synchronized void onPause() {
-		if (mWebView != null) {
+        if (mWebView != null)
 			mWebView.onPause();
 		}
-	}
 
 	public synchronized void onResume() {
-		if (mWebView != null) {
+        if (mWebView != null)
 			mWebView.onResume();
 		}
+
+    public synchronized void freeMemory() {
+        if (mWebView != null && Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT)
+            mWebView.freeMemory();
 	}
 
 	public void setForegroundTab(boolean isForeground) {
@@ -512,11 +467,11 @@ public class LightningView implements ILightningTab {
 		}
 	}
 
-	public void setHardwareRendering() {
+    private void setHardwareRendering() {
 		mWebView.setLayerType(View.LAYER_TYPE_HARDWARE, mPaint);
 	}
 
-	public void setNormalRendering() {
+    private void setNormalRendering() {
 		mWebView.setLayerType(View.LAYER_TYPE_NONE, null);
 	}
 
@@ -524,7 +479,7 @@ public class LightningView implements ILightningTab {
 		mWebView.setLayerType(View.LAYER_TYPE_SOFTWARE, null);
 	}
 
-	public void setColorMode(int mode) {
+    private void setColorMode(int mode) {
 		mInvertPage = false;
 		switch (mode) {
 			case 0:
@@ -592,15 +547,9 @@ public class LightningView implements ILightningTab {
 		}
 	}
 
-	public void clearCache(boolean disk) {
-		if (mWebView != null) {
-			mWebView.clearCache(disk);
-		}
-	}
-
 	public synchronized void reload() {
 		// Check if configured proxy is available
-		if (!mBrowserController.isProxyReady()) {
+        if (mBrowserController.proxyIsNotReady()) {
 			// User has been notified
 			return;
 		}
@@ -611,20 +560,23 @@ public class LightningView implements ILightningTab {
 	}
 
 	private void cacheFavicon(Bitmap icon) {
+        if (icon == null) return;
+
 		String hash = String.valueOf(Utils.getDomainName(getUrl()).hashCode());
 		Log.d(Constants.TAG, "Caching icon for " + Utils.getDomainName(getUrl()));
+        FileOutputStream fos = null;
+        try {
 		File image = new File(mActivity.getCacheDir(), hash + ".png");
-		try {
-			FileOutputStream fos = new FileOutputStream(image);
+            fos = new FileOutputStream(image);
 			icon.compress(Bitmap.CompressFormat.PNG, 100, fos);
 			fos.flush();
-			fos.close();
 		} catch (IOException e) {
 			e.printStackTrace();
+        } finally {
+            Utils.close(fos);
 		}
 	}
 
-	@SuppressWarnings("deprecation")
 	@SuppressLint("NewApi")
 	public synchronized void find(String text) {
 		if (mWebView != null) {
@@ -634,10 +586,6 @@ public class LightningView implements ILightningTab {
 				mWebView.findAll(text);
 			}
 		}
-	}
-
-	public Activity getActivity() {
-		return mActivity;
 	}
 
 	public synchronized void onDestroy() {
@@ -686,6 +634,7 @@ public class LightningView implements ILightningTab {
 		return mWebView != null && mWebView.canGoForward() && !mIsCustomWebView;
 	}
 
+    @Nullable
 	public WebView getWebView() {
 		return mWebView;
 	}
@@ -696,7 +645,7 @@ public class LightningView implements ILightningTab {
 
 	public synchronized void loadUrl(String url) {
 		// Check if configured proxy is available
-		if (!mBrowserController.isProxyReady()) {
+        if (mBrowserController.proxyIsNotReady()) {
 			// User has been notified
 			return;
 		}
@@ -709,8 +658,8 @@ public class LightningView implements ILightningTab {
 			if (API > 16) {
 				final WebSettings settings = mWebView.getSettings();
 				setAccessFromUrl(url, settings);
-			}
 		}
+	}
 	}
 
 	public synchronized void invalidate() {
@@ -723,8 +672,9 @@ public class LightningView implements ILightningTab {
 		return mTitle.getTitle();
 	}
 
+    @NonNull
 	public String getUrl() {
-		if (mWebView != null) {
+        if (mWebView != null && mWebView.getUrl() != null) {
 			return mWebView.getUrl();
 		} else {
 			return "";
@@ -739,6 +689,7 @@ public class LightningView implements ILightningTab {
 			mActivity = context;
 		}
 
+		// TODO This wrong (COPY & PASTE programming)
 		@TargetApi(Build.VERSION_CODES.LOLLIPOP)
 		@Override
 		public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
@@ -764,10 +715,10 @@ public class LightningView implements ILightningTab {
 				ByteArrayInputStream EMPTY = new ByteArrayInputStream("".getBytes());
 				return new WebResourceResponse("text/plain", "utf-8", EMPTY);
 			}
-
 			return super.shouldInterceptRequest(view, request);
 		}
 
+		// TODO This wrong (COPY & PASTE programming)
 		@Override
 		public WebResourceResponse shouldInterceptRequest(WebView view, String url) {
 			if (url.startsWith("http://antiphishing.clyqz.com/")) {
@@ -796,6 +747,7 @@ public class LightningView implements ILightningTab {
 		public void onPageFinished(WebView view, String url) {
 			if (view.isShown()) {
 				mBrowserController.updateUrl(url, true);
+                mBrowserController.updateBookmarkIndicator(url);
 				view.postInvalidate();
 			}
 			if (view.getTitle() == null || view.getTitle().isEmpty()) {
@@ -820,6 +772,7 @@ public class LightningView implements ILightningTab {
 		public void onPageStarted(WebView view, String url, Bitmap favicon) {
 			if (isShown()) {
 				mBrowserController.updateUrl(url, false);
+                mBrowserController.updateBookmarkIndicator(url);
 				mBrowserController.showActionBar();
 			}
 			mTitle.setFavicon(mWebpageBitmap);
@@ -955,12 +908,12 @@ public class LightningView implements ILightningTab {
 		@Override
 		public boolean shouldOverrideUrlLoading(WebView view, String url) {
 			// Check if configured proxy is available
-			if (!mBrowserController.isProxyReady()) {
+            if (mBrowserController.proxyIsNotReady()) {
 				// User has been notified
 				return true;
 			}
 
-			if (mBrowserController.isIncognito()) {
+            if (mIsIncognitoTab) {
 				return super.shouldOverrideUrlLoading(view, url);
 			}
 			if (url.startsWith("about:")) {
@@ -968,7 +921,7 @@ public class LightningView implements ILightningTab {
 			}
 			if (url.contains("mailto:")) {
 				MailTo mailTo = MailTo.parse(url);
-				Intent i = Utils.newEmailIntent(mActivity, mailTo.getTo(), mailTo.getSubject(),
+                Intent i = Utils.newEmailIntent(mailTo.getTo(), mailTo.getSubject(),
 						mailTo.getBody(), mailTo.getCc());
 				mActivity.startActivity(i);
 				view.reload();
@@ -1010,6 +963,8 @@ public class LightningView implements ILightningTab {
 
 		@Override
 		public void onReceivedIcon(WebView view, Bitmap icon) {
+            if (icon == null)
+                return;
 			mTitle.setFavicon(icon);
 			mBrowserController.update();
 			cacheFavicon(icon);
@@ -1017,12 +972,13 @@ public class LightningView implements ILightningTab {
 
 		@Override
 		public void onReceivedTitle(WebView view, String title) {
-			if (!title.isEmpty()) {
+            if (title != null && !title.isEmpty()) {
 				mTitle.setTitle(title);
 			} else {
 				mTitle.setTitle(mActivity.getString(R.string.untitled));
 			}
 			mBrowserController.update();
+            if (view != null)
 			mBrowserController.updateHistory(title, view.getUrl());
 		}
 
@@ -1062,14 +1018,13 @@ public class LightningView implements ILightningTab {
 		@Override
 		public boolean onCreateWindow(WebView view, boolean isDialog, boolean isUserGesture,
 				Message resultMsg) {
-			mBrowserController.onCreateWindow(isUserGesture, resultMsg);
+            mBrowserController.onCreateWindow(resultMsg);
 			return true;
 		}
 
 		@Override
 		public void onCloseWindow(WebView window) {
-			// TODO Auto-generated method stub
-			super.onCloseWindow(window);
+            mBrowserController.onCloseWindow(LightningView.this);
 		}
 
 		public void openFileChooser(ValueCallback<Uri> uploadMsg) {
@@ -1120,8 +1075,7 @@ public class LightningView implements ILightningTab {
 			// video.setVisibility(View.GONE);
 			// }
 			// } else {
-			Activity activity = mBrowserController.getActivity();
-			mBrowserController.onShowCustomView(view, activity.getRequestedOrientation(), callback);
+            mBrowserController.onShowCustomView(view, callback);
 
 			// }
 
@@ -1144,7 +1098,7 @@ public class LightningView implements ILightningTab {
 			// video.setVisibility(View.GONE);
 			// }
 			// } else {
-			mBrowserController.onShowCustomView(view, requestedOrientation, callback);
+            mBrowserController.onShowCustomView(view, callback);
 
 			// }
 
@@ -1159,7 +1113,7 @@ public class LightningView implements ILightningTab {
 		private final Bitmap mDefaultIcon;
 
 		public Title(Context context, boolean darkTheme) {
-			mDefaultIcon = Utils.getWebpageBitmap(context.getResources(), darkTheme);
+            mDefaultIcon = ThemeUtils.getThemedBitmap(context, R.drawable.ic_webpage, darkTheme);
 			mFavicon = mDefaultIcon;
 			mTitle = mActivity.getString(R.string.action_new_tab);
 		}
@@ -1209,7 +1163,10 @@ public class LightningView implements ILightningTab {
 		@SuppressLint("ClickableViewAccessibility")
 		@Override
 		public boolean onTouch(View view, MotionEvent arg1) {
-			if (view != null && !view.hasFocus()) {
+            if (view == null)
+                return false;
+
+            if (!view.hasFocus()) {
 				view.requestFocus();
 			}
 			mAction = arg1.getAction();
@@ -1217,13 +1174,10 @@ public class LightningView implements ILightningTab {
 			if (mAction == MotionEvent.ACTION_DOWN) {
 				mLocation = mY;
 			} else if (mAction == MotionEvent.ACTION_UP) {
-				if ((mY - mLocation) > SCROLL_DOWN_THRESHOLD) {
-					if (mWebView.getScrollY() != 0) {
+                final float distance = (mY - mLocation);
+                if (distance > SCROLL_UP_THRESHOLD && view.getScrollY() < SCROLL_UP_THRESHOLD) {
 						mBrowserController.showActionBar();
-					} else {
-						mBrowserController.toggleActionBar();
-					}
-				} else if ((mY - mLocation) < -SCROLL_UP_THRESHOLD) {
+                } else if (distance < -SCROLL_UP_THRESHOLD) {
 					mBrowserController.hideActionBar();
 				}
 				mLocation = 0;
@@ -1235,10 +1189,21 @@ public class LightningView implements ILightningTab {
 
 	private class CustomGestureListener extends SimpleOnGestureListener {
 
+        @Override
+        public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
+            int power = (int) (velocityY * 100 / mMaxFling);
+            if (power < -10) {
+                mBrowserController.hideActionBar();
+            } else if (power > 15) {
+                mBrowserController.showActionBar();
+            }
+            return super.onFling(e1, e2, velocityX, velocityY);
+        }
+
 		/**
 		 * Without this, onLongPress is not called when user is zooming using
 		 * two fingers, but is when using only one.
-		 * 
+         * <p/>
 		 * The required behaviour is to not trigger this when the user is
 		 * zooming, it shouldn't matter how much fingers the user's using.
 		 */
