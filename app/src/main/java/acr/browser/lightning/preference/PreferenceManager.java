@@ -47,6 +47,10 @@ public class PreferenceManager {
 		public static final String READING_TEXT_SIZE = "readingTextSize";
 		public static final String DARK_THEME = "darkTheme";
 		public static final String DEFAULT_BOOKMARKS = "defaultBookmarks";
+        public static final String THEME = "Theme";
+        public static final String TEXT_ENCODING = "textEncoding";
+        public static final String CLEAR_WEBSTORAGE_EXIT = "clearWebStorageExit";
+        public static final String SHOW_TABS_IN_DRAWER = "showTabsInDrawer";
 
 		public static final String USE_PROXY = "useProxy";
 		public static final String PROXY_CHOICE = "proxyChoice";
@@ -100,6 +104,10 @@ public class PreferenceManager {
 		return mPrefs.getBoolean(Name.CLEAR_COOKIES_EXIT, false);
 	}
 
+    public boolean getClearWebStorageExitEnabled() {
+        return mPrefs.getBoolean(Name.CLEAR_WEBSTORAGE_EXIT, false);
+    }
+
 	public boolean getClearHistoryExitEnabled() {
 		return mPrefs.getBoolean(Name.CLEAR_HISTORY_EXIT, false);
 	}
@@ -110,10 +118,6 @@ public class PreferenceManager {
 
 	public boolean getCookiesEnabled() {
 		return mPrefs.getBoolean(Name.COOKIES, true);
-	}
-
-	public boolean getDefaultBookmarks() {
-		return mPrefs.getBoolean(Name.DEFAULT_BOOKMARKS, true);
 	}
 
 	public String getDownloadDirectory() {
@@ -224,8 +228,8 @@ public class PreferenceManager {
 		return mPrefs.getInt(Name.URL_BOX_CONTENTS, 0);
 	}
 
-	public boolean getUseDarkTheme() {
-		return mPrefs.getBoolean(Name.DARK_THEME, false);
+    public int getUseTheme() {
+        return mPrefs.getInt(Name.THEME, 0);
 	}
 
 	public boolean getUseProxy() {
@@ -248,6 +252,14 @@ public class PreferenceManager {
 		return mPrefs.getBoolean(Name.USE_WIDE_VIEWPORT, true);
 	}
 
+    public String getTextEncoding() {
+        return mPrefs.getString(Name.TEXT_ENCODING, Constants.DEFAULT_ENCODING);
+    }
+
+    public boolean getShowTabsInDrawer(boolean defaultValue){
+        return mPrefs.getBoolean(Name.SHOW_TABS_IN_DRAWER, defaultValue);
+    }
+
 	private void putBoolean(String name, boolean value) {
 		mPrefs.edit().putBoolean(name, value).apply();
 	}
@@ -259,6 +271,14 @@ public class PreferenceManager {
 	private void putString(String name, String value) {
 		mPrefs.edit().putString(name, value).apply();
 	}
+
+    public void setShowTabsInDrawer(boolean show){
+        putBoolean(Name.SHOW_TABS_IN_DRAWER, show);
+    }
+
+    public void setTextEncoding(String encoding) {
+        putString(Name.TEXT_ENCODING, encoding);
+    }
 
 	public void setAdBlockEnabled(boolean enable) {
 		putBoolean(Name.BLOCK_ADS, enable);
@@ -288,6 +308,10 @@ public class PreferenceManager {
 		putBoolean(Name.CLEAR_COOKIES_EXIT, enable);
 	}
 
+    public void setClearWebStorageExitEnabled(boolean enable) {
+        putBoolean(Name.CLEAR_WEBSTORAGE_EXIT, enable);
+    }
+
 	public void setClearHistoryExitEnabled(boolean enable) {
 		putBoolean(Name.CLEAR_HISTORY_EXIT, enable);
 	}
@@ -298,10 +322,6 @@ public class PreferenceManager {
 
 	public void setCookiesEnabled(boolean enable) {
 		putBoolean(Name.COOKIES, enable);
-	}
-
-	public void setDefaultBookmarks(boolean show) {
-		putBoolean(Name.DEFAULT_BOOKMARKS, show);
 	}
 
 	public void setDownloadDirectory(String directory) {
@@ -357,7 +377,7 @@ public class PreferenceManager {
 	}
 
 	public void setReadingTextSize(int size) {
-		putInt(Name.READING_TEXT_SIZE, 2);
+        putInt(Name.READING_TEXT_SIZE, size);
 	}
 
 	public void setRenderingMode(int mode) {
@@ -404,8 +424,8 @@ public class PreferenceManager {
 		putInt(Name.URL_BOX_CONTENTS, choice);
 	}
 
-	public void setUseDarkTheme(boolean use) {
-		putBoolean(Name.DARK_THEME, use);
+    public void setUseTheme(int theme) {
+        putInt(Name.THEME, theme);
 	}
 
 	/**

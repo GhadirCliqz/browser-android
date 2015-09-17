@@ -23,7 +23,7 @@ public class HistoryDatabase extends SQLiteOpenHelper {
 	public static final String DATABASE_NAME = "historyManager";
 
 	// HistoryItems table name
-	public static final String TABLE_HISTORY = "history";
+    private static final String TABLE_HISTORY = "history";
 
 	// HistoryItems Table Columns names
 	public static final String KEY_ID = "id";
@@ -32,7 +32,7 @@ public class HistoryDatabase extends SQLiteOpenHelper {
 	public static final String KEY_TIME_VISITED = "time";
 	public static final String KEY_COUNT_VISITED = "visits";
 
-	public static SQLiteDatabase mDatabase;
+    private static SQLiteDatabase mDatabase;
 
 	private static HistoryDatabase mInstance;
 
@@ -74,11 +74,11 @@ public class HistoryDatabase extends SQLiteOpenHelper {
 					TABLE_HISTORY + "(" + KEY_COUNT_VISITED + ")";
 			db.execSQL(CREATE_VISITS_INDEX);
 		} else {
-			// Drop older table if it exists
-			db.execSQL("DROP TABLE IF EXISTS " + TABLE_HISTORY);
-			// Create tables again
-			onCreate(db);
-		}
+		// Drop older table if it exists
+		db.execSQL("DROP TABLE IF EXISTS " + TABLE_HISTORY);
+		// Create tables again
+		onCreate(db);
+	}
 	}
 
 	public boolean isClosed() {
@@ -104,10 +104,10 @@ public class HistoryDatabase extends SQLiteOpenHelper {
 		if (q.getCount() > 0) {
 			q.moveToFirst();
 			final ContentValues values = new ContentValues();
-			values.put(KEY_TITLE, title);
-			values.put(KEY_TIME_VISITED, System.currentTimeMillis());
+		values.put(KEY_TITLE, title);
+		values.put(KEY_TIME_VISITED, System.currentTimeMillis());
 			values.put(KEY_COUNT_VISITED, q.getInt(1) + 1);
-			mDatabase.update(TABLE_HISTORY, values, KEY_URL + " = ?", new String[]{url});
+			mDatabase.update(TABLE_HISTORY, values, KEY_URL + " = ?", new String[] { url });
 
 		} else {
 			addHistoryItem(new HistoryItem(url, title));
@@ -143,7 +143,7 @@ public class HistoryDatabase extends SQLiteOpenHelper {
 
 	}
 
-	public synchronized void addHistoryItem(HistoryItem item) {
+    private synchronized void addHistoryItem(HistoryItem item) {
 		ContentValues values = new ContentValues();
 		values.put(KEY_URL, item.getUrl());
 		values.put(KEY_TITLE, item.getTitle());

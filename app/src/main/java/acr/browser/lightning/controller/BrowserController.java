@@ -12,49 +12,50 @@ import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient.CustomViewCallback;
 import android.webkit.WebView;
 
+import acr.browser.lightning.view.LightningView;
+
 public interface BrowserController {
 
-	void updateUrl(String title, boolean shortUrl);
+    void updateUrl(String title, boolean shortUrl);
 
-	void updateProgress(int n);
+    void updateProgress(int n);
 
-	void updateHistory(String title, String url);
+    void updateHistory(String title, String url);
 
-	void openFileChooser(ValueCallback<Uri> uploadMsg);
+    void openFileChooser(ValueCallback<Uri> uploadMsg);
 
-	void update();
+    void update();
 
-	void onLongPress();
+    void onLongPress();
 
-	void onShowCustomView(View view, int requestedOrientation, CustomViewCallback callback);
+    void onShowCustomView(View view, CustomViewCallback callback);
 
-	void onHideCustomView();
+    void onHideCustomView();
 
-	Bitmap getDefaultVideoPoster();
+    Bitmap getDefaultVideoPoster();
 
-	View getVideoLoadingProgressView();
+    View getVideoLoadingProgressView();
 
-	void onCreateWindow(boolean isUserGesture, Message resultMsg);
+    void onCreateWindow(Message resultMsg);
 
-	Activity getActivity();
+    void onCloseWindow(LightningView view);
 
-	void hideActionBar();
+    Activity getActivity();
 
-	void showActionBar();
+    void hideActionBar();
 
-	void toggleActionBar();
+    void showActionBar();
 
-	void longClickPage(String url);
+    void longClickPage(String url);
 
-	void openBookmarkPage(WebView view);
+    void openBookmarkPage(WebView view);
 
-	void showFileChooser(ValueCallback<Uri[]> filePathCallback);
+    void showFileChooser(ValueCallback<Uri[]> filePathCallback);
 
-	void closeEmptyTab();
+    void closeEmptyTab();
 
-	boolean isIncognito();
+    boolean proxyIsNotReady();
 
-	boolean isProxyReady();
+    void updateBookmarkIndicator(String url);
 
-	int getMenu();
 }
