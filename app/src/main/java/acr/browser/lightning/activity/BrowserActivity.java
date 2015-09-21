@@ -51,6 +51,9 @@ import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
+import android.text.style.CharacterStyle;
+import android.text.style.MetricAffectingSpan;
+import android.text.style.URLSpan;
 import android.util.Log;
 import android.util.Patterns;
 import android.view.KeyEvent;
@@ -366,6 +369,7 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
 		mSearch.setOnEditorActionListener(search.new EditorActionListener());
 		mSearch.setOnTouchListener(search.new TouchListener());
 		mSearch.addTextChangedListener(search.new SearchTextWatcher());
+		mSearch.setOnEditorActionListener(search.new EditorActionListener());
 
 		mSystemBrowser = getSystemBrowser();
         new Thread(new Runnable() {
@@ -386,11 +390,11 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
         View view = findViewById(R.id.bookmark_back_button);
         view.setOnClickListener(new OnClickListener() {
 			@Override
-            public void onClick(View v) {
-                if (mBookmarkManager == null)
-                    return;
-                if (!mBookmarkManager.isRootFolder()) {
-                    setBookmarkDataSet(mBookmarkManager.getBookmarksFromFolder(null, true), true);
+			public void onClick(View v) {
+				if (mBookmarkManager == null)
+					return;
+				if (!mBookmarkManager.isRootFolder()) {
+					setBookmarkDataSet(mBookmarkManager.getBookmarksFromFolder(null, true), true);
 				}
 			}
 		});
@@ -601,12 +605,21 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
 					if (mCurrentView == mSearchContainer) {
 						showTab(mPreSearchTab);
 						mPreSearchTab = null;
+						mSearch.requestFocus();
+						mSearch.setText(null);
+						InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+						inputMethodManager.showSoftInput(mSearch, InputMethodManager.SHOW_FORCED);
 					}
 				}
 			}
 
 			@Override
 			public void afterTextChanged(Editable editable) {
+
+				CharacterStyle[] characterSpans = editable.getSpans(0, editable.length(), CharacterStyle.class);
+				for(int spanType=0; spanType < characterSpans.length; spanType++) {
+					editable.removeSpan(characterSpans[spanType]);
+				}
 
 			}
 		}
