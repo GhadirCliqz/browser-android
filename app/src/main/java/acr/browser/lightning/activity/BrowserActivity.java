@@ -211,6 +211,7 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
 	private static final FrameLayout.LayoutParams COVER_SCREEN_PARAMS = new FrameLayout.LayoutParams(
 			LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
 	private EditText mSearch;
+    private LinearLayout mSearchParent;
 
 	abstract boolean isIncognito();
 
@@ -352,6 +353,7 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
 
 		// create the search EditText in the ToolBar
 		mSearch = (SearchEditText) actionBar.getCustomView().findViewById(R.id.search);
+        mSearchParent = (LinearLayout) actionBar.getCustomView().findViewById(R.id.search_container);
 		mUntitledTitle = getString(R.string.untitled);
 		mBackgroundColor = getResources().getColor(R.color.primary_color);
         mDeleteIcon = ThemeUtils.getLightThemedDrawable(this, R.drawable.ic_action_delete);
@@ -1521,7 +1523,7 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
 		} else {
 			if (mCurrentView != null) {
 				Log.d(Constants.TAG, "onBackPressed");
-				if (mSearch.hasFocus()) {
+				if (mSearchParent.hasFocus()) {
 					mCurrentView.requestFocus();
 				} else if (mCurrentView.canGoBack()) {
 					if (!mCurrentView.isShown()) {
@@ -1529,7 +1531,9 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
 					} else {
 						mCurrentView.goBack();
 					}
-				} else {
+				} else if (mCurrentView == mSearchContainer) {
+                    showTab(mPreSearchTab);
+                } else {
                     deleteTab(mWebViewList.indexOf(mCurrentView));
 				}
 			} else {
