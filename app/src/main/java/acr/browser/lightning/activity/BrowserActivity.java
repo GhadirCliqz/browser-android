@@ -139,6 +139,7 @@ import acr.browser.lightning.utils.Utils;
 import acr.browser.lightning.utils.WebUtils;
 import acr.browser.lightning.view.AnimatedProgressBar;
 import acr.browser.lightning.view.LightningView;
+import acr.browser.lightning.view.SearchEditText;
 
 public abstract class BrowserActivity extends ThemableBrowserActivity implements BrowserController, OnClickListener, OnLongClickListener, WebSearchView.IWebSearchResult {
 
@@ -210,6 +211,7 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
 	private static final FrameLayout.LayoutParams COVER_SCREEN_PARAMS = new FrameLayout.LayoutParams(
 			LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
 	private EditText mSearch;
+    private LinearLayout mSearchParent;
 
 	abstract boolean isIncognito();
 
@@ -350,7 +352,8 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
         mBookmarkImage = (ImageView) findViewById(R.id.icon_star);
 
 		// create the search EditText in the ToolBar
-		mSearch = (EditText) actionBar.getCustomView().findViewById(R.id.search);
+		mSearch = (SearchEditText) actionBar.getCustomView().findViewById(R.id.search);
+        mSearchParent = (LinearLayout) actionBar.getCustomView().findViewById(R.id.search_container);
 		mUntitledTitle = getString(R.string.untitled);
 		mBackgroundColor = getResources().getColor(R.color.primary_color);
         mDeleteIcon = ThemeUtils.getLightThemedDrawable(this, R.drawable.ic_action_delete);
@@ -369,7 +372,6 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
 		mSearch.setOnEditorActionListener(search.new EditorActionListener());
 		mSearch.setOnTouchListener(search.new TouchListener());
 		mSearch.addTextChangedListener(search.new SearchTextWatcher());
-		mSearch.setOnEditorActionListener(search.new EditorActionListener());
 
 		mSystemBrowser = getSystemBrowser();
         new Thread(new Runnable() {
@@ -617,8 +619,8 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
 			public void afterTextChanged(Editable editable) {
 
 				CharacterStyle[] characterSpans = editable.getSpans(0, editable.length(), CharacterStyle.class);
-				for(int spanType=0; spanType < characterSpans.length; spanType++) {
-					editable.removeSpan(characterSpans[spanType]);
+				for(CharacterStyle characterSpan : characterSpans) {
+					editable.removeSpan(characterSpan);
 				}
 
 			}
@@ -1521,7 +1523,7 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
 		} else {
 			if (mCurrentView != null) {
 				Log.d(Constants.TAG, "onBackPressed");
-				if (mSearch.hasFocus()) {
+				if (mSearchParent.hasFocus()) {
 					mCurrentView.requestFocus();
 				} else if (mCurrentView.canGoBack()) {
 					if (!mCurrentView.isShown()) {
@@ -1529,7 +1531,9 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
 					} else {
 						mCurrentView.goBack();
 					}
-				} else {
+				} else if (mCurrentView == mSearchContainer) {
+                    showTab(mPreSearchTab);
+                } else {
                     deleteTab(mWebViewList.indexOf(mCurrentView));
 				}
 			} else {
@@ -1798,49 +1802,49 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
      */
     private void changeToolbarBackground(@NonNull Bitmap favicon, @Nullable final Drawable tabBackground) {
 		Palette.from(favicon).generate(new Palette.PaletteAsyncListener() {
-			@Override
-			public void onGenerated(Palette palette) {
+            @Override
+            public void onGenerated(Palette palette) {
 
-				// OR with opaque black to remove transparency glitches
-				int color = 0xff000000 | palette.getVibrantColor(mActivity.getResources()
-						.getColor(R.color.primary_color));
+                // OR with opaque black to remove transparency glitches
+                int color = 0xff000000 | palette.getVibrantColor(mActivity.getResources()
+                        .getColor(R.color.primary_color));
 
-				int finalColor; // Lighten up the dark color if it is
-				// too dark
+                int finalColor; // Lighten up the dark color if it is
+                // too dark
                 if (Utils.isColorTooDark(color)) {
                     finalColor = Utils.mixTwoColors(
-							mActivity.getResources().getColor(R.color.primary_color),
-							color, 0.25f);
-				} else {
-					finalColor = color;
-				}
+                            mActivity.getResources().getColor(R.color.primary_color),
+                            color, 0.25f);
+                } else {
+                    finalColor = color;
+                }
 
-				ValueAnimator anim = ValueAnimator.ofObject(new ArgbEvaluator(),
-						mBackground.getColor(), finalColor);
+                ValueAnimator anim = ValueAnimator.ofObject(new ArgbEvaluator(),
+                        mBackground.getColor(), finalColor);
                 final Window window = getWindow();
                 if (!mShowTabsInDrawer) {
                     window.setBackgroundDrawable(new ColorDrawable(Color.BLACK));
                 }
-				anim.addUpdateListener(new AnimatorUpdateListener() {
+                anim.addUpdateListener(new AnimatorUpdateListener() {
 
-					@Override
-					public void onAnimationUpdate(ValueAnimator animation) {
+                    @Override
+                    public void onAnimationUpdate(ValueAnimator animation) {
                         final int color = (Integer) animation.getAnimatedValue();
                         if (mShowTabsInDrawer) {
-						mBackground.setColor(color);
+                            mBackground.setColor(color);
                             window.setBackgroundDrawable(mBackground);
                         }
-						mToolbarLayout.setBackgroundColor(color);
+                        mToolbarLayout.setBackgroundColor(color);
                         if (tabBackground != null) {
                             tabBackground.setColorFilter(color, PorterDuff.Mode.SRC_IN);
-					}
+                        }
                     }
 
-				});
-				anim.setDuration(300);
-				anim.start();
-			}
-		});
+                });
+                anim.setDuration(300);
+                anim.start();
+            }
+        });
 	}
 
 	public class BookmarkViewAdapter extends ArrayAdapter<HistoryItem> {
@@ -2015,7 +2019,7 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
 			return;
 		}
 		if (shortUrl && !url.startsWith(Constants.FILE)) {
-			switch (mPreferences.getUrlBoxContentChoice()) {
+            switch (mPreferences.getUrlBoxContentChoice()) {
 				case 0: // Default, show only the domain
 					url = url.replaceFirst(Constants.HTTP, "");
 					url = Utils.getDomainName(url);
@@ -2034,10 +2038,10 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
 			}
 
 		} else {
-			if (url.startsWith(Constants.FILE)) {
-				url = "";
-			}
-			mSearch.setText(url);
+			if (!url.startsWith(Constants.FILE)) {
+                mSearch.setText(url);
+            }
+
 		}
 	}
 
