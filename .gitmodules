@@ -2,10 +2,3 @@
 	path = external/netcipher
 	url = https://github.com/guardianproject/NetCipher.git
 	branch = master
-[submodule "external/navigation-extension"]
-	path = external/navigation-extension
-	url = git@github.com:cliqz/navigation-extension.git
-	branch = masterRefactor
-[submodule "external/fresh-tab"]
-	path = external/fresh-tab
-	url = git@github.com:cliqz/fresh-tab.git
