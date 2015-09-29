@@ -197,7 +197,7 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
 	// Image
     private Bitmap mDefaultVideoPoster, mWebpageBitmap, mFolderBitmap;
 	private final ColorDrawable mBackground = new ColorDrawable();
-	private Drawable mDeleteIcon, mRefreshIcon, mCopyIcon, mIcon;
+	private Drawable mDeleteIcon, mRefreshIcon, mClearIcon, mIcon;
 	private DrawerArrowDrawable mArrowDrawable;
 
     // Proxy
@@ -358,12 +358,12 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
 		mBackgroundColor = getResources().getColor(R.color.primary_color);
         mDeleteIcon = ThemeUtils.getLightThemedDrawable(this, R.drawable.ic_action_delete);
         mRefreshIcon = ThemeUtils.getLightThemedDrawable(this, R.drawable.ic_action_refresh);
-        mCopyIcon = ThemeUtils.getLightThemedDrawable(this, R.drawable.ic_action_copy);
+        mClearIcon = ThemeUtils.getLightThemedDrawable(this, R.drawable.ic_action_delete);
 
         int iconBounds = Utils.dpToPx(30);
 		mDeleteIcon.setBounds(0, 0, iconBounds, iconBounds);
 		mRefreshIcon.setBounds(0, 0, iconBounds, iconBounds);
-		mCopyIcon.setBounds(0, 0, iconBounds, iconBounds);
+		mClearIcon.setBounds(0, 0, iconBounds, iconBounds);
 		mIcon = mRefreshIcon;
 		SearchClass search = new SearchClass();
 		mSearch.setCompoundDrawables(null, null, mRefreshIcon, null);
@@ -523,9 +523,13 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
 															// selected
 						}
 					});
-
-					mIcon = mCopyIcon;
-					mSearch.setCompoundDrawables(null, null, mCopyIcon, null);
+//					if(mSearch.getText().toString().isEmpty()) {
+//						mIcon = null;
+//					} else {
+//						mIcon = mClearIcon;
+//					}
+					mIcon = mClearIcon;
+					mSearch.setCompoundDrawables(null, null, mIcon, null);
 				}
 				final Animation anim = new Animation() {
 
@@ -618,6 +622,20 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
 			@Override
 			public void afterTextChanged(Editable editable) {
 
+//				if(mSearch.getText().toString().isEmpty()) {
+//					mIcon = null;
+//				} else {
+//					if(mSearch.getText().toString().startsWith(Constants.HTTP)) {
+//						if (mCurrentView.getProgress() < 100) {
+//							setIsLoading();
+//						} else {
+//							setIsFinishedLoading();
+//						}
+//					} else {
+//						mIcon = mClearIcon;
+//					}
+//				}
+//				mSearch.setCompoundDrawables(null, null, mIcon, null);
 				CharacterStyle[] characterSpans = editable.getSpans(0, editable.length(), CharacterStyle.class);
 				for(CharacterStyle characterSpan : characterSpans) {
 					editable.removeSpan(characterSpan);
@@ -636,11 +654,9 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
 					if (tappedX) {
 						if (event.getAction() == MotionEvent.ACTION_UP) {
 							if (mSearch.hasFocus()) {
-								ClipboardManager clipboard = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
-								ClipData clip = ClipData.newPlainText("label", mSearch.getText()
-										.toString());
-								clipboard.setPrimaryClip(clip);
-                                Utils.showSnackbar(mActivity, R.string.message_text_copied);
+								if(!mSearch.getText().toString().isEmpty()) {
+									mSearch.setText("");
+								}
 							} else {
 								refreshOrStop();
 							}
