@@ -4,10 +4,8 @@ android {
     compileSdkVersion 22
     buildToolsVersion "22.0.1"
     defaultConfig {
-        applicationId "com.cliqz.browser"
         minSdkVersion 14
         targetSdkVersion 22
-        versionCode 1
         versionName "0.1"
 
         buildConfigField 'String', 'LIGHTNING_VERSION_NAME', '"4.1.1a"'
@@ -27,6 +25,12 @@ android {
     }
 
     productFlavors {
+        cliqz {
+            buildConfigField "boolean", "FULL_VERSION", "true"
+            applicationId "com.cliqz.browser"
+            versionCode 1
+
+        }
         lightningPlus {
             buildConfigField "boolean", "FULL_VERSION", "true"
             applicationId "acr.browser.lightning"
@@ -48,6 +52,9 @@ android {
                     '../../freshtab/dist/mobile'
             ]
 		}
+        cliqz {
+            java.srcDirs += 'src/lightningPlus/java'
+        }
     }
 }
 
@@ -61,6 +68,8 @@ dependencies {
     // Only Lightning Plus needs the proxy libraries
     lightningPlusCompile 'net.i2p.android:client:0.7'
     lightningPlusCompile(project(':libnetcipher'))
+    cliqzCompile 'net.i2p.android:client:0.7'
+    cliqzCompile(project(':libnetcipher'))
     // git submodule foreach git reset --hard
     // git submodule update --remote
 }
