@@ -4,7 +4,7 @@
 package acr.browser.lightning.constant;
 
 import acr.browser.lightning.R;
-import acr.browser.lightning.activity.BrowserApp;
+import acr.browser.lightning.app.BrowserApp;
 
 public class BookmarkPage {
 

@@ -52,8 +52,6 @@ import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.text.style.CharacterStyle;
-import android.text.style.MetricAffectingSpan;
-import android.text.style.URLSpan;
 import android.util.Log;
 import android.util.Patterns;
 import android.view.KeyEvent;
@@ -101,6 +99,9 @@ import android.widget.VideoView;
 
 import com.cliqz.browser.search.WebSearchView;
 import com.google.common.collect.ImmutableSet;
+import com.squareup.otto.Bus;
+import com.squareup.otto.Subscribe;
+
 import org.lucasr.twowayview.TwoWayView;
 
 
@@ -121,7 +122,11 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
+import javax.inject.Inject;
+
 import acr.browser.lightning.R;
+import acr.browser.lightning.app.BrowserApp;
+import acr.browser.lightning.bus.AutoCompleteEvents;
 import acr.browser.lightning.constant.BookmarkPage;
 import acr.browser.lightning.constant.Constants;
 import acr.browser.lightning.constant.HistoryPage;
@@ -210,8 +215,13 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
 			LayoutParams.MATCH_PARENT);
 	private static final FrameLayout.LayoutParams COVER_SCREEN_PARAMS = new FrameLayout.LayoutParams(
 			LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
-	private EditText mSearch;
+	private SearchEditText mSearch;
     private LinearLayout mSearchParent;
+
+	private static boolean isDelLastPressedKey = false;
+
+	@Inject
+	Bus mEventBus;
 
 	abstract boolean isIncognito();
 
@@ -227,6 +237,7 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		BrowserApp.getAppComponent().inject(this);
 		initialize();
 	}
 
@@ -595,6 +606,11 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
 
 			@Override
 			public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+				if(i2==0) {
+					isDelLastPressedKey = true;
+				} else {
+					isDelLastPressedKey = false;
+				}
 				if (!mSearch.hasFocus()) {
 					return;
 				}
@@ -606,7 +622,9 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
 					return;
 				}
 				if (!q.isEmpty()) {
-					cliqzSearch(q);
+					if(!isDelLastPressedKey) {
+						cliqzSearch(q);
+					}
 				} else {
 					if (mCurrentView == mSearchContainer) {
 						showTab(mPreSearchTab);
@@ -668,6 +686,25 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
 			}
 
 		}
+	}
+
+	/**
+	 * This is the function which sets the suggestedUrl in the url bar.
+	 * The urlBar(mSearch) has to be accessed from the Ui thread, because this function is called from
+	 * a different thread of the WebSearchView Class
+	 * @param suggestedUrl The url to be set in the url bar
+	 */
+	private void setAutocompleteUrl(final String suggestedUrl) {
+
+		final String currentText = mSearch.getText().toString();
+		runOnUiThread(new Runnable() {
+			@Override
+			public void run() {
+				mSearch.setText(suggestedUrl);
+				mSearch.setSelection(currentText.length(), suggestedUrl.length());
+			}
+		});
+
 	}
 
 	private class DrawerLocker implements DrawerListener {
@@ -1590,6 +1627,7 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
 	protected void onStop() {
 		super.onStop();
         mProxyUtils.onStop();
+		mEventBus.unregister(mEventBusListener);
 	}
 
 	@Override
@@ -1606,7 +1644,8 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
 	protected void onStart() {
 		super.onStart();
         mProxyUtils.onStart(this);
-				}
+		mEventBus.register(mEventBusListener);
+	}
 
 	@Override
 	protected void onResume() {
@@ -3084,4 +3123,20 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
             }
         }
     };
+
+	/**
+	 * This object handles all the Events that are posted on the EventBus
+	 */
+	private final Object mEventBusListener = new Object() {
+
+		/**
+		 * This function is called when the extension suggests a autocomplete Url
+		 * @param event
+		 */
+		@Subscribe
+		public void autocompleteUrlCallBack(final AutoCompleteEvents.SetAutoCompleteUrl event) {
+			Log.d("AutocompleteB",event.url);
+			setAutocompleteUrl(event.url);
+		}
+	};
 }
