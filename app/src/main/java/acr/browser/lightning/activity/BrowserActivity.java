@@ -519,12 +519,7 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
 					}
 					updateUrl(mCurrentView.getUrl(), true);
 				} else if (hasFocus) {
-					String url = mCurrentView.getUrl();
-                    if (url.startsWith(Constants.FILE)) {
-						mSearch.setText("");
-					} else {
-						mSearch.setText(url);
-					}
+					
 					mSearch.post(new Runnable() {
 
 						@Override
