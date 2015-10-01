@@ -190,6 +190,8 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
             mIsNewIntent = false,
             mIsFullScreen = false,
             mIsImmersive = false,
+			isDelLastPressedKey = false,
+			isAutoSuggestedUrl = false,
             mShowTabsInDrawer;
     private int mOriginalOrientation, mBackgroundColor, mIdGenerator, mIconColor;
 	private String mSearchText, mUntitledTitle, mHomepage, mCameraPhotoPath;
@@ -217,8 +219,6 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
 			LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
 	private SearchEditText mSearch;
     private LinearLayout mSearchParent;
-
-	private static boolean isDelLastPressedKey = false;
 
 	@Inject
 	Bus mEventBus;
@@ -622,7 +622,7 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
 					return;
 				}
 				if (!q.isEmpty()) {
-					if(!isDelLastPressedKey) {
+					if(!isDelLastPressedKey && !isAutoSuggestedUrl) {
 						cliqzSearch(q);
 					}
 				} else {
@@ -700,8 +700,10 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
 		runOnUiThread(new Runnable() {
 			@Override
 			public void run() {
+				isAutoSuggestedUrl = true;
 				mSearch.setText(suggestedUrl);
 				mSearch.setSelection(currentText.length(), suggestedUrl.length());
+				isAutoSuggestedUrl = false;
 			}
 		});
 
