@@ -1429,6 +1429,7 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
 		}
 		mIdGenerator++;
         mWebViewList.add(startingTab);
+		mSearch.setText("");
 
 		mTitleAdapter.notifyDataSetChanged();
 		if (show) {
