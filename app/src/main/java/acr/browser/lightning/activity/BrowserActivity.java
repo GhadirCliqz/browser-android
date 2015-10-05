@@ -52,8 +52,6 @@ import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.text.style.CharacterStyle;
-import android.text.style.MetricAffectingSpan;
-import android.text.style.URLSpan;
 import android.util.Log;
 import android.util.Patterns;
 import android.view.KeyEvent;
@@ -101,6 +99,9 @@ import android.widget.VideoView;
 
 import com.cliqz.browser.search.WebSearchView;
 import com.google.common.collect.ImmutableSet;
+import com.squareup.otto.Bus;
+import com.squareup.otto.Subscribe;
+
 import org.lucasr.twowayview.TwoWayView;
 
 
@@ -121,7 +122,11 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
+import javax.inject.Inject;
+
 import acr.browser.lightning.R;
+import acr.browser.lightning.app.BrowserApp;
+import acr.browser.lightning.bus.AutoCompleteEvents;
 import acr.browser.lightning.constant.BookmarkPage;
 import acr.browser.lightning.constant.Constants;
 import acr.browser.lightning.constant.HistoryPage;
@@ -185,6 +190,8 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
             mIsNewIntent = false,
             mIsFullScreen = false,
             mIsImmersive = false,
+            //used to prevent searching the suggested url
+			mIsAutoSuggestedUrl = false,
             mShowTabsInDrawer;
     private int mOriginalOrientation, mBackgroundColor, mIdGenerator, mIconColor;
 	private String mSearchText, mUntitledTitle, mHomepage, mCameraPhotoPath;
@@ -197,7 +204,7 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
 	// Image
     private Bitmap mDefaultVideoPoster, mWebpageBitmap, mFolderBitmap;
 	private final ColorDrawable mBackground = new ColorDrawable();
-	private Drawable mDeleteIcon, mRefreshIcon, mCopyIcon, mIcon;
+	private Drawable mDeleteIcon, mRefreshIcon, mClearIcon, mIcon;
 	private DrawerArrowDrawable mArrowDrawable;
 
     // Proxy
@@ -210,8 +217,11 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
 			LayoutParams.MATCH_PARENT);
 	private static final FrameLayout.LayoutParams COVER_SCREEN_PARAMS = new FrameLayout.LayoutParams(
 			LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
-	private EditText mSearch;
+	private SearchEditText mSearch;
     private LinearLayout mSearchParent;
+
+	@Inject
+	Bus mEventBus;
 
 	abstract boolean isIncognito();
 
@@ -227,6 +237,7 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		BrowserApp.getAppComponent().inject(this);
 		initialize();
 	}
 
@@ -358,12 +369,12 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
 		mBackgroundColor = getResources().getColor(R.color.primary_color);
         mDeleteIcon = ThemeUtils.getLightThemedDrawable(this, R.drawable.ic_action_delete);
         mRefreshIcon = ThemeUtils.getLightThemedDrawable(this, R.drawable.ic_action_refresh);
-        mCopyIcon = ThemeUtils.getLightThemedDrawable(this, R.drawable.ic_action_copy);
+        mClearIcon = ThemeUtils.getLightThemedDrawable(this, R.drawable.ic_action_delete);
 
         int iconBounds = Utils.dpToPx(30);
 		mDeleteIcon.setBounds(0, 0, iconBounds, iconBounds);
 		mRefreshIcon.setBounds(0, 0, iconBounds, iconBounds);
-		mCopyIcon.setBounds(0, 0, iconBounds, iconBounds);
+		mClearIcon.setBounds(0, 0, iconBounds, iconBounds);
 		mIcon = mRefreshIcon;
 		SearchClass search = new SearchClass();
 		mSearch.setCompoundDrawables(null, null, mRefreshIcon, null);
@@ -508,12 +519,7 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
 					}
 					updateUrl(mCurrentView.getUrl(), true);
 				} else if (hasFocus) {
-					String url = mCurrentView.getUrl();
-                    if (url.startsWith(Constants.FILE)) {
-						mSearch.setText("");
-					} else {
-						mSearch.setText(url);
-					}
+					
 					mSearch.post(new Runnable() {
 
 						@Override
@@ -523,9 +529,12 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
 															// selected
 						}
 					});
-
-					mIcon = mCopyIcon;
-					mSearch.setCompoundDrawables(null, null, mCopyIcon, null);
+					if(mSearch.getText().toString().isEmpty()) {
+						mIcon = null;
+					} else {
+						mIcon = mClearIcon;
+					}
+					mSearch.setCompoundDrawables(null, null, mIcon, null);
 				}
 				final Animation anim = new Animation() {
 
@@ -590,7 +599,8 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
 			}
 
 			@Override
-			public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+			public void onTextChanged(CharSequence charSequence, int start, int before, int count) {
+                boolean isDelLastPressedKey = count == 0;
 				if (!mSearch.hasFocus()) {
 					return;
 				}
@@ -602,7 +612,9 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
 					return;
 				}
 				if (!q.isEmpty()) {
-					cliqzSearch(q);
+					if(!isDelLastPressedKey && !mIsAutoSuggestedUrl) {
+						cliqzSearch(q);
+					}
 				} else {
 					if (mCurrentView == mSearchContainer) {
 						showTab(mPreSearchTab);
@@ -618,6 +630,20 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
 			@Override
 			public void afterTextChanged(Editable editable) {
 
+				if(mSearch.getText().toString().isEmpty()) {
+					mIcon = null;
+				} else {
+					if(mSearch.hasFocus()) {
+						mIcon = mClearIcon;
+					} else {
+						if (mCurrentView.getProgress() < 100) {
+							mIcon = mDeleteIcon;
+						} else {
+							mIcon = mRefreshIcon;
+						}
+					}
+				}
+				mSearch.setCompoundDrawables(null, null, mIcon, null);
 				CharacterStyle[] characterSpans = editable.getSpans(0, editable.length(), CharacterStyle.class);
 				for(CharacterStyle characterSpan : characterSpans) {
 					editable.removeSpan(characterSpan);
@@ -636,11 +662,9 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
 					if (tappedX) {
 						if (event.getAction() == MotionEvent.ACTION_UP) {
 							if (mSearch.hasFocus()) {
-								ClipboardManager clipboard = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
-								ClipData clip = ClipData.newPlainText("label", mSearch.getText()
-										.toString());
-								clipboard.setPrimaryClip(clip);
-                                Utils.showSnackbar(mActivity, R.string.message_text_copied);
+								if(!mSearch.getText().toString().isEmpty()) {
+									mSearch.setText("");
+								}
 							} else {
 								refreshOrStop();
 							}
@@ -652,6 +676,27 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
 			}
 
 		}
+	}
+
+	/**
+	 * This is the function which sets the suggestedUrl in the url bar.
+	 * The urlBar(mSearch) has to be accessed from the Ui thread, because this function is called from
+	 * a different thread of the WebSearchView Class
+	 * @param suggestedUrl The url to be set in the url bar
+	 */
+	private void setAutocompleteUrl(final String suggestedUrl) {
+
+		final String currentText = mSearch.getText().toString();
+		runOnUiThread(new Runnable() {
+			@Override
+			public void run() {
+				mIsAutoSuggestedUrl = true;
+				mSearch.setText(suggestedUrl);
+				mSearch.setSelection(currentText.length(), suggestedUrl.length());
+				mIsAutoSuggestedUrl = false;
+			}
+		});
+
 	}
 
 	private class DrawerLocker implements DrawerListener {
@@ -1380,6 +1425,7 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
 		}
 		mIdGenerator++;
         mWebViewList.add(startingTab);
+		mSearch.setText("");
 
 		mTitleAdapter.notifyDataSetChanged();
 		if (show) {
@@ -1574,6 +1620,7 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
 	protected void onStop() {
 		super.onStop();
         mProxyUtils.onStop();
+		mEventBus.unregister(mEventBusListener);
 	}
 
 	@Override
@@ -1590,7 +1637,8 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
 	protected void onStart() {
 		super.onStart();
         mProxyUtils.onStart(this);
-				}
+		mEventBus.register(mEventBusListener);
+	}
 
 	@Override
 	protected void onResume() {
@@ -3068,4 +3116,20 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
             }
         }
     };
+
+	/**
+	 * This object handles all the Events that are posted on the EventBus
+	 */
+	private final Object mEventBusListener = new Object() {
+
+		/**
+		 * This function is called when the extension suggests a autocomplete Url
+		 * @param event
+		 */
+		@Subscribe
+		public void autocompleteUrlCallBack(final AutoCompleteEvents.SetAutoCompleteUrl event) {
+			Log.d("AutocompleteB",event.url);
+			setAutocompleteUrl(event.url);
+		}
+	};
 }

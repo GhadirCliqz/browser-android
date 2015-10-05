@@ -23,12 +23,18 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
+import com.squareup.otto.Bus;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.List;
 
+import javax.inject.Inject;
+
 import acr.browser.lightning.BuildConfig;
+import acr.browser.lightning.app.BrowserApp;
+import acr.browser.lightning.bus.AutoCompleteEvents;
 import acr.browser.lightning.database.HistoryDatabase;
 import acr.browser.lightning.database.HistoryItem;
 import acr.browser.lightning.view.ILightningTab;
@@ -50,6 +56,9 @@ public class WebSearchView extends WebView implements ILightningTab {
     private boolean mFirstHide = true;
     private IWebSearchResult mResultClickedListener;
     private HistoryDatabase mHistoryDatabase;
+
+    @Inject
+    Bus mAutoCompleteBus;
 
     public class WebClickedRunnable implements Runnable {
 
@@ -91,6 +100,7 @@ public class WebSearchView extends WebView implements ILightningTab {
         super(context);
 
         setup();
+        BrowserApp.getAppComponent().inject(this);
     }
 
     public void setHistoryDatabase(final HistoryDatabase db) {
@@ -342,6 +352,15 @@ public class WebSearchView extends WebView implements ILightningTab {
             }
 
             return environment.toString();
+        }
+
+        /**
+         * Callback from JS which suggests a url.
+         * @param url the suggested url that the user might be typing
+         */
+        @JavascriptInterface
+        public void autocomplete(String url) {
+            mAutoCompleteBus.post(new AutoCompleteEvents.SetAutoCompleteUrl(url));
         }
     }
 

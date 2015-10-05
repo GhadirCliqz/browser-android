@@ -3,7 +3,7 @@
  */
 package acr.browser.lightning.constant;
 
-import acr.browser.lightning.activity.BrowserApp;
+import acr.browser.lightning.app.BrowserApp;
 import acr.browser.lightning.R;
 
 public class StartPage {
