@@ -190,8 +190,8 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
             mIsNewIntent = false,
             mIsFullScreen = false,
             mIsImmersive = false,
-			isDelLastPressedKey = false,
-			isAutoSuggestedUrl = false,
+            //used to prevent searching the suggested url
+			mIsAutoSuggestedUrl = false,
             mShowTabsInDrawer;
     private int mOriginalOrientation, mBackgroundColor, mIdGenerator, mIconColor;
 	private String mSearchText, mUntitledTitle, mHomepage, mCameraPhotoPath;
@@ -599,12 +599,8 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
 			}
 
 			@Override
-			public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-				if(i2==0) {
-					isDelLastPressedKey = true;
-				} else {
-					isDelLastPressedKey = false;
-				}
+			public void onTextChanged(CharSequence charSequence, int start, int before, int count) {
+                boolean isDelLastPressedKey = count == 0;
 				if (!mSearch.hasFocus()) {
 					return;
 				}
@@ -616,7 +612,7 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
 					return;
 				}
 				if (!q.isEmpty()) {
-					if(!isDelLastPressedKey && !isAutoSuggestedUrl) {
+					if(!isDelLastPressedKey && !mIsAutoSuggestedUrl) {
 						cliqzSearch(q);
 					}
 				} else {
@@ -694,10 +690,10 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
 		runOnUiThread(new Runnable() {
 			@Override
 			public void run() {
-				isAutoSuggestedUrl = true;
+				mIsAutoSuggestedUrl = true;
 				mSearch.setText(suggestedUrl);
 				mSearch.setSelection(currentText.length(), suggestedUrl.length());
-				isAutoSuggestedUrl = false;
+				mIsAutoSuggestedUrl = false;
 			}
 		});
 
