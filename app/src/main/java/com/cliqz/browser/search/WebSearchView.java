@@ -34,7 +34,6 @@ import javax.inject.Inject;
 
 import acr.browser.lightning.BuildConfig;
 import acr.browser.lightning.app.BrowserApp;
-import acr.browser.lightning.bus.AutoCompleteEvents;
 import acr.browser.lightning.database.HistoryDatabase;
 import acr.browser.lightning.database.HistoryItem;
 import acr.browser.lightning.view.ILightningTab;
@@ -54,32 +53,19 @@ public class WebSearchView extends WebView implements ILightningTab {
     private boolean mProfilingRunning = false;
     private int mLastScrollPosition = 0;
     private boolean mFirstHide = true;
-    private IWebSearchResult mResultClickedListener;
+    private CliqzCallbacks mCliqzCallbacksListener;
     private HistoryDatabase mHistoryDatabase;
 
     @Inject
     Bus mAutoCompleteBus;
 
-    public class WebClickedRunnable implements Runnable {
 
-        private String mUrl;
+    public interface CliqzCallbacks {
+        void onResultClicked(final String url);
 
-        public void setUrl (final String url) {
-            this.mUrl = url;
-        }
+        void onNotifyQuery(final String query);
 
-        @Override
-        public void run() {
-            if (mResultClickedListener != null) {
-                mResultClickedListener.onUrlClicked(mUrl);
-            }
-        }
-    };
-
-    private WebClickedRunnable mWebClickedRunnable = new WebClickedRunnable();
-
-    public interface IWebSearchResult {
-        public void onUrlClicked(final String url);
+        void onAutocompleteUrl(final String str);
     }
 
     private WebViewClient mWebViewClient = new WebViewClient() {
@@ -107,8 +93,8 @@ public class WebSearchView extends WebView implements ILightningTab {
         mHistoryDatabase = db;
     }
 
-    public void setResultListener(final IWebSearchResult cb) {
-        mResultClickedListener = cb;
+    public void setResultListener(final CliqzCallbacks cb) {
+        mCliqzCallbacksListener = cb;
     }
 
     // Next steps:
@@ -238,9 +224,15 @@ public class WebSearchView extends WebView implements ILightningTab {
 
         @JavascriptInterface
         public boolean openLink(final String url) {
-            mWebClickedRunnable.setUrl(url);
-            post(mWebClickedRunnable);
-
+            final CliqzCallbacks listener = mCliqzCallbacksListener;
+            if (listener != null) {
+                post(new Runnable() {
+                    @Override
+                    public void run() {
+                        listener.onResultClicked(url);
+                    }
+                });
+            }
             return false;
         }
 
@@ -359,8 +351,35 @@ public class WebSearchView extends WebView implements ILightningTab {
          * @param url the suggested url that the user might be typing
          */
         @JavascriptInterface
-        public void autocomplete(String url) {
-            mAutoCompleteBus.post(new AutoCompleteEvents.SetAutoCompleteUrl(url));
+        public void autocomplete(final String url) {
+            final CliqzCallbacks listener = mCliqzCallbacksListener;
+            if (listener != null) {
+                post(new Runnable() {
+                    @Override
+                    public void run() {
+                        listener.onAutocompleteUrl(url);
+                    }
+                });
+            }
+        }
+
+        /**
+         * Callback from JS used to notify the interface the query had been changed (i.e. the user
+         * select a previous query between the query history)
+         *
+         * @param query the selected query
+         */
+        @JavascriptInterface
+        public void notifyQuery(final String query) {
+            final CliqzCallbacks listener = mCliqzCallbacksListener;
+            if (listener != null) {
+                post(new Runnable() {
+                    @Override
+                    public void run() {
+                        listener.onNotifyQuery(query);
+                    }
+                });
+            }
         }
     }
 

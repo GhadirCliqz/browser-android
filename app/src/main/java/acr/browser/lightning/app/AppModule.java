@@ -3,13 +3,12 @@ package acr.browser.lightning.app;
 import android.content.Context;
 
 import com.squareup.otto.Bus;
-import com.squareup.otto.ThreadEnforcer;
 
 import dagger.Module;
 import dagger.Provides;
 
 /**
- * Created by strider29 on 30/09/15.
+ * Created by Ravijt on 30/09/15.
  */
 @Module
 public class AppModule {
@@ -18,7 +17,7 @@ public class AppModule {
 
     public AppModule(BrowserApp app) {
         this.app = app;
-        this.bus = new Bus(ThreadEnforcer.ANY);
+        this.bus = new Bus();
     }
 
     @Provides

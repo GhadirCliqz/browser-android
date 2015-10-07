@@ -100,7 +100,6 @@ import android.widget.VideoView;
 import com.cliqz.browser.search.WebSearchView;
 import com.google.common.collect.ImmutableSet;
 import com.squareup.otto.Bus;
-import com.squareup.otto.Subscribe;
 
 import org.lucasr.twowayview.TwoWayView;
 
@@ -125,7 +124,6 @@ import javax.inject.Inject;
 
 import acr.browser.lightning.R;
 import acr.browser.lightning.app.BrowserApp;
-import acr.browser.lightning.bus.AutoCompleteEvents;
 import acr.browser.lightning.constant.BookmarkPage;
 import acr.browser.lightning.constant.Constants;
 import acr.browser.lightning.constant.HistoryPage;
@@ -145,7 +143,7 @@ import acr.browser.lightning.view.AnimatedProgressBar;
 import acr.browser.lightning.view.LightningView;
 import acr.browser.lightning.view.SearchEditText;
 
-public abstract class BrowserActivity extends ThemableBrowserActivity implements BrowserController, OnClickListener, OnLongClickListener, WebSearchView.IWebSearchResult {
+public abstract class BrowserActivity extends ThemableBrowserActivity implements BrowserController, OnClickListener, OnLongClickListener, WebSearchView.CliqzCallbacks {
 
     // Layout
     private DrawerLayout mDrawerLayout;
@@ -431,13 +429,23 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
     }
 
     @Override
-    public void onUrlClicked(String url) {
+    public void onResultClicked(String url) {
         if (mPreSearchTab != null) {
             showTab(mPreSearchTab);
             mPreSearchTab.loadUrl(url);
             mPreSearchTab = null;
         }
 
+    }
+
+    @Override
+    public void onAutocompleteUrl(String url) {
+        setAutocompleteUrl(url);
+    }
+
+    @Override
+    public void onNotifyQuery(String query) {
+        mSearch.setText(query);
     }
 
     private class SearchClass {
@@ -481,7 +489,7 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
                 if (IME_ACTIONS.contains(actionId) || (keycode == KeyEvent.KEYCODE_ENTER)) {
                     if (Patterns.WEB_URL.matcher(text).matches()) {
                         final String url = URLUtil.guessUrl(text.toString());
-                        onUrlClicked(url);
+                        onResultClicked(url);
                         handled = true;
                     } else if (text.length() > 0) {
                         searchTheWeb(text.toString());
@@ -1623,7 +1631,7 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
     protected void onStop() {
         super.onStop();
         mProxyUtils.onStop();
-        mEventBus.unregister(mEventBusListener);
+        // mEventBus.unregister(mEventBusListener);
     }
 
     @Override
@@ -1640,7 +1648,7 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
     protected void onStart() {
         super.onStart();
         mProxyUtils.onStart(this);
-        mEventBus.register(mEventBusListener);
+        // mEventBus.register(mEventBusListener);
     }
 
     @Override
@@ -3120,20 +3128,4 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
         }
     };
 
-    /**
-     * This object handles all the Events that are posted on the EventBus
-     */
-    private final Object mEventBusListener = new Object() {
-
-        /**
-         * This function is called when the extension suggests a autocomplete Url
-         *
-         * @param event
-         */
-        @Subscribe
-        public void autocompleteUrlCallBack(final AutoCompleteEvents.SetAutoCompleteUrl event) {
-            Log.d("AutocompleteB", event.url);
-            setAutocompleteUrl(event.url);
-        }
-    };
 }
