@@ -109,8 +109,10 @@ import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -144,6 +146,8 @@ import acr.browser.lightning.view.LightningView;
 import acr.browser.lightning.view.SearchEditText;
 
 public abstract class BrowserActivity extends ThemableBrowserActivity implements BrowserController, OnClickListener, OnLongClickListener, WebSearchView.CliqzCallbacks {
+
+    private static final String TAG = BrowserActivity.class.getSimpleName();
 
     // Layout
     private DrawerLayout mDrawerLayout;
@@ -1657,8 +1661,11 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
         Log.d(Constants.TAG, "onResume");
         /* if (mSearchAdapter != null) {
             mSearchAdapter.refreshPreferences();
-			mSearchAdapter.refreshBookmarks();
-		} */
+            mSearchAdapter.refreshBookmarks();
+        } */
+
+        forceNetworkConnection();
+
         if (mCurrentView != null) {
             mCurrentView.resumeTimers();
             mCurrentView.onResume();
@@ -1679,6 +1686,27 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
         IntentFilter filter = new IntentFilter();
         filter.addAction(NETWORK_BROADCAST_ACTION);
         registerReceiver(mNetworkReceiver, filter);
+    }
+
+    // MBD-224 It should work but need testing
+    private void forceNetworkConnection() {
+        (new Thread() {
+            @Override
+            public void run() {
+                final byte[] buffer = new byte[1024];
+                try {
+                    URL url = new URL("https://newbeta.cliqz.com/version");
+                    HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+                    connection.setRequestMethod("HEAD");
+                    InputStream inputStream = connection.getInputStream();
+                    while(inputStream.read(buffer) > 0) {}
+                    // The system will keep the connection even if I explicitly kill it
+                    connection.disconnect();
+                } catch (IOException e) {
+                    Log.i(TAG, "Can't force connection", e);
+                }
+            }
+        }).start();
     }
 
     /**
