@@ -44,7 +44,7 @@ public class GeneralSettingsFragment extends PreferenceFragment implements Prefe
     private static final String SETTINGS_DRAWERTABS = "cb_drawertabs";
 
     private Activity mActivity;
-    private static final int API = android.os.Build.VERSION.SDK_INT;
+    private static final int API = Build.VERSION.SDK_INT;
     private PreferenceManager mPreferences;
     private CharSequence[] mProxyChoices;
     private Preference proxy, useragent, downloadloc, home, searchengine;
