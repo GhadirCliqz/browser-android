@@ -17,10 +17,10 @@ public final class Constants {
 	public static final String DESKTOP_USER_AGENT = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/37.0.2049.0 Safari/537.36";
 	public static final String MOBILE_USER_AGENT = "Mozilla/5.0 (Linux; U; Android 4.4; en-us; Nexus 4 Build/JOP24G) AppleWebKit/534.30 (KHTML, like Gecko) Version/4.0 Mobile Safari/534.30";
 	public static final String YAHOO_SEARCH = "https://search.yahoo.com/search?p=";
-	public static final String GOOGLE_SEARCH = "https://www.google.com/search?client=lightning&ie=UTF-8&oe=UTF-8&q=";
+	public static final String GOOGLE_SEARCH = "https://www.google.com/search?client=com.cliqz.browser&ie=UTF-8&oe=UTF-8&q=";
 	public static final String BING_SEARCH = "https://www.bing.com/search?q=";
-	public static final String DUCK_SEARCH = "https://duckduckgo.com/?t=lightning&q=";
-	public static final String DUCK_LITE_SEARCH = "https://duckduckgo.com/lite/?t=lightning&q=";
+	public static final String DUCK_SEARCH = "https://duckduckgo.com/?t=com.cliqz.browser&q=";
+	public static final String DUCK_LITE_SEARCH = "https://duckduckgo.com/lite/?t=com.cliqz.browser&q=";
 	public static final String STARTPAGE_MOBILE_SEARCH = "https://startpage.com/do/m/mobilesearch?language=english&query=";
 	public static final String STARTPAGE_SEARCH = "https://startpage.com/do/search?language=english&query=";
 	public static final String ASK_SEARCH = "http://www.ask.com/web?qsrc=0&o=0&l=dir&qo=lightningBrowser&q=";
