@@ -53,9 +53,6 @@ android {
                     '../../freshtab/dist/mobile'
             ]
 		}
-        cliqz {
-            java.srcDirs += 'src/lightningPlus/java'
-        }
     }
 }
 
