@@ -98,6 +98,7 @@ import android.widget.TextView.OnEditorActionListener;
 import android.widget.VideoView;
 
 import com.cliqz.browser.search.WebSearchView;
+import com.cliqz.browser.widget.AutocompleteEditText;
 import com.google.common.collect.ImmutableSet;
 import com.squareup.otto.Bus;
 
@@ -191,8 +192,6 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
             mIsNewIntent = false,
             mIsFullScreen = false,
             mIsImmersive = false,
-    //used to prevent searching the suggested url
-    mIsAutoSuggestedUrl = false,
             mShowTabsInDrawer;
     private int mOriginalOrientation, mBackgroundColor, mIdGenerator, mIconColor;
     private String mSearchText, mUntitledTitle, mHomepage, mCameraPhotoPath;
@@ -218,7 +217,7 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
             LayoutParams.MATCH_PARENT);
     private static final FrameLayout.LayoutParams COVER_SCREEN_PARAMS = new FrameLayout.LayoutParams(
             LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
-    private SearchEditText mSearch;
+    private AutocompleteEditText mSearch;
     private LinearLayout mSearchParent;
 
     @Inject
@@ -364,7 +363,7 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
         mBookmarkImage = (ImageView) findViewById(R.id.icon_star);
 
         // create the search EditText in the ToolBar
-        mSearch = (SearchEditText) actionBar.getCustomView().findViewById(R.id.search);
+        mSearch = (AutocompleteEditText) actionBar.getCustomView().findViewById(R.id.search);
         mSearch.setFocusable(true);
         mSearch.setFocusableInTouchMode(true);
 
@@ -443,8 +442,13 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
     }
 
     @Override
-    public void onAutocompleteUrl(String url) {
-        setAutocompleteUrl(url);
+    public void onAutocompleteUrl(final String url) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                mSearch.setAutocompleteText(url);
+            }
+        });
     }
 
     @Override
@@ -624,7 +628,7 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
                     return;
                 }
                 if (!q.isEmpty()) {
-                    if (!isDelLastPressedKey && !mIsAutoSuggestedUrl) {
+                    if (!isDelLastPressedKey) {
                         cliqzSearch(q);
                     }
                 }
@@ -690,28 +694,6 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
             }
 
         }
-    }
-
-    /**
-     * This is the function which sets the suggestedUrl in the url bar.
-     * The urlBar(mSearch) has to be accessed from the Ui thread, because this function is called from
-     * a different thread of the WebSearchView Class
-     *
-     * @param suggestedUrl The url to be set in the url bar
-     */
-    private void setAutocompleteUrl(final String suggestedUrl) {
-
-        final String currentText = mSearch.getText().toString();
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                mIsAutoSuggestedUrl = true;
-                mSearch.setText(suggestedUrl);
-                mSearch.setSelection(currentText.length(), suggestedUrl.length());
-                mIsAutoSuggestedUrl = false;
-            }
-        });
-
     }
 
     private class DrawerLocker implements DrawerListener {
