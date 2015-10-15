@@ -110,10 +110,8 @@ import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -144,7 +142,6 @@ import acr.browser.lightning.utils.Utils;
 import acr.browser.lightning.utils.WebUtils;
 import acr.browser.lightning.view.AnimatedProgressBar;
 import acr.browser.lightning.view.LightningView;
-import acr.browser.lightning.view.SearchEditText;
 
 public abstract class BrowserActivity extends ThemableBrowserActivity implements BrowserController, OnClickListener, OnLongClickListener, WebSearchView.CliqzCallbacks {
 
@@ -446,7 +443,7 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                mSearch.setAutocompleteText(url);
+                mSearch.getAutocompleteService().improveAutocomplete(url);
             }
         });
     }
