@@ -47,6 +47,7 @@ import android.support.v4.widget.DrawerLayout.DrawerListener;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.graphics.Palette;
+import android.support.v7.view.ActionMode;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextUtils;
@@ -111,6 +112,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -123,6 +126,7 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
+import acr.browser.lightning.BuildConfig;
 import acr.browser.lightning.R;
 import acr.browser.lightning.app.BrowserApp;
 import acr.browser.lightning.constant.BookmarkPage;
@@ -453,6 +457,28 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
         mSearch.setText(query);
     }
 
+    private final Runnable showCliqzInterface = new Runnable() {
+
+        @Override
+        public void run() {
+            // Hack to make sure text get selected
+            mSearch.selectAll();
+            if (mSearch.getText().toString().isEmpty()) {
+                mIcon = null;
+            } else {
+                mIcon = mClearIcon;
+            }
+            mSearch.setCompoundDrawables(null, null, mIcon, null);
+
+            // Show the search interface
+            if (mCurrentView != mSearchContainer) {
+                Log.d(Constants.TAG, "Switching back to cliqz view");
+                mPreSearchTab = mCurrentView;
+                showTab(mSearchContainer);
+            }
+        }
+    };
+
     private class SearchClass {
 
         public class KeyListener implements OnKeyListener {
@@ -527,27 +553,7 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
                     }
                     updateUrl(mCurrentView.getUrl(), true);
                 } else if (hasFocus) {
-                    mSearch.post(new Runnable() {
-
-                        @Override
-                        public void run() {
-                            // Hack to make sure text get selected
-                            ((EditText) v).selectAll();
-                            if (mSearch.getText().toString().isEmpty()) {
-                                mIcon = null;
-                            } else {
-                                mIcon = mClearIcon;
-                            }
-                            mSearch.setCompoundDrawables(null, null, mIcon, null);
-
-                            // Show the search interface
-                            if (mCurrentView != mSearchContainer) {
-                                Log.d(Constants.TAG, "Switching back to cliqz view");
-                                mPreSearchTab = mCurrentView;
-                                showTab(mSearchContainer);
-                            }
-                        }
-                    });
+                    mSearch.post(showCliqzInterface);
                 }
                 final Animation anim = new Animation() {
 
@@ -2354,6 +2360,47 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
         i.setType("*/*");
         startActivityForResult(Intent.createChooser(i, getString(R.string.title_file_chooser)), 1);
     }
+
+    @Override
+    public void onSupportActionModeStarted(final ActionMode mode) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            final Menu menu = mode.getMenu();
+            final int groupId = menu.size() > 0 ? menu.getItem(0).getGroupId() : 0;
+            final MenuItem cliqzItem = menu.add(groupId, R.id.menu_cliqz_search_item, 0, R.string.search_with_cliqz);
+            cliqzItem.setIcon(R.drawable.ic_action_desktop);
+            cliqzItem.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
+            final ValueCallback<String> callback = new ValueCallback<String>() {
+                @Override
+                public void onReceiveValue(String value) {
+                    if (value != null && !value.isEmpty()) {
+                        if (value.startsWith("\"")) {
+                            value = value.substring(1);
+                        }
+                        if (value.endsWith("\"")) {
+                            value = value.substring(0, value.length() - 1);
+                        }
+                        mSearch.requestFocus();
+                        mSearch.setText(value);
+                        // mSearchView.onQueryChanged(value);
+                        mSearch.post(showCliqzInterface);
+                    }
+                }
+            };
+            final MenuItem.OnMenuItemClickListener clickListener = new MenuItem.OnMenuItemClickListener() {
+                @Override
+                public boolean onMenuItemClick(MenuItem item) {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                        mCurrentView.getWebView().evaluateJavascript("window.getSelection().toString()", callback);
+                    }
+                    mode.finish();
+                    return true;
+                }
+            };
+            cliqzItem.setOnMenuItemClickListener(clickListener);
+        }
+        super.onSupportActionModeStarted(mode);
+    }
+
 
     /**
      * used to allow uploading into the browser

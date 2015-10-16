@@ -223,4 +223,5 @@
     <string name="settings_adblock">Ad Block Settings</string>
     <string name="tabs_in_drawer">Show tabs in Navigation Drawer</string>
     <string name="mail_to_feedback_at_cliqz.com">mailto:feedback@cliqz.com?subject=[ANDROID]+</string>
+    <string name="search_with_cliqz">Search with Cliqz</string>
 </resources>
