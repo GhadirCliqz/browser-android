@@ -2379,8 +2379,9 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
                         if (value.endsWith("\"")) {
                             value = value.substring(0, value.length() - 1);
                         }
+                        mSearch.requestFocus();
                         mSearch.setText(value);
-                        mSearchView.onQueryChanged(value);
+                        // mSearchView.onQueryChanged(value);
                         mSearch.post(showCliqzInterface);
                     }
                 }
