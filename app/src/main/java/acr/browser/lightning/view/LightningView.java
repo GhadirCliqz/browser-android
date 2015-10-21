@@ -164,6 +164,8 @@ public class LightningView implements ILightningTab {
                 } else {
                     // don't load anything, the user is looking for a blank tab
                 }
+            } else if (isIncognito) {
+                mWebView.loadUrl(Constants.INCOGNITO_HOMEPAGE);
             } else {
                 mWebView.loadUrl(Constants.HOMEPAGE);
             }

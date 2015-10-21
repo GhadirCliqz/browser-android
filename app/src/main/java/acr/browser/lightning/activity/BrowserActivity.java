@@ -2401,7 +2401,6 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
         super.onSupportActionModeStarted(mode);
     }
 
-
     /**
      * used to allow uploading into the browser
      */
