@@ -288,7 +288,8 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
         }
 
         setNavigationDrawerWidth();
-        mDrawerLayout.setDrawerListener(new DrawerLocker());
+        // [Stefano] MBD-278 Force drawer to open with swipes
+        // mDrawerLayout.setDrawerListener(new DrawerLocker());
 
         mWebpageBitmap = ThemeUtils.getThemedBitmap(this, R.drawable.ic_webpage, mDarkTheme);
         mFolderBitmap = ThemeUtils.getThemedBitmap(this, R.drawable.ic_folder, mDarkTheme);
@@ -306,8 +307,12 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
             mTitleAdapter = new LightningViewAdapter(this, R.layout.tab_list_item_horizontal, mWebViewList);
             mDrawerListLeft = horizontalListView;
             mDrawerListLeft.setOverScrollMode(View.OVER_SCROLL_NEVER);
-            mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED, mDrawerLeft);
+            // [Stefano] MBD-278 Force drawer to open with swipes
+            // mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED, mDrawerLeft);
         }
+
+        // [Stefano] MBD-278 Force drawer to open with swipes
+        mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
 
         mDrawerListLeft.setAdapter(mTitleAdapter);
         mDrawerListLeft.setOnItemClickListener(new DrawerItemClickListener());
@@ -699,6 +704,7 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
         }
     }
 
+    /* TODO remove this
     private class DrawerLocker implements DrawerListener {
 
         @Override
@@ -728,6 +734,7 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
         }
 
     }
+    */
 
     private void setNavigationDrawerWidth() {
         int width = getResources().getDisplayMetrics().widthPixels - Utils.dpToPx(56);
