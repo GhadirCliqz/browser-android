@@ -50,9 +50,9 @@ android {
         main {
             assets.srcDirs += [
                     '../../navigation/build/dev/androidkit',
-                    '../../freshtab/dist/mobile'
+                    // '../../freshtab/dist/mobile'
             ]
-		}
+        }
     }
 }
 
