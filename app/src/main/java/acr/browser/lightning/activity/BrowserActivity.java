@@ -624,7 +624,6 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
 
             @Override
             public void onTextChanged(CharSequence charSequence, int start, int before, int count) {
-                boolean isDelLastPressedKey = count == 0;
                 if (!mSearch.hasFocus()) {
                     return;
                 }
@@ -636,9 +635,7 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
                     return;
                 }
                 if (!q.isEmpty()) {
-                    if (!isDelLastPressedKey) {
-                        cliqzSearch(q);
-                    }
+                    cliqzSearch(q);
                 }
                 // TODO [Stefano] Review this
                 /* else {
