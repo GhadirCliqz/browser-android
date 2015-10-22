@@ -438,11 +438,23 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
     }
 
     @Override
-    public void onResultClicked(String url) {
+    public void onResultClicked(final String url) {
         if (mPreSearchTab != null) {
             showTab(mPreSearchTab);
-            mPreSearchTab.loadUrl(url);
-            mPreSearchTab = null;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                final WebView currentWebView = mPreSearchTab.getWebView();
+                currentWebView.evaluateJavascript("document.body.innerHTML=\"\"", new ValueCallback<String>() {
+                    @Override
+                    public void onReceiveValue(String value) {
+                        mPreSearchTab.loadUrl(url);
+                        mPreSearchTab = null;
+                    }
+                });
+            } else {
+                mPreSearchTab.getWebView().clearView();
+                mPreSearchTab.loadUrl(url);
+                mPreSearchTab = null;
+            }
         }
 
     }
