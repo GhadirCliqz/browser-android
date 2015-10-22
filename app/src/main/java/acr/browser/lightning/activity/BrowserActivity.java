@@ -24,6 +24,7 @@ import android.graphics.Color;
 import android.graphics.ColorMatrix;
 import android.graphics.ColorMatrixColorFilter;
 import android.graphics.Paint;
+import android.graphics.Point;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
@@ -33,6 +34,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.provider.Browser;
@@ -41,6 +43,7 @@ import android.support.annotation.IdRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.view.GravityCompat;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v4.view.ViewCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.DrawerLayout.DrawerListener;
@@ -55,6 +58,7 @@ import android.text.TextWatcher;
 import android.text.style.CharacterStyle;
 import android.util.Log;
 import android.util.Patterns;
+import android.view.Display;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -98,10 +102,13 @@ import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 import android.widget.VideoView;
 
+import com.cliqz.browser.bus.TabManagerEvents;
 import com.cliqz.browser.search.WebSearchView;
 import com.cliqz.browser.widget.AutocompleteEditText;
+import com.cliqz.browser.webview.OpenTabsView;
 import com.google.common.collect.ImmutableSet;
 import com.squareup.otto.Bus;
+import com.squareup.otto.Subscribe;
 
 import org.lucasr.twowayview.TwoWayView;
 
@@ -111,6 +118,7 @@ import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -123,6 +131,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 import javax.inject.Inject;
 
@@ -160,6 +169,7 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
     private LinearLayout mDrawerLeft, mDrawerRight, mUiLayout, mToolbarLayout;
     private RelativeLayout mSearchBar;
     private WebSearchView mSearchView;
+    private OpenTabsView mOpenTabsView;
 
     // List
     private final List<LightningView> mWebViewList = new ArrayList<>();
@@ -167,6 +177,7 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
     private LightningView mCurrentView;
     private LightningView mSearchContainer;
     private LightningView mPreSearchTab;
+    private LightningView mOpenTabsContainer;
 
     // Views
     private AnimatedProgressBar mProgressBar;
@@ -260,7 +271,10 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
         mSearchView = new WebSearchView(this);
         mSearchView.setResultListener(this);
 
-        mSearchContainer = new LightningView(this, "", false, isIncognito(), mSearchView, mHistoryDatabase);
+        mOpenTabsView = new OpenTabsView(this);
+        mOpenTabsContainer = new LightningView(this, "", false, isIncognito(), null, mOpenTabsView, mHistoryDatabase);
+
+        mSearchContainer = new LightningView(this, "", false, isIncognito(), null, mSearchView, mHistoryDatabase);
 
         mClickHandler = new ClickHandler(this);
         mBrowserFrame = (FrameLayout) findViewById(R.id.content_frame);
@@ -933,6 +947,21 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle action buttons
         switch (item.getItemId()) {
+            case R.id.action_open_tabs:
+                getSupportActionBar().hide();
+                savePreview();
+                if(mCurrentView!=mSearchContainer) {
+                    mPreSearchTab = mCurrentView;
+                }
+                showTab(mOpenTabsContainer);
+                mOpenTabsView.openTabsList = mWebViewList;
+
+                if(mOpenTabsView.getUrl() != null && mOpenTabsView.getUrl().equals(Constants.OPEN_TABS)) {
+                    mOpenTabsView.showTabManager();
+                } else {
+                    mOpenTabsView.loadUrl(Constants.OPEN_TABS);
+                }
+                return true;
             case android.R.id.home:
                 if (mDrawerLayout.isDrawerOpen(mDrawerRight)) {
                     mDrawerLayout.closeDrawer(mDrawerRight);
@@ -949,6 +978,7 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
                 }
                 return true;
             case R.id.action_new_tab:
+                savePreview();
                 newTab(null, true);
                 return true;
             case R.id.action_incognito:
@@ -1435,7 +1465,8 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
             return false;
         }
         mIsNewIntent = false;
-        LightningView startingTab = new LightningView(mActivity, url, mDarkTheme, isIncognito(), null, mHistoryDatabase);
+        String uniqueId = UUID.randomUUID().toString();
+        LightningView startingTab = new LightningView(mActivity, url, mDarkTheme, isIncognito(), uniqueId, null, mHistoryDatabase);
         if (mIdGenerator == 0) {
             startingTab.resumeTimers();
         }
@@ -1444,6 +1475,7 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
         mSearch.setText("");
 
         mTitleAdapter.notifyDataSetChanged();
+        invalidateOptionsMenu();
         if (show) {
             mDrawerListLeft.setItemChecked(mWebViewList.size() - 1, true);
             showTab(startingTab);
@@ -1595,7 +1627,10 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
                     }
                 } else if (mCurrentView == mSearchContainer) {
                     showTab(mPreSearchTab);
-                } else {
+                } else if (mCurrentView == mOpenTabsContainer) {
+                    mOpenTabsView.backPressed();
+                }
+                else {
                     deleteTab(mWebViewList.indexOf(mCurrentView));
                 }
             } else {
@@ -1636,7 +1671,7 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
     protected void onStop() {
         super.onStop();
         mProxyUtils.onStop();
-        // mEventBus.unregister(mEventBusListener);
+        mEventBus.unregister(mEventBusListener);
     }
 
     @Override
@@ -1653,7 +1688,7 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
     protected void onStart() {
         super.onStart();
         mProxyUtils.onStart(this);
-        // mEventBus.register(mEventBusListener);
+        mEventBus.register(mEventBusListener);
     }
 
     @Override
@@ -2281,6 +2316,17 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuItem back = menu.findItem(R.id.action_back);
         MenuItem forward = menu.findItem(R.id.action_forward);
+        final MenuItem openTabs = menu.findItem(R.id.action_open_tabs);
+        MenuItemCompat.setActionView(openTabs,R.layout.open_tabs);
+        TextView openTabsCounter = (TextView)openTabs.getActionView().findViewById(R.id.open_tabs_count);
+        openTabsCounter.setText(Integer.toString(mWebViewList.size()));
+        openTabs.getActionView().setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onOptionsItemSelected(openTabs);
+            }
+        });
+
         if (back != null && back.getIcon() != null)
             back.getIcon().setColorFilter(mIconColor, PorterDuff.Mode.SRC_IN);
         if (forward != null && forward.getIcon() != null)
@@ -3196,5 +3242,180 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
             }
         }
     };
+
+    /**
+     * This object handles all the Events that are posted on the EventBus
+     */
+    private final Object mEventBusListener = new Object() {
+
+        @Subscribe
+        public void exitTabManager(final TabManagerEvents.ExitTabManager event) {
+            Log.d("TabManager", "Exiting Tab Manager");
+            showTab(mPreSearchTab);
+            getSupportActionBar().show();
+        }
+
+        @Subscribe
+        public void openTab(final TabManagerEvents.OpenTab event) {
+            for(LightningView tab : mWebViewList) {
+                if(tab.getId().equals(event.id)) {
+                    showTab(tab);
+                    getSupportActionBar().show();
+                    break;
+                }
+            }
+        }
+
+        @Subscribe
+        public void closeTabs(final TabManagerEvents.CloseTab event) {
+            List<String> deleteTabsList = event.ids;
+            if(deleteTabsList.size()>1) {
+                showAlert(deleteTabsList);
+            } else {
+                deleteTabs(deleteTabsList);
+            }
+        }
+    };
+
+    private void deleteTabs(List<String> ids) {
+        for(String id : ids) {
+            deleteTab(id);
+        }
+        mOpenTabsView.updateTabmanagerView();
+    }
+
+    /**
+     * This alert is shown if the user tries to close a group of tabs
+     *
+     * @param deleteTabsList List of tabs to be closed
+     */
+    private void showAlert(final List<String> deleteTabsList) {
+        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
+        alertDialogBuilder.setMessage("This will delete all the tabs in the group");
+
+        alertDialogBuilder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface arg0, int arg1) {
+                deleteTabs(deleteTabsList);
+            }
+        });
+
+        alertDialogBuilder.setNegativeButton("Back",new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+            }
+        });
+
+        AlertDialog alertDialog = alertDialogBuilder.create();
+        alertDialog.show();
+    }
+
+    /**
+     * Saves the screenshot of the tab. The image name is the "id" of the tab.
+     */
+    private void savePreview() {
+
+        if(mCurrentView!=mSearchContainer) {
+
+            WebView webView =mCurrentView.getWebView();
+            Display display = getWindowManager().getDefaultDisplay();
+            Point size = new Point();
+            display.getSize(size);
+            int height = 2*size.y/3;
+            int offset = webView.getScrollY();
+            webView.measure(View.MeasureSpec.makeMeasureSpec(View.MeasureSpec.UNSPECIFIED,
+                    View.MeasureSpec.UNSPECIFIED), View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED));
+            webView.layout(0, offset, webView.getMeasuredWidth(), offset+height);
+            webView.setDrawingCacheEnabled(true);
+            webView.buildDrawingCache();
+            Bitmap bitmap = Bitmap.createBitmap(webView.getMeasuredWidth(),height, Bitmap.Config.ARGB_8888);
+            Canvas canvas = new Canvas(bitmap);
+            Paint paint = new Paint();
+            canvas.drawBitmap(bitmap, 0, 0, paint);
+            webView.draw(canvas);
+
+            if (bitmap != null) {
+                try {
+                    String path = Environment.getExternalStorageDirectory().toString();
+                    OutputStream fOut = null;
+                    File file = new File(path, "/"+mCurrentView.getId()+".jpeg");
+                    fOut = new FileOutputStream(file);
+
+                    bitmap.compress(Bitmap.CompressFormat.JPEG, 50, fOut);
+                    fOut.flush();
+                    fOut.close();
+                    bitmap.recycle();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+    /**
+     * Deletes the screenshot of a tab. It is called when a tab is closed
+     *
+     * @param id Name of the screenshot to be deleted
+     */
+    private void deletePreview(String id) {
+
+        String path = Environment.getExternalStorageDirectory().toString();
+        File file = new File(path, "/"+id+".jpeg");
+        file.delete();
+    }
+
+    private void deleteTab(String id) {
+
+        int position = 0;
+        int current = mWebViewList.indexOf(mPreSearchTab);
+
+        for(LightningView tab : mWebViewList) {
+            if(tab.getId().equals(id)) {
+                break;
+            }
+            position++;
+        }
+
+        LightningView tab = mWebViewList.get(position);
+
+        if(tab == null) {
+            return;
+        }
+
+        if(current == position) {
+
+            if(position+1 == mWebViewList.size()) {
+
+                if(mWebViewList.size()==1) {
+                    mWebViewList.remove(position);
+                    performExitCleanUp();
+                    tab.pauseTimers();
+                    tab.onDestroy();
+                    mPreSearchTab = null;
+                    mCurrentView = null;
+                    finish();
+                } else {
+                    mPreSearchTab = mWebViewList.get(position-1);
+                    mWebViewList.remove(position);
+                }
+
+            } else {
+
+                mPreSearchTab = mWebViewList.get(position+1);
+                mWebViewList.remove(position);
+
+            }
+
+        } else {
+
+            mWebViewList.remove(position);
+        }
+
+        invalidateOptionsMenu();
+        deletePreview(id);
+
+
+    }
+
 
 }

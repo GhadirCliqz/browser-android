@@ -72,7 +72,7 @@ public class WebSearchView extends WebView implements ILightningTab {
         /* public void onPageFinished (WebView view, String url) {
             executeJS("_cliqzLoadCSS('content/skin/android.css');");
         } */
-
+        @Override
         public boolean shouldOverrideUrlLoading(final WebView wv, final String url) {
             Log.d (TAG, "New url: " + url);
             return true;
