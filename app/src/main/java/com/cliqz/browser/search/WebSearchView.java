@@ -381,6 +381,33 @@ public class WebSearchView extends WebView implements ILightningTab {
                 });
             }
         }
+
+        /**
+         * Ask the browser to perform some action ({@link Intent}). The list of types can be found
+         * in {@link BrowserActionTypes}. However, the type can be any string, we simply ignore what
+         * we do not know.
+         *
+         * @param data the data used to perform the action (i.e. a phone number)
+         * @param type the type of the data
+         * @see BrowserActionTypes
+         */
+        @JavascriptInterface
+        public void browserAction(final String data, final String type) {
+            final Context context = getContext();
+            if (context == null) {
+                return;
+            }
+            final BrowserActionTypes action = BrowserActionTypes.fromTypeString(type);
+            final Intent intent = action.getIntent(context, data);
+            if (intent != null) {
+                post(new Runnable() {
+                    @Override
+                    public void run() {
+                        context.startActivity(intent);
+                    }
+                });
+            }
+        }
     }
 
     /**
