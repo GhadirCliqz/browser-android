@@ -288,7 +288,8 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
         }
 
         setNavigationDrawerWidth();
-        mDrawerLayout.setDrawerListener(new DrawerLocker());
+        // [Stefano] MBD-278 Force drawer to open with swipes
+        // mDrawerLayout.setDrawerListener(new DrawerLocker());
 
         mWebpageBitmap = ThemeUtils.getThemedBitmap(this, R.drawable.ic_webpage, mDarkTheme);
         mFolderBitmap = ThemeUtils.getThemedBitmap(this, R.drawable.ic_folder, mDarkTheme);
@@ -306,8 +307,12 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
             mTitleAdapter = new LightningViewAdapter(this, R.layout.tab_list_item_horizontal, mWebViewList);
             mDrawerListLeft = horizontalListView;
             mDrawerListLeft.setOverScrollMode(View.OVER_SCROLL_NEVER);
-            mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED, mDrawerLeft);
+            // [Stefano] MBD-278 Force drawer to open with swipes
+            // mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED, mDrawerLeft);
         }
+
+        // [Stefano] MBD-278 Force drawer to open with swipes
+        mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
 
         mDrawerListLeft.setAdapter(mTitleAdapter);
         mDrawerListLeft.setOnItemClickListener(new DrawerItemClickListener());
@@ -433,11 +438,23 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
     }
 
     @Override
-    public void onResultClicked(String url) {
+    public void onResultClicked(final String url) {
         if (mPreSearchTab != null) {
             showTab(mPreSearchTab);
-            mPreSearchTab.loadUrl(url);
-            mPreSearchTab = null;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                final WebView currentWebView = mPreSearchTab.getWebView();
+                currentWebView.evaluateJavascript("document.body.innerHTML=\"\"", new ValueCallback<String>() {
+                    @Override
+                    public void onReceiveValue(String value) {
+                        mPreSearchTab.loadUrl(url);
+                        mPreSearchTab = null;
+                    }
+                });
+            } else {
+                mPreSearchTab.getWebView().clearView();
+                mPreSearchTab.loadUrl(url);
+                mPreSearchTab = null;
+            }
         }
 
     }
@@ -619,7 +636,6 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
 
             @Override
             public void onTextChanged(CharSequence charSequence, int start, int before, int count) {
-                boolean isDelLastPressedKey = count == 0;
                 if (!mSearch.hasFocus()) {
                     return;
                 }
@@ -631,9 +647,7 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
                     return;
                 }
                 if (!q.isEmpty()) {
-                    if (!isDelLastPressedKey) {
-                        cliqzSearch(q);
-                    }
+                    cliqzSearch(q);
                 }
                 // TODO [Stefano] Review this
                 /* else {
@@ -699,6 +713,7 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
         }
     }
 
+    /* TODO remove this
     private class DrawerLocker implements DrawerListener {
 
         @Override
@@ -728,6 +743,7 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
         }
 
     }
+    */
 
     private void setNavigationDrawerWidth() {
         int width = getResources().getDisplayMetrics().widthPixels - Utils.dpToPx(56);
@@ -2400,7 +2416,6 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
         }
         super.onSupportActionModeStarted(mode);
     }
-
 
     /**
      * used to allow uploading into the browser
