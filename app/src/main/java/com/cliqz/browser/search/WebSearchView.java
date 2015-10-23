@@ -211,7 +211,7 @@ public class WebSearchView extends WebView implements ILightningTab {
         }
     }
 
-    public class JsBridge {
+    private class JsBridge {
         // Can open any URI, event Android internal ones like contacts etc
         @JavascriptInterface
         public void openAndroidUri(final String uriStr) {

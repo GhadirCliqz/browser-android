@@ -3243,9 +3243,7 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
         }
     };
 
-    /**
-     * This object handles all the Events that are posted on the EventBus
-     */
+    //This object handles all the Events that are posted on the EventBus
     private final Object mEventBusListener = new Object() {
 
         @Subscribe
@@ -3284,11 +3282,7 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
         mOpenTabsView.updateTabmanagerView();
     }
 
-    /**
-     * This alert is shown if the user tries to close a group of tabs
-     *
-     * @param deleteTabsList List of tabs to be closed
-     */
+    //This alert is shown if the user tries to close a group of tabs
     private void showAlert(final List<String> deleteTabsList) {
         AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
         alertDialogBuilder.setMessage("This will delete all the tabs in the group");
@@ -3310,13 +3304,10 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
         alertDialog.show();
     }
 
-    /**
-     * Saves the screenshot of the tab. The image name is the "id" of the tab.
-     */
+
+    //Saves the screenshot of the tab. The image name is the "id" of the tab.
     private void savePreview() {
-
         if(mCurrentView!=mSearchContainer) {
-
             WebView webView =mCurrentView.getWebView();
             Display display = getWindowManager().getDefaultDisplay();
             Point size = new Point();
@@ -3336,36 +3327,27 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
 
             if (bitmap != null) {
                 try {
-                    String path = Environment.getExternalStorageDirectory().toString();
-                    OutputStream fOut = null;
-                    File file = new File(path, "/"+mCurrentView.getId()+".jpeg");
-                    fOut = new FileOutputStream(file);
-
+                    File directory = this.getDir("cliqz", Context.MODE_PRIVATE);
+                    File file = new File(directory, mCurrentView.getId()+".jpeg");
+                    FileOutputStream fOut = new FileOutputStream(file);
                     bitmap.compress(Bitmap.CompressFormat.JPEG, 50, fOut);
                     fOut.flush();
                     fOut.close();
                     bitmap.recycle();
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    Log.e(TAG, "Error Message", e);
                 }
             }
         }
     }
 
-    /**
-     * Deletes the screenshot of a tab. It is called when a tab is closed
-     *
-     * @param id Name of the screenshot to be deleted
-     */
+    //Deletes the screenshot of a tab. It is called when a tab is closed.
     private void deletePreview(String id) {
-
-        String path = Environment.getExternalStorageDirectory().toString();
-        File file = new File(path, "/"+id+".jpeg");
+        File file = new File(this.getDir("cliqz",Context.MODE_PRIVATE).getPath() + "/" + id + ".jpeg");
         file.delete();
     }
 
     private void deleteTab(String id) {
-
         int position = 0;
         int current = mWebViewList.indexOf(mPreSearchTab);
 
@@ -3383,9 +3365,7 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
         }
 
         if(current == position) {
-
             if(position+1 == mWebViewList.size()) {
-
                 if(mWebViewList.size()==1) {
                     mWebViewList.remove(position);
                     performExitCleanUp();
@@ -3398,24 +3378,16 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
                     mPreSearchTab = mWebViewList.get(position-1);
                     mWebViewList.remove(position);
                 }
-
             } else {
-
                 mPreSearchTab = mWebViewList.get(position+1);
                 mWebViewList.remove(position);
-
             }
-
         } else {
-
             mWebViewList.remove(position);
         }
 
         invalidateOptionsMenu();
         deletePreview(id);
-
-
     }
-
 
 }

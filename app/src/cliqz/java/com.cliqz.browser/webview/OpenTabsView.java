@@ -46,7 +46,7 @@ public class OpenTabsView extends WebView implements ILightningTab {
     private static final String KEY_URL = "url";
     private static final String KEY_IMAGE_URL = "img";
     private static final String KEY_LIST = "list";
-    private static final String path = Environment.getExternalStorageDirectory().toString();
+    private static String directory;
     public List<LightningView> openTabsList;
 
     @Inject
@@ -54,6 +54,7 @@ public class OpenTabsView extends WebView implements ILightningTab {
 
     public OpenTabsView(Context context) {
         super(context);
+        directory = context.getDir("cliqz",Context.MODE_PRIVATE).getPath();
         setup();
         BrowserApp.getAppComponent().inject(this);
     }
@@ -96,7 +97,7 @@ public class OpenTabsView extends WebView implements ILightningTab {
         addJavascriptInterface(new JsBridge(), "tabmanager");
     }
 
-    public class JsBridge {
+    private class JsBridge {
 
         @JavascriptInterface
         public void onReady() {
@@ -155,7 +156,7 @@ public class OpenTabsView extends WebView implements ILightningTab {
             HashMap<String,String> processedTabDetails = new HashMap<>();
             processedTabDetails.put(KEY_ID,tabDetails.getId());
             processedTabDetails.put(KEY_URL,tabDetails.getUrl());
-            processedTabDetails.put(KEY_IMAGE_URL, path+"/"+tabDetails.getId()+".jpeg");
+            processedTabDetails.put(KEY_IMAGE_URL, directory + "/" + tabDetails.getId() + ".jpeg");
             JSONObject jsonObject = new JSONObject(processedTabDetails);
             openTabsJSON.put(jsonObject);
         }
