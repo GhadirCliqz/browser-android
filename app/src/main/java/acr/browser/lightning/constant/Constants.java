@@ -26,6 +26,7 @@ public final class Constants {
     public static final String ASK_SEARCH = "http://www.ask.com/web?qsrc=0&o=0&l=dir&qo=lightningBrowser&q=";
     public static final String HOMEPAGE = "file:///android_asset/homepage/index.html";
     public static final String INCOGNITO_HOMEPAGE = "file:///android_asset/incognito/index.html";
+    public static final String OPEN_TABS = "file:///android_asset/tab-mngt/tabs.html";
     public static final String BAIDU_SEARCH = "https://www.baidu.com/s?wd=";
     public static final String YANDEX_SEARCH = "https://yandex.ru/yandsearch?lr=21411&text=";
     public static final String EXTERNAL_STORAGE = Environment.getExternalStorageDirectory()

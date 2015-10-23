@@ -51,6 +51,7 @@ android {
             assets.srcDirs += [
                     '../../navigation/build/dev/androidkit',
                     // '../../freshtab/dist/mobile'
+                    '../../mobile-tab-manager/build/android'
             ]
         }
     }

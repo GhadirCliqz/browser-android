@@ -76,6 +76,7 @@ public class LightningView implements ILightningTab {
     private final boolean mIsCustomWebView;
     private String mAntiPhishingSrc;
     private WebView mWebView;
+    private String mId;
     private boolean mIsIncognitoTab;
     private BrowserController mBrowserController;
     private GestureDetector mGestureDetector;
@@ -94,6 +95,7 @@ public class LightningView implements ILightningTab {
     private static float mMaxFling;
     private static final int API = android.os.Build.VERSION.SDK_INT;
     private static final int SCROLL_UP_THRESHOLD = Utils.dpToPx(10);
+
     private static final float[] mNegativeColorArray = {-1.0f, 0, 0, 0, 255, // red
             0, -1.0f, 0, 0, 255, // green
             0, 0, -1.0f, 0, 255, // blue
@@ -103,11 +105,12 @@ public class LightningView implements ILightningTab {
     private String mUrl;
 
     @SuppressLint("NewApi")
-    public LightningView(final Activity activity, String url, final boolean darkTheme, boolean isIncognito, final WebView overrideWebView, final HistoryDatabase database) {
+    public LightningView(final Activity activity, String url, final boolean darkTheme, boolean isIncognito, String uniqueId, final WebView overrideWebView, final HistoryDatabase database) {
 
         mActivity = activity;
         mHistoryDatabase = database;
         mUrl = url;
+        mId = uniqueId;
 
         if (overrideWebView != null) {
             mWebView = overrideWebView;
@@ -678,10 +681,15 @@ public class LightningView implements ILightningTab {
     @NonNull
     public String getUrl() {
         if (mWebView != null && mWebView.getUrl() != null) {
+
             return mWebView.getUrl();
         } else {
             return "";
         }
+    }
+
+    public String getId() {
+        return mId;
     }
 
     public class LightningWebClient extends WebViewClient {
@@ -762,7 +770,7 @@ public class LightningView implements ILightningTab {
                 view.evaluateJavascript(Constants.JAVASCRIPT_INVERT_PAGE, null);
             }
             /* TODO antiphishing is a nice feature, we have to replace this with a java version
-			if (API >= Build.VERSION_CODES.KITKAT) {
+            if (API >= Build.VERSION_CODES.KITKAT) {
 				view.evaluateJavascript(Constants.JAVASCRIPT_LOAD_ANTIPHISHING, null);
 			} else {
 				view.loadUrl(Constants.JAVASCRIPT_LOAD_ANTIPHISHING);

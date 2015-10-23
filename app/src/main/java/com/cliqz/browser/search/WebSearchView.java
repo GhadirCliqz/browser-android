@@ -72,7 +72,7 @@ public class WebSearchView extends WebView implements ILightningTab {
         /* public void onPageFinished (WebView view, String url) {
             executeJS("_cliqzLoadCSS('content/skin/android.css');");
         } */
-
+        @Override
         public boolean shouldOverrideUrlLoading(final WebView wv, final String url) {
             Log.d (TAG, "New url: " + url);
             return true;
@@ -211,7 +211,7 @@ public class WebSearchView extends WebView implements ILightningTab {
         }
     }
 
-    public class JsBridge {
+    private class JsBridge {
         // Can open any URI, event Android internal ones like contacts etc
         @JavascriptInterface
         public void openAndroidUri(final String uriStr) {
