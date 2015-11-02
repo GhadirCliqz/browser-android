@@ -7,9 +7,9 @@ import org.jsoup.nodes.Element;
  * 
  * @author Chris Alexander, chris@chris-alexander.co.uk
  */
-public class ImageResult {
+class ImageResult {
 
-    public final String src;
+    private final String src;
     public final Integer weight;
     public final String title;
     public final int height;

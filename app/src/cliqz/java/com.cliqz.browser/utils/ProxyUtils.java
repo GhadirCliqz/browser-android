@@ -10,13 +10,13 @@ public class ProxyUtils {
 
     private static ProxyUtils mInstance;
 
-    private ProxyUtils(Context context) {
+    private ProxyUtils() {
 
     }
 
-    public static ProxyUtils getInstance(Context context) {
+    public static ProxyUtils getInstance() {
         if (mInstance == null) {
-            mInstance = new ProxyUtils(context);
+            mInstance = new ProxyUtils();
         }
         return mInstance;
     }

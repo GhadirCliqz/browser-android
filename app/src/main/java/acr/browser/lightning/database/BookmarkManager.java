@@ -2,12 +2,10 @@ package acr.browser.lightning.database;
 
 import android.app.Activity;
 import android.content.Context;
-import android.database.Cursor;
 import android.os.Environment;
-import android.provider.Browser;
-import android.widget.Toast;
-import android.util.Log;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.util.Log;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -24,124 +22,222 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
+import javax.inject.Singleton;
 
 import acr.browser.lightning.R;
 import acr.browser.lightning.constant.Constants;
-import acr.browser.lightning.preference.PreferenceManager;
 import acr.browser.lightning.utils.Utils;
 
+@Singleton
 public class BookmarkManager {
 
-	private static final String TAG = BookmarkManager.class.getSimpleName();
+    private static final String TAG = BookmarkManager.class.getSimpleName();
 
-	private final Context mContext;
-	private static final String TITLE = "title";
-	private static final String URL = "url";
-	private static final String FOLDER = "folder";
-	private static final String ORDER = "order";
-	private static final String FILE_BOOKMARKS = "bookmarks.dat";
-    private static Set<String> mBookmarkSearchSet = new HashSet<>();
-    private static final List<HistoryItem> mBookmarkList = new ArrayList<>();
-    private static String mCurrentFolder = "";
-	private static BookmarkManager mInstance;
+    private static final String TITLE = "title";
+    private static final String URL = "url";
+    private static final String FOLDER = "folder";
+    private static final String ORDER = "order";
+    private static final String FILE_BOOKMARKS = "bookmarks.dat";
 
-	public static BookmarkManager getInstance(Context context) {
-		if (mInstance == null) {
-			mInstance = new BookmarkManager(context);
-		}
-		return mInstance;
-	}
+    private final String DEFAULT_BOOKMARK_TITLE;
 
-	private BookmarkManager(Context context) {
-		mContext = context;
-        mBookmarkList.clear();
-        mBookmarkList.addAll(getAllBookmarks(true));
-        mBookmarkSearchSet = getBookmarkUrls(mBookmarkList);
+    private Map<String, HistoryItem> mBookmarksMap;
+    // private final List<HistoryItem> mBookmarkList = new ArrayList<>();
+    private String mCurrentFolder = "";
+    private final ExecutorService mExecutor;
+    private boolean mReady = false;
+    private final File mFilesDir;
+
+    public BookmarkManager(Context context) {
+        mExecutor = Executors.newSingleThreadExecutor();
+        mFilesDir = context.getFilesDir();
+        DEFAULT_BOOKMARK_TITLE = context.getString(R.string.untitled);
+        mExecutor.execute(new BookmarkInitializer(context));
+    }
+
+    /**
+     * @return true if the BookmarkManager was initialized, false otherwise
+     */
+    public boolean isReady() {
+        return mReady;
+    }
+
+    /**
+     * Look for bookmark using the url
+     *
+     * @param url the lookup url
+     * @return the bookmark as an {@link HistoryItem} or null
+     */
+    @Nullable
+    public HistoryItem findBookmarkForUrl(final String url) {
+        return mBookmarksMap.get(url);
+    }
+
+    /**
+     * Initialize the BookmarkManager, it's a one-time operation and will be executed asynchronously.
+     * When done, mReady flag will been set to true.
+     */
+    private class BookmarkInitializer implements Runnable {
+        private final Context mContext;
+
+        public BookmarkInitializer(Context context) {
+            mContext = context;
+        }
+
+        @Override
+        public void run() {
+            synchronized (BookmarkManager.this) {
+                final Map<String, HistoryItem> bookmarks = new HashMap<>();
+                final File bookmarksFile = new File(mFilesDir, FILE_BOOKMARKS);
+
+                BufferedReader bookmarksReader = null;
+                InputStream inputStream = null;
+                try {
+                    if (bookmarksFile.exists() && bookmarksFile.isFile()) {
+                        inputStream = new FileInputStream(bookmarksFile);
+                    } else {
+                        inputStream = mContext.getResources().openRawResource(R.raw.default_bookmarks);
+                    }
+                    bookmarksReader = new BufferedReader(new InputStreamReader(inputStream));
+                    String line;
+                    while ((line = bookmarksReader.readLine()) != null) {
+                        try {
+                            JSONObject object = new JSONObject(line);
+                            HistoryItem item = new HistoryItem();
+                            item.setTitle(object.getString(TITLE));
+                            final String url = object.getString(URL);
+                            item.setUrl(url);
+                            item.setFolder(object.getString(FOLDER));
+                            item.setOrder(object.getInt(ORDER));
+                            item.setImageId(R.drawable.ic_bookmark);
+                            bookmarks.put(url, item);
+                        } catch (JSONException e) {
+                            Log.e(TAG, "Can't parse line " + line, e);
+                        }
+                    }
+                } catch (IOException e) {
+                    Log.e(TAG, "Error reading the bookmarks file", e);
+                } finally {
+                    Utils.close(bookmarksReader);
+                    Utils.close(inputStream);
+                }
+                mBookmarksMap = bookmarks;
+                mReady = true;
+            }
+        }
+
+    }
+
+    /**
+     * Dump all the given bookmarks to the bookmark file using a temporary file
+     */
+    private class BookmarksWriter implements Runnable {
+
+        private final List<HistoryItem> mBookmarks;
+
+        public BookmarksWriter(List<HistoryItem> bookmarks) {
+            mBookmarks = bookmarks;
+        }
+
+        @Override
+        public void run() {
+            final File tempFile = new File(mFilesDir,
+                    String.format("bm_%d.dat", System.currentTimeMillis()));
+            final File bookmarksFile = new File(mFilesDir, FILE_BOOKMARKS);
+            boolean success = false;
+            BufferedWriter bookmarkWriter = null;
+            try {
+                bookmarkWriter = new BufferedWriter(new FileWriter(tempFile, false));
+                JSONObject object = new JSONObject();
+                for (HistoryItem item : mBookmarks) {
+                    object.put(TITLE, item.getTitle());
+                    object.put(URL, item.getUrl());
+                    object.put(FOLDER, item.getFolder());
+                    object.put(ORDER, item.getOrder());
+                    bookmarkWriter.write(object.toString());
+                    bookmarkWriter.newLine();
+                }
+                success = true;
+            } catch (IOException | JSONException e) {
+                e.printStackTrace();
+            } finally {
+                Utils.close(bookmarkWriter);
+            }
+
+            if (success) {
+                // Overwrite the bookmarks file by renaming the temp file
+                tempFile.renameTo(bookmarksFile);
+            }
+        }
+    }
+
+    @Override
+    protected void finalize() throws Throwable {
+        mExecutor.shutdownNow();
+        super.finalize();
     }
 
     public boolean isBookmark(String url) {
-        return mBookmarkSearchSet.contains(url);
-	}
+        return mBookmarksMap.containsKey(url);
+    }
 
-	/**
-     * This method adds the the HistoryItem item to permanent bookmark storage.
-     * It returns true if the operation was successful.
-	 * 
+    /**
+     * This method adds the the HistoryItem item to permanent bookmark storage.<br>
+     * This operation is blocking if the manager is still not ready.
+     *
      * @param item the item to add
-	 */
-	public synchronized boolean addBookmark(HistoryItem item) {
-		File bookmarksFile = new File(mContext.getFilesDir(), FILE_BOOKMARKS);
-        if (item.getUrl() == null || mBookmarkSearchSet.contains(item.getUrl())) {
-			return false;
-		}
-        mBookmarkList.add(item);
-        BufferedWriter bookmarkWriter = null;
-		try {
-            bookmarkWriter = new BufferedWriter(new FileWriter(bookmarksFile, true));
-			JSONObject object = new JSONObject();
-			object.put(TITLE, item.getTitle());
-			object.put(URL, item.getUrl());
-			object.put(FOLDER, item.getFolder());
-			object.put(ORDER, item.getOrder());
-			bookmarkWriter.write(object.toString());
-			bookmarkWriter.newLine();
-            mBookmarkSearchSet.add(item.getUrl());
-		} catch (IOException | JSONException e) {
-			e.printStackTrace();
-        } finally {
-            Utils.close(bookmarkWriter);
-		}
-		return true;
-	}
+     * @return It returns true if the operation was successful.
+     */
+    public synchronized boolean addBookmark(@NonNull HistoryItem item) {
+        final String url = item.getUrl();
+        if (url == null || mBookmarksMap.containsKey(url)) {
+            return false;
+        }
+        mBookmarksMap.put(url, item);
+        mExecutor.execute(new BookmarksWriter(new LinkedList<>(mBookmarksMap.values())));
+        return true;
+    }
 
-	/**
-	 * This method adds the list of HistoryItems to permanent bookmark storage
-	 * 
+    /**
+     * This method adds the list of HistoryItems to permanent bookmark storage
+     *
      * @param list the list of HistoryItems to add to bookmarks
-	 */
-    private synchronized void addBookmarkList(List<HistoryItem> list) {
-		File bookmarksFile = new File(mContext.getFilesDir(), FILE_BOOKMARKS);
-        BufferedWriter bookmarkWriter = null;
-		try {
-            bookmarkWriter = new BufferedWriter(new FileWriter(bookmarksFile, true));
-            JSONObject object = new JSONObject();
-			for (HistoryItem item : list) {
-                if (item.getUrl() != null && !mBookmarkSearchSet.contains(item.getUrl())) {
-					object.put(TITLE, item.getTitle());
-					object.put(URL, item.getUrl());
-					object.put(FOLDER, item.getFolder());
-					object.put(ORDER, item.getOrder());
-					bookmarkWriter.write(object.toString());
-					bookmarkWriter.newLine();
-                    mBookmarkSearchSet.add(item.getUrl());
-                    mBookmarkList.add(item);
-				}
-			}
-		} catch (IOException | JSONException e) {
-			e.printStackTrace();
-        } finally {
-            Utils.close(bookmarkWriter);
-		}
-	}
+     */
+    public synchronized void addBookmarkList(List<HistoryItem> list) {
+        if (list == null || list.isEmpty()) {
+            return;
+        }
+        for (HistoryItem item : list) {
+            final String url = item.getUrl();
+            if (url != null && !mBookmarksMap.containsKey(url)) {
+                mBookmarksMap.put(url, item);
+            }
+        }
+        mExecutor.execute(new BookmarksWriter(new LinkedList<>(mBookmarksMap.values())));
+    }
 
-	/**
+    /**
      * This method deletes the bookmark with the given url. It returns
      * true if the deletion was successful.
-	 * 
+     *
      * @param deleteItem the bookmark item to delete
-	 */
+     */
     public synchronized boolean deleteBookmark(HistoryItem deleteItem) {
         if (deleteItem == null || deleteItem.isFolder()) {
-			return false;
-		}
-        mBookmarkSearchSet.remove(deleteItem.getUrl());
-        mBookmarkList.remove(deleteItem);
-        overwriteBookmarks(mBookmarkList);
+            return false;
+        }
+        mBookmarksMap.remove(deleteItem.getUrl());
+        mExecutor.execute(new BookmarksWriter(new LinkedList<>(mBookmarksMap.values())));
         return true;
     }
 
@@ -152,18 +248,18 @@ public class BookmarkManager {
      * @param newName the new name of the folder
      */
     public synchronized void renameFolder(@NonNull String oldName, @NonNull String newName) {
-        if (newName.length() == 0) {
+        if (newName.isEmpty()) {
             return;
         }
-        for (int n = 0; n < mBookmarkList.size(); n++) {
-            if (mBookmarkList.get(n).getFolder().equals(oldName)) {
-                mBookmarkList.get(n).setFolder(newName);
-            } else if (mBookmarkList.get(n).isFolder() && mBookmarkList.get(n).getTitle().equals(oldName)) {
-                mBookmarkList.get(n).setTitle(newName);
-                mBookmarkList.get(n).setUrl(Constants.FOLDER + newName);
+        for (HistoryItem item : mBookmarksMap.values()) {
+            if (item.getFolder().equals(oldName)) {
+                item.setFolder(newName);
+            } else if (item.isFolder() && item.getTitle().equals(oldName)) {
+                item.setTitle(newName);
+                item.setUrl(Constants.FOLDER + newName);
             }
         }
-        overwriteBookmarks(mBookmarkList);
+        mExecutor.execute(new BookmarksWriter(new LinkedList<>(mBookmarksMap.values())));
     }
 
     /**
@@ -172,16 +268,22 @@ public class BookmarkManager {
      * @param name the name of the folder to be deleted
      */
     public synchronized void deleteFolder(@NonNull String name) {
-        Iterator<HistoryItem> iterator = mBookmarkList.iterator();
-        while (iterator.hasNext()) {
-            HistoryItem item = iterator.next();
-            if (!item.isFolder() && item.getFolder().equals(name)) {
-                item.setFolder("");
-            } else if (item.getTitle().equals(name)) {
-                iterator.remove();
+        final Map<String, HistoryItem> bookmarks = new HashMap<>();
+        for (HistoryItem item : mBookmarksMap.values()) {
+            final String url = item.getUrl();
+            if (item.isFolder()) {
+                if (!item.getTitle().equals(name)) {
+                    bookmarks.put(url, item);
+                }
+            } else {
+                if (item.getFolder().equals(name)) {
+                    item.setFolder("");
+                }
+                bookmarks.put(url, item);
             }
         }
-        overwriteBookmarks(mBookmarkList);
+        mBookmarksMap = bookmarks;
+        mExecutor.execute(new BookmarksWriter(new LinkedList<>(mBookmarksMap.values())));
     }
 
     /**
@@ -194,151 +296,132 @@ public class BookmarkManager {
         if (oldItem == null || newItem == null || oldItem.isFolder()) {
             return;
         }
-        mBookmarkList.remove(oldItem);
-        mBookmarkList.add(newItem);
-        if (!oldItem.getUrl().equals(newItem.getUrl())) {
-            // Update the BookmarkMap if the URL has been changed
-            mBookmarkSearchSet.remove(oldItem.getUrl());
-            mBookmarkSearchSet.add(newItem.getUrl());
-				}
-        if (newItem.getUrl().length() == 0) {
+        if (newItem.getUrl().isEmpty()) {
             deleteBookmark(oldItem);
             return;
-			}
-        if (newItem.getTitle().length() == 0) {
-            newItem.setTitle(mContext.getString(R.string.untitled));
-		}
-        overwriteBookmarks(mBookmarkList);
-	}
+        }
+        if (newItem.getTitle().isEmpty()) {
+            newItem.setTitle(DEFAULT_BOOKMARK_TITLE);
+        }
+        final String oldUrl = oldItem.getUrl();
+        final String newUrl = newItem.getUrl();
+        if (!oldUrl.equals(newUrl)) {
+            // The url has been changed, remove the old one
+            mBookmarksMap.remove(oldUrl);
+        }
+        mBookmarksMap.put(newUrl, newItem);
+        mExecutor.execute(new BookmarksWriter(new LinkedList<>(mBookmarksMap.values())));
+    }
 
-	/**
-	 * This method exports the stored bookmarks to a text file in the device's
-	 * external download directory
-	 */
+    /**
+     * This method exports the stored bookmarks to a text file in the device's
+     * external download directory
+     */
     public synchronized void exportBookmarks(Activity activity) {
         List<HistoryItem> bookmarkList = getAllBookmarks(true);
-		File bookmarksExport = new File(
-				Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
-				"BookmarksExport.txt");
-		int counter = 0;
-		while (bookmarksExport.exists()) {
-			counter++;
-			bookmarksExport = new File(
-					Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
-					"BookmarksExport-" + counter + ".txt");
-		}
+        File bookmarksExport = new File(
+                Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
+                "BookmarksExport.txt");
+        int counter = 0;
+        while (bookmarksExport.exists()) {
+            counter++;
+            bookmarksExport = new File(
+                    Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
+                    "BookmarksExport-" + counter + ".txt");
+        }
         BufferedWriter bookmarkWriter = null;
-		try {
+        try {
             bookmarkWriter = new BufferedWriter(new FileWriter(bookmarksExport,
-					false));
+                    false));
             JSONObject object = new JSONObject();
-			for (HistoryItem item : bookmarkList) {
-				object.put(TITLE, item.getTitle());
-				object.put(URL, item.getUrl());
-				object.put(FOLDER, item.getFolder());
-				object.put(ORDER, item.getOrder());
-				bookmarkWriter.write(object.toString());
-				bookmarkWriter.newLine();
-			}
+            for (HistoryItem item : bookmarkList) {
+                object.put(TITLE, item.getTitle());
+                object.put(URL, item.getUrl());
+                object.put(FOLDER, item.getFolder());
+                object.put(ORDER, item.getOrder());
+                bookmarkWriter.write(object.toString());
+                bookmarkWriter.newLine();
+            }
             Utils.showSnackbar(activity, activity.getString(R.string.bookmark_export_path)
                     + ' ' + bookmarksExport.getPath());
-		} catch (IOException | JSONException e) {
-			e.printStackTrace();
+        } catch (IOException | JSONException e) {
+            e.printStackTrace();
         } finally {
             Utils.close(bookmarkWriter);
-		}
+        }
 
-	}
+    }
 
-	/**
+    /**
      * This method returns a list of ALL stored bookmarks.
      * This is a disk-bound operation and should not be
      * done very frequently.
-	 * 
+     *
+     * @param sort force to sort the returned bookmarkList
      * @return returns a list of bookmarks that can be sorted
-	 */
+     */
     public synchronized List<HistoryItem> getAllBookmarks(boolean sort) {
-		final List<HistoryItem> bookmarks = new ArrayList<>();
-		final File bookmarksFile = new File(mContext.getFilesDir(), FILE_BOOKMARKS);
-		try {
-			final InputStream inputStream;
-			if (bookmarksFile.exists() && bookmarksFile.isFile()) {
-				inputStream = new FileInputStream(bookmarksFile);
-			} else {
-				inputStream = mContext.getResources().openRawResource(R.raw.default_bookmarks);
-			}
-			final BufferedReader bookmarksReader =
-					new BufferedReader(new InputStreamReader(inputStream));
-			String line;
-			while ((line = bookmarksReader.readLine()) != null) {
-				try {
-					JSONObject object = new JSONObject(line);
-					HistoryItem item = new HistoryItem();
-					item.setTitle(object.getString(TITLE));
-					item.setUrl(object.getString(URL));
-					item.setFolder(object.getString(FOLDER));
-					item.setOrder(object.getInt(ORDER));
-					item.setImageId(R.drawable.ic_bookmark);
-					bookmarks.add(item);
-				} catch (JSONException e) {
-					Log.e(TAG, "Can't parse line " + line, e);
-				}
-			}
-			bookmarksReader.close();
-		} catch (IOException e) {
-			e.printStackTrace();
+        final List<HistoryItem> bookmarks = new ArrayList<>(mBookmarksMap.values());
+        if (sort) {
+            Collections.sort(bookmarks, new SortIgnoreCase());
         }
-		if (sort) {
-			Collections.sort(bookmarks, new SortIgnoreCase());
-		}
-		return bookmarks;
-	}
+        return bookmarks;
+    }
 
-	/**
+    /**
      * This method returns a list of bookmarks and folders located in the specified folder.
      * This method should generally be used by the UI when it needs a list to display to the
      * user as it returns a subset of all bookmarks and includes folders as well which are
      * really 'fake' bookmarks.
-	 * 
+     *
      * @param folder the name of the folder to retrieve bookmarks from
      * @return a list of bookmarks found in that folder
-	 */
+     */
     public synchronized List<HistoryItem> getBookmarksFromFolder(String folder, boolean sort) {
-		List<HistoryItem> bookmarks = new ArrayList<>();
-        if (folder == null || folder.length() == 0) {
+        List<HistoryItem> bookmarks = new ArrayList<>();
+        if (folder == null || folder.isEmpty()) {
             bookmarks.addAll(getFolders(sort));
             folder = "";
-				}
+        }
         mCurrentFolder = folder;
-        for (int n = 0; n < mBookmarkList.size(); n++) {
-            if (mBookmarkList.get(n).getFolder().equals(folder))
-                bookmarks.add(mBookmarkList.get(n));
-			}
+        for (HistoryItem item : mBookmarksMap.values()) {
+            if (item.getFolder().equals(folder))
+                bookmarks.add(item);
+        }
         if (sort) {
             Collections.sort(bookmarks, new SortIgnoreCase());
-		}
-		return bookmarks;
-	}
+        }
+        return bookmarks;
+    }
 
-	/**
+    /**
      * Tells you if you are at the root folder or in a subfolder
      *
      * @return returns true if you are in the root folder
      */
     public boolean isRootFolder() {
-        return mCurrentFolder.length() == 0;
+        return mCurrentFolder.isEmpty();
     }
 
     /**
-	 * Method is used internally for searching the bookmarks
-	 * 
+     * Returns the current folder
+     *
+     * @return the current folder
+     */
+    public String getCurrentFolder() {
+        return mCurrentFolder;
+    }
+
+    /**
+     * Method is used internally for searching the bookmarks
+     *
      * @return a sorted map of all bookmarks, useful for seeing if a bookmark exists
      */
-    private static Set<String> getBookmarkUrls(List<HistoryItem> list) {
+    private Set<String> getBookmarkUrls(List<HistoryItem> list) {
         Set<String> set = new HashSet<>();
-        for (int n = 0; n < list.size(); n++) {
-            if (!mBookmarkList.get(n).isFolder())
-                set.add(mBookmarkList.get(n).getUrl());
+        for (HistoryItem item : mBookmarksMap.values()) {
+            if (!item.isFolder())
+                set.add(item.getUrl());
         }
         return set;
     }
@@ -349,173 +432,80 @@ public class BookmarkManager {
      * the list of bookmarks that have non-empty folder fields.
      *
      * @return a list of all folders
-	 */
-    public synchronized List<HistoryItem> getFolders(boolean sort) {
-        List<HistoryItem> folders = new ArrayList<>();
-        Set<String> folderMap = new HashSet<>();
-		File bookmarksFile = new File(mContext.getFilesDir(), FILE_BOOKMARKS);
-        BufferedReader bookmarksReader = null;
-		try {
-            bookmarksReader = new BufferedReader(new FileReader(bookmarksFile));
-			String line;
-			while ((line = bookmarksReader.readLine()) != null) {
-				JSONObject object = new JSONObject(line);
-                String folderName = object.getString(FOLDER);
-                if (!folderName.isEmpty() && !folderMap.contains(folderName)) {
-                    HistoryItem item = new HistoryItem();
-                    item.setTitle(folderName);
-                    item.setUrl(Constants.FOLDER + folderName);
-                    item.setIsFolder(true);
-                    folderMap.add(folderName);
-                    folders.add(item);
-                }
-			}
-        } catch (IOException | JSONException e) {
-			e.printStackTrace();
-        } finally {
-            Utils.close(bookmarksReader);
-		}
-        if (sort) {
-            Collections.sort(folders, new SortIgnoreCase());
+     */
+    private synchronized List<HistoryItem> getFolders(boolean sort) {
+        final HashMap<String, HistoryItem> folders = new HashMap<>();
+        for (HistoryItem item : mBookmarksMap.values()) {
+            final String folderName = item.getFolder();
+            if (folderName != null && !folderName.isEmpty() && !folders.containsKey(folderName)) {
+                final HistoryItem folder = new HistoryItem();
+                folder.setIsFolder(true);
+                folder.setTitle(folderName);
+                folder.setImageId(R.drawable.ic_folder);
+                folder.setUrl(Constants.FOLDER + folderName);
+                folders.put(folderName, folder);
+            }
         }
-        return folders;
-	}
+        final List<HistoryItem> result = new ArrayList<>(folders.values());
+        if (sort) {
+            Collections.sort(result, new SortIgnoreCase());
+        }
+        return result;
+    }
 
-	/**
+    /**
      * returns a list of folder titles that can be used for suggestions in a
      * simple list adapter
-	 * 
+     *
      * @return a list of folder title strings
-	 */
+     */
     public synchronized List<String> getFolderTitles() {
-        List<String> folders = new ArrayList<>();
-        Set<String> folderMap = new HashSet<>();
-		File bookmarksFile = new File(mContext.getFilesDir(), FILE_BOOKMARKS);
-        BufferedReader bookmarksReader = null;
-		try {
-            bookmarksReader = new BufferedReader(new FileReader(bookmarksFile));
-			String line;
-			while ((line = bookmarksReader.readLine()) != null) {
-				JSONObject object = new JSONObject(line);
-				String folderName = object.getString(FOLDER);
-                if (!folderName.isEmpty() && !folderMap.contains(folderName)) {
-                    folders.add(folderName);
-                    folderMap.add(folderName);
-				}
-			}
-		} catch (IOException | JSONException e) {
-			e.printStackTrace();
-        } finally {
-            Utils.close(bookmarksReader);
-		}
-		return folders;
-	}
+        final Set<String> folders = new HashSet<>();
+        for (HistoryItem item : mBookmarksMap.values()) {
+            final String folderName = item.getFolder();
+            if (folderName != null && !folderName.isEmpty()) {
+                folders.add(folderName);
+            }
+        }
+        return new ArrayList<>(folders);
+    }
 
-	/**
-	 * This method imports all bookmarks that are included in the device's
-	 * permanent bookmark storage
-	 */
-    public synchronized void importBookmarksFromBrowser(Activity activity) throws Exception{
-		if (PreferenceManager.getInstance().getSystemBrowserPresent()) {
-
-			List<HistoryItem> bookmarkList = new ArrayList<>();
-			String[] columns = new String[] { Browser.BookmarkColumns.TITLE,
-					Browser.BookmarkColumns.URL };
-			String selection = Browser.BookmarkColumns.BOOKMARK + " = 1";
-			Cursor cursor = mContext.getContentResolver().query(Browser.BOOKMARKS_URI, columns,
-					selection, null, null);
-            if (cursor == null)
-                return;
-			String title, url;
-			int number = 0;
-			if (cursor.moveToFirst()) {
-				do {
-					title = cursor.getString(0);
-					url = cursor.getString(1);
-					if (title.isEmpty()) {
-						title = Utils.getDomainName(url);
-					}
-					number++;
-					bookmarkList.add(new HistoryItem(url, title));
-				} while (cursor.moveToNext());
-			}
-
-			cursor.close();
-			addBookmarkList(bookmarkList);
-
-            Utils.showSnackbar(activity, number + " " + mContext.getResources().getString(R.string.message_import));
-		} else {
-            Utils.createInformativeDialog(activity, R.string.title_error, R.string.dialog_import_error);
-		}
-	}
-
-	/**
-	 * This method imports the bookmarks from a backup file that is located on
-	 * external storage
-	 * 
+    /**
+     * This method imports the bookmarks from a backup file that is located on
+     * external storage
+     *
      * @param file the file to attempt to import bookmarks from
-	 */
+     */
     public synchronized void importBookmarksFromFile(File file, Activity activity) {
-		if (file == null) {
-			return;
-		}
-		List<HistoryItem> list = new ArrayList<>();
+        if (file == null) {
+            return;
+        }
+        List<HistoryItem> list = new ArrayList<>();
         BufferedReader bookmarksReader = null;
-		try {
+        try {
             bookmarksReader = new BufferedReader(new FileReader(file));
-			String line;
-			int number = 0;
-			while ((line = bookmarksReader.readLine()) != null) {
-				JSONObject object = new JSONObject(line);
-				HistoryItem item = new HistoryItem();
-				item.setTitle(object.getString(TITLE));
-				item.setUrl(object.getString(URL));
-				item.setFolder(object.getString(FOLDER));
-				item.setOrder(object.getInt(ORDER));
-				list.add(item);
-				number++;
-			}
-			addBookmarkList(list);
+            String line;
+            int number = 0;
+            while ((line = bookmarksReader.readLine()) != null) {
+                JSONObject object = new JSONObject(line);
+                HistoryItem item = new HistoryItem();
+                item.setTitle(object.getString(TITLE));
+                item.setUrl(object.getString(URL));
+                item.setFolder(object.getString(FOLDER));
+                item.setOrder(object.getInt(ORDER));
+                list.add(item);
+                number++;
+            }
+            addBookmarkList(list);
             String message = activity.getResources().getString(R.string.message_import);
             Utils.showSnackbar(activity, number + " " + message);
-		} catch (IOException | JSONException e) {
-			e.printStackTrace();
+        } catch (IOException | JSONException e) {
+            e.printStackTrace();
             Utils.createInformativeDialog(activity, R.string.title_error, R.string.import_bookmark_error);
         } finally {
             Utils.close(bookmarksReader);
-		}
-	}
-
-	/**
-	 * This method overwrites the entire bookmark file with the list of
-	 * bookmarks. This is useful when an edit has been made to one or more
-	 * bookmarks in the list
-	 * 
-     * @param list the list of bookmarks to overwrite the old ones with
-	 */
-    private synchronized void overwriteBookmarks(List<HistoryItem> list) {
-		File bookmarksFile = new File(mContext.getFilesDir(), FILE_BOOKMARKS);
-        BufferedWriter bookmarkWriter = null;
-		try {
-            bookmarkWriter = new BufferedWriter(new FileWriter(bookmarksFile, false));
-				JSONObject object = new JSONObject();
-            for (int n = 0; n < list.size(); n++) {
-                HistoryItem item = list.get(n);
-                if (!item.isFolder()) {
-				object.put(TITLE, item.getTitle());
-				object.put(URL, item.getUrl());
-				object.put(FOLDER, item.getFolder());
-				object.put(ORDER, item.getOrder());
-				bookmarkWriter.write(object.toString());
-				bookmarkWriter.newLine();
-			}
-            }
-		} catch (IOException | JSONException e) {
-			e.printStackTrace();
-        } finally {
-            Utils.close(bookmarkWriter);
-		}
-	}
+        }
+    }
 
     /**
      * find the index of a bookmark in a list using only its URL
@@ -538,18 +528,18 @@ public class BookmarkManager {
      */
     public static class SortIgnoreCase implements Comparator<HistoryItem> {
 
-		public int compare(HistoryItem o1, HistoryItem o2) {
-			if (o1 == null || o2 == null || o1.getTitle() == null || o2.getTitle() == null) {
-				return 0;
-			}
+        public int compare(HistoryItem o1, HistoryItem o2) {
+            if (o1 == null || o2 == null || o1.getTitle() == null || o2.getTitle() == null) {
+                return 0;
+            }
             if (o1.isFolder() == o2.isFolder()) {
-			return o1.getTitle().toLowerCase(Locale.getDefault())
-					.compareTo(o2.getTitle().toLowerCase(Locale.getDefault()));
+                return o1.getTitle().toLowerCase(Locale.getDefault())
+                        .compareTo(o2.getTitle().toLowerCase(Locale.getDefault()));
 
             } else {
                 return o1.isFolder() ? 1 : -1;
             }
-		}
+        }
 
-	}
+    }
 }

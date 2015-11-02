@@ -13,8 +13,8 @@ import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
 
+import acr.browser.lightning.app.BrowserApp;
 import acr.browser.lightning.constant.Constants;
-import acr.browser.lightning.preference.PreferenceManager;
 
 public class AdBlock {
 
@@ -28,7 +28,7 @@ public class AdBlock {
     private static final String TAB = "\t";
     private static final String SPACE = " ";
     private static final String EMPTY = "";
-    private static final Set<String> mBlockedDomainsList = new HashSet<>();
+    private final Set<String> mBlockedDomainsList = new HashSet<>();
     private boolean mBlockAds;
     private static final Locale mLocale = Locale.getDefault();
     private static AdBlock mInstance;
@@ -44,11 +44,11 @@ public class AdBlock {
         if (mBlockedDomainsList.isEmpty() && Constants.FULL_VERSION) {
             loadHostsFile(context);
         }
-        mBlockAds = PreferenceManager.getInstance().getAdBlockEnabled();
+        mBlockAds = BrowserApp.getAppComponent().getPreferenceManager().getAdBlockEnabled();
     }
 
     public void updatePreference() {
-        mBlockAds = PreferenceManager.getInstance().getAdBlockEnabled();
+        mBlockAds = BrowserApp.getAppComponent().getPreferenceManager().getAdBlockEnabled();
     }
 
     private void loadBlockedDomainsList(final Context context) {
@@ -57,8 +57,9 @@ public class AdBlock {
             @Override
             public void run() {
                 AssetManager asset = context.getAssets();
+                BufferedReader reader = null;
                 try {
-                    BufferedReader reader = new BufferedReader(new InputStreamReader(
+                    reader = new BufferedReader(new InputStreamReader(
                             asset.open(BLOCKED_DOMAINS_LIST_FILE_NAME)));
                     String line;
                     while ((line = reader.readLine()) != null) {
@@ -67,6 +68,8 @@ public class AdBlock {
                 } catch (IOException e) {
                     Log.wtf(TAG, "Reading blocked domains list from file '"
                             + BLOCKED_DOMAINS_LIST_FILE_NAME + "' failed.", e);
+                } finally {
+                    Utils.close(reader);
                 }
             }
         });

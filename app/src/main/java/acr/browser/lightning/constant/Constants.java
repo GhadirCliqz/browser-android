@@ -3,6 +3,7 @@
  */
 package acr.browser.lightning.constant;
 
+
 import android.os.Environment;
 
 import acr.browser.lightning.BuildConfig;
@@ -49,6 +50,11 @@ public final class Constants {
     public static final int PROXY_ORBOT = 1;
     public static final int PROXY_I2P = 2;
     public static final int PROXY_MANUAL = 3;
+
+    /**
+     * The bookmark page standard suffix
+     */
+    public static final String BOOKMARKS_FILENAME = "bookmarks.html";
 
     public static final String DEFAULT_ENCODING = "UTF-8";
 

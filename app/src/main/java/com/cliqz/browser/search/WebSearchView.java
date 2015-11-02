@@ -111,13 +111,15 @@ public class WebSearchView extends WebView implements ILightningTab {
 
         // Web view settings
         WebSettings webSettings = getSettings();
+        webSettings.setAllowFileAccess(true);
         webSettings.setJavaScriptEnabled(true);
         webSettings.setDomStorageEnabled(true);
-        /* webSettings.setGeolocationEnabled(true);
-        webSettings.setGeolocationDatabasePath(mContext.getCacheDir().getAbsolutePath()); */
+        webSettings.setGeolocationEnabled(true);
+        webSettings.setGeolocationDatabasePath(getContext().getCacheDir().getAbsolutePath());
 
         if (Build.VERSION.SDK_INT >= 16) {
             // Otherwise we can't do XHR
+            webSettings.setAllowFileAccessFromFileURLs(true);
             webSettings.setAllowUniversalAccessFromFileURLs(true);
         }
 

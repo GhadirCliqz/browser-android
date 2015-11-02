@@ -1,20 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/left_drawer"
-    android:layout_width="@dimen/navigation_width"
+    android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:layout_gravity="start"
     android:background="?attr/drawerBackground"
     android:clickable="true"
-    android:fitsSystemWindows="true"
-    android:orientation="vertical">
+    android:orientation="vertical" >
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
         android:background="?attr/dividerColor"
         android:gravity="center_vertical"
-        android:orientation="horizontal">
+        android:orientation="horizontal" >
 
         <FrameLayout
             android:id="@+id/tab_header_button"
@@ -23,12 +20,12 @@
             android:background="?attr/actionBarItemBackground"
             android:gravity="center">
 
-            <ImageView
-                android:id="@+id/plusIcon"
+        <ImageView
+            android:id="@+id/plusIcon"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:contentDescription="@string/action_new_tab"
+            android:contentDescription="@string/action_new_tab"
                 android:src="@drawable/ic_action_tabs" />
         </FrameLayout>
 
@@ -44,15 +41,14 @@
             android:textAppearance="?android:attr/textAppearanceLarge" />
     </LinearLayout>
 
-    <org.lucasr.twowayview.TwoWayView
-        android:id="@+id/left_drawer_list"
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/tabs_list"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:choiceMode="singleChoice"
         android:divider="@null"
         android:dividerHeight="0dp"
-        android:listSelector="?attr/listBackground" />
+        android:overScrollMode="ifContentScrolls" />
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -60,7 +56,7 @@
         android:background="?attr/dividerColor"
         android:baselineAligned="false"
         android:orientation="horizontal"
-        android:weightSum="3">
+        android:weightSum="4">
 
         <FrameLayout
             android:id="@+id/action_back"
@@ -68,7 +64,7 @@
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:background="?attr/actionBarItemBackground"
-            android:clickable="true">
+            android:clickable="true" >
 
             <ImageView
                 android:id="@+id/icon_back"
@@ -85,7 +81,7 @@
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:background="?attr/actionBarItemBackground"
-            android:clickable="true">
+            android:clickable="true" >
 
             <ImageView
                 android:id="@+id/icon_plus"
@@ -97,12 +93,29 @@
         </FrameLayout>
 
         <FrameLayout
-            android:id="@+id/action_forward"
+            android:id="@+id/action_home"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:background="?attr/actionBarItemBackground"
             android:clickable="true">
+
+            <ImageView
+                android:id="@+id/icon_home"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:contentDescription="@string/action_homepage"
+                android:src="@drawable/ic_action_home" />
+        </FrameLayout>
+
+        <FrameLayout
+            android:id="@+id/action_forward"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="?attr/actionBarItemBackground"
+            android:clickable="true" >
 
             <ImageView
                 android:id="@+id/icon_forward"

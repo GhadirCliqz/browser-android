@@ -7,6 +7,7 @@ import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.net.Uri;
+import android.os.Build;
 import android.util.Log;
 import android.webkit.WebView;
 
@@ -15,21 +16,19 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import acr.browser.lightning.controller.BrowserController;
-
 public class IntentUtils {
 
     private final Activity mActivity;
 
     private static final Pattern ACCEPTED_URI_SCHEMA = Pattern.compile("(?i)"
             + // switch on case insensitive matching
-            "("
+            '('
             + // begin group for schema
-            "(?:http|https|file):\\/\\/" + "|(?:inline|data|about|javascript):" + "|(?:.*:.*@)"
-            + ")" + "(.*)");
+            "(?:http|https|file)://" + "|(?:inline|data|about|javascript):" + "|(?:.*:.*@)"
+            + ')' + "(.*)");
 
-    public IntentUtils(BrowserController controller) {
-        mActivity = controller.getActivity();
+    public IntentUtils(Activity activity) {
+        mActivity = activity;
     }
 
     public boolean startActivityForUrl(WebView tab, String url) {
@@ -41,6 +40,11 @@ public class IntentUtils {
             return false;
         }
 
+        intent.addCategory(Intent.CATEGORY_BROWSABLE);
+        intent.setComponent(null);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH_MR1) {
+            intent.setSelector(null);
+        }
         if (mActivity.getPackageManager().resolveActivity(intent, 0) == null) {
             String packagename = intent.getPackage();
             if (packagename != null) {
