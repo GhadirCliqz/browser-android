@@ -5,16 +5,17 @@
     android:layout_height="match_parent"
     android:gravity="center_vertical"
     android:orientation="horizontal"
+    android:clickable="false"
     android:paddingLeft="10dp"
     android:paddingRight="10dp"
     android:weightSum="1">
 
     <ImageView
         android:id="@+id/faviconTab"
-        android:layout_width="24dp"
-        android:layout_height="24dp"
-        android:layout_marginLeft="5dp"
-        android:layout_marginRight="5dp"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:layout_marginLeft="7dp"
+        android:layout_marginRight="7dp"
         android:contentDescription="Favicon"
         android:gravity="center_vertical" />
 

@@ -15,17 +15,19 @@
  */
 package acr.browser.lightning.reading;
 
+import org.jsoup.nodes.Element;
+
 import java.io.UnsupportedEncodingException;
 import java.net.CookieHandler;
 import java.net.CookieManager;
 import java.net.CookiePolicy;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.security.SecureRandom;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
-import java.text.SimpleDateFormat;
-import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -33,15 +35,13 @@ import javax.net.ssl.KeyManager;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
-import org.jsoup.nodes.Element;
 
 /**
- * 
  * @author Peter Karich
  */
-public class SHelper {
+class SHelper {
 
-    public static final String UTF8 = "UTF-8";
+    private static final String UTF8 = "UTF-8";
     private static final Pattern SPACE = Pattern.compile(" ");
 
     public static String replaceSpaces(String url) {
@@ -72,9 +72,9 @@ public class SHelper {
         if (str.isEmpty())
             return "";
 
-        StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder(str.length());
         boolean previousSpace = false;
-        for (int i = 0; i < str.length(); i++) {
+        for (int i = 0, length = str.length(); i < length; i++) {
             char c = str.charAt(i);
             if (c == ' ' || (int) c == 9 || c == '\n') {
                 previousSpace = true;
@@ -95,7 +95,7 @@ public class SHelper {
      * invalid encoding character occurs.
      */
     public static String encodingCleanup(String str) {
-        StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder(str.length());
         boolean startedWithCorrectString = false;
         for (int i = 0; i < str.length(); i++) {
             char c = str.charAt(i);
@@ -122,13 +122,12 @@ public class SHelper {
         return str1.substring(res[0], res[1]);
     }
 
-    public static int[] longestSubstring(String str1, String str2) {
+    private static int[] longestSubstring(String str1, String str2) {
         if (str1 == null || str1.isEmpty() || str2 == null || str2.isEmpty())
             return null;
 
         // dynamic programming => save already identical length into array
-        // to understand this algo simply print identical length in every entry
-        // of the array
+        // to understand this algo simply print identical length in every entry of the array
         // i+1, j+1 then reuses information from i,j
         // java initializes them already with 0
         int[][] num = new int[str1.length()][str2.length()];
@@ -152,7 +151,7 @@ public class SHelper {
                 }
             }
         }
-        return new int[] { lastSubstrBegin, endIndex };
+        return new int[]{lastSubstrBegin, endIndex};
     }
 
     public static String getDefaultFavicon(String url) {
@@ -160,35 +159,19 @@ public class SHelper {
     }
 
     /**
-     * @param urlForDomain
-     *            extract the domain from this url
-     * @param path
-     *            this url does not have a domain
-     * @return returns the domain
+     * @param urlForDomain extract the domain from this url
+     * @param path         this url does not have a domain
+     * @return
      */
     public static String useDomainOfFirstArg4Second(String urlForDomain, String path) {
-        if (path.startsWith("http"))
+        try {
+            // See: http://stackoverflow.com/questions/1389184/building-an-absolute-url-from-a-relative-url-in-java
+            URL baseUrl = new URL(urlForDomain);
+            URL relativeurl = new URL(baseUrl, path);
+            return relativeurl.toString();
+        } catch (MalformedURLException ex) {
             return path;
-
-        if ("favicon.ico".equals(path))
-            path = "/favicon.ico";
-
-        if (path.startsWith("//")) {
-            // wikipedia special case, see tests
-            if (urlForDomain.startsWith("https:"))
-                return "https:" + path;
-
-            return "http:" + path;
-        } else if (path.startsWith("/"))
-            return "http://" + extractHost(urlForDomain) + path;
-        else if (path.startsWith("../")) {
-            int slashIndex = urlForDomain.lastIndexOf("/");
-            if (slashIndex > 0 && slashIndex + 1 < urlForDomain.length())
-                urlForDomain = urlForDomain.substring(0, slashIndex + 1);
-
-            return urlForDomain + path;
         }
-        return path;
     }
 
     public static String extractHost(String url) {
@@ -210,7 +193,7 @@ public class SHelper {
                 url = url.substring("m.".length());
         }
 
-        int slashIndex = url.indexOf("/");
+        int slashIndex = url.indexOf('/');
         if (slashIndex > 0)
             url = url.substring(0, slashIndex);
 
@@ -224,14 +207,12 @@ public class SHelper {
     }
 
     public static boolean isVideo(String url) {
-        return url.endsWith(".mpeg") || url.endsWith(".mpg") || url.endsWith(".avi")
-                || url.endsWith(".mov") || url.endsWith(".mpg4") || url.endsWith(".mp4")
-                || url.endsWith(".flv") || url.endsWith(".wmv");
+        return url.endsWith(".mpeg") || url.endsWith(".mpg") || url.endsWith(".avi") || url.endsWith(".mov")
+                || url.endsWith(".mpg4") || url.endsWith(".mp4") || url.endsWith(".flv") || url.endsWith(".wmv");
     }
 
     public static boolean isAudio(String url) {
-        return url.endsWith(".mp3") || url.endsWith(".ogg") || url.endsWith(".m3u")
-                || url.endsWith(".wav");
+        return url.endsWith(".mp3") || url.endsWith(".ogg") || url.endsWith(".m3u") || url.endsWith(".wav");
     }
 
     public static boolean isDoc(String url) {
@@ -241,23 +222,20 @@ public class SHelper {
 
     public static boolean isPackage(String url) {
         return url.endsWith(".gz") || url.endsWith(".tgz") || url.endsWith(".zip")
-                || url.endsWith(".rar") || url.endsWith(".deb") || url.endsWith(".rpm")
-                || url.endsWith(".7z");
+                || url.endsWith(".rar") || url.endsWith(".deb") || url.endsWith(".rpm") || url.endsWith(".7z");
     }
 
     public static boolean isApp(String url) {
-        return url.endsWith(".exe") || url.endsWith(".bin") || url.endsWith(".bat")
-                || url.endsWith(".dmg");
+        return url.endsWith(".exe") || url.endsWith(".bin") || url.endsWith(".bat") || url.endsWith(".dmg");
     }
 
     public static boolean isImage(String url) {
         return url.endsWith(".png") || url.endsWith(".jpeg") || url.endsWith(".gif")
-                || url.endsWith(".jpg") || url.endsWith(".bmp") || url.endsWith(".ico")
-                || url.endsWith(".eps");
+                || url.endsWith(".jpg") || url.endsWith(".bmp") || url.endsWith(".ico") || url.endsWith(".eps");
     }
 
     /**
-     * http://blogs.sun.com/CoreJavaTechTips/entry/cookie_handling_in_java_se
+     * @see "http://blogs.sun.com/CoreJavaTechTips/entry/cookie_handling_in_java_se"
      */
     public static void enableCookieMgmt() {
         CookieManager manager = new CookieManager();
@@ -266,7 +244,7 @@ public class SHelper {
     }
 
     /**
-     * http://stackoverflow.com/questions/2529682/setting-user-agent-of-a-java-urlconnection
+     * @see "http://stackoverflow.com/questions/2529682/setting-user-agent-of-a-java-urlconnection"
      */
     public static void enableUserAgentOverwrite() {
         System.setProperty("http.agent", "");
@@ -275,7 +253,7 @@ public class SHelper {
     public static String getUrlFromUglyGoogleRedirect(String url) {
         if (url.startsWith("http://www.google.com/url?")) {
             url = url.substring("http://www.google.com/url?".length());
-            String arr[] = urlDecode(url).split("\\&");
+            String arr[] = urlDecode(url).split("&");
             for (String str : arr) {
                 if (str.startsWith("q="))
                     return str.substring("q=".length());
@@ -302,7 +280,7 @@ public class SHelper {
         }
     }
 
-    public static String urlDecode(String str) {
+    private static String urlDecode(String str) {
         try {
             return URLDecoder.decode(str, UTF8);
         } catch (UnsupportedEncodingException ex) {
@@ -322,18 +300,18 @@ public class SHelper {
         return printNode(root, 0);
     }
 
-    public static String printNode(Element root, int indentation) {
-        StringBuilder sb = new StringBuilder();
+    private static String printNode(Element root, int indentation) {
+        StringBuilder sb = new StringBuilder(indentation);
         for (int i = 0; i < indentation; i++) {
             sb.append(' ');
         }
         sb.append(root.tagName());
-        sb.append(":");
+        sb.append(':');
         sb.append(root.ownText());
-        sb.append("\n");
+        sb.append('\n');
         for (Element el : root.children()) {
             sb.append(printNode(el, indentation + 1));
-            sb.append("\n");
+            sb.append('\n');
         }
         return sb.toString();
     }
@@ -377,8 +355,8 @@ public class SHelper {
                 } else if (counter == monthCounter + 1) {
                     try {
                         day = Integer.parseInt(str);
-                    } catch (Exception ex) {
-                        ex.printStackTrace();
+                    } catch (Exception ignored) {
+                        // ignored
                     }
                     if (day < 1 || day > 31) {
                         day = -1;
@@ -392,8 +370,7 @@ public class SHelper {
         if (year < 0)
             return null;
 
-        StringBuilder str = new StringBuilder();
-        str.append(year);
+        StringBuilder str = new StringBuilder(year);
         if (month < 1)
             return str.toString();
 
@@ -426,21 +403,11 @@ public class SHelper {
         return dateStr + "/01/01";
     }
 
-    /**
-     * keep in mind: simpleDateFormatter is not thread safe! call completeDate
-     * before applying this formatter.
-     */
-    public static SimpleDateFormat createDateFormatter() {
-        return new SimpleDateFormat("yyyy/MM/dd", Locale.getDefault());
-    }
-
-    // with the help of
-    // http://stackoverflow.com/questions/1828775/httpclient-and-ssl
+    // with the help of http://stackoverflow.com/questions/1828775/httpclient-and-ssl
     public static void enableAnySSL() {
         try {
             SSLContext ctx = SSLContext.getInstance("TLS");
-            ctx.init(new KeyManager[0], new TrustManager[] { new DefaultTrustManager() },
-                    new SecureRandom());
+            ctx.init(new KeyManager[0], new TrustManager[]{new DefaultTrustManager()}, new SecureRandom());
             SSLContext.setDefault(ctx);
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -450,13 +417,11 @@ public class SHelper {
     private static class DefaultTrustManager implements X509TrustManager {
 
         @Override
-        public void checkClientTrusted(X509Certificate[] arg0, String arg1)
-                throws CertificateException {
+        public void checkClientTrusted(X509Certificate[] arg0, String arg1) throws CertificateException {
         }
 
         @Override
-        public void checkServerTrusted(X509Certificate[] arg0, String arg1)
-                throws CertificateException {
+        public void checkServerTrusted(X509Certificate[] arg0, String arg1) throws CertificateException {
         }
 
         @Override

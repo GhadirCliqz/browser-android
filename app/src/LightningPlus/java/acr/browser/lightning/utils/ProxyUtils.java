@@ -3,7 +3,6 @@ package acr.browser.lightning.utils;
 import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.support.annotation.NonNull;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
 
@@ -11,6 +10,7 @@ import net.i2p.android.ui.I2PAndroidHelper;
 
 import acr.browser.lightning.R;
 import acr.browser.lightning.app.BrowserApp;
+import acr.browser.lightning.bus.BrowserEvents;
 import acr.browser.lightning.constant.Constants;
 import acr.browser.lightning.preference.PreferenceManager;
 import info.guardianproject.netcipher.proxy.OrbotHelper;
@@ -21,20 +21,20 @@ import info.guardianproject.netcipher.web.WebkitProxy;
  */
 public class ProxyUtils {
     // Helper
-    private static I2PAndroidHelper mI2PHelper;
+    private final I2PAndroidHelper mI2PHelper;
     private static boolean mI2PHelperBound;
     private static boolean mI2PProxyInitialized;
-    private static PreferenceManager mPreferences;
+    private final PreferenceManager mPreferences;
     private static ProxyUtils mInstance;
 
     private ProxyUtils(Context context) {
-        mPreferences = PreferenceManager.getInstance();
-        mI2PHelper = new I2PAndroidHelper(context);
+        mPreferences = BrowserApp.getAppComponent().getPreferenceManager();
+        mI2PHelper = new I2PAndroidHelper(context.getApplicationContext());
     }
 
-    public static ProxyUtils getInstance(@NonNull Context context) {
+    public static ProxyUtils getInstance() {
         if (mInstance == null) {
-            mInstance = new ProxyUtils(context);
+            mInstance = new ProxyUtils(BrowserApp.getAppContext());
         }
         return mInstance;
     }
@@ -144,13 +144,15 @@ public class ProxyUtils {
 
     }
 
-    public boolean isProxyReady(Activity activity) {
+    public boolean isProxyReady() {
         if (mPreferences.getProxyChoice() == Constants.PROXY_I2P) {
             if (!mI2PHelper.isI2PAndroidRunning()) {
-                Utils.showSnackbar(activity, R.string.i2p_not_running);
+                BrowserApp.getAppComponent().getBus()
+                        .post(new BrowserEvents.ShowSnackBarMessage(R.string.i2p_not_running));
                 return false;
             } else if (!mI2PHelper.areTunnelsActive()) {
-                Utils.showSnackbar(activity, R.string.i2p_tunnels_not_ready);
+                BrowserApp.getAppComponent().getBus()
+                        .post(new BrowserEvents.ShowSnackBarMessage(R.string.i2p_tunnels_not_ready));
                 return false;
             }
         }
@@ -191,7 +193,7 @@ public class ProxyUtils {
         }
     }
 
-    public int setProxyChoice(int choice, Activity activity) {
+    public static int setProxyChoice(int choice, Activity activity) {
         switch (choice) {
             case Constants.PROXY_ORBOT:
                 if (!OrbotHelper.isOrbotInstalled(activity)) {
@@ -201,7 +203,7 @@ public class ProxyUtils {
                 break;
 
             case Constants.PROXY_I2P:
-                I2PAndroidHelper ih = new I2PAndroidHelper(activity.getApplicationContext());
+                I2PAndroidHelper ih = new I2PAndroidHelper(BrowserApp.getAppContext());
                 if (!ih.isI2PAndroidInstalled()) {
                     choice = Constants.NO_PROXY;
                     ih.promptToInstall(activity);

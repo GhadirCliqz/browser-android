@@ -3,6 +3,7 @@
  */
 package acr.browser.lightning.utils;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
@@ -11,6 +12,7 @@ import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -19,8 +21,10 @@ import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Shader;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
+import android.provider.Browser;
 import android.support.annotation.DrawableRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.StringRes;
@@ -42,15 +46,29 @@ import java.util.Date;
 import acr.browser.lightning.R;
 import acr.browser.lightning.constant.Constants;
 import acr.browser.lightning.download.DownloadHandler;
+import com.anthonycr.grant.PermissionsManager;
+import com.anthonycr.grant.PermissionsResultAction;
 
 public final class Utils {
 
     public static void downloadFile(final Activity activity, final String url,
                                     final String userAgent, final String contentDisposition) {
-        String fileName = URLUtil.guessFileName(url, null, null);
-        DownloadHandler.onDownloadStart(activity, url, userAgent, contentDisposition, null
-        );
-        Log.i(Constants.TAG, "Downloading" + fileName);
+        PermissionsManager.getInstance().requestPermissionsIfNecessaryForResult(activity, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE}, new PermissionsResultAction() {
+            @Override
+            public void onGranted() {
+                String fileName = URLUtil.guessFileName(url, null, null);
+                DownloadHandler.onDownloadStart(activity, url, userAgent, contentDisposition, null
+                );
+                Log.i(Constants.TAG, "Downloading" + fileName);
+            }
+
+            @Override
+            public void onDenied(String permission) {
+                // TODO Show Message
+            }
+        });
+
     }
 
     public static Intent newEmailIntent(String address, String subject,
@@ -151,7 +169,7 @@ public final class Utils {
         }
     }
 
-    public static boolean deleteDir(File dir) {
+    private static boolean deleteDir(File dir) {
         if (dir != null && dir.isDirectory()) {
             String[] children = dir.list();
             for (String aChildren : children) {
@@ -309,4 +327,43 @@ public final class Utils {
         canvas.drawPath(wallpath, paint);
     }
 
+
+    private static Boolean isSystemBrowserPresent = null;
+
+    /**
+     * Check if the system browser is available, it caches the result so calling it multiple times
+     * doesn't imply wasting resources.
+     *
+     * @param context needed to get a {@link android.content.ContentResolver}
+     * @return true if the system browser is present, false otherwise
+     * @author Stefano Pacifici
+     */
+    public static boolean isSystemBrowserPresent(Context context) {
+        if (isSystemBrowserPresent != null) {
+            return isSystemBrowserPresent;
+        }
+
+        Cursor c = null;
+        String[] columns = new String[]{"url", "title"};
+        boolean browserFlag;
+        try {
+            Uri bookmarks = Uri.parse("content://browser/bookmarks");
+            c = context.getContentResolver().query(bookmarks, columns, null, null, null);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        if (c != null) {
+            Log.d("Browser", "System Browser Available");
+            browserFlag = true;
+        } else {
+            Log.e("Browser", "System Browser Unavailable");
+            browserFlag = false;
+        }
+        if (c != null) {
+            c.close();
+        }
+        isSystemBrowserPresent = new Boolean(browserFlag);
+        return browserFlag;
+    }
 }

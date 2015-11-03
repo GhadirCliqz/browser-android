@@ -19,9 +19,10 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 
 import acr.browser.lightning.R;
+import acr.browser.lightning.fragment.LightningPreferenceFragment;
 import acr.browser.lightning.preference.PreferenceManager;
 
-public class DisplaySettingsFragment extends PreferenceFragment implements Preference.OnPreferenceClickListener, Preference.OnPreferenceChangeListener {
+public class DisplaySettingsFragment extends LightningPreferenceFragment implements Preference.OnPreferenceClickListener, Preference.OnPreferenceChangeListener {
 
     private static final String SETTINGS_HIDESTATUSBAR = "fullScreenOption";
     private static final String SETTINGS_THEME = "app_theme";
@@ -54,7 +55,6 @@ public class DisplaySettingsFragment extends PreferenceFragment implements Prefe
 
     private void initPrefs() {
         // mPreferences storage
-        mPreferences = PreferenceManager.getInstance();
         mThemeOptions = this.getResources().getStringArray(R.array.themes);
         mCurrentTheme = mPreferences.getUseTheme();
 

@@ -27,11 +27,12 @@ import java.util.List;
 
 import acr.browser.lightning.R;
 import acr.browser.lightning.constant.Constants;
+import acr.browser.lightning.fragment.LightningPreferenceFragment;
 import acr.browser.lightning.preference.PreferenceManager;
 import acr.browser.lightning.utils.ProxyUtils;
 import acr.browser.lightning.utils.Utils;
 
-public class AdvancedSettingsFragment extends PreferenceFragment implements Preference.OnPreferenceClickListener, Preference.OnPreferenceChangeListener {
+public class AdvancedSettingsFragment extends LightningPreferenceFragment implements Preference.OnPreferenceClickListener, Preference.OnPreferenceChangeListener {
 
     private static final String SETTINGS_NEWWINDOW = "allow_new_window";
     private static final String SETTINGS_RESTORETABS = "restore_tabs";
@@ -64,9 +65,6 @@ public class AdvancedSettingsFragment extends PreferenceFragment implements Pref
     }
 
     private void initPrefs() {
-        // mPreferences storage
-        mPreferences = PreferenceManager.getInstance();
-
         textEncoding = findPreference(SETTINGS_TEXTENCODING);
         urlcontent = findPreference(SETTINGS_URLCONTENT);
         cbAllowPopups = (CheckBoxPreference) findPreference(SETTINGS_NEWWINDOW);
@@ -190,7 +188,7 @@ public class AdvancedSettingsFragment extends PreferenceFragment implements Pref
     }
 
     private void setProxyChoice(int choice) {
-        ProxyUtils utils = ProxyUtils.getInstance(mActivity);
+        ProxyUtils utils = ProxyUtils.getInstance(/* mActivity */);
         switch (choice) {
             case Constants.PROXY_ORBOT:
                 choice = utils.setProxyChoice(choice, mActivity);
@@ -361,11 +359,15 @@ public class AdvancedSettingsFragment extends PreferenceFragment implements Pref
         } else {
             Drawable drawable;
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                drawable = getResources().getDrawable(android.R.drawable.edit_text, getActivity().getTheme());
+                drawable = getResources().getDrawable(android.R.drawable.edit_text, mActivity.getTheme());
             } else {
                 drawable = getResources().getDrawable(android.R.drawable.edit_text);
             }
-            layout.setBackground(drawable);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+                layout.setBackground(drawable);
+            } else {
+                layout.setBackgroundDrawable(drawable);
+            }
         }
         downLocationPicker.setView(layout);
         downLocationPicker.setPositiveButton(getResources().getString(R.string.action_ok),

@@ -5,6 +5,7 @@ package com.cliqz.browser.fragment;
 
 import android.app.Activity;
 import android.content.DialogInterface;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.CheckBoxPreference;
@@ -13,26 +14,36 @@ import android.preference.PreferenceFragment;
 import android.support.v7.app.AlertDialog;
 import android.widget.EditText;
 
+import java.lang.ref.WeakReference;
+import java.util.List;
+
 import acr.browser.lightning.R;
 import acr.browser.lightning.constant.Constants;
+import acr.browser.lightning.database.BookmarkLocalSync;
 import acr.browser.lightning.database.BookmarkManager;
+import acr.browser.lightning.database.HistoryItem;
+import acr.browser.lightning.fragment.LightningPreferenceFragment;
 import acr.browser.lightning.preference.PreferenceManager;
+import acr.browser.lightning.utils.Utils;
 
-public class GeneralSettingsFragment extends PreferenceFragment implements Preference.OnPreferenceClickListener, Preference.OnPreferenceChangeListener {
+public class GeneralSettingsFragment extends LightningPreferenceFragment implements Preference.OnPreferenceClickListener, Preference.OnPreferenceChangeListener {
 
     private static final String SETTINGS_ADS = "cb_ads";
     private static final String SETTINGS_IMAGES = "cb_images";
     private static final String SETTINGS_SEARCHENGINE = "search";
     private static final String SETTINGS_DRAWERTABS = "cb_drawertabs";
     private static final String SETTINGS_BROWSER_IMPORT = "import_browser_bookmark";
+    private static final String SETTINGS_IMPORT_BROWSER = "import_browser";
+
 
     private Activity mActivity;
-    private BookmarkManager mBookmarkManager;
 
     private static final int API = Build.VERSION.SDK_INT;
     private PreferenceManager mPreferences;
     private Preference searchengine;
     private CheckBoxPreference cbAds, cbImages, cbDrawerTabs;
+    private ImportBookmarksTask mImportTaskReference = null;
+    private BookmarkLocalSync mSync;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -42,15 +53,22 @@ public class GeneralSettingsFragment extends PreferenceFragment implements Prefe
 
         mActivity = getActivity();
 
-        mBookmarkManager = BookmarkManager.getInstance(mActivity.getApplicationContext());
-
         initPrefs();
+    }
+
+    @Override
+    public void onDestroy() {
+        if (mImportTaskReference != null) {
+            mImportTaskReference.cancel(false);
+        }
+        super.onDestroy();
     }
 
     private void initPrefs() {
         // mPreferences storage
         Preference importBrowserpref = findPreference(SETTINGS_BROWSER_IMPORT);
-        mPreferences = PreferenceManager.getInstance();
+
+        mSync = new BookmarkLocalSync(mActivity);
 
         searchengine = findPreference(SETTINGS_SEARCHENGINE);
 
@@ -78,7 +96,17 @@ public class GeneralSettingsFragment extends PreferenceFragment implements Prefe
         cbImages.setChecked(imagesBool);
         cbAds.setChecked(Constants.FULL_VERSION && mPreferences.getAdBlockEnabled());
         cbDrawerTabs.setChecked(mPreferences.getShowTabsInDrawer(true));
+        new Thread(mInitializeImportPreference).start();
     }
+
+    private final Runnable mInitializeImportPreference = new Runnable() {
+        @Override
+        public void run() {
+            Preference importStock = findPreference(SETTINGS_IMPORT_BROWSER);
+            importStock.setEnabled(mSync.isStockSupported() || mSync.isChromeSupported());
+            importStock.setOnPreferenceClickListener(GeneralSettingsFragment.this);
+        }
+    };
 
     private void searchDialog() {
         AlertDialog.Builder picker = new AlertDialog.Builder(mActivity);
@@ -171,11 +199,8 @@ public class GeneralSettingsFragment extends PreferenceFragment implements Prefe
                 searchDialog();
                 return true;
             case SETTINGS_BROWSER_IMPORT:
-                try {
-                    mBookmarkManager.importBookmarksFromBrowser(getActivity());
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+                mImportTaskReference = new ImportBookmarksTask(getActivity());
+                mImportTaskReference.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
                 return true;
             default:
                 return false;
@@ -201,4 +226,41 @@ public class GeneralSettingsFragment extends PreferenceFragment implements Prefe
                 return false;
         }
     }
+
+    private class ImportBookmarksTask extends AsyncTask<Void, Void, Integer> {
+
+        private final WeakReference<Activity> mActivityReference;
+
+        public ImportBookmarksTask(Activity activity) {
+            mActivityReference = new WeakReference<>(activity);
+        }
+
+        @Override
+        protected Integer doInBackground(Void... params) {
+            List<HistoryItem> list = null;
+            if (mSync.isStockSupported()) {
+                list = mSync.getBookmarksFromStockBrowser();
+            } else if (mSync.isChromeSupported()) {
+                list = mSync.getBookmarksFromChrome();
+            }
+            int count = 0;
+            if (list != null && !list.isEmpty()) {
+                mBookmarkManager.addBookmarkList(list);
+                count = list.size();
+            }
+            return count;
+        }
+
+        @Override
+        protected void onPostExecute(Integer num) {
+            super.onPostExecute(num);
+            Activity activity = mActivityReference.get();
+            if (activity != null) {
+                int number = num;
+                final String message = activity.getResources().getString(R.string.message_import);
+                Utils.showSnackbar(activity, number + " " + message);
+            }
+        }
+    }
+
 }

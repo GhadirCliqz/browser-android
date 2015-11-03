@@ -4,22 +4,17 @@
 package acr.browser.lightning.fragment;
 
 import android.app.Activity;
-import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.net.Uri;
 import android.os.Bundle;
 import android.preference.Preference;
 import android.preference.PreferenceFragment;
 
-import acr.browser.lightning.BuildConfig;
 import acr.browser.lightning.R;
 
 public class AboutSettingsFragment extends PreferenceFragment {
 
     private Activity mActivity;
-
-    private int mCounter = 1;
 
     private static final String SETTINGS_VERSION = "pref_version";
 
@@ -33,30 +28,15 @@ public class AboutSettingsFragment extends PreferenceFragment {
 
         Preference version = findPreference(SETTINGS_VERSION);
         version.setSummary(getVersion());
-        version.setOnPreferenceClickListener(versionClickListener);
     }
 
     private String getVersion() {
-        final String version = BuildConfig.VERSION_NAME;
-        final String lightningVersion = BuildConfig.LIGHTNING_VERSION_NAME;
-        return getString(R.string.about_version_format, version, lightningVersion);
+        try {
+            PackageInfo p = mActivity.getPackageManager().getPackageInfo(mActivity.getPackageName(), 0);
+            return p.versionName;
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+            return "1.0";
+        }
     }
-
-    private final Preference.OnPreferenceClickListener versionClickListener =
-            new Preference.OnPreferenceClickListener() {
-                @Override
-                public boolean onPreferenceClick(Preference preference) {
-                    if (mCounter < 10) {
-                        mCounter++;
-                        return false;
-                    } else {
-                        final Intent intent = new Intent(Intent.ACTION_VIEW,
-                                Uri.parse("http://i.imgur.com/4lpVkTS.gif"));
-                        getActivity().startActivity(intent);
-                        mCounter = 0;
-                        return true;
-                    }
-                }
-            };
-
 }

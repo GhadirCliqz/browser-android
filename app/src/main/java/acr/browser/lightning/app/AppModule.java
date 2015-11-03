@@ -4,11 +4,14 @@ import android.content.Context;
 
 import com.squareup.otto.Bus;
 
+import javax.inject.Singleton;
+
+import acr.browser.lightning.database.BookmarkManager;
 import dagger.Module;
 import dagger.Provides;
 
 /**
- * Created by Ravijt on 30/09/15.
+ * Created by Stefano Pacifici on 01/09/15.
  */
 @Module
 public class AppModule {
@@ -23,6 +26,12 @@ public class AppModule {
     @Provides
     public Context provideContext() {
         return app.getApplicationContext();
+    }
+
+    @Provides
+    @Singleton
+    public BookmarkManager provideBookmarkManager() {
+        return new BookmarkManager(app.getApplicationContext());
     }
 
     @Provides

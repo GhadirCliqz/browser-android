@@ -36,8 +36,7 @@ public class HistoryPage {
     private static final String END = "</div></body></html>";
 
     public static String getHistoryPage(Context context) {
-        StringBuilder historyBuilder = new StringBuilder();
-        historyBuilder.append(HistoryPage.HEADING);
+        StringBuilder historyBuilder = new StringBuilder(HistoryPage.HEADING);
         List<HistoryItem> historyList = getWebHistory(context);
         Iterator<HistoryItem> it = historyList.iterator();
         HistoryItem helper;
@@ -67,8 +66,7 @@ public class HistoryPage {
     }
 
     private static List<HistoryItem> getWebHistory(Context context) {
-        HistoryDatabase databaseHandler = HistoryDatabase.getInstance(context
-                .getApplicationContext());
+        HistoryDatabase databaseHandler = BrowserApp.getAppComponent().getHistoryDatabase();
         return databaseHandler.getLastHundredItems();
     }
 }
