@@ -163,7 +163,7 @@ public class TabsManager {
      * @return The removed tab reference or null
      */
     @Nullable
-    public synchronized LightningView deleteTab(final int position) {
+    private synchronized LightningView removeTab(final int position) {
         if (position >= mWebViewList.size()) {
             return null;
         }
@@ -175,6 +175,25 @@ public class TabsManager {
         return tab;
     }
 
+    public synchronized void deleteTab(int position) {
+        final LightningView currentTab = getCurrentTab();
+        int current = positionOf(currentTab);
+
+        if (current == position) {
+            if (size() == 1) {
+                mCurrentTab = null;
+            } else if (current < size() - 1 ) {
+                // There is another tab after this one
+                mCurrentTab = getTabAtPosition(current + 1);
+            } else {
+                mCurrentTab = getTabAtPosition(current - 1);
+            }
+            removeTab(current);
+        } else {
+            removeTab(position);
+        }
+    }
+
     /**
      * Return the position of the given tab.
      *
@@ -183,6 +202,21 @@ public class TabsManager {
      */
     public synchronized int positionOf(final LightningView tab) {
         return mWebViewList.indexOf(tab);
+    }
+
+    /**
+     * Return the position of the given tab.
+     *
+     * @param id the unique id of the tab we want the position
+     * @return the position of the tab or -1 if the tab is not in the list
+     */
+    public synchronized int positionOf(final String id) {
+        for(LightningView tab : mWebViewList) {
+            if(tab.getId().equals(id)) {
+                return positionOf(tab);
+            }
+        }
+        return -1;
     }
 
     /**
