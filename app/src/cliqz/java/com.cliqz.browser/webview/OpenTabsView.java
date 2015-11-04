@@ -31,6 +31,7 @@ import javax.inject.Inject;
 
 import acr.browser.lightning.BuildConfig;
 import acr.browser.lightning.activity.BrowserActivity;
+import acr.browser.lightning.activity.TabsManager;
 import acr.browser.lightning.app.BrowserApp;
 import acr.browser.lightning.constant.Constants;
 import acr.browser.lightning.view.ILightningTab;
@@ -47,10 +48,12 @@ public class OpenTabsView extends WebView implements ILightningTab {
     private static final String KEY_IMAGE_URL = "img";
     private static final String KEY_LIST = "list";
     private static String directory;
-    public List<LightningView> openTabsList;
 
     @Inject
     Bus mTabManagerBus;
+
+    @Inject
+    TabsManager tabsManager;
 
     public OpenTabsView(Context context) {
         super(context);
@@ -152,7 +155,7 @@ public class OpenTabsView extends WebView implements ILightningTab {
      */
     private String openTabsToJSON() {
         JSONArray openTabsJSON = new JSONArray();
-        for(LightningView tabDetails : openTabsList) {
+        for(LightningView tabDetails : tabsManager.getTabsList()) {
             HashMap<String,String> processedTabDetails = new HashMap<>();
             processedTabDetails.put(KEY_ID,tabDetails.getId());
             processedTabDetails.put(KEY_URL,tabDetails.getUrl());
