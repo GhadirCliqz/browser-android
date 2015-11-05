@@ -9,6 +9,7 @@ import com.squareup.otto.Bus;
 import javax.inject.Singleton;
 
 import acr.browser.lightning.activity.BrowserActivity;
+import acr.browser.lightning.activity.BrowserMenuPopup;
 import acr.browser.lightning.activity.ThemableBrowserActivity;
 import acr.browser.lightning.constant.BookmarkPage;
 import acr.browser.lightning.database.HistoryDatabase;
@@ -58,8 +59,10 @@ public interface AppComponent {
     void inject(LightningView lightningView);
 
     void inject(ThemableBrowserActivity activity);
-	
-	void inject(WebSearchView webSearchView);
+
+    void inject(WebSearchView webSearchView);
 
     void inject(OpenTabsView openTabsView);
+
+    void inject(BrowserMenuPopup browserMenuPopup);
 }

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources xmlns:android="http://schemas.android.com/apk/res/android">
+<resources xmlns:tools="http://schemas.android.com/tools" xmlns:android="http://schemas.android.com/apk/res/android">
 
     <style name="Theme.SettingsTheme" parent="Theme.AppCompat.Light">
 
@@ -123,5 +123,16 @@
 
     <style name="normalText">
         <item name="android:textStyle">normal</item>
+        <item name="android:fontFamily" tools:targetApi="jelly_bean">sans-serif-light</item>
     </style>
+
+    <style name="TwoWayView">
+        <item name="android:orientation">horizontal</item>
+    </style>
+    <style name="popupMenu.textViewStyle" parent="TextAppearance.AppCompat.Medium">
+        <item name="android:layout_margin">5dp</item>
+        <item name="android:background">?attr/actionBarItemBackground</item>
+        <item name="android:color">@color/abc_primary_text_material_dark</item>
+    </style>
+
 </resources>

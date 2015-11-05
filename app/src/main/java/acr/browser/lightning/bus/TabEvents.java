@@ -1,5 +1,7 @@
 package acr.browser.lightning.bus;
 
+import acr.browser.lightning.activity.BrowserMenuPopup;
+
 /**
  * A collection of events been sent by {@link acr.browser.lightning.fragment.TabsFragment}
  *
@@ -61,5 +63,14 @@ public final class TabEvents {
      * new tab button.
      */
     public static class NewTabLongPress {
+    }
+
+    /**
+     * Sended by {@link BrowserMenuPopup} when the user press the "New
+     * incognito tab" menu item.
+     *
+     * THIS IS CLIQZ SPECIFIC
+     */
+    public static class NewIncognitoTab {
     }
 }
