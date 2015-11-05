@@ -4,5 +4,7 @@
     <dimen name="navigation_width">260dp</dimen>
     <dimen name="search_bar_height">48dp</dimen>
     <dimen name="abc_action_button_min_width_overflow_material">48dp</dimen>
+    <dimen name="browser_menu_horizontal_margin">10dp</dimen>
+    <dimen name="browser_menu_vertical_margin">10dp</dimen>
 
 </resources>

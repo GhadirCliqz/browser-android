@@ -11,11 +11,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 
+import com.anthonycr.grant.PermissionsManager;
+
 import java.util.ArrayList;
 import java.util.List;
 
 import acr.browser.lightning.R;
-import com.anthonycr.grant.PermissionsManager;
 
 public class SettingsActivity extends ThemableSettingsActivity {
 

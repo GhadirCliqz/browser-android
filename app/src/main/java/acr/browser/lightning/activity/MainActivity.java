@@ -14,14 +14,14 @@ import acr.browser.lightning.R;
 @SuppressWarnings("deprecation")
 public class MainActivity extends BrowserActivity {
 
-	@Override
-	public void updateCookiePreference() {
+    @Override
+    public void updateCookiePreference() {
         CookieManager cookieManager = CookieManager.getInstance();
-		if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
-			CookieSyncManager.createInstance(this);
-		}
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+            CookieSyncManager.createInstance(this);
+        }
         cookieManager.setAcceptCookie(mPreferences.getCookiesEnabled());
-	}
+    }
 
 //    @Override
 //    public synchronized void initializeTabs() {
@@ -29,39 +29,39 @@ public class MainActivity extends BrowserActivity {
 //        // if incognito mode use newTab(null, true); instead
 //    }
 
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		getMenuInflater().inflate(R.menu.main, menu);
-		return super.onCreateOptionsMenu(menu);
-	}
+    /* @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.main, menu);
+        return super.onCreateOptionsMenu(menu);
+    } */
 
-	@Override
-	protected void onNewIntent(Intent intent) {
-		handleNewIntent(intent);
-		super.onNewIntent(intent);
-	}
+    @Override
+    protected void onNewIntent(Intent intent) {
+        handleNewIntent(intent);
+        super.onNewIntent(intent);
+    }
 
-	@Override
-	protected void onPause() {
-		super.onPause();
-		saveOpenTabs();
-	}
+    @Override
+    protected void onPause() {
+        super.onPause();
+        saveOpenTabs();
+    }
 
-	@Override
+    @Override
     public void updateHistory(@Nullable String title, @NonNull String url) {
-		addItemToHistory(title, url);
-	}
+        addItemToHistory(title, url);
+    }
 
-	@Override
-	public boolean isIncognito() {
-		return false;
-	}
+    @Override
+    public boolean isIncognito() {
+        return false;
+    }
 
-	@Override
-	public void closeActivity() {
-		closeDrawers();
-		moveTaskToBack(true);
-	}
+    @Override
+    public void closeActivity() {
+        closeDrawers();
+        moveTaskToBack(true);
+    }
 
 
 }
