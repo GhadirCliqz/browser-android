@@ -491,7 +491,9 @@ public abstract class BrowserActivity extends ThemableBrowserActivity
 
                 @Override
                 public void run() {
+                    if (mArrowDrawable != null) {
                     mArrowImage.startAnimation(anim);
+                }
                 }
 
             }, 100);
@@ -1015,8 +1017,7 @@ public abstract class BrowserActivity extends ThemableBrowserActivity
             updateUrl(newView.getUrl(), true);
             updateProgress(newView.getProgress());
         } else {
-            updateUrl("", true);
-            updateProgress(0);
+                newTab(url, true);
         }
 
         mBrowserFrame.addView(newWebView, MATCH_PARENT);
@@ -1206,8 +1207,6 @@ public abstract class BrowserActivity extends ThemableBrowserActivity
             mIsNewIntent = false;
             closeActivity();
         }
-
-        Log.d(Constants.TAG, "deleted tab");
     }
 
     private void performExitCleanUp() {

@@ -11,7 +11,14 @@
         android:layout_height="?attr/actionBarSize"
         android:background="?attr/dividerColor"
         android:gravity="center_vertical"
-        android:orientation="horizontal" >
+        android:orientation="horizontal">
+
+        <FrameLayout
+            android:id="@+id/tab_header_button"
+            android:layout_width="?attr/actionBarSize"
+            android:layout_height="match_parent"
+            android:background="?attr/actionBarItemBackground"
+            android:gravity="center">
 
         <FrameLayout
             android:id="@+id/tab_header_button"

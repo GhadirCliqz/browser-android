@@ -30,8 +30,6 @@ public final class Constants {
     public static final String OPEN_TABS = "file:///android_asset/tab-mngt/tabs.html";
     public static final String BAIDU_SEARCH = "https://www.baidu.com/s?wd=";
     public static final String YANDEX_SEARCH = "https://yandex.ru/yandsearch?lr=21411&text=";
-    public static final String EXTERNAL_STORAGE = Environment.getExternalStorageDirectory()
-            .toString();
     public static final String JAVASCRIPT_INVERT_PAGE = "javascript:(function(){var e='img {-webkit-filter: invert(100%);'+'-moz-filter: invert(100%);'+'-o-filter: invert(100%);'+'-ms-filter: invert(100%); }',t=document.getElementsByTagName('head')[0],n=document.createElement('style');if(!window.counter){window.counter=1}else{window.counter++;if(window.counter%2==0){var e='html {-webkit-filter: invert(0%); -moz-filter: invert(0%); -o-filter: invert(0%); -ms-filter: invert(0%); }'}}n.type='text/css';if(n.styleSheet){n.styleSheet.cssText=e}else{n.appendChild(document.createTextNode(e))}t.appendChild(n)})();";
     public static final String JAVASCRIPT_LOAD_ANTIPHISHING = "javascript:(function(d){script = d.createElement('script'); script.type = 'text/javascript'; script.async = true; script.onload = function() { window.setTimeout(function() { CliqzAntiPhishing.auxOnPageLoad(document.location.href); }, 10) }; script.src = 'cliqz://js/CliqzAntiPhishing.js'; d.getElementsByTagName('head')[0].appendChild(script)})(document);";
     public static final String JAVASCRIPT_TEXT_REFLOW = "javascript:document.getElementsByTagName('body')[0].style.width=window.innerWidth+'px';";

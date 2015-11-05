@@ -156,7 +156,7 @@ public class LightningView implements ILightningTab {
 
             if (url != null) {
                 if (!url.trim().isEmpty()) {
-                    mWebView.loadUrl(url);
+                mWebView.loadUrl(url, mRequestHeaders);
                 } else {
                     // don't load anything, the user is looking for a blank tab
                 }
@@ -175,7 +175,7 @@ public class LightningView implements ILightningTab {
         } else if (mHomepage.startsWith("about:bookmarks")) {
             loadBookmarkpage();
         } else {
-            mWebView.loadUrl(mHomepage);
+            mWebView.loadUrl(mHomepage, mRequestHeaders);
         }
     }
 
