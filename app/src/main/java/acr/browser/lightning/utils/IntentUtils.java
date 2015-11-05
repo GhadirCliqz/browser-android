@@ -57,8 +57,6 @@ public class IntentUtils {
                 return false;
             }
         }
-        intent.addCategory(Intent.CATEGORY_BROWSABLE);
-        intent.setComponent(null);
         if (tab != null) {
             intent.putExtra(mActivity.getPackageName() + ".Origin", 1);
         }

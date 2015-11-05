@@ -44,7 +44,10 @@ android {
         }
     }
     lintOptions {
-        abortOnError false
+        abortOnError true
+    }
+    packagingOptions {
+        exclude '.readme'
     }
     packagingOptions {
         exclude '.readme'
@@ -60,6 +63,14 @@ android {
         lightningPlus.setRoot('src/LightningPlus')
         lightningLite.setRoot('src/LightningLite')
     }
+}
+
+dexcount {
+    includeClasses = false
+    includeFieldCount = false
+    printAsTree = true
+    orderByMethodCount = true
+    verbose = false
 }
 
 dexcount {

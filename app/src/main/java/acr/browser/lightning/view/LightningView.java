@@ -19,6 +19,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.util.ArrayMap;
 import android.util.Log;
 import android.view.GestureDetector;
 import android.view.GestureDetector.SimpleOnGestureListener;
@@ -42,6 +43,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.lang.ref.WeakReference;
 import java.util.List;
+import java.util.Map;
 
 import javax.inject.Inject;
 
@@ -63,6 +65,10 @@ import acr.browser.lightning.utils.ThemeUtils;
 import acr.browser.lightning.utils.Utils;
 
 public class LightningView implements ILightningTab {
+
+    public static final String HEADER_REQUESTED_WITH = "X-Requested-With";
+    public static final String HEADER_WAP_PROFILE = "X-Wap-Profile";
+    public static final String HEADER_DNT = "DNT";
 
     final LightningViewTitle mTitle;
     private WebView mWebView;
@@ -97,6 +103,7 @@ public class LightningView implements ILightningTab {
             0, 0, 0, 1.0f, 0 // alpha
     };
     private final WebViewHandler mWebViewHandler = new WebViewHandler(this);
+    private final Map<String, String> mRequestHeaders = new ArrayMap<>();
 
     @Inject
     Bus mEventBus;
@@ -120,7 +127,7 @@ public class LightningView implements ILightningTab {
         mHistoryDatabase = database;
         mUIController = (UIController) activity;
         mIsCustomWebView = overrideWebView != null;
-        mWebView = overrideWebView!= null ? overrideWebView : new WebView(activity);
+        mWebView = overrideWebView != null ? overrideWebView : new WebView(activity);
         mIsIncognitoTab = isIncognito;
         mTitle = new LightningViewTitle(activity, mUIController.getUseDarkTheme());
         mAdBlock = AdBlock.getInstance(activity.getApplicationContext());
@@ -142,7 +149,7 @@ public class LightningView implements ILightningTab {
 
         mWebView.setScrollbarFadingEnabled(true);
 
-        if(overrideWebView == null) {
+        if (overrideWebView == null) {
             mWebView.setSaveEnabled(true);
             mWebView.setNetworkAvailable(true);
             mWebView.setWebChromeClient(new LightningChromeClient(activity, this));
@@ -156,7 +163,7 @@ public class LightningView implements ILightningTab {
 
             if (url != null) {
                 if (!url.trim().isEmpty()) {
-                    mWebView.loadUrl(url);
+                    mWebView.loadUrl(url, mRequestHeaders);
                 } else {
                     // don't load anything, the user is looking for a blank tab
                 }
@@ -171,11 +178,11 @@ public class LightningView implements ILightningTab {
             return;
         }
         if (mHomepage.startsWith("about:home")) {
-            mWebView.loadUrl(StartPage.getHomepage(mActivity));
+            mWebView.loadUrl(StartPage.getHomepage(mActivity), mRequestHeaders);
         } else if (mHomepage.startsWith("about:bookmarks")) {
             loadBookmarkpage();
         } else {
-            mWebView.loadUrl(mHomepage);
+            mWebView.loadUrl(mHomepage, mRequestHeaders);
         }
     }
 
@@ -200,7 +207,7 @@ public class LightningView implements ILightningTab {
         File bookmarkWebPage = new File(mActivity.getFilesDir(), Constants.BOOKMARKS_FILENAME);
 
         BrowserApp.getAppComponent().getBookmarkPage().buildBookmarkPage(null);
-        mWebView.loadUrl(Constants.FILE + bookmarkWebPage);
+        mWebView.loadUrl(Constants.FILE + bookmarkWebPage, mRequestHeaders);
 
     }
 
@@ -223,6 +230,20 @@ public class LightningView implements ILightningTab {
         mAdBlock.updatePreference();
         mHomepage = mPreferences.getHomepage();
         setColorMode(mPreferences.getRenderingMode());
+
+        if (mPreferences.getDoNotTrackEnabled()) {
+            mRequestHeaders.put(HEADER_DNT, "1");
+        } else {
+            mRequestHeaders.remove(HEADER_DNT);
+        }
+
+        if (mPreferences.getRemoveIdentifyingHeadersEnabled()) {
+            mRequestHeaders.put(HEADER_REQUESTED_WITH, "");
+            mRequestHeaders.put(HEADER_WAP_PROFILE, "");
+        } else {
+            mRequestHeaders.remove(HEADER_REQUESTED_WITH);
+            mRequestHeaders.remove(HEADER_WAP_PROFILE);
+        }
 
         if (!mIsIncognitoTab) {
             settings.setGeolocationEnabled(mPreferences.getLocationEnabled());
@@ -463,6 +484,11 @@ public class LightningView implements ILightningTab {
                 settings.setUserAgentString(ua);
                 break;
         }
+    }
+
+    @NonNull
+    protected Map<String, String> getRequestHeaders() {
+        return mRequestHeaders;
     }
 
     public boolean isShown() {
@@ -766,8 +792,7 @@ public class LightningView implements ILightningTab {
 
         if (mWebView != null && !mIsCustomWebView) {
             mUrl = url;
-            // mWebView.loadDataWithBaseURL("file:///android_asset/");
-            mWebView.loadUrl(url);
+            mWebView.loadUrl(url, mRequestHeaders);
 
             if (API > 16) {
                 final WebSettings settings = mWebView.getSettings();

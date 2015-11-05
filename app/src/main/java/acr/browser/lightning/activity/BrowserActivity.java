@@ -124,7 +124,9 @@ import acr.browser.lightning.fragment.BookmarksFragment;
 import acr.browser.lightning.fragment.TabsFragment;
 import acr.browser.lightning.object.SearchAdapter;
 import acr.browser.lightning.receiver.NetworkReceiver;
+
 import com.anthonycr.grant.PermissionsManager;
+
 import acr.browser.lightning.utils.ProxyUtils;
 import acr.browser.lightning.utils.ThemeUtils;
 import acr.browser.lightning.utils.UrlUtils;
@@ -136,7 +138,7 @@ import butterknife.Bind;
 import butterknife.ButterKnife;
 
 public abstract class BrowserActivity extends ThemableBrowserActivity
-        implements UIController, OnClickListener, OnLongClickListener, CliqzCallbacks{
+        implements UIController, OnClickListener, OnLongClickListener, CliqzCallbacks {
 
     // Static Layout
     @Bind(R.id.drawer_layout)
@@ -510,7 +512,9 @@ public abstract class BrowserActivity extends ThemableBrowserActivity
 
                 @Override
                 public void run() {
-                    mArrowImage.startAnimation(anim);
+                    if (mArrowDrawable != null) {
+                        mArrowImage.startAnimation(anim);
+                    }
                 }
 
             }, 100);
@@ -859,7 +863,7 @@ public abstract class BrowserActivity extends ThemableBrowserActivity
                 getSupportActionBar().hide();
                 savePreview();
                 switchTabs(tabsManager.getCurrentTab(), mOpenTabsContainer);
-                if(mOpenTabsView.getUrl() != null && mOpenTabsView.getUrl().equals(Constants.OPEN_TABS)) {
+                if (mOpenTabsView.getUrl() != null && mOpenTabsView.getUrl().equals(Constants.OPEN_TABS)) {
                     mOpenTabsView.showTabManager();
                 } else {
                     mOpenTabsView.loadUrl(Constants.OPEN_TABS);
@@ -1044,8 +1048,7 @@ public abstract class BrowserActivity extends ThemableBrowserActivity
             updateUrl(newView.getUrl(), true);
             updateProgress(newView.getProgress());
         } else {
-            updateUrl("", true);
-            updateProgress(0);
+            newTab(null, true);
         }
 
         mBrowserFrame.addView(newWebView, MATCH_PARENT);
@@ -1215,7 +1218,6 @@ public abstract class BrowserActivity extends ThemableBrowserActivity
             closeActivity();
         }
         invalidateOptionsMenu();
-        Log.d(Constants.TAG, "deleted tab");
     }
 
     private void performExitCleanUp() {
@@ -1268,8 +1270,8 @@ public abstract class BrowserActivity extends ThemableBrowserActivity
             if (currentTab != null) {
                 Log.d(Constants.TAG, "onBackPressed");
                 if (mSearch.hasFocus()) {
-                    switchTabs(mSearchContainer,tabsManager.getCurrentTab());
-                } else if(mOpenTabsContainer.isShown()) {
+                    switchTabs(mSearchContainer, tabsManager.getCurrentTab());
+                } else if (mOpenTabsContainer.isShown()) {
                     mOpenTabsView.backPressed();
                 } else if (currentTab.canGoBack()) {
                     if (!currentTab.isShown()) {
@@ -1591,7 +1593,7 @@ public abstract class BrowserActivity extends ThemableBrowserActivity
         MenuItem forward = menu.findItem(R.id.action_forward);
         final MenuItem openTabs = menu.findItem(R.id.action_open_tabs);
         MenuItemCompat.setActionView(openTabs, R.layout.open_tabs);
-        TextView openTabsCounter = (TextView)openTabs.getActionView().findViewById(R.id.open_tabs_count);
+        TextView openTabsCounter = (TextView) openTabs.getActionView().findViewById(R.id.open_tabs_count);
         openTabsCounter.setText(Integer.toString(tabsManager.getTabsList().size()));
         openTabs.getActionView().setOnClickListener(new OnClickListener() {
             @Override
@@ -2360,7 +2362,6 @@ public abstract class BrowserActivity extends ThemableBrowserActivity
         }
 
 
-
         @Subscribe
         public void exitTabManager(final TabManagerEvents.ExitTabManager event) {
             switchTabs(mOpenTabsContainer, tabsManager.getCurrentTab());
@@ -2369,8 +2370,8 @@ public abstract class BrowserActivity extends ThemableBrowserActivity
 
         @Subscribe
         public void openTab(final TabManagerEvents.OpenTab event) {
-            for(LightningView tab : tabsManager.getTabsList()) {
-                if(tab.getId().equals(event.id)) {
+            for (LightningView tab : tabsManager.getTabsList()) {
+                if (tab.getId().equals(event.id)) {
                     tabsManager.switchToTab(tabsManager.positionOf(tab));
                     switchTabs(mOpenTabsContainer, tabsManager.getCurrentTab());
                     getSupportActionBar().show();
@@ -2382,7 +2383,7 @@ public abstract class BrowserActivity extends ThemableBrowserActivity
         @Subscribe
         public void closeTabs(final TabManagerEvents.CloseTab event) {
             List<String> deleteTabsList = event.ids;
-            if(deleteTabsList.size() > 1) {
+            if (deleteTabsList.size() > 1) {
                 showAlert(deleteTabsList);
             } else {
                 deleteTabs(deleteTabsList);
@@ -2402,7 +2403,7 @@ public abstract class BrowserActivity extends ThemableBrowserActivity
             }
         });
 
-        alertDialogBuilder.setNegativeButton("Back",new DialogInterface.OnClickListener() {
+        alertDialogBuilder.setNegativeButton("Back", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
             }
@@ -2413,7 +2414,7 @@ public abstract class BrowserActivity extends ThemableBrowserActivity
     }
 
     private void deleteTabs(List<String> ids) {
-        for(String id : ids) {
+        for (String id : ids) {
             deleteTab(tabsManager.positionOf(id));
         }
         mOpenTabsView.updateTabmanagerView();
