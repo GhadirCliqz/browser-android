@@ -20,22 +20,5 @@
     </FrameLayout>
 
     <include layout="@layout/search" />
-
-    <FrameLayout
-        android:id="@+id/menu_button"
-        android:layout_width="?attr/actionBarSize"
-        android:layout_height="?attr/actionBarSize"
-        android:layout_marginTop="2dp"
-        android:background="?attr/actionBarItemBackground"
-        android:clickable="true"
-        android:gravity="center" >
-
-        <ImageView
-            android:id="@+id/menu_dots"
-            android:layout_gravity="center"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/abc_ic_menu_moreoverflow_mtrl_alpha"/>
-    </FrameLayout>
-
+    
 </LinearLayout>

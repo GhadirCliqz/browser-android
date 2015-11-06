@@ -38,6 +38,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.DrawerLayout.DrawerListener;
 import android.support.v7.app.ActionBar;
@@ -52,6 +53,7 @@ import android.util.Log;
 import android.util.Patterns;
 import android.view.Display;
 import android.view.KeyEvent;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
@@ -172,7 +174,6 @@ public abstract class BrowserActivity extends ThemableBrowserActivity
     private FrameLayout mFullscreenContainer;
     private VideoView mVideoView;
     private View mCustomView;
-    private ImageView mMenuDotsImage;
 
     // Adapter
     private SearchAdapter mSearchAdapter;
@@ -333,9 +334,6 @@ public abstract class BrowserActivity extends ThemableBrowserActivity
             mArrowImage.setColorFilter(mIconColor, PorterDuff.Mode.SRC_IN);
         }
         arrowButton.setOnClickListener(this);
-
-        mMenuDotsImage = (ImageView) customView.findViewById(R.id.menu_dots);
-        mMenuDotsImage.setOnClickListener(this);
 
         mProxyUtils = ProxyUtils.getInstance();
 
@@ -859,14 +857,7 @@ public abstract class BrowserActivity extends ThemableBrowserActivity
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // This is CLIQZ specific, we do not want to rewrite this
-        return onAction(item.getItemId()) || super.onOptionsItemSelected(item);
-    }
-
-    // This is CLIQZ specific, must be package visible to let the BrowserMenuPopup to call it
-    final boolean onAction(@IdRes int id) {
-        final LightningView currentView = mTabsManager.getCurrentTab();
-        // Handle action buttons
-        switch (id) {
+        switch (item.getItemId()) {
             case R.id.action_open_tabs:
                 getSupportActionBar().hide();
                 savePreview();
@@ -877,6 +868,22 @@ public abstract class BrowserActivity extends ThemableBrowserActivity
                     mOpenTabsView.loadUrl(Constants.OPEN_TABS);
                 }
                 return true;
+            case R.id.menu_dots:
+                final BrowserMenuPopup popup = new BrowserMenuPopup(this);
+                popup.setAnchorView(findViewById(R.id.menu_dots));
+                popup.show();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+
+        }
+    }
+
+    // This is CLIQZ specific, must be package visible to let the BrowserMenuPopup to call it
+    final boolean onAction(@IdRes int id) {
+        final LightningView currentView = mTabsManager.getCurrentTab();
+        // Handle action buttons
+        switch (id) {
             case android.R.id.home:
                 if (mDrawerLayout.isDrawerOpen(mDrawerRight)) {
                     mDrawerLayout.closeDrawer(mDrawerRight);
@@ -1062,7 +1069,8 @@ public abstract class BrowserActivity extends ThemableBrowserActivity
             updateUrl(newView.getUrl(), true);
             updateProgress(newView.getProgress());
         } else {
-            newTab(null, true);
+            updateUrl("", true);
+            updateProgress(0);
         }
 
         mBrowserFrame.addView(newWebView, MATCH_PARENT);
@@ -1601,11 +1609,8 @@ public abstract class BrowserActivity extends ThemableBrowserActivity
         mDrawerLayout.closeDrawers();
     }
 
-    /* TODO Remove this, we replaced it with custom view
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        MenuItem back = menu.findItem(R.id.action_back);
-        MenuItem forward = menu.findItem(R.id.action_forward);
         final MenuItem openTabs = menu.findItem(R.id.action_open_tabs);
         MenuItemCompat.setActionView(openTabs, R.layout.open_tabs);
         TextView openTabsCounter = (TextView)openTabs.getActionView().findViewById(R.id.open_tabs_count);
@@ -1617,13 +1622,8 @@ public abstract class BrowserActivity extends ThemableBrowserActivity
             }
         });
 
-        if (back != null && back.getIcon() != null)
-            back.getIcon().setColorFilter(mIconColor, PorterDuff.Mode.SRC_IN);
-        if (forward != null && forward.getIcon() != null)
-            forward.getIcon().setColorFilter(mIconColor, PorterDuff.Mode.SRC_IN);
         return super.onCreateOptionsMenu(menu);
     }
-    */
 
     /**
      * opens a file chooser
@@ -2091,10 +2091,6 @@ public abstract class BrowserActivity extends ThemableBrowserActivity
                 currentTab.reload();
                 closeDrawers();
                 break;
-            case R.id.menu_dots:
-                final BrowserMenuPopup popup = new BrowserMenuPopup(this);
-                popup.setAnchorView(v);
-                popup.show();
         }
     }
 

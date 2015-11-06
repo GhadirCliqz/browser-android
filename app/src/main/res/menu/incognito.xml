@@ -6,23 +6,8 @@
         android:id="@+id/action_open_tabs"
         app:showAsAction="always"/>
     <item
-        android:id="@+id/action_new_tab"
-        android:title="@string/action_new_tab"/>
-    <item
-        android:id="@+id/action_share"
-        android:title="@string/action_share"/>
-    <item
-        android:id="@+id/action_find"
-        android:title="@string/action_find"/>
-    <item
-        android:id="@+id/action_history"
-        android:title="@string/action_history"/>
-    <item
-        android:id="@+id/action_bookmarks"
-        android:title="@string/action_bookmarks"/>
-    
-    <item
-        android:id="@+id/action_reading_mode"
-        android:title="@string/reading_mode"/>
+        android:id="@+id/menu_dots"
+        app:showAsAction="always"
+        android:icon="@drawable/abc_ic_menu_moreoverflow_mtrl_alpha"/>
 
 </menu>
