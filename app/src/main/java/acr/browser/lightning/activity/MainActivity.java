@@ -29,11 +29,11 @@ public class MainActivity extends BrowserActivity {
 //        // if incognito mode use newTab(null, true); instead
 //    }
 
-    /* @Override
+    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.main, menu);
         return super.onCreateOptionsMenu(menu);
-    } */
+    }
 
     @Override
     protected void onNewIntent(Intent intent) {

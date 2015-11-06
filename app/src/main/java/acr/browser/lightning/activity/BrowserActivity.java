@@ -38,6 +38,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.DrawerLayout.DrawerListener;
 import android.support.v7.app.ActionBar;
@@ -52,6 +53,7 @@ import android.util.Log;
 import android.util.Patterns;
 import android.view.Display;
 import android.view.KeyEvent;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
@@ -88,6 +90,7 @@ import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 import android.widget.VideoView;
 
+import com.anthonycr.grant.PermissionsManager;
 import com.cliqz.browser.bus.TabManagerEvents;
 import com.cliqz.browser.search.WebSearchView;
 import com.cliqz.browser.search.WebSearchView.CliqzCallbacks;
@@ -123,9 +126,6 @@ import acr.browser.lightning.fragment.BookmarksFragment;
 import acr.browser.lightning.fragment.TabsFragment;
 import acr.browser.lightning.object.SearchAdapter;
 import acr.browser.lightning.receiver.NetworkReceiver;
-
-import com.anthonycr.grant.PermissionsManager;
-
 import acr.browser.lightning.utils.ProxyUtils;
 import acr.browser.lightning.utils.ThemeUtils;
 import acr.browser.lightning.utils.UrlUtils;
@@ -334,9 +334,6 @@ public abstract class BrowserActivity extends ThemableBrowserActivity
             mArrowImage.setColorFilter(mIconColor, PorterDuff.Mode.SRC_IN);
         }
         arrowButton.setOnClickListener(this);
-
-        mMenuDotsImage = (ImageView) customView.findViewById(R.id.menu_dots);
-        mMenuDotsImage.setOnClickListener(this);
 
         mProxyUtils = ProxyUtils.getInstance();
 
@@ -849,7 +846,6 @@ public abstract class BrowserActivity extends ThemableBrowserActivity
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // This is CLIQZ specific, we do not want to rewrite this
         return onAction(item.getItemId()) || super.onOptionsItemSelected(item);
     }
 
@@ -868,6 +864,11 @@ public abstract class BrowserActivity extends ThemableBrowserActivity
                 } else {
                     mOpenTabsView.loadUrl(Constants.OPEN_TABS);
                 }
+                return true;
+            case R.id.menu_dots:
+                final BrowserMenuPopup popup = new BrowserMenuPopup(this);
+                popup.setAnchorView(findViewById(R.id.menu_dots));
+                popup.show();
                 return true;
             case android.R.id.home:
                 if (mDrawerLayout.isDrawerOpen(mDrawerRight)) {
@@ -1073,7 +1074,8 @@ public abstract class BrowserActivity extends ThemableBrowserActivity
             updateUrl(newView.getUrl(), true);
             updateProgress(newView.getProgress());
         } else {
-            newTab(null, true);
+            updateUrl("", true);
+            updateProgress(0);
         }
 
         mBrowserFrame.addView(newWebView, MATCH_PARENT);
@@ -1612,14 +1614,11 @@ public abstract class BrowserActivity extends ThemableBrowserActivity
         mDrawerLayout.closeDrawers();
     }
 
-    /* TODO Remove this, we replaced it with custom view
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        MenuItem back = menu.findItem(R.id.action_back);
-        MenuItem forward = menu.findItem(R.id.action_forward);
         final MenuItem openTabs = menu.findItem(R.id.action_open_tabs);
         MenuItemCompat.setActionView(openTabs, R.layout.open_tabs);
-        TextView openTabsCounter = (TextView)openTabs.getActionView().findViewById(R.id.open_tabs_count);
+        TextView openTabsCounter = (TextView) openTabs.getActionView().findViewById(R.id.open_tabs_count);
         openTabsCounter.setText(Integer.toString(mTabsManager.getTabsList().size()));
         openTabs.getActionView().setOnClickListener(new OnClickListener() {
             @Override
@@ -1628,13 +1627,8 @@ public abstract class BrowserActivity extends ThemableBrowserActivity
             }
         });
 
-        if (back != null && back.getIcon() != null)
-            back.getIcon().setColorFilter(mIconColor, PorterDuff.Mode.SRC_IN);
-        if (forward != null && forward.getIcon() != null)
-            forward.getIcon().setColorFilter(mIconColor, PorterDuff.Mode.SRC_IN);
         return super.onCreateOptionsMenu(menu);
     }
-    */
 
     /**
      * opens a file chooser
@@ -2223,7 +2217,7 @@ public abstract class BrowserActivity extends ThemableBrowserActivity
                 addBookmark(title, url);
             } else {
                 deleteBookmark(title, url);
-            }
+        }
         }
 
         /**

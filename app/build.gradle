@@ -103,7 +103,7 @@ dependencies {
     compile 'com.jakewharton:butterknife:7.0.1'
 
     // permissions
-    compile 'com.anthonycr.grant:permissions:1.0'
+    compile 'com.anthonycr.grant:permissions:1.1'
 
     // proxy support
     compile 'net.i2p.android:client:0.7'
