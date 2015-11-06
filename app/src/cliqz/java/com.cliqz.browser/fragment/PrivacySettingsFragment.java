@@ -16,13 +16,11 @@ import android.support.v7.app.AlertDialog;
 import android.webkit.WebView;
 
 import acr.browser.lightning.R;
-import acr.browser.lightning.fragment.LightningPreferenceFragment;
 import acr.browser.lightning.preference.PreferenceManager;
 import acr.browser.lightning.utils.Utils;
 import acr.browser.lightning.utils.WebUtils;
 
-public class PrivacySettingsFragment extends LightningPreferenceFragment
-        implements Preference.OnPreferenceClickListener, Preference.OnPreferenceChangeListener {
+public class PrivacySettingsFragment extends BaseSettingsFragment {
 
     private static final String SETTINGS_LOCATION = "location";
     private static final String SETTINGS_ENABLECOOKIES = "allow_cookies";
@@ -58,7 +56,7 @@ public class PrivacySettingsFragment extends LightningPreferenceFragment
 
     private void initPrefs() {
         // mPreferenceManager storage
-        mSystemBrowser = Utils.isSystemBrowserPresent(mActivity);
+        mSystemBrowser = mPreferenceManager.getSystemBrowserPresent();
 
         Preference clearcache = findPreference(SETTINGS_CLEARCACHE);
         Preference clearhistory = findPreference(SETTINGS_CLEARHISTORY);

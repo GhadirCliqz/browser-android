@@ -12,7 +12,6 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.preference.CheckBoxPreference;
 import android.preference.Preference;
-import android.preference.PreferenceFragment;
 import android.support.v7.app.AlertDialog;
 import android.text.InputFilter;
 import android.util.Log;
@@ -27,12 +26,11 @@ import java.util.List;
 
 import acr.browser.lightning.R;
 import acr.browser.lightning.constant.Constants;
-import acr.browser.lightning.fragment.LightningPreferenceFragment;
 import acr.browser.lightning.preference.PreferenceManager;
 import acr.browser.lightning.utils.ProxyUtils;
 import acr.browser.lightning.utils.Utils;
 
-public class AdvancedSettingsFragment extends LightningPreferenceFragment implements Preference.OnPreferenceClickListener, Preference.OnPreferenceChangeListener {
+public class AdvancedSettingsFragment extends BaseSettingsFragment {
 
     private static final String SETTINGS_NEWWINDOW = "allow_new_window";
     private static final String SETTINGS_RESTORETABS = "restore_tabs";
@@ -65,6 +63,7 @@ public class AdvancedSettingsFragment extends LightningPreferenceFragment implem
     }
 
     private void initPrefs() {
+        // mPreferences storage
         textEncoding = findPreference(SETTINGS_TEXTENCODING);
         urlcontent = findPreference(SETTINGS_URLCONTENT);
         cbAllowPopups = (CheckBoxPreference) findPreference(SETTINGS_NEWWINDOW);
@@ -188,7 +187,7 @@ public class AdvancedSettingsFragment extends LightningPreferenceFragment implem
     }
 
     private void setProxyChoice(int choice) {
-        ProxyUtils utils = ProxyUtils.getInstance(/* mActivity */);
+        ProxyUtils utils = ProxyUtils.getInstance();
         switch (choice) {
             case Constants.PROXY_ORBOT:
                 choice = utils.setProxyChoice(choice, mActivity);
@@ -359,7 +358,7 @@ public class AdvancedSettingsFragment extends LightningPreferenceFragment implem
         } else {
             Drawable drawable;
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                drawable = getResources().getDrawable(android.R.drawable.edit_text, mActivity.getTheme());
+                drawable = getResources().getDrawable(android.R.drawable.edit_text, getActivity().getTheme());
             } else {
                 drawable = getResources().getDrawable(android.R.drawable.edit_text);
             }
