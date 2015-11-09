@@ -101,6 +101,7 @@ import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.List;
@@ -1186,6 +1187,8 @@ public abstract class BrowserActivity extends ThemableBrowserActivity
             Utils.showSnackbar(this, R.string.max_tabs);
             return false;
         }
+        //save the screendump of current tab before switching to new tab
+        savePreview();
         mIsNewIntent = false;
         LightningView startingTab = mTabsManager.newTab(this, url, isIncognito());
         if (mIdGenerator == 0) {
@@ -1226,16 +1229,12 @@ public abstract class BrowserActivity extends ThemableBrowserActivity
             mBrowserFrame.setBackgroundColor(mBackgroundColor);
         }
         final LightningView currentTab = mTabsManager.getCurrentTab();
+        deletePreview(position);
         mTabsManager.deleteTab(position);
         final LightningView afterTab = mTabsManager.getCurrentTab();
         if (afterTab == null) {
-//            if (currentTab != null && (UrlUtils.isSpecialUrl(currentTab.getUrl())
-//                    || currentTab.getUrl().equals(mPreferenceManager.getHomepage()))) {
-//                closeActivity();
-//            } else {
             performExitCleanUp();
             finish();
-//            }
         }
 
         mEventBus.post(new BrowserEvents.TabsChanged());
@@ -2217,7 +2216,7 @@ public abstract class BrowserActivity extends ThemableBrowserActivity
                 addBookmark(title, url);
             } else {
                 deleteBookmark(title, url);
-        }
+            }
         }
 
         /**
@@ -2448,37 +2447,38 @@ public abstract class BrowserActivity extends ThemableBrowserActivity
 
     //Saves the screenshot of the tab. The image name is the "id" of the tab.
     private void savePreview() {
-        if (!mSearchContainer.isShown()) {
-            WebView webView = mTabsManager.getCurrentTab().getWebView();
-            Display display = getWindowManager().getDefaultDisplay();
-            Point size = new Point();
-            display.getSize(size);
-            int height = 2 * size.y / 3;
-            int offset = webView.getScrollY();
-            webView.measure(View.MeasureSpec.makeMeasureSpec(View.MeasureSpec.UNSPECIFIED,
-                    View.MeasureSpec.UNSPECIFIED), View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED));
-            webView.layout(0, offset, webView.getMeasuredWidth(), offset + height);
-            webView.setDrawingCacheEnabled(true);
-            webView.buildDrawingCache();
-            Bitmap bitmap = Bitmap.createBitmap(webView.getMeasuredWidth(), height, Bitmap.Config.ARGB_8888);
+        View view = mTabsManager.getCurrentWebView().getRootView();
+        Bitmap bitmap;
+        if(mSearchContainer.isShown()) {
+            bitmap = Bitmap.createBitmap(view.getWidth(), view.getHeight(), Bitmap.Config.ARGB_8888);
             Canvas canvas = new Canvas(bitmap);
-            Paint paint = new Paint();
-            canvas.drawBitmap(bitmap, 0, 0, paint);
-            webView.draw(canvas);
-
-            if (bitmap != null) {
-                try {
-                    File directory = this.getDir("cliqz", Context.MODE_PRIVATE);
-                    File file = new File(directory, mTabsManager.getCurrentTab().getId() + ".jpeg");
-                    FileOutputStream fOut = new FileOutputStream(file);
-                    bitmap.compress(Bitmap.CompressFormat.JPEG, 50, fOut);
-                    fOut.flush();
-                    fOut.close();
-                    bitmap.recycle();
-                } catch (Exception e) {
-                    Log.e(Constants.TAG, "Error Message", e);
-                }
-            }
+            view.draw(canvas);
+        } else {
+            view.setDrawingCacheEnabled(true);
+            //crop the image from the top by 150px
+            bitmap = Bitmap.createBitmap(view.getDrawingCache(),0,150,view.getWidth(),view.getHeight()-150);
+            view.setDrawingCacheEnabled(false);
+        }
+        try {
+            File directory = this.getDir("cliqz", MODE_PRIVATE);
+            File file = new File(directory, mTabsManager.getCurrentTab().getId() + ".jpeg");
+            FileOutputStream fileOutputStream = new FileOutputStream(file);
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 40, fileOutputStream);
+            fileOutputStream.flush();
+            fileOutputStream.close();
+            bitmap.recycle();
+        } catch (FileNotFoundException e) {
+            Log.e(Constants.TAG, "FileNotFoundException in savePreview", e);
+        } catch (IOException e) {
+            Log.e(Constants.TAG, "IOException in savePreview", e);
         }
     }
+
+    //deletes the screenshot of the tab being deleted.
+    private void deletePreview(int position) {
+        File directory = this.getDir("cliqz", MODE_PRIVATE);
+        File file = new File(directory, mTabsManager.getTabAtPosition(position).getId() + ".jpeg");
+        file.delete();
+    }
+
 }
