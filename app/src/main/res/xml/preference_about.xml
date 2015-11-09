@@ -1,14 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!--suppress AndroidElementNotAllowed -->
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
-
-    <PreferenceCategory android:title="@string/settings_about">
-        <Preference
-            android:summary="@string/url_twitter"
-            android:title="@string/action_follow_me">
+     <Preference
+            android:summary="@string/feedback_at_cliqz_dot_com"
+            android:title="@string/contact_cliqz">
             <intent
-                android:action="android.intent.action.VIEW"
-                android:data="http://twitter.com/RestainoAnthony">
+                android:action="android.intent.action.SENDTO"
+                android:data="@string/mail_to_feedback_at_cliqz.com">
                 <extra
                     android:name="SOURCE"
                     android:value="SELF" />
@@ -17,7 +14,6 @@
         <Preference
             android:key="pref_version"
             android:title="@string/version" />
-    </PreferenceCategory>
     <PreferenceCategory android:title="@string/licenses">
         <Preference
             android:summary="@string/mpl_license"
