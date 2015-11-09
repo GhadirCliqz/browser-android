@@ -83,10 +83,10 @@ dexcount {
 
 dependencies {
     // support libraries
-    compile 'com.android.support:palette-v7:23.1.0'
-    compile 'com.android.support:appcompat-v7:23.1.0'
-    compile 'com.android.support:design:23.1.0'
-    compile 'com.android.support:recyclerview-v7:23.1.0'
+    compile 'com.android.support:palette-v7:23.0.1'
+    compile 'com.android.support:appcompat-v7:23.0.1'
+    compile 'com.android.support:design:23.0.1'
+    compile 'com.android.support:recyclerview-v7:23.0.1'
     compile 'com.google.guava:guava:18.0'
 
     // html parsing fo reading mode
@@ -101,9 +101,6 @@ dependencies {
 
     // view binding
     compile 'com.jakewharton:butterknife:7.0.1'
-
-    // permissions
-    compile 'com.anthonycr.grant:permissions:1.1'
 
     // proxy support
     compile 'net.i2p.android:client:0.7'
