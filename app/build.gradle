@@ -11,6 +11,10 @@ android {
         versionName "0.2"
 
         buildConfigField 'String', 'LIGHTNING_VERSION_NAME', '"4.2.3.1"'
+        buildConfigField "boolean", "FULL_VERSION", "true"
+
+        applicationId "com.cliqz.browser"
+        versionCode 1
     }
     buildTypes {
         debug {
@@ -23,24 +27,6 @@ android {
             minifyEnabled true
             shrinkResources true
             proguardFiles 'proguard-project.txt'
-        }
-    }
-    productFlavors {
-        cliqz {
-            buildConfigField "boolean", "FULL_VERSION", "true"
-            applicationId "com.cliqz.browser"
-            versionCode 1
-
-        }
-        lightningPlus {
-            buildConfigField "boolean", "FULL_VERSION", "true"
-            applicationId "acr.browser.lightning"
-            versionCode 85
-        }
-        lightningLite {
-            buildConfigField "boolean", "FULL_VERSION", "false"
-            applicationId "acr.browser.barebones"
-            versionCode 86
         }
     }
     lintOptions {
@@ -60,17 +46,7 @@ android {
                     '../../mobile-tab-manager/build/android'
             ]
         }
-        lightningPlus.setRoot('src/LightningPlus')
-        lightningLite.setRoot('src/LightningLite')
     }
-}
-
-dexcount {
-    includeClasses = false
-    includeFieldCount = false
-    printAsTree = true
-    orderByMethodCount = true
-    verbose = false
 }
 
 dexcount {
@@ -83,10 +59,10 @@ dexcount {
 
 dependencies {
     // support libraries
-    compile 'com.android.support:palette-v7:23.1.0'
-    compile 'com.android.support:appcompat-v7:23.1.0'
-    compile 'com.android.support:design:23.1.0'
-    compile 'com.android.support:recyclerview-v7:23.1.0'
+    compile 'com.android.support:palette-v7:23.0.1'
+    compile 'com.android.support:appcompat-v7:23.0.1'
+    compile 'com.android.support:design:23.0.1'
+    compile 'com.android.support:recyclerview-v7:23.0.1'
     compile 'com.google.guava:guava:18.0'
 
     // html parsing fo reading mode
@@ -101,9 +77,6 @@ dependencies {
 
     // view binding
     compile 'com.jakewharton:butterknife:7.0.1'
-
-    // permissions
-    compile 'com.anthonycr.grant:permissions:1.0'
 
     // proxy support
     compile 'net.i2p.android:client:0.7'

@@ -2,6 +2,7 @@ package acr.browser.lightning.app;
 
 import android.content.Context;
 
+import com.cliqz.browser.fragment.BaseSettingsFragment;
 import com.cliqz.browser.search.WebSearchView;
 import com.cliqz.browser.webview.OpenTabsView;
 import com.squareup.otto.Bus;
@@ -9,6 +10,7 @@ import com.squareup.otto.Bus;
 import javax.inject.Singleton;
 
 import acr.browser.lightning.activity.BrowserActivity;
+import acr.browser.lightning.activity.BrowserMenuPopup;
 import acr.browser.lightning.activity.ThemableBrowserActivity;
 import acr.browser.lightning.constant.BookmarkPage;
 import acr.browser.lightning.database.HistoryDatabase;
@@ -62,4 +64,8 @@ public interface AppComponent {
 	void inject(WebSearchView webSearchView);
 
     void inject(OpenTabsView openTabsView);
+
+    void inject(BrowserMenuPopup browserMenuPopup);
+
+    void inject(BaseSettingsFragment baseSettingsFragment);
 }

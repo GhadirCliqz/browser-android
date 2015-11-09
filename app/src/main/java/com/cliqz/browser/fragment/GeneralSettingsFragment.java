@@ -5,7 +5,6 @@ package com.cliqz.browser.fragment;
 
 import android.app.Activity;
 import android.content.DialogInterface;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.CheckBoxPreference;
@@ -14,36 +13,24 @@ import android.preference.PreferenceFragment;
 import android.support.v7.app.AlertDialog;
 import android.widget.EditText;
 
-import java.lang.ref.WeakReference;
-import java.util.List;
-
 import acr.browser.lightning.R;
 import acr.browser.lightning.constant.Constants;
-import acr.browser.lightning.database.BookmarkLocalSync;
 import acr.browser.lightning.database.BookmarkManager;
-import acr.browser.lightning.database.HistoryItem;
-import acr.browser.lightning.fragment.LightningPreferenceFragment;
 import acr.browser.lightning.preference.PreferenceManager;
-import acr.browser.lightning.utils.Utils;
 
-public class GeneralSettingsFragment extends LightningPreferenceFragment implements Preference.OnPreferenceClickListener, Preference.OnPreferenceChangeListener {
+public class GeneralSettingsFragment extends BaseSettingsFragment {
 
     private static final String SETTINGS_ADS = "cb_ads";
     private static final String SETTINGS_IMAGES = "cb_images";
     private static final String SETTINGS_SEARCHENGINE = "search";
     private static final String SETTINGS_DRAWERTABS = "cb_drawertabs";
     private static final String SETTINGS_BROWSER_IMPORT = "import_browser_bookmark";
-    private static final String SETTINGS_IMPORT_BROWSER = "import_browser";
-
 
     private Activity mActivity;
 
     private static final int API = Build.VERSION.SDK_INT;
-    private PreferenceManager mPreferences;
     private Preference searchengine;
     private CheckBoxPreference cbAds, cbImages, cbDrawerTabs;
-    private ImportBookmarksTask mImportTaskReference = null;
-    private BookmarkLocalSync mSync;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -56,20 +43,9 @@ public class GeneralSettingsFragment extends LightningPreferenceFragment impleme
         initPrefs();
     }
 
-    @Override
-    public void onDestroy() {
-        if (mImportTaskReference != null) {
-            mImportTaskReference.cancel(false);
-        }
-        super.onDestroy();
-    }
-
     private void initPrefs() {
-        // mPreferences storage
+        // mPreferenceManager storage
         Preference importBrowserpref = findPreference(SETTINGS_BROWSER_IMPORT);
-
-        mSync = new BookmarkLocalSync(mActivity);
-
         searchengine = findPreference(SETTINGS_SEARCHENGINE);
 
         cbAds = (CheckBoxPreference) findPreference(SETTINGS_ADS);
@@ -83,30 +59,20 @@ public class GeneralSettingsFragment extends LightningPreferenceFragment impleme
         cbDrawerTabs.setOnPreferenceChangeListener(this);
 
         if (API >= 19) {
-            mPreferences.setFlashSupport(0);
+            mPreferenceManager.setFlashSupport(0);
         }
 
-        setSearchEngineSummary(mPreferences.getSearchChoice());
+        setSearchEngineSummary(mPreferenceManager.getSearchChoice());
 
-        int flashNum = mPreferences.getFlashSupport();
-        boolean imagesBool = mPreferences.getBlockImagesEnabled();
+        int flashNum = mPreferenceManager.getFlashSupport();
+        boolean imagesBool = mPreferenceManager.getBlockImagesEnabled();
 
         cbAds.setEnabled(Constants.FULL_VERSION);
 
         cbImages.setChecked(imagesBool);
-        cbAds.setChecked(Constants.FULL_VERSION && mPreferences.getAdBlockEnabled());
-        cbDrawerTabs.setChecked(mPreferences.getShowTabsInDrawer(true));
-        new Thread(mInitializeImportPreference).start();
+        cbAds.setChecked(Constants.FULL_VERSION && mPreferenceManager.getAdBlockEnabled());
+        cbDrawerTabs.setChecked(mPreferenceManager.getShowTabsInDrawer(true));
     }
-
-    private final Runnable mInitializeImportPreference = new Runnable() {
-        @Override
-        public void run() {
-            Preference importStock = findPreference(SETTINGS_IMPORT_BROWSER);
-            importStock.setEnabled(mSync.isStockSupported() || mSync.isChromeSupported());
-            importStock.setOnPreferenceClickListener(GeneralSettingsFragment.this);
-        }
-    };
 
     private void searchDialog() {
         AlertDialog.Builder picker = new AlertDialog.Builder(mActivity);
@@ -116,13 +82,13 @@ public class GeneralSettingsFragment extends LightningPreferenceFragment impleme
                 "DuckDuckGo (Privacy)", "DuckDuckGo Lite (Privacy)", "Baidu (Chinese)",
                 "Yandex (Russian)"};
 
-        int n = mPreferences.getSearchChoice();
+        int n = mPreferenceManager.getSearchChoice();
 
         picker.setSingleChoiceItems(chars, n, new DialogInterface.OnClickListener() {
 
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                mPreferences.setSearchChoice(which);
+                mPreferenceManager.setSearchChoice(which);
                 setSearchEngineSummary(which);
             }
         });
@@ -139,7 +105,7 @@ public class GeneralSettingsFragment extends LightningPreferenceFragment impleme
         final AlertDialog.Builder urlPicker = new AlertDialog.Builder(mActivity);
         urlPicker.setTitle(getResources().getString(R.string.custom_url));
         final EditText getSearchUrl = new EditText(mActivity);
-        String mSearchUrl = mPreferences.getSearchUrl();
+        String mSearchUrl = mPreferenceManager.getSearchUrl();
         getSearchUrl.setText(mSearchUrl);
         urlPicker.setView(getSearchUrl);
         urlPicker.setPositiveButton(getResources().getString(R.string.action_ok),
@@ -147,7 +113,7 @@ public class GeneralSettingsFragment extends LightningPreferenceFragment impleme
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         String text = getSearchUrl.getText().toString();
-                        mPreferences.setSearchUrl(text);
+                        mPreferenceManager.setSearchUrl(text);
                         searchengine.setSummary(getResources().getString(R.string.custom_url) + ": "
                                 + text);
                     }
@@ -199,8 +165,11 @@ public class GeneralSettingsFragment extends LightningPreferenceFragment impleme
                 searchDialog();
                 return true;
             case SETTINGS_BROWSER_IMPORT:
-                mImportTaskReference = new ImportBookmarksTask(getActivity());
-                mImportTaskReference.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+//                try {
+//                    mBookmarkManager.importBookmarksFromBrowser(getActivity());
+//                } catch (Exception e) {
+//                    e.printStackTrace();
+//                }
                 return true;
             default:
                 return false;
@@ -212,55 +181,18 @@ public class GeneralSettingsFragment extends LightningPreferenceFragment impleme
         // switch preferences
         switch (preference.getKey()) {
             case SETTINGS_ADS:
-                mPreferences.setAdBlockEnabled((Boolean) newValue);
+                mPreferenceManager.setAdBlockEnabled((Boolean) newValue);
                 cbAds.setChecked((Boolean) newValue);
                 return true;
             case SETTINGS_IMAGES:
-                mPreferences.setBlockImagesEnabled((Boolean) newValue);
+                mPreferenceManager.setBlockImagesEnabled((Boolean) newValue);
                 cbImages.setChecked((Boolean) newValue);
                 return true;
             case  SETTINGS_DRAWERTABS:
-                mPreferences.setShowTabsInDrawer((Boolean) newValue);
+                mPreferenceManager.setShowTabsInDrawer((Boolean) newValue);
                 cbDrawerTabs.setChecked((Boolean) newValue);
             default:
                 return false;
         }
     }
-
-    private class ImportBookmarksTask extends AsyncTask<Void, Void, Integer> {
-
-        private final WeakReference<Activity> mActivityReference;
-
-        public ImportBookmarksTask(Activity activity) {
-            mActivityReference = new WeakReference<>(activity);
-        }
-
-        @Override
-        protected Integer doInBackground(Void... params) {
-            List<HistoryItem> list = null;
-            if (mSync.isStockSupported()) {
-                list = mSync.getBookmarksFromStockBrowser();
-            } else if (mSync.isChromeSupported()) {
-                list = mSync.getBookmarksFromChrome();
-            }
-            int count = 0;
-            if (list != null && !list.isEmpty()) {
-                mBookmarkManager.addBookmarkList(list);
-                count = list.size();
-            }
-            return count;
-        }
-
-        @Override
-        protected void onPostExecute(Integer num) {
-            super.onPostExecute(num);
-            Activity activity = mActivityReference.get();
-            if (activity != null) {
-                int number = num;
-                final String message = activity.getResources().getString(R.string.message_import);
-                Utils.showSnackbar(activity, number + " " + message);
-            }
-        }
-    }
-
 }

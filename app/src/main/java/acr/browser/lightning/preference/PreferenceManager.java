@@ -203,6 +203,10 @@ public class PreferenceManager {
         return mPrefs.getString(Name.SEARCH_URL, Constants.GOOGLE_SEARCH);
     }
 
+    public boolean getSystemBrowserPresent() {
+        return false;
+    }
+
     public boolean getTextReflowEnabled() {
         return mPrefs.getBoolean(Name.TEXT_REFLOW, false);
     }
