@@ -22,6 +22,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -150,16 +151,21 @@ public class OpenTabsView extends WebView implements ILightningTab {
 
     }
 
-    /**
-     * @return JSON encoded String details of the open tabs
-     */
+    // returns JSON encoded String details of the open tabs
     private String openTabsToJSON() {
         JSONArray openTabsJSON = new JSONArray();
         for(LightningView tabDetails : tabsManager.getTabsList()) {
+            File file = new File(directory + "/" + tabDetails.getId() + ".jpeg");
+            String imagePath;
+            if(file.exists()) {
+                imagePath = file.getAbsolutePath();
+            } else {
+                imagePath = "";
+            }
             HashMap<String,String> processedTabDetails = new HashMap<>();
             processedTabDetails.put(KEY_ID,tabDetails.getId());
             processedTabDetails.put(KEY_URL,tabDetails.getUrl());
-            processedTabDetails.put(KEY_IMAGE_URL, directory + "/" + tabDetails.getId() + ".jpeg");
+            processedTabDetails.put(KEY_IMAGE_URL, imagePath);
             JSONObject jsonObject = new JSONObject(processedTabDetails);
             openTabsJSON.put(jsonObject);
         }
