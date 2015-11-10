@@ -657,6 +657,7 @@ public class LightningView implements ILightningTab {
 
     public synchronized void onDestroy() {
         if (mWebView != null) {
+            deletePreview();
             mWebView.stopLoading();
             mWebView.onPause();
             mWebView.clearHistory();

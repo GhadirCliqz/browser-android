@@ -1229,7 +1229,6 @@ public abstract class BrowserActivity extends ThemableBrowserActivity
             mBrowserFrame.setBackgroundColor(mBackgroundColor);
         }
         final LightningView currentTab = mTabsManager.getCurrentTab();
-        mTabsManager.getTabAtPosition(position).deletePreview();
         mTabsManager.deleteTab(position);
         final LightningView afterTab = mTabsManager.getCurrentTab();
         if (afterTab == null) {
