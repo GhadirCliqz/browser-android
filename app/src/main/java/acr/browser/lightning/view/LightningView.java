@@ -962,7 +962,7 @@ public class LightningView implements ILightningTab {
     }
 
     //deletes the screenshot of the tab being deleted.
-    public void deletePreview() {
+    private void deletePreview() {
         File directory = mActivity.getApplicationContext().getDir("cliqz", mActivity.getApplicationContext().MODE_PRIVATE);
         File file = new File(directory, mId + ".jpeg");
         file.delete();
