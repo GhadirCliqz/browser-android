@@ -66,8 +66,8 @@ public interface AppComponent {
     void inject(LightningView lightningView);
 
     void inject(ThemableBrowserActivity activity);
-	
-	void inject(WebSearchView webSearchView);
+
+    void inject(WebSearchView webSearchView);
 
     void inject(OpenTabsView openTabsView);
 
