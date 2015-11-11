@@ -60,8 +60,6 @@ public class OnBoardingActivity extends FragmentActivity {
 
     public void launchMain(View view) {
         mPreferences.setOnBoardingComplete(true);
-        Intent intent = new Intent(OnBoardingActivity.this, MainActivity.class);
-        startActivity(intent);
         finish();
     }
 

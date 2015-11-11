@@ -26,7 +26,6 @@ public class MainActivity extends BrowserActivity {
         if(!mPreferences.getOnBoardingComplete()) {
             Intent intent = new Intent(MainActivity.this, OnBoardingActivity.class);
             startActivity(intent);
-            finish();
         }
     }
 
