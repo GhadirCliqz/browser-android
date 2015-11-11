@@ -379,17 +379,8 @@ public abstract class BrowserActivity extends ThemableBrowserActivity
 
         // CLIQZ - BEGIN
         mCliqzSearch = new WebSearchView(this);
-        mCliqzSearch.setHistoryDatabase(mHistoryDatabase);
         mCliqzSearch.setResultListener(this);
         mSearchContainer = new LightningView(this, "", isIncognito(), "SEARCH_CONTAINER", mCliqzSearch, mHistoryDatabase);
-        // CLIQZ - END
-
-        // CLIQZ - BEGIN
-        mCliqzSearch = new WebSearchView(this);
-        mCliqzSearch.setHistoryDatabase(mHistoryDatabase);
-        mCliqzSearch.setResultListener(this);
-        mSearchContainer = new LightningView(this, "", isIncognito(), "SEARCH_CONTAINER", mCliqzSearch, mHistoryDatabase);
-
         mOpenTabsView = new OpenTabsView(this);
         mOpenTabsContainer = new LightningView(this, "", isIncognito(), "OPEN_TABS_CONTAINER", mOpenTabsView, mHistoryDatabase);
         // CLIQZ - END

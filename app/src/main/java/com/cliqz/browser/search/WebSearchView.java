@@ -23,8 +23,6 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
-import com.squareup.otto.Bus;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -53,12 +51,12 @@ public class WebSearchView extends WebView implements ILightningTab {
     private boolean mProfilingRunning = false;
     private int mLastScrollPosition = 0;
     private boolean mFirstHide = true;
-    private CliqzCallbacks mCliqzCallbacksListener;
-    private HistoryDatabase mHistoryDatabase;
+
+    // Package visible to support the new brigde
+    CliqzCallbacks mListener;
 
     @Inject
-    Bus mAutoCompleteBus;
-
+    HistoryDatabase historyDatabase;
 
     public interface CliqzCallbacks {
         void onResultClicked(final String url);
@@ -89,12 +87,8 @@ public class WebSearchView extends WebView implements ILightningTab {
         BrowserApp.getAppComponent().inject(this);
     }
 
-    public void setHistoryDatabase(final HistoryDatabase db) {
-        mHistoryDatabase = db;
-    }
-
     public void setResultListener(final CliqzCallbacks cb) {
-        mCliqzCallbacksListener = cb;
+        mListener = cb;
     }
 
     // Next steps:
@@ -145,7 +139,7 @@ public class WebSearchView extends WebView implements ILightningTab {
         openCliqzView();
 
         // Callbacks from JS to Java
-        addJavascriptInterface(new JsBridge(), "jsBridge");
+        addJavascriptInterface(new SearchBridge(this), "jsBridge");
     }
 
     public void openCliqzView() {
@@ -206,209 +200,73 @@ public class WebSearchView extends WebView implements ILightningTab {
         }
     }
 
-    public void openUrl(String url) {
-        if (url != null && !url.equals(mUrl)) {
-            mUrl = url;
-            loadUrl(url);
+    private String historyToJSON(final List<HistoryItem> items) {
+        final StringBuilder sb = new StringBuilder(items.size() * 100);
+        sb.append("[");
+        String sep = "";
+        for (final HistoryItem item : items) {
+            sb.append(sep);
+            item.toJsonString(sb);
+            sep = ",";
         }
+        sb.append("]");
+        return sb.toString();
     }
 
-    private class JsBridge {
-        // Can open any URI, event Android internal ones like contacts etc
-        @JavascriptInterface
-        public void openAndroidUri(final String uriStr) {
-            final Uri uri = Uri.parse(uriStr);
-            Intent intent = new Intent(Intent.ACTION_VIEW, uri);
-            /* if (intent.resolveActivity(getActivity().getPackageManager()) != null) {
-                startActivity(intent);
-            } */
-        }
-
-        @JavascriptInterface
-        public boolean openLink(final String url) {
-            final CliqzCallbacks listener = mCliqzCallbacksListener;
-            if (listener != null) {
-                post(new Runnable() {
-                    @Override
-                    public void run() {
-                        listener.onResultClicked(url);
-                    }
-                });
-            }
-            return false;
-        }
-
-        private String historyToJSON(final List<HistoryItem> items) {
-            final StringBuilder sb = new StringBuilder(items.size() * 100);
-            sb.append("[");
-            String sep = "";
-            for (final HistoryItem item : items) {
-                sb.append(sep);
-                item.toJsonString(sb);
-                sep = ",";
-            }
-            sb.append("]");
-            return sb.toString();
-        }
-
-        @JavascriptInterface
-        public String searchHistory(final String query) {
-            if (mHistoryDatabase != null) {
-                final List<HistoryItem> items = mHistoryDatabase.findItemsContaining(query, 100);
-                try {
-                    return historyToJSON(items);
-                } catch (Exception e) {
-                    Log.e(TAG, "Cannot serialize History", e);
-                }
-            }
-            return "[]";
-        }
-
-        @JavascriptInterface
-        public String getTopSites() {
-            if (mHistoryDatabase != null) {
-                final List<HistoryItem> items = mHistoryDatabase.getTopSites(20);
-                try {
-                    return historyToJSON(items);
-                } catch (Exception e) {
-                    Log.e(TAG, "Cannot serialize History", e);
-                }
-            }
-            return "[]";
-        }
-
-        /**
-         * Callback sent from JS once it is ready
-         * @return
-         */
-        @JavascriptInterface
-        public int isReady() {
-            mJsReady = true;
-            // If the user typed a query before JS was ready, fire it now
-            if (mLastQuery != null || mLastLocation != null) {
-                final CharSequence lastQuery = mLastQuery;
-                post(new Runnable() {
-                    public void run() {
-                        if (mLastQuery != null) {
-                            mLastQuery = null;
-                            onQueryChanged(lastQuery.toString());
-                        }
-                        if (mLastLocation != null) {
-                            setLocation(mLastLocation);
-                            mLastLocation = null;
-                        }
-                    }
-                });
-
-            }
-            return 0;
-        }
-
-        @JavascriptInterface
-        public String getEnvironment() {
-            final Context act = getContext();
-            if (act == null) {
-                return "{}";
-            }
-
-            final JSONObject environment = new JSONObject();
-            final DisplayMetrics dm = getResources().getDisplayMetrics();
-
+    /**
+     * Support for the {@link SearchBridge} to search the history
+     * @param query
+     * @return a stringified json result string
+     */
+    String searchHistory(final String query) {
+        if (historyDatabase != null) {
+            final List<HistoryItem> items = historyDatabase.findItemsContaining(query, 100);
             try {
-                environment.put("width", dm.widthPixels);
-                environment.put("height", dm.heightPixels);
-                environment.put("dpi", dm.densityDpi);
-                environment.put("manufacturer", Build.MANUFACTURER);
-                environment.put("model", Build.MODEL);
-                environment.put("apilevel", Build.VERSION.SDK_INT);
-                ConnectivityManager cm =
-                        (ConnectivityManager) act.getSystemService(Context.CONNECTIVITY_SERVICE);
-
-                NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
-                if (activeNetwork != null &&
-                        activeNetwork.isConnectedOrConnecting()) {
-
-                    environment.put("connection", activeNetwork.getTypeName());
-                } else {
-                    environment.put("connection", "offline");
-                }
-                // environment.put("UUID", app.getInstallationId());
-                // environment.put("first_install", app.getInstallationTime());
-            } catch (JSONException e) {
-                Log.w(TAG, "Cannot create env", e);
+                return historyToJSON(items);
+            } catch (Exception e) {
+                Log.e(TAG, "Cannot serialize History", e);
             }
-            final PackageInfo pInfo;
+        }
+        return "[]";
+    }
+
+    /**
+     * Support for {@link SearchBridge} to get the 20 most visited web sites
+     * @return a stringified json result string
+     */
+    String getTopSites() {
+        if (historyDatabase != null) {
+            final List<HistoryItem> items = historyDatabase.getTopSites(20);
             try {
-                pInfo = act.getPackageManager().getPackageInfo(act.getPackageName(), 0);
-                environment.put("version", pInfo.versionName);
-            } catch (PackageManager.NameNotFoundException e) {
-            } catch (JSONException e) {
-            }
-
-            return environment.toString();
-        }
-
-        /**
-         * Callback from JS which suggests a url.
-         * @param url the suggested url that the user might be typing
-         */
-        @JavascriptInterface
-        public void autocomplete(final String url) {
-            final CliqzCallbacks listener = mCliqzCallbacksListener;
-            if (listener != null) {
-                post(new Runnable() {
-                    @Override
-                    public void run() {
-                        listener.onAutocompleteUrl(url);
-                    }
-                });
+                return historyToJSON(items);
+            } catch (Exception e) {
+                Log.e(TAG, "Cannot serialize History", e);
             }
         }
+        return "[]";
+    }
 
-        /**
-         * Callback from JS used to notify the interface the query had been changed (i.e. the user
-         * select a previous query between the query history)
-         *
-         * @param query the selected query
-         */
-        @JavascriptInterface
-        public void notifyQuery(final String query) {
-            final CliqzCallbacks listener = mCliqzCallbacksListener;
-            if (listener != null) {
-                post(new Runnable() {
-                    @Override
-                    public void run() {
-                        listener.onNotifyQuery(query);
+    /**
+     * Support for the {@link SearchBridge}, signal sent from JS once it is ready
+     */
+    void extensionReady() {
+        mJsReady = true;
+        // If the user typed a query before JS was ready, fire it now
+        if (mLastQuery != null || mLastLocation != null) {
+            final CharSequence lastQuery = mLastQuery;
+            post(new Runnable() {
+                public void run() {
+                    if (mLastQuery != null) {
+                        mLastQuery = null;
+                        onQueryChanged(lastQuery.toString());
                     }
-                });
-            }
-        }
+                    if (mLastLocation != null) {
+                        setLocation(mLastLocation);
+                        mLastLocation = null;
+                    }
+                }
+            });
 
-        /**
-         * Ask the browser to perform some action ({@link Intent}). The list of types can be found
-         * in {@link BrowserActionTypes}. However, the type can be any string, we simply ignore what
-         * we do not know.
-         *
-         * @param data the data used to perform the action (i.e. a phone number)
-         * @param type the type of the data
-         * @see BrowserActionTypes
-         */
-        @JavascriptInterface
-        public void browserAction(final String data, final String type) {
-            final Context context = getContext();
-            if (context == null) {
-                return;
-            }
-            final BrowserActionTypes action = BrowserActionTypes.fromTypeString(type);
-            final Intent intent = action.getIntent(context, data);
-            if (intent != null) {
-                post(new Runnable() {
-                    @Override
-                    public void run() {
-                        context.startActivity(intent);
-                    }
-                });
-            }
         }
     }
 
@@ -416,11 +274,18 @@ public class WebSearchView extends WebView implements ILightningTab {
      * Evaluate JS in web context
      * @param js JS command
      */
-    private void executeJS(final String js) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            evaluateJavascript(js, null);
-        } else {
-            loadUrl("javascript:" + js);
+    void executeJS(final String js) {
+        if (js != null && !js.isEmpty()) {
+            post(new Runnable() {
+                @Override
+                public void run() {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                        evaluateJavascript(js, null);
+                    } else {
+                        loadUrl("javascript:" + js);
+                    }
+                }
+            });
         }
     }
 
