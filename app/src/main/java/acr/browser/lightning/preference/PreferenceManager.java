@@ -60,6 +60,7 @@ public class PreferenceManager {
         public static final String USE_PROXY_PORT = "useProxyPort";
         public static final String INITIAL_CHECK_FOR_TOR = "checkForTor";
         public static final String INITIAL_CHECK_FOR_I2P = "checkForI2P";
+        public static final String ONBOARDING_COMPLETE = "onboardingComplete";
     }
 
     private final SharedPreferences mPrefs;
@@ -257,6 +258,10 @@ public class PreferenceManager {
 
     public boolean getRemoveIdentifyingHeadersEnabled(){
         return mPrefs.getBoolean(Name.IDENTIFYING_HEADERS, false);
+    }
+
+    public boolean getOnBoardingComplete() {
+        return mPrefs.getBoolean(Name.ONBOARDING_COMPLETE, false);
     }
 
     private void putBoolean(String name, boolean value) {
@@ -460,5 +465,9 @@ public class PreferenceManager {
 
     public void setUseWideViewportEnabled(boolean enable) {
         putBoolean(Name.USE_WIDE_VIEWPORT, enable);
+    }
+
+    public void setOnBoardingComplete(boolean done) {
+        putBoolean(Name.ONBOARDING_COMPLETE, done);
     }
 }

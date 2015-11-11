@@ -858,7 +858,7 @@ public abstract class BrowserActivity extends ThemableBrowserActivity
         switch (id) {
             case R.id.action_open_tabs:
                 getSupportActionBar().hide();
-                savePreview();
+                mTabsManager.getCurrentTab().savePreview();
                 switchTabs(mTabsManager.getCurrentTab(), mOpenTabsContainer);
                 if (mOpenTabsView.getUrl() != null && mOpenTabsView.getUrl().equals(Constants.OPEN_TABS)) {
                     mOpenTabsView.showTabManager();
@@ -1188,7 +1188,7 @@ public abstract class BrowserActivity extends ThemableBrowserActivity
             return false;
         }
         //save the screendump of current tab before switching to new tab
-        savePreview();
+        mTabsManager.getCurrentTab().savePreview();
         mIsNewIntent = false;
         LightningView startingTab = mTabsManager.newTab(this, url, isIncognito());
         if (mIdGenerator == 0) {
@@ -1229,7 +1229,6 @@ public abstract class BrowserActivity extends ThemableBrowserActivity
             mBrowserFrame.setBackgroundColor(mBackgroundColor);
         }
         final LightningView currentTab = mTabsManager.getCurrentTab();
-        deletePreview(position);
         mTabsManager.deleteTab(position);
         final LightningView afterTab = mTabsManager.getCurrentTab();
         if (afterTab == null) {
@@ -2443,42 +2442,6 @@ public abstract class BrowserActivity extends ThemableBrowserActivity
             deleteTab(mTabsManager.positionOf(id));
         }
         mOpenTabsView.updateTabmanagerView();
-    }
-
-    //Saves the screenshot of the tab. The image name is the "id" of the tab.
-    private void savePreview() {
-        View view = mTabsManager.getCurrentWebView().getRootView();
-        Bitmap bitmap;
-        if(mSearchContainer.isShown()) {
-            bitmap = Bitmap.createBitmap(view.getWidth(), view.getHeight(), Bitmap.Config.ARGB_8888);
-            Canvas canvas = new Canvas(bitmap);
-            view.draw(canvas);
-        } else {
-            view.setDrawingCacheEnabled(true);
-            //crop the image from the top by 150px
-            bitmap = Bitmap.createBitmap(view.getDrawingCache(),0,150,view.getWidth(),view.getHeight()-150);
-            view.setDrawingCacheEnabled(false);
-        }
-        try {
-            File directory = this.getDir("cliqz", MODE_PRIVATE);
-            File file = new File(directory, mTabsManager.getCurrentTab().getId() + ".jpeg");
-            FileOutputStream fileOutputStream = new FileOutputStream(file);
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 40, fileOutputStream);
-            fileOutputStream.flush();
-            fileOutputStream.close();
-            bitmap.recycle();
-        } catch (FileNotFoundException e) {
-            Log.e(Constants.TAG, "FileNotFoundException in savePreview", e);
-        } catch (IOException e) {
-            Log.e(Constants.TAG, "IOException in savePreview", e);
-        }
-    }
-
-    //deletes the screenshot of the tab being deleted.
-    private void deletePreview(int position) {
-        File directory = this.getDir("cliqz", MODE_PRIVATE);
-        File file = new File(directory, mTabsManager.getTabAtPosition(position).getId() + ".jpeg");
-        file.delete();
     }
 
 }

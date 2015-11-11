@@ -11,6 +11,8 @@ import javax.inject.Singleton;
 
 import acr.browser.lightning.activity.BrowserActivity;
 import acr.browser.lightning.activity.BrowserMenuPopup;
+import acr.browser.lightning.activity.MainActivity;
+import acr.browser.lightning.activity.OnBoardingActivity;
 import acr.browser.lightning.activity.ThemableBrowserActivity;
 import acr.browser.lightning.constant.BookmarkPage;
 import acr.browser.lightning.database.HistoryDatabase;
@@ -30,6 +32,10 @@ import dagger.Component;
 @Singleton
 @Component(modules = {AppModule.class})
 public interface AppComponent {
+
+    void inject(MainActivity activity);
+
+    void inject(OnBoardingActivity activity);
 
     void inject(BrowserActivity activity);
 

@@ -9,6 +9,7 @@ import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.ColorMatrix;
 import android.graphics.ColorMatrixColorFilter;
@@ -41,6 +42,7 @@ import com.squareup.otto.Bus;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.util.List;
 import java.util.Map;
@@ -655,6 +657,7 @@ public class LightningView implements ILightningTab {
 
     public synchronized void onDestroy() {
         if (mWebView != null) {
+            deletePreview();
             mWebView.stopLoading();
             mWebView.onPause();
             mWebView.clearHistory();
@@ -927,5 +930,41 @@ public class LightningView implements ILightningTab {
                 view.longClickPage(url);
             }
         }
+    }
+
+    //Saves the screenshot of the tab. The image name is the "id" of the tab.
+    public void savePreview() {
+        View view = mWebView.getRootView();
+        Bitmap bitmap;
+        if(!mWebView.isShown()) {
+            bitmap = Bitmap.createBitmap(view.getWidth(), view.getHeight(), Bitmap.Config.ARGB_8888);
+            Canvas canvas = new Canvas(bitmap);
+            view.draw(canvas);
+        } else {
+            view.setDrawingCacheEnabled(true);
+            //crop the image from the top by 150px
+            bitmap = Bitmap.createBitmap(view.getDrawingCache(),0,150,view.getWidth(),view.getHeight()-150);
+            view.setDrawingCacheEnabled(false);
+        }
+        try {
+            File directory = mActivity.getApplicationContext().getDir("cliqz", mActivity.getApplicationContext().MODE_PRIVATE);
+            File file = new File(directory, mId + ".jpeg");
+            FileOutputStream fileOutputStream = new FileOutputStream(file);
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 40, fileOutputStream);
+            fileOutputStream.flush();
+            fileOutputStream.close();
+            bitmap.recycle();
+        } catch (FileNotFoundException e) {
+            Log.e(Constants.TAG, "FileNotFoundException in savePreview", e);
+        } catch (IOException e) {
+            Log.e(Constants.TAG, "IOException in savePreview", e);
+        }
+    }
+
+    //deletes the screenshot of the tab being deleted.
+    private void deletePreview() {
+        File directory = mActivity.getApplicationContext().getDir("cliqz", mActivity.getApplicationContext().MODE_PRIVATE);
+        File file = new File(directory, mId + ".jpeg");
+        file.delete();
     }
 }
