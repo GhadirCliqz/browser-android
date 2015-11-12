@@ -43,10 +43,10 @@ public class AutocompleteService {
      */
     public static AutocompleteService createInstance(Context context) {
         final AutocompleteService service = new AutocompleteService();
-        new DictionaryLoader(context, service).start();
         if (sExtraCompletionFile == null) {
             sExtraCompletionFile = new File(context.getFilesDir(), EXTRA_COMPLETION_FILE_NAME);
         }
+        new DictionaryLoader(context, service).start();
         return service;
     }
 

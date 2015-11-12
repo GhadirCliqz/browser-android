@@ -17,10 +17,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.sqlite.SQLiteException;
 import android.graphics.Bitmap;
-import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.Paint;
-import android.graphics.Point;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
@@ -51,7 +48,6 @@ import android.text.TextWatcher;
 import android.text.style.CharacterStyle;
 import android.util.Log;
 import android.util.Patterns;
-import android.view.Display;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -101,8 +97,6 @@ import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.List;
 import java.util.Set;
@@ -168,13 +162,11 @@ public abstract class BrowserActivity extends ThemableBrowserActivity
 
     // Toolbar Views
     private AutocompleteEditText mSearch;
-    private ImageView mArrowImage;
 
     // Full Screen Video Views
     private FrameLayout mFullscreenContainer;
     private VideoView mVideoView;
     private View mCustomView;
-    private ImageView mMenuDotsImage;
 
     // Adapter
     private SearchAdapter mSearchAdapter;
@@ -322,19 +314,6 @@ public abstract class BrowserActivity extends ThemableBrowserActivity
         lp.width = LayoutParams.MATCH_PARENT;
         lp.height = LayoutParams.MATCH_PARENT;
         customView.setLayoutParams(lp);
-
-        mArrowImage = (ImageView) customView.findViewById(R.id.arrow);
-        FrameLayout arrowButton = (FrameLayout) customView.findViewById(R.id.arrow_button);
-        if (mShowTabsInDrawer) {
-            // Use hardware acceleration for the animation
-            mArrowDrawable = new DrawerArrowDrawable(this);
-            mArrowImage.setLayerType(View.LAYER_TYPE_HARDWARE, null);
-            mArrowImage.setImageDrawable(mArrowDrawable);
-        } else {
-            mArrowImage.setImageResource(R.drawable.ic_action_home);
-            mArrowImage.setColorFilter(mIconColor, PorterDuff.Mode.SRC_IN);
-        }
-        arrowButton.setOnClickListener(this);
 
         mProxyUtils = ProxyUtils.getInstance();
 
@@ -490,16 +469,6 @@ public abstract class BrowserActivity extends ThemableBrowserActivity
                 }
 
             });
-            new Handler().postDelayed(new Runnable() {
-
-                @Override
-                public void run() {
-                    if (mArrowDrawable != null) {
-                        mArrowImage.startAnimation(anim);
-                    }
-                }
-
-            }, 100);
 
             if (!hasFocus) {
                 InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
