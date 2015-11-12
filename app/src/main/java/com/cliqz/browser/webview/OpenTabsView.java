@@ -1,14 +1,10 @@
 package com.cliqz.browser.webview;
 
-import android.annotation.TargetApi;
 import android.content.Context;
 import android.os.Build;
-import android.os.Environment;
-import android.support.annotation.Nullable;
 import android.util.Log;
 import android.view.View;
 import android.webkit.ConsoleMessage;
-import android.webkit.GeolocationPermissions;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
@@ -26,12 +22,10 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Objects;
 
 import javax.inject.Inject;
 
 import acr.browser.lightning.BuildConfig;
-import acr.browser.lightning.activity.BrowserActivity;
 import acr.browser.lightning.activity.TabsManager;
 import acr.browser.lightning.app.BrowserApp;
 import acr.browser.lightning.constant.Constants;
@@ -99,6 +93,7 @@ public class OpenTabsView extends WebView implements ILightningTab {
         });
 
         addJavascriptInterface(new JsBridge(), "tabmanager");
+        super.loadUrl(Constants.OPEN_TABS);
     }
 
     private class JsBridge {

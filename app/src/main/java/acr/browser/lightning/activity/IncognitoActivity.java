@@ -58,7 +58,8 @@ public class IncognitoActivity extends BrowserActivity {
 
     @Override
     public void closeActivity() {
-        closeDrawers();
+//  TODO No more drawers
+//        closeBookmarkFragment();
         finish();
     }
 }

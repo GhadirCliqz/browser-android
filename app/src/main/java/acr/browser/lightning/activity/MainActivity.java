@@ -74,7 +74,8 @@ public class MainActivity extends BrowserActivity {
 
     @Override
     public void closeActivity() {
-        closeDrawers();
+//  TODO No more drawers
+//        closeBookmarkFragment();
         moveTaskToBack(true);
     }
 

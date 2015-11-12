@@ -17,10 +17,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.sqlite.SQLiteException;
 import android.graphics.Bitmap;
-import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.Paint;
-import android.graphics.Point;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
@@ -28,19 +25,16 @@ import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.Message;
 import android.provider.MediaStore;
 import android.support.annotation.ColorInt;
 import android.support.annotation.IdRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
-import android.support.v4.view.GravityCompat;
 import android.support.v4.view.MenuItemCompat;
-import android.support.v4.widget.DrawerLayout;
-import android.support.v4.widget.DrawerLayout.DrawerListener;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.graphics.Palette;
@@ -51,7 +45,6 @@ import android.text.TextWatcher;
 import android.text.style.CharacterStyle;
 import android.util.Log;
 import android.util.Patterns;
-import android.view.Display;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -101,8 +94,6 @@ import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.List;
 import java.util.Set;
@@ -124,7 +115,6 @@ import acr.browser.lightning.database.HistoryDatabase;
 import acr.browser.lightning.database.HistoryItem;
 import acr.browser.lightning.dialog.LightningDialogBuilder;
 import acr.browser.lightning.fragment.BookmarksFragment;
-import acr.browser.lightning.fragment.TabsFragment;
 import acr.browser.lightning.object.SearchAdapter;
 import acr.browser.lightning.receiver.NetworkReceiver;
 import acr.browser.lightning.utils.ProxyUtils;
@@ -140,21 +130,14 @@ import butterknife.ButterKnife;
 public abstract class BrowserActivity extends ThemableBrowserActivity
         implements UIController, OnClickListener, OnLongClickListener, CliqzCallbacks {
 
+    private static final String BOOKMARKS_FRAGMENT_TAG = "bookmarks_tag";
+
     // Static Layout
-    @Bind(R.id.drawer_layout)
-    DrawerLayout mDrawerLayout;
+    @Bind(R.id.main_layout)
+    ViewGroup mUiLayout;
 
     @Bind(R.id.content_frame)
     FrameLayout mBrowserFrame;
-
-    @Bind(R.id.left_drawer)
-    ViewGroup mDrawerLeft;
-
-    @Bind(R.id.right_drawer)
-    ViewGroup mDrawerRight;
-
-    @Bind(R.id.ui_layout)
-    ViewGroup mUiLayout;
 
     @Bind(R.id.toolbar_layout)
     ViewGroup mToolbarLayout;
@@ -168,13 +151,11 @@ public abstract class BrowserActivity extends ThemableBrowserActivity
 
     // Toolbar Views
     private AutocompleteEditText mSearch;
-    private ImageView mArrowImage;
 
     // Full Screen Video Views
     private FrameLayout mFullscreenContainer;
     private VideoView mVideoView;
     private View mCustomView;
-    private ImageView mMenuDotsImage;
 
     // Adapter
     private SearchAdapter mSearchAdapter;
@@ -271,42 +252,13 @@ public abstract class BrowserActivity extends ThemableBrowserActivity
         // initialize background ColorDrawable
         mBackground.setColor(((ColorDrawable) mToolbarLayout.getBackground()).getColor());
 
-        // Drawer stutters otherwise
-        mDrawerLeft.setLayerType(View.LAYER_TYPE_HARDWARE, null);
-        mDrawerRight.setLayerType(View.LAYER_TYPE_HARDWARE, null);
-
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP && !mShowTabsInDrawer) {
             getWindow().setStatusBarColor(Color.BLACK);
         }
 
-        setNavigationDrawerWidth();
-        mDrawerLayout.setDrawerListener(new DrawerLocker());
-
         mWebpageBitmap = ThemeUtils.getThemedBitmap(this, R.drawable.ic_webpage, mDarkTheme);
 
         mHomepage = mPreferences.getHomepage();
-
-        final TabsFragment tabsFragment = new TabsFragment();
-        final int containerId = mShowTabsInDrawer ? R.id.left_drawer : R.id.tabs_toolbar_container;
-        final Bundle tabsFragmentArguments = new Bundle();
-        tabsFragmentArguments.putBoolean(TabsFragment.IS_INCOGNITO, isIncognito());
-        tabsFragmentArguments.putBoolean(TabsFragment.VERTICAL_MODE, mShowTabsInDrawer);
-        tabsFragment.setArguments(tabsFragmentArguments);
-
-        final BookmarksFragment bookmarksFragment = new BookmarksFragment();
-        final Bundle bookmarksFragmentArguments = new Bundle();
-        bookmarksFragmentArguments.putBoolean(BookmarksFragment.INCOGNITO_MODE, isIncognito());
-        bookmarksFragment.setArguments(bookmarksFragmentArguments);
-
-        final FragmentManager fragmentManager = getSupportFragmentManager();
-        fragmentManager
-                .beginTransaction()
-                .add(containerId, tabsFragment)
-                .add(R.id.right_drawer, bookmarksFragment)
-                .commit();
-        if (mShowTabsInDrawer) {
-            mToolbarLayout.removeView(findViewById(R.id.tabs_toolbar_container));
-        }
 
         if (actionBar == null)
             return;
@@ -322,19 +274,6 @@ public abstract class BrowserActivity extends ThemableBrowserActivity
         lp.width = LayoutParams.MATCH_PARENT;
         lp.height = LayoutParams.MATCH_PARENT;
         customView.setLayoutParams(lp);
-
-        mArrowImage = (ImageView) customView.findViewById(R.id.arrow);
-        FrameLayout arrowButton = (FrameLayout) customView.findViewById(R.id.arrow_button);
-        if (mShowTabsInDrawer) {
-            // Use hardware acceleration for the animation
-            mArrowDrawable = new DrawerArrowDrawable(this);
-            mArrowImage.setLayerType(View.LAYER_TYPE_HARDWARE, null);
-            mArrowImage.setImageDrawable(mArrowDrawable);
-        } else {
-            mArrowImage.setImageResource(R.drawable.ic_action_home);
-            mArrowImage.setColorFilter(mIconColor, PorterDuff.Mode.SRC_IN);
-        }
-        arrowButton.setOnClickListener(this);
 
         mProxyUtils = ProxyUtils.getInstance();
 
@@ -362,9 +301,6 @@ public abstract class BrowserActivity extends ThemableBrowserActivity
         mSearch.setOnEditorActionListener(search);
         mSearch.setOnTouchListener(search);
         mSearch.addTextChangedListener(search);
-
-        mDrawerLayout.setDrawerShadow(R.drawable.drawer_right_shadow, GravityCompat.END);
-        mDrawerLayout.setDrawerShadow(R.drawable.drawer_left_shadow, GravityCompat.START);
 
         if (API <= Build.VERSION_CODES.JELLY_BEAN_MR2) {
             //noinspection deprecation
@@ -490,16 +426,6 @@ public abstract class BrowserActivity extends ThemableBrowserActivity
                 }
 
             });
-            new Handler().postDelayed(new Runnable() {
-
-                @Override
-                public void run() {
-                    if (mArrowDrawable != null) {
-                        mArrowImage.startAnimation(anim);
-                    }
-                }
-
-            }, 100);
 
             if (!hasFocus) {
                 InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
@@ -528,17 +454,6 @@ public abstract class BrowserActivity extends ThemableBrowserActivity
             if (!q.isEmpty()) {
                 mCliqzSearch.onQueryChanged(q);
             }
-            // TODO [Stefano] Review this
-        /* else {
-            if (mCurrentView == mSearchContainer) {
-                showTab(mPreSearchTab);
-                mPreSearchTab = null;
-                mSearch.requestFocus();
-                mSearch.setText(null);
-                InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-                inputMethodManager.showSoftInput(mSearch, InputMethodManager.SHOW_FORCED);
-            }
-        } */
         }
 
         @Override
@@ -661,69 +576,6 @@ public abstract class BrowserActivity extends ThemableBrowserActivity
         }
     };
     // CLIQZ - END
-
-    private class DrawerLocker implements DrawerListener {
-
-        @Override
-        public void onDrawerClosed(View v) {
-            if (v == mDrawerRight && mShowTabsInDrawer) {
-                mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED, mDrawerLeft);
-            } else {
-                mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED, mDrawerRight);
-            }
-        }
-
-        @Override
-        public void onDrawerOpened(View v) {
-            if (v == mDrawerRight) {
-                mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED, mDrawerLeft);
-            } else {
-                mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED, mDrawerRight);
-            }
-        }
-
-        @Override
-        public void onDrawerSlide(View v, float arg) {
-        }
-
-        @Override
-        public void onDrawerStateChanged(int arg) {
-        }
-
-    }
-
-    private void setNavigationDrawerWidth() {
-        int width = getResources().getDisplayMetrics().widthPixels - Utils.dpToPx(56);
-        int maxWidth;
-        if (isTablet()) {
-            maxWidth = Utils.dpToPx(320);
-        } else {
-            maxWidth = Utils.dpToPx(300);
-        }
-        if (width > maxWidth) {
-            DrawerLayout.LayoutParams params = (android.support.v4.widget.DrawerLayout.LayoutParams) mDrawerLeft
-                    .getLayoutParams();
-            params.width = maxWidth;
-            mDrawerLeft.setLayoutParams(params);
-            mDrawerLeft.requestLayout();
-            DrawerLayout.LayoutParams paramsRight = (android.support.v4.widget.DrawerLayout.LayoutParams) mDrawerRight
-                    .getLayoutParams();
-            paramsRight.width = maxWidth;
-            mDrawerRight.setLayoutParams(paramsRight);
-            mDrawerRight.requestLayout();
-        } else {
-            DrawerLayout.LayoutParams params = (android.support.v4.widget.DrawerLayout.LayoutParams) mDrawerLeft
-                    .getLayoutParams();
-            params.width = width;
-            mDrawerLeft.setLayoutParams(params);
-            mDrawerLeft.requestLayout();
-            DrawerLayout.LayoutParams paramsRight = (android.support.v4.widget.DrawerLayout.LayoutParams) mDrawerRight
-                    .getLayoutParams();
-            paramsRight.width = width;
-            mDrawerRight.setLayoutParams(paramsRight);
-            mDrawerRight.requestLayout();
-        }
-    }
 
     private void initializePreferences() {
         final LightningView currentView = mTabsManager.getCurrentTab();
@@ -849,23 +701,14 @@ public abstract class BrowserActivity extends ThemableBrowserActivity
         switch (id) {
             case R.id.action_open_tabs:
                 getSupportActionBar().hide();
-                mTabsManager.getCurrentTab().savePreview();
-                switchTabs(mTabsManager.getCurrentTab(), mOpenTabsContainer);
-                if (mOpenTabsView.getUrl() != null && mOpenTabsView.getUrl().equals(Constants.OPEN_TABS)) {
-                    mOpenTabsView.showTabManager();
-                } else {
-                    mOpenTabsView.loadUrl(Constants.OPEN_TABS);
-                }
+                switchTabs(currentView, mOpenTabsContainer);
+                currentView.savePreview();
+                mOpenTabsView.showTabManager();
                 return true;
             case R.id.menu_dots:
                 final BrowserMenuPopup popup = new BrowserMenuPopup(this);
                 popup.setAnchorView(findViewById(R.id.menu_dots));
                 popup.show();
-                return true;
-            case android.R.id.home:
-                if (mDrawerLayout.isDrawerOpen(mDrawerRight)) {
-                    mDrawerLayout.closeDrawer(mDrawerRight);
-                }
                 return true;
             case R.id.action_back:
                 if (currentView != null && currentView.canGoBack()) {
@@ -1093,16 +936,6 @@ public abstract class BrowserActivity extends ThemableBrowserActivity
 
         showActionBar();
 
-        // Use a delayed handler to make the transition smooth
-        // otherwise it will get caught up with the showTab code
-        // and cause a janky motion
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                mDrawerLayout.closeDrawers();
-            }
-        }, 200);
-
         // Should update the bookmark status in BookmarksFragment
         mEventBus.post(new BrowserEvents.CurrentPageUrl(newView.getUrl()));
 
@@ -1178,8 +1011,8 @@ public abstract class BrowserActivity extends ThemableBrowserActivity
             Utils.showSnackbar(this, R.string.max_tabs);
             return false;
         }
-        //save the screendump of current tab before switching to new tab
-        mTabsManager.getCurrentTab().savePreview();
+
+        LightningView oldTab = mTabsManager.getCurrentTab();
         mIsNewIntent = false;
         LightningView startingTab = mTabsManager.newTab(this, url, isIncognito());
         if (mIdGenerator == 0) {
@@ -1190,16 +1023,12 @@ public abstract class BrowserActivity extends ThemableBrowserActivity
         if (show) {
             showTab(mTabsManager.size() - 1);
         }
+        //save the screendump of current tab before switching to new tab
+        oldTab.savePreview();
+
         // TODO Check is this is callable directly from LightningView
         mEventBus.post(new BrowserEvents.TabsChanged());
 
-        // TODO Restore this
-        // new Handler().postDelayed(new Runnable() {
-        //    @Override
-        //    public void run() {
-        //        mDrawerListLeft.smoothScrollToPosition(mTabsManager.size() - 1);
-        //    }
-        // }, 300);
         invalidateOptionsMenu();
         return true;
     }
@@ -1278,35 +1107,33 @@ public abstract class BrowserActivity extends ThemableBrowserActivity
     @Override
     public synchronized void onBackPressed() {
         final LightningView currentTab = mTabsManager.getCurrentTab();
-        if (mDrawerLayout.isDrawerOpen(mDrawerLeft)) {
-            mDrawerLayout.closeDrawer(mDrawerLeft);
-        } else if (mDrawerLayout.isDrawerOpen(mDrawerRight)) {
-            mEventBus.post(new BrowserEvents.UserPressedBack());
-        } else {
-            if (currentTab != null) {
-                Log.d(Constants.TAG, "onBackPressed");
-                if (mSearch.hasFocus()) {
-                    switchTabs(mSearchContainer, mTabsManager.getCurrentTab());
-                } else if (mOpenTabsContainer.isShown()) {
-                    mOpenTabsView.backPressed();
-                } else if (currentTab.canGoBack()) {
-                    if (!currentTab.isShown()) {
-                        onHideCustomView();
-                    } else {
-                        currentTab.goBack();
-                    }
+        final Fragment bookmarksFragment = getSupportFragmentManager()
+                .findFragmentByTag(BOOKMARKS_FRAGMENT_TAG);
+        if (bookmarksFragment != null) {
+            closeBookmarkFragment();
+        } else if (currentTab != null) {
+            Log.d(Constants.TAG, "onBackPressed");
+            if (mSearch.hasFocus()) {
+                switchTabs(mSearchContainer, mTabsManager.getCurrentTab());
+            } else if (mOpenTabsContainer.isShown()) {
+                mOpenTabsView.backPressed();
+            } else if (currentTab.canGoBack()) {
+                if (!currentTab.isShown()) {
+                    onHideCustomView();
                 } else {
-                    if (mCustomView != null || mCustomViewCallback != null) {
-                        onHideCustomView();
-                    } else {
-                        deleteTab(mTabsManager.positionOf(currentTab));
-                        invalidateOptionsMenu();
-                    }
+                    currentTab.goBack();
                 }
             } else {
-                Log.e(Constants.TAG, "This shouldn't happen ever");
-                super.onBackPressed();
+                if (mCustomView != null || mCustomViewCallback != null) {
+                    onHideCustomView();
+                } else {
+                    deleteTab(mTabsManager.positionOf(currentTab));
+                    invalidateOptionsMenu();
+                }
             }
+        } else {
+            Log.e(Constants.TAG, "This shouldn't happen ever");
+            super.onBackPressed();
         }
     }
 
@@ -1593,14 +1420,22 @@ public abstract class BrowserActivity extends ThemableBrowserActivity
      * helper function that opens the bookmark drawer
      */
     private void openBookmarks() {
-        if (mDrawerLayout.isDrawerOpen(mDrawerLeft)) {
-            mDrawerLayout.closeDrawers();
-        }
-        mDrawerLayout.openDrawer(mDrawerRight);
+        final BookmarksFragment bookmarksFragment = new BookmarksFragment();
+        final Bundle bookmarksFragmentArguments = new Bundle();
+        bookmarksFragmentArguments.putBoolean(BookmarksFragment.INCOGNITO_MODE, isIncognito());
+        bookmarksFragment.setArguments(bookmarksFragmentArguments);
+        final FragmentManager manager = getSupportFragmentManager();
+        manager.beginTransaction()
+                .add(android.R.id.content, bookmarksFragment, BOOKMARKS_FRAGMENT_TAG)
+                .commit();
     }
 
-    void closeDrawers() {
-        mDrawerLayout.closeDrawers();
+    void closeBookmarkFragment() {
+        final FragmentManager manager = getSupportFragmentManager();
+        final Fragment bookmarksFragment = manager.findFragmentByTag(BOOKMARKS_FRAGMENT_TAG);
+        if (bookmarksFragment != null) {
+            manager.beginTransaction().remove(bookmarksFragment).commit();
+        }
     }
 
     @Override
@@ -2056,15 +1891,6 @@ public abstract class BrowserActivity extends ThemableBrowserActivity
             return;
         }
         switch (v.getId()) {
-            case R.id.arrow_button:
-                if (mSearch != null && mSearch.hasFocus()) {
-                    currentTab.requestFocus();
-                } else if (mShowTabsInDrawer) {
-                    mDrawerLayout.openDrawer(mDrawerLeft);
-                } else {
-                    currentTab.loadHomepage();
-                }
-                break;
             case R.id.button_next:
                 currentTab.findNext();
                 break;
@@ -2083,7 +1909,7 @@ public abstract class BrowserActivity extends ThemableBrowserActivity
             case R.id.action_toggle_desktop:
                 currentTab.toggleDesktopUA(this);
                 currentTab.reload();
-                closeDrawers();
+                closeBookmarkFragment();
                 break;
             case R.id.menu_dots:
                 final BrowserMenuPopup popup = new BrowserMenuPopup(this);
@@ -2095,27 +1921,6 @@ public abstract class BrowserActivity extends ThemableBrowserActivity
     @Override
     public boolean onLongClick(View view) {
         return true;
-    }
-
-    // TODO Check if all the calls are relative to TabsFragement
-
-    /**
-     * A utility method that creates a FrameLayout button with the given ID and
-     * sets the image of the button to the given image ID. The OnClick and OnLongClick
-     * listeners are set to this class, so BrowserActivity should handle those events
-     * there. Additionally, it tints the images according to the current theme.
-     * This method only is a convenience so that this code does not have to be repeated
-     * for the several "Buttons" that use this.
-     *
-     * @param buttonId the view id of the button
-     * @param imageId  the image to set as the button image
-     */
-    private void setupFrameLayoutButton(@IdRes int buttonId, @IdRes int imageId) {
-        final View frameButton = findViewById(buttonId);
-        final ImageView buttonImage = (ImageView) findViewById(imageId);
-        frameButton.setOnClickListener(this);
-        frameButton.setOnLongClickListener(this);
-        buttonImage.setColorFilter(mIconColor, PorterDuff.Mode.SRC_IN);
     }
 
     /**
@@ -2161,15 +1966,7 @@ public abstract class BrowserActivity extends ThemableBrowserActivity
         @Subscribe
         public void loadUrlInCurrentTab(final BrowserEvents.OpenUrlInCurrentTab event) {
             loadUrlInCurrentView(event.url);
-            // keep any jank from happening when the drawer is closed after the
-            // URL starts to load
-            final Handler handler = new Handler();
-            handler.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    mDrawerLayout.closeDrawer(mDrawerRight);
-                }
-            }, 150);
+            closeBookmarkFragment();
         }
 
         /**
@@ -2183,7 +1980,7 @@ public abstract class BrowserActivity extends ThemableBrowserActivity
         @Subscribe
         public void loadUrlInNewTab(final BrowserEvents.OpenUrlInNewTab event) {
             BrowserActivity.this.newTab(event.url, true);
-            mDrawerLayout.closeDrawers();
+            closeBookmarkFragment();
         }
 
         /**
@@ -2253,7 +2050,7 @@ public abstract class BrowserActivity extends ThemableBrowserActivity
          */
         @Subscribe
         public void closeBookmarks(final BookmarkEvents.CloseBookmarks event) {
-            mDrawerLayout.closeDrawer(mDrawerRight);
+            closeBookmarkFragment();
         }
 
         /**
@@ -2348,7 +2145,7 @@ public abstract class BrowserActivity extends ThemableBrowserActivity
             final LightningView currentTab = mTabsManager.getCurrentTab();
             if (currentTab != null) {
                 currentTab.loadHomepage();
-                closeDrawers();
+                closeBookmarkFragment();
             }
         }
 

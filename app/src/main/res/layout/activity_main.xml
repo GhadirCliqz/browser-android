@@ -4,9 +4,17 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@null"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:fitsSystemWindows="true">
 
-    <android.support.v4.widget.DrawerLayout
+    <include layout="@layout/toolbar" />
+
+    <include layout="@layout/browser_content" />
+
+    <include layout="@layout/search_interface" />
+
+    <!-- TODO Remove this
+        android.support.v4.widget.DrawerLayout
         android:id="@+id/drawer_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -43,6 +51,6 @@
             android:layout_width="@dimen/navigation_width"
             android:layout_height="match_parent" />
 
-    </android.support.v4.widget.DrawerLayout>
+    </android.support.v4.widget.DrawerLayout -->
 
 </LinearLayout>
