@@ -701,13 +701,9 @@ public abstract class BrowserActivity extends ThemableBrowserActivity
         switch (id) {
             case R.id.action_open_tabs:
                 getSupportActionBar().hide();
-                mTabsManager.getCurrentTab().savePreview();
-                switchTabs(mTabsManager.getCurrentTab(), mOpenTabsContainer);
-                if (mOpenTabsView.getUrl() != null && mOpenTabsView.getUrl().equals(Constants.OPEN_TABS)) {
-                    mOpenTabsView.showTabManager();
-                } else {
-                    mOpenTabsView.loadUrl(Constants.OPEN_TABS);
-                }
+                switchTabs(currentView, mOpenTabsContainer);
+                currentView.savePreview();
+                mOpenTabsView.showTabManager();
                 return true;
             case R.id.menu_dots:
                 final BrowserMenuPopup popup = new BrowserMenuPopup(this);
@@ -1015,8 +1011,8 @@ public abstract class BrowserActivity extends ThemableBrowserActivity
             Utils.showSnackbar(this, R.string.max_tabs);
             return false;
         }
-        //save the screendump of current tab before switching to new tab
-        mTabsManager.getCurrentTab().savePreview();
+
+        LightningView oldTab = mTabsManager.getCurrentTab();
         mIsNewIntent = false;
         LightningView startingTab = mTabsManager.newTab(this, url, isIncognito());
         if (mIdGenerator == 0) {
@@ -1027,6 +1023,9 @@ public abstract class BrowserActivity extends ThemableBrowserActivity
         if (show) {
             showTab(mTabsManager.size() - 1);
         }
+        //save the screendump of current tab before switching to new tab
+        oldTab.savePreview();
+
         // TODO Check is this is callable directly from LightningView
         mEventBus.post(new BrowserEvents.TabsChanged());
 

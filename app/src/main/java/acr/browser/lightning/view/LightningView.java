@@ -28,6 +28,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnTouchListener;
 import android.view.ViewConfiguration;
+import android.view.ViewParent;
 import android.webkit.CookieManager;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebBackForwardList;
@@ -934,18 +935,19 @@ public class LightningView implements ILightningTab {
 
     //Saves the screenshot of the tab. The image name is the "id" of the tab.
     public void savePreview() {
-        View view = mWebView.getRootView();
-        Bitmap bitmap;
-        if(!mWebView.isShown()) {
-            bitmap = Bitmap.createBitmap(view.getWidth(), view.getHeight(), Bitmap.Config.ARGB_8888);
-            Canvas canvas = new Canvas(bitmap);
-            view.draw(canvas);
-        } else {
-            view.setDrawingCacheEnabled(true);
-            //crop the image from the top by 150px
-            bitmap = Bitmap.createBitmap(view.getDrawingCache(),0,150,view.getWidth(),view.getHeight()-150);
-            view.setDrawingCacheEnabled(false);
+        ViewParent viewParent = mWebView.getParent();
+        if (viewParent != null) {
+            throw new RuntimeException("Do not take screenshots when you are attached");
         }
+        final int scrollX = mWebView.getScrollX();
+        final int scrollY = mWebView.getScrollY();
+        mWebView.scrollTo(0, 0);
+        final int width = mWebView.getWidth();
+        final int height = width /3 * 4;
+        final Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+        final Canvas canvas = new Canvas(bitmap);
+        mWebView.draw(canvas);
+        mWebView.scrollTo(scrollX, scrollY);
         try {
             File directory = mActivity.getApplicationContext().getDir("cliqz", mActivity.getApplicationContext().MODE_PRIVATE);
             File file = new File(directory, mId + ".jpeg");
