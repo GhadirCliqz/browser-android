@@ -59,4 +59,6 @@ public final class Constants {
     public static final String[] TEXT_ENCODINGS = {"ISO-8859-1", "UTF-8", "GBK", "Big5", "ISO-2022-JP", "SHIFT_JS", "EUC-JP", "EUC-KR"};
 
     public static final String EXTERNAL_STORAGE = Environment.getExternalStorageDirectory().toString();
+
+    public static final String TABS_SCREENSHOT_FOLDER_NAME = "tabs";
 }

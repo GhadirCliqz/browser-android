@@ -1,30 +1,19 @@
-package com.cliqz.browser.search;
+package com.cliqz.browser.webview;
 
 import android.annotation.TargetApi;
 import android.content.Context;
-import android.content.Intent;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
 import android.location.Location;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Debug;
 import android.support.annotation.Nullable;
-import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.View;
 import android.webkit.ConsoleMessage;
 import android.webkit.GeolocationPermissions;
-import android.webkit.JavascriptInterface;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
-
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.util.List;
 
@@ -39,9 +28,9 @@ import acr.browser.lightning.view.ILightningTab;
 /**
  * Created by kread on 13/07/15.
  */
-public class WebSearchView extends WebView implements ILightningTab {
+public class CliqzView extends WebView implements ILightningTab {
 
-    private static final String TAG = WebSearchView.class.getSimpleName();
+    private static final String TAG = CliqzView.class.getSimpleName();
     private static final boolean DO_PROFILE_QUERY = false;
     // app_debug includes single JS files, app includes minified JS
     private static final String CLIQZ_URL = "file:///android_asset/navigation/index.html";
@@ -80,7 +69,7 @@ public class WebSearchView extends WebView implements ILightningTab {
     private Location mLastLocation;
     private String mUrl;
 
-    public WebSearchView(Context context) {
+    public CliqzView(Context context) {
         super(context);
 
         setup();
@@ -139,7 +128,7 @@ public class WebSearchView extends WebView implements ILightningTab {
         openCliqzView();
 
         // Callbacks from JS to Java
-        addJavascriptInterface(new SearchBridge(this), "jsBridge");
+        addJavascriptInterface(new CliqzBridge(this), "jsBridge");
     }
 
     public void openCliqzView() {
@@ -214,7 +203,7 @@ public class WebSearchView extends WebView implements ILightningTab {
     }
 
     /**
-     * Support for the {@link SearchBridge} to search the history
+     * Support for the {@link CliqzBridge} to search the history
      * @param query
      * @return a stringified json result string
      */
@@ -231,7 +220,7 @@ public class WebSearchView extends WebView implements ILightningTab {
     }
 
     /**
-     * Support for {@link SearchBridge} to get the 20 most visited web sites
+     * Support for {@link CliqzBridge} to get the 20 most visited web sites
      * @return a stringified json result string
      */
     String getTopSites() {
@@ -247,7 +236,7 @@ public class WebSearchView extends WebView implements ILightningTab {
     }
 
     /**
-     * Support for the {@link SearchBridge}, signal sent from JS once it is ready
+     * Support for the {@link CliqzBridge}, signal sent from JS once it is ready
      */
     void extensionReady() {
         mJsReady = true;
