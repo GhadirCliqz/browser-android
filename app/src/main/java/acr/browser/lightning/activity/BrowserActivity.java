@@ -77,7 +77,6 @@ import android.widget.AutoCompleteTextView;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
-import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
@@ -85,9 +84,9 @@ import android.widget.VideoView;
 
 import com.anthonycr.grant.PermissionsManager;
 import com.cliqz.browser.bus.TabManagerEvents;
-import com.cliqz.browser.search.WebSearchView;
-import com.cliqz.browser.search.WebSearchView.CliqzCallbacks;
-import com.cliqz.browser.webview.OpenTabsView;
+import com.cliqz.browser.webview.CliqzView;
+import com.cliqz.browser.webview.CliqzView.CliqzCallbacks;
+import com.cliqz.browser.webview.TabsManagerView;
 import com.cliqz.browser.widget.AutocompleteEditText;
 import com.google.common.collect.ImmutableSet;
 import com.squareup.otto.Bus;
@@ -178,8 +177,8 @@ public abstract class BrowserActivity extends ThemableBrowserActivity
 
     // CLIQZ
     private LightningView mSearchContainer, mOpenTabsContainer;
-    private WebSearchView mCliqzSearch;
-    private OpenTabsView mOpenTabsView;
+    private CliqzView mCliqzSearch;
+    private TabsManagerView mTabsManagerView;
 
 
     // The singleton BookmarkManager
@@ -314,11 +313,11 @@ public abstract class BrowserActivity extends ThemableBrowserActivity
         mProxyUtils.checkForProxy(this);
 
         // CLIQZ - BEGIN
-        mCliqzSearch = new WebSearchView(this);
+        mCliqzSearch = new CliqzView(this);
         mCliqzSearch.setResultListener(this);
         mSearchContainer = new LightningView(this, "", isIncognito(), "SEARCH_CONTAINER", mCliqzSearch, mHistoryDatabase);
-        mOpenTabsView = new OpenTabsView(this);
-        mOpenTabsContainer = new LightningView(this, "", isIncognito(), "OPEN_TABS_CONTAINER", mOpenTabsView, mHistoryDatabase);
+        mTabsManagerView = new TabsManagerView(this);
+        mOpenTabsContainer = new LightningView(this, "", isIncognito(), "OPEN_TABS_CONTAINER", mTabsManagerView, mHistoryDatabase);
         // CLIQZ - END
     }
 
@@ -703,7 +702,7 @@ public abstract class BrowserActivity extends ThemableBrowserActivity
                 getSupportActionBar().hide();
                 switchTabs(currentView, mOpenTabsContainer);
                 currentView.savePreview();
-                mOpenTabsView.showTabManager();
+                mTabsManagerView.showTabManager();
                 return true;
             case R.id.menu_dots:
                 final BrowserMenuPopup popup = new BrowserMenuPopup(this);
@@ -1116,7 +1115,7 @@ public abstract class BrowserActivity extends ThemableBrowserActivity
             if (mSearch.hasFocus()) {
                 switchTabs(mSearchContainer, mTabsManager.getCurrentTab());
             } else if (mOpenTabsContainer.isShown()) {
-                mOpenTabsView.backPressed();
+                mTabsManagerView.backPressed();
             } else if (currentTab.canGoBack()) {
                 if (!currentTab.isShown()) {
                     onHideCustomView();
@@ -2233,7 +2232,7 @@ public abstract class BrowserActivity extends ThemableBrowserActivity
         for (String id : ids) {
             deleteTab(mTabsManager.positionOf(id));
         }
-        mOpenTabsView.updateTabmanagerView();
+        mTabsManagerView.updateTabmanagerView();
     }
 
 }

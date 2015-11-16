@@ -949,7 +949,7 @@ public class LightningView implements ILightningTab {
         mWebView.draw(canvas);
         mWebView.scrollTo(scrollX, scrollY);
         try {
-            File directory = mActivity.getApplicationContext().getDir("cliqz", mActivity.getApplicationContext().MODE_PRIVATE);
+            File directory = mActivity.getDir(Constants.TABS_SCREENSHOT_FOLDER_NAME, Context.MODE_PRIVATE);
             File file = new File(directory, mId + ".jpeg");
             FileOutputStream fileOutputStream = new FileOutputStream(file);
             bitmap.compress(Bitmap.CompressFormat.JPEG, 40, fileOutputStream);
@@ -965,7 +965,8 @@ public class LightningView implements ILightningTab {
 
     //deletes the screenshot of the tab being deleted.
     private void deletePreview() {
-        File directory = mActivity.getApplicationContext().getDir("cliqz", mActivity.getApplicationContext().MODE_PRIVATE);
+        File directory = mActivity
+                .getDir(Constants.TABS_SCREENSHOT_FOLDER_NAME, Context.MODE_PRIVATE);
         File file = new File(directory, mId + ".jpeg");
         file.delete();
     }
