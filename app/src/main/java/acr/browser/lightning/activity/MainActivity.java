@@ -8,21 +8,14 @@ import android.support.annotation.Nullable;
 import android.view.Menu;
 import android.webkit.CookieManager;
 import android.webkit.CookieSyncManager;
-import javax.inject.Inject;
 import acr.browser.lightning.R;
-import acr.browser.lightning.app.BrowserApp;
-import acr.browser.lightning.preference.PreferenceManager;
 
 @SuppressWarnings("deprecation")
 public class MainActivity extends BrowserActivity {
 
-    @Inject
-    PreferenceManager mPreferences;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        BrowserApp.getAppComponent().inject(this);
         if(!mPreferences.getOnBoardingComplete()) {
             Intent intent = new Intent(MainActivity.this, OnBoardingActivity.class);
             startActivity(intent);

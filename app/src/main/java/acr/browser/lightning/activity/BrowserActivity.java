@@ -1209,6 +1209,10 @@ public abstract class BrowserActivity extends ThemableBrowserActivity
         registerReceiver(mNetworkReceiver, filter);
 
         mEventBus.register(mBusEventListener);
+
+        if(mTabsManager.getCurrentTab().getUrl().equals(Constants.HOMEPAGE)) {
+            mSearch.requestFocus();
+        }
     }
 
     /**

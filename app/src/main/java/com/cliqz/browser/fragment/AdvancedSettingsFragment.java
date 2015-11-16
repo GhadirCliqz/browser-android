@@ -43,7 +43,6 @@ public class AdvancedSettingsFragment extends BaseSettingsFragment {
 
     private Activity mActivity;
     private static final int API = Build.VERSION.SDK_INT;
-    private PreferenceManager mPreferences;
     private CharSequence[] mProxyChoices;
     private int mAgentChoice;
     private String mDownloadLocation;
@@ -63,7 +62,7 @@ public class AdvancedSettingsFragment extends BaseSettingsFragment {
     }
 
     private void initPrefs() {
-        // mPreferences storage
+        // mPreferenceManager storage
         textEncoding = findPreference(SETTINGS_TEXTENCODING);
         urlcontent = findPreference(SETTINGS_URLCONTENT);
         cbAllowPopups = (CheckBoxPreference) findPreference(SETTINGS_NEWWINDOW);
@@ -82,26 +81,26 @@ public class AdvancedSettingsFragment extends BaseSettingsFragment {
         cbrestoreTabs.setOnPreferenceChangeListener(this);
         cbJsScript.setOnPreferenceChangeListener(this);
 
-        textEncoding.setSummary(mPreferences.getTextEncoding());
+        textEncoding.setSummary(mPreferenceManager.getTextEncoding());
 
         mUrlOptions = getResources().getStringArray(R.array.url_content_array);
-        int option = mPreferences.getUrlBoxContentChoice();
+        int option = mPreferenceManager.getUrlBoxContentChoice();
         urlcontent.setSummary(mUrlOptions[option]);
 
-        cbAllowPopups.setChecked(mPreferences.getPopupsEnabled());
-        cbrestoreTabs.setChecked(mPreferences.getRestoreLostTabsEnabled());
-        cbJsScript.setChecked(mPreferences.getJavaScriptEnabled());
+        cbAllowPopups.setChecked(mPreferenceManager.getPopupsEnabled());
+        cbrestoreTabs.setChecked(mPreferenceManager.getRestoreLostTabsEnabled());
+        cbJsScript.setChecked(mPreferenceManager.getJavaScriptEnabled());
 
         mProxyChoices = getResources().getStringArray(R.array.proxy_choices_array);
-        int choice = mPreferences.getProxyChoice();
+        int choice = mPreferenceManager.getProxyChoice();
         if (choice == Constants.PROXY_MANUAL) {
-            proxy.setSummary(mPreferences.getProxyHost() + ":" + mPreferences.getProxyPort());
+            proxy.setSummary(mPreferenceManager.getProxyHost() + ":" + mPreferenceManager.getProxyPort());
         } else {
             proxy.setSummary(mProxyChoices[choice]);
         }
         proxy.setEnabled(Constants.FULL_VERSION);
 
-        mAgentChoice = mPreferences.getUserAgentChoice();
+        mAgentChoice = mPreferenceManager.getUserAgentChoice();
         switch (mAgentChoice) {
             case 1:
                 useragent.setSummary(getResources().getString(R.string.agent_default));
@@ -116,7 +115,7 @@ public class AdvancedSettingsFragment extends BaseSettingsFragment {
                 useragent.setSummary(getResources().getString(R.string.agent_custom));
         }
 
-        mDownloadLocation = mPreferences.getDownloadDirectory();
+        mDownloadLocation = mPreferenceManager.getDownloadDirectory();
         downloadloc.setSummary(Constants.EXTERNAL_STORAGE + '/' + mDownloadLocation);
 
 
@@ -150,15 +149,15 @@ public class AdvancedSettingsFragment extends BaseSettingsFragment {
         // switch preferences
         switch (preference.getKey()) {
             case SETTINGS_NEWWINDOW:
-                mPreferences.setPopupsEnabled((Boolean) newValue);
+                mPreferenceManager.setPopupsEnabled((Boolean) newValue);
                 cbAllowPopups.setChecked((Boolean) newValue);
                 return true;
             case SETTINGS_RESTORETABS:
-                mPreferences.setRestoreLostTabsEnabled((Boolean) newValue);
+                mPreferenceManager.setRestoreLostTabsEnabled((Boolean) newValue);
                 cbrestoreTabs.setChecked((Boolean) newValue);
                 return true;
             case SETTINGS_JAVASCRIPT:
-                mPreferences.setJavaScriptEnabled((Boolean) newValue);
+                mPreferenceManager.setJavaScriptEnabled((Boolean) newValue);
                 cbJsScript.setChecked((Boolean) newValue);
                 return true;
             default:
@@ -169,7 +168,7 @@ public class AdvancedSettingsFragment extends BaseSettingsFragment {
     private void proxyChoicePicker() {
         AlertDialog.Builder picker = new AlertDialog.Builder(mActivity);
         picker.setTitle(getResources().getString(R.string.http_proxy));
-        picker.setSingleChoiceItems(mProxyChoices, mPreferences.getProxyChoice(),
+        picker.setSingleChoiceItems(mProxyChoices, mPreferenceManager.getProxyChoice(),
                 new DialogInterface.OnClickListener() {
 
                     @Override
@@ -200,7 +199,7 @@ public class AdvancedSettingsFragment extends BaseSettingsFragment {
                 break;
         }
 
-        mPreferences.setProxyChoice(choice);
+        mPreferenceManager.setProxyChoice(choice);
         if (choice < mProxyChoices.length)
             proxy.setSummary(mProxyChoices[choice]);
     }
@@ -218,8 +217,8 @@ public class AdvancedSettingsFragment extends BaseSettingsFragment {
         filterArray[0] = new InputFilter.LengthFilter(maxCharacters - 1);
         eProxyPort.setFilters(filterArray);
 
-        eProxyHost.setText(mPreferences.getProxyHost());
-        eProxyPort.setText(Integer.toString(mPreferences.getProxyPort()));
+        eProxyHost.setText(mPreferenceManager.getProxyHost());
+        eProxyPort.setText(Integer.toString(mPreferenceManager.getProxyPort()));
 
         new AlertDialog.Builder(mActivity)
                 .setTitle(R.string.manual_proxy)
@@ -234,10 +233,10 @@ public class AdvancedSettingsFragment extends BaseSettingsFragment {
                             // larger than max integer
                             proxyPort = Integer.parseInt(eProxyPort.getText().toString());
                         } catch (NumberFormatException ignored) {
-                            proxyPort = mPreferences.getProxyPort();
+                            proxyPort = mPreferenceManager.getProxyPort();
                         }
-                        mPreferences.setProxyHost(proxyHost);
-                        mPreferences.setProxyPort(proxyPort);
+                        mPreferenceManager.setProxyHost(proxyHost);
+                        mPreferenceManager.setProxyPort(proxyPort);
                         proxy.setSummary(proxyHost + ":" + proxyPort);
                     }
                 }).show();
@@ -246,12 +245,12 @@ public class AdvancedSettingsFragment extends BaseSettingsFragment {
     private void agentDialog() {
         AlertDialog.Builder agentPicker = new AlertDialog.Builder(mActivity);
         agentPicker.setTitle(getResources().getString(R.string.title_user_agent));
-        mAgentChoice = mPreferences.getUserAgentChoice();
+        mAgentChoice = mPreferenceManager.getUserAgentChoice();
         agentPicker.setSingleChoiceItems(R.array.user_agent, mAgentChoice - 1,
                 new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        mPreferences.setUserAgentChoice(which + 1);
+                        mPreferenceManager.setUserAgentChoice(which + 1);
                         switch (which + 1) {
                             case 1:
                                 useragent.setSummary(getResources().getString(R.string.agent_default));
@@ -294,7 +293,7 @@ public class AdvancedSettingsFragment extends BaseSettingsFragment {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         String text = getAgent.getText().toString();
-                        mPreferences.setUserAgentString(text);
+                        mPreferenceManager.setUserAgentString(text);
                         useragent.setSummary(getResources().getString(R.string.agent_custom));
                     }
                 });
@@ -304,7 +303,7 @@ public class AdvancedSettingsFragment extends BaseSettingsFragment {
     private void downloadLocDialog() {
         AlertDialog.Builder picker = new AlertDialog.Builder(mActivity);
         picker.setTitle(getResources().getString(R.string.title_download_location));
-        mDownloadLocation = mPreferences.getDownloadDirectory();
+        mDownloadLocation = mPreferenceManager.getDownloadDirectory();
         int n;
         if (mDownloadLocation.contains(Environment.DIRECTORY_DOWNLOADS)) {
             n = 1;
@@ -318,7 +317,7 @@ public class AdvancedSettingsFragment extends BaseSettingsFragment {
                     public void onClick(DialogInterface dialog, int which) {
                         switch (which + 1) {
                             case 1:
-                                mPreferences.setDownloadDirectory(Environment.DIRECTORY_DOWNLOADS);
+                                mPreferenceManager.setDownloadDirectory(Environment.DIRECTORY_DOWNLOADS);
                                 downloadloc.setSummary(Constants.EXTERNAL_STORAGE + '/'
                                         + Environment.DIRECTORY_DOWNLOADS);
                                 break;
@@ -342,7 +341,7 @@ public class AdvancedSettingsFragment extends BaseSettingsFragment {
         LinearLayout layout = new LinearLayout(mActivity);
         downLocationPicker.setTitle(getResources().getString(R.string.title_download_location));
         final EditText getDownload = new EditText(mActivity);
-        getDownload.setText(mPreferences.getDownloadDirectory());
+        getDownload.setText(mPreferenceManager.getDownloadDirectory());
 
         int padding = Utils.dpToPx(10);
 
@@ -374,7 +373,7 @@ public class AdvancedSettingsFragment extends BaseSettingsFragment {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         String text = getDownload.getText().toString();
-                        mPreferences.setDownloadDirectory(text);
+                        mPreferenceManager.setDownloadDirectory(text);
                         downloadloc.setSummary(Constants.EXTERNAL_STORAGE + '/' + text);
                     }
                 });
@@ -386,12 +385,12 @@ public class AdvancedSettingsFragment extends BaseSettingsFragment {
         AlertDialog.Builder picker = new AlertDialog.Builder(mActivity);
         picker.setTitle(getResources().getString(R.string.text_encoding));
         final List<String> textEncodingList = Arrays.asList(Constants.TEXT_ENCODINGS);
-        int n = textEncodingList.indexOf(mPreferences.getTextEncoding());
+        int n = textEncodingList.indexOf(mPreferenceManager.getTextEncoding());
 
         picker.setSingleChoiceItems(Constants.TEXT_ENCODINGS, n, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                mPreferences.setTextEncoding(Constants.TEXT_ENCODINGS[which]);
+                mPreferenceManager.setTextEncoding(Constants.TEXT_ENCODINGS[which]);
                 textEncoding.setSummary(Constants.TEXT_ENCODINGS[which]);
             }
         });
@@ -409,12 +408,12 @@ public class AdvancedSettingsFragment extends BaseSettingsFragment {
         AlertDialog.Builder picker = new AlertDialog.Builder(mActivity);
         picker.setTitle(getResources().getString(R.string.url_contents));
 
-        int n = mPreferences.getUrlBoxContentChoice();
+        int n = mPreferenceManager.getUrlBoxContentChoice();
 
         picker.setSingleChoiceItems(mUrlOptions, n, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                mPreferences.setUrlBoxContentChoice(which);
+                mPreferenceManager.setUrlBoxContentChoice(which);
                 if (which < mUrlOptions.length) {
                     urlcontent.setSummary(mUrlOptions[which]);
                 }
