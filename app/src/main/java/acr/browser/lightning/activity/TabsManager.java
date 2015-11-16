@@ -9,7 +9,6 @@ import android.webkit.WebView;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -28,6 +27,7 @@ public class TabsManager {
     private static final String TAG = TabsManager.class.getSimpleName();
     private final List<LightningView> mWebViewList = new ArrayList<>();
     private LightningView mCurrentTab;
+    private static int uniqueID = 1;
 
     @Inject
     PreferenceManager mPreferenceManager;
@@ -150,7 +150,8 @@ public class TabsManager {
     public synchronized LightningView newTab(final Activity activity,
                                              final String url,
                                              final boolean isIncognito) {
-        String uniqueId = UUID.randomUUID().toString();
+        String uniqueId = Integer.toString(uniqueID);
+        uniqueID++;
         final LightningView tab = new LightningView(activity, url, isIncognito, uniqueId);
         mWebViewList.add(tab);
         return tab;
