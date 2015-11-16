@@ -5,23 +5,18 @@ import android.os.Build;
 import android.util.Log;
 import android.view.View;
 import android.webkit.ConsoleMessage;
-import android.webkit.JavascriptInterface;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
-import com.cliqz.browser.bus.TabManagerEvents;
 import com.squareup.otto.Bus;
 
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 
 import javax.inject.Inject;
 
@@ -35,14 +30,16 @@ import acr.browser.lightning.view.LightningView;
 /**
  * Created by Ravjit on 12/10/15.
  */
-public class OpenTabsView extends WebView implements ILightningTab {
+public class TabsManagerView extends WebView implements ILightningTab {
 
-    private static final String TAG = OpenTabsView.class.getSimpleName();
+    private static final String TAG = TabsManagerView.class.getSimpleName();
     private static final String KEY_ID = "id";
     private static final String KEY_URL = "url";
     private static final String KEY_IMAGE_URL = "img";
     private static final String KEY_LIST = "list";
-    private static String directory;
+
+    private final File directory;
+    private final TabsManagerBridge bridge;
 
     @Inject
     Bus mTabManagerBus;
@@ -50,9 +47,11 @@ public class OpenTabsView extends WebView implements ILightningTab {
     @Inject
     TabsManager tabsManager;
 
-    public OpenTabsView(Context context) {
+    public TabsManagerView(Context context) {
         super(context);
-        directory = context.getDir("cliqz",Context.MODE_PRIVATE).getPath();
+        directory = context.getDir(Constants.TABS_SCREENSHOT_FOLDER_NAME,Context.MODE_PRIVATE);
+        directory.mkdirs();
+        bridge = new TabsManagerBridge(this);
         setup();
         BrowserApp.getAppComponent().inject(this);
     }
@@ -92,62 +91,12 @@ public class OpenTabsView extends WebView implements ILightningTab {
             }
         });
 
-        addJavascriptInterface(new JsBridge(), "tabmanager");
+        addJavascriptInterface(bridge, "tabmanager");
         super.loadUrl(Constants.OPEN_TABS);
     }
 
-    private class JsBridge {
-
-        @JavascriptInterface
-        public void onReady() {
-            sendUrls();
-        }
-
-        @JavascriptInterface
-        public void goBack() {
-            post(new Runnable() {
-                @Override
-                public void run() {
-                    mTabManagerBus.post(new TabManagerEvents.ExitTabManager());
-                }
-            });
-        }
-
-        @JavascriptInterface
-        public void openLink(final String id) {
-            post(new Runnable() {
-                @Override
-                public void run() {
-                    mTabManagerBus.post(new TabManagerEvents.OpenTab(id));
-                }
-            });
-        }
-
-        @JavascriptInterface
-        public void deleteTabs(final String id) {
-            post(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        List<String> deleteTabsList = new ArrayList<>();
-                        JSONObject jsonObject = new JSONObject(id);
-                        JSONArray list = jsonObject.getJSONArray(KEY_LIST);
-                        for (int i = 0; i < list.length(); i++) {
-                            deleteTabsList.add(list.getJSONObject(i).getString(KEY_ID));
-                        }
-                        mTabManagerBus.post(new TabManagerEvents.CloseTab(deleteTabsList));
-
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                }
-            });
-        }
-
-    }
-
     // returns JSON encoded String details of the open tabs
-    private String openTabsToJSON() {
+    String openTabsToJSON() {
         JSONArray openTabsJSON = new JSONArray();
         for(LightningView tabDetails : tabsManager.getTabsList()) {
             File file = new File(directory + "/" + tabDetails.getId() + ".jpeg");
@@ -167,34 +116,15 @@ public class OpenTabsView extends WebView implements ILightningTab {
         return openTabsJSON.toString();
     }
 
-    public void sendUrls() {
-        post(new Runnable() {
-            @Override
-            public void run() {
-                executeJS("main(" + openTabsToJSON() + ")");
-            }
-        });
-    }
-
     public void updateTabmanagerView() {
-        executeJS("updateView()");
+        bridge.executeJavascript("updateView()");
     }
 
     public void showTabManager() {
-        executeJS("showTabManager()");
+        bridge.executeJavascript("showTabManager()");
     }
 
     public void backPressed() {
-        executeJS("onBackPressed()");
+        bridge.executeJavascript("onBackPressed()");
     }
-
-    private void executeJS(final String js) {
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            evaluateJavascript(js, null);
-        } else {
-            loadUrl("javascript:" + js);
-        }
-    }
-
-
 }

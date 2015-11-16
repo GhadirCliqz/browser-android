@@ -3,8 +3,8 @@ package acr.browser.lightning.app;
 import android.content.Context;
 
 import com.cliqz.browser.fragment.BaseSettingsFragment;
-import com.cliqz.browser.search.WebSearchView;
-import com.cliqz.browser.webview.OpenTabsView;
+import com.cliqz.browser.webview.CliqzView;
+import com.cliqz.browser.webview.TabsManagerView;
 import com.squareup.otto.Bus;
 
 import javax.inject.Singleton;
@@ -67,9 +67,9 @@ public interface AppComponent {
 
     void inject(ThemableBrowserActivity activity);
 
-    void inject(WebSearchView webSearchView);
+    void inject(CliqzView cliqzView);
 
-    void inject(OpenTabsView openTabsView);
+    void inject(TabsManagerView tabsManagerView);
 
     void inject(BrowserMenuPopup browserMenuPopup);
 
