@@ -7,6 +7,7 @@ import com.cliqz.browser.bus.TabManagerEvents;
 
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 
@@ -33,7 +34,8 @@ class TabsManagerBridge extends Bridge {
             @Override
             public void execute(Bridge bridge, Object data, String callback) {
                 // Callback is ignored here, we are using the bus and this is the simplest way
-                final JSONArray list = data instanceof JSONArray ? (JSONArray) data : null;
+                final JSONObject object = data instanceof JSONObject ? (JSONObject) data : null;
+                final JSONArray list = object != null ? object.optJSONArray("list") : null;
                 if (list == null || list.length() == 0) {
                     return;
                 }
