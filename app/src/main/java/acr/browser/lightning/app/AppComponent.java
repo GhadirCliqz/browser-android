@@ -33,8 +33,6 @@ import dagger.Component;
 @Component(modules = {AppModule.class})
 public interface AppComponent {
 
-    void inject(MainActivity activity);
-
     void inject(OnBoardingActivity activity);
 
     void inject(BrowserActivity activity);
