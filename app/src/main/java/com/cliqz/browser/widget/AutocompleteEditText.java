@@ -65,7 +65,14 @@ public class AutocompleteEditText extends EditText {
         final CharSequence currentText = getText();
         if (text.toString().startsWith(currentText.toString())) {
             setTextKeepState(text);
-            setSelection(currentText.length(), text.length());
+            final int selectionBegin = currentText.length();
+            final int selectionEnd = text.length();
+            post(new Runnable() {
+                @Override
+                public void run() {
+                    setSelection(selectionBegin, selectionEnd);
+                }
+            });
         }
         mIsAutocompleting = false;
     }

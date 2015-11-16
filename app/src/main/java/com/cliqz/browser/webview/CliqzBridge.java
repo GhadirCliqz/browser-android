@@ -114,6 +114,22 @@ class CliqzBridge extends Bridge {
             }
         }),
 
+        notifyQuery(new IAction() {
+            @Override
+            public void execute(Bridge bridge, Object data, String callback) {
+                final String query = (data instanceof String) ? (String) data : null;
+                final CliqzView cliqzView = (CliqzView) bridge.getWebView();
+                if (query == null) {
+                    Log.w(TAG, "No url to notify");
+                    return;
+                }
+                final CliqzView.CliqzCallbacks listener = cliqzView.mListener;
+                if(listener != null) {
+                    listener.onNotifyQuery(query);
+                }
+            }
+        }),
+
         none(new IAction() {
             @Override
             public void execute(Bridge bridge, Object data, String callback) {
