@@ -338,6 +338,7 @@ public abstract class BrowserActivity extends ThemableBrowserActivity
                     searchTheWeb(mSearch.getText().toString());
                     final LightningView currentView = mTabsManager.getCurrentTab();
                     if (currentView != null) {
+                        switchTabs(mSearchContainer, currentView);
                         currentView.requestFocus();
                     }
                     return true;
@@ -369,6 +370,7 @@ public abstract class BrowserActivity extends ThemableBrowserActivity
                     imm.hideSoftInputFromWindow(mSearch.getWindowToken(), 0);
                     final LightningView currentView = mTabsManager.getCurrentTab();
                     if (currentView != null) {
+                        switchTabs(mSearchContainer, currentView);
                         currentView.requestFocus();
                     }
                     return true;
@@ -1103,7 +1105,8 @@ public abstract class BrowserActivity extends ThemableBrowserActivity
         finish();
     }
 
-    @Override
+    //TODO Review the use of onHideCustomView, it always exits the fucntion in the first if block without doing anythnig
+    /*@Override
     public synchronized void onBackPressed() {
         final LightningView currentTab = mTabsManager.getCurrentTab();
         final Fragment bookmarksFragment = getSupportFragmentManager()
@@ -1129,6 +1132,33 @@ public abstract class BrowserActivity extends ThemableBrowserActivity
                     deleteTab(mTabsManager.positionOf(currentTab));
                     invalidateOptionsMenu();
                 }
+            }
+        } else {
+            Log.e(Constants.TAG, "This shouldn't happen ever");
+            super.onBackPressed();
+        }
+    }*/
+
+    @Override
+    public synchronized void onBackPressed() {
+        final LightningView currentTab = mTabsManager.getCurrentTab();
+        final Fragment bookmarksFragment = getSupportFragmentManager()
+                .findFragmentByTag(BOOKMARKS_FRAGMENT_TAG);
+        if (bookmarksFragment != null) {
+            closeBookmarkFragment();
+        } else if (currentTab != null) {
+            Log.d(Constants.TAG, "onBackPressed");
+            if (mSearch.hasFocus()) {
+                switchTabs(mSearchContainer, currentTab);
+            } else if (mOpenTabsContainer.isShown()) {
+                mTabsManagerView.backPressed();
+            } else if (mSearchContainer.isShown()) {
+                switchTabs(mSearchContainer, currentTab);
+            } else if (currentTab.canGoBack()) {
+                currentTab.goBack();
+            } else {
+                deleteTab(mTabsManager.positionOf(currentTab));
+                invalidateOptionsMenu();
             }
         } else {
             Log.e(Constants.TAG, "This shouldn't happen ever");
