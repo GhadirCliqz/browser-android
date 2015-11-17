@@ -4,6 +4,7 @@
 
 package acr.browser.lightning.activity;
 
+import android.Manifest;
 import android.animation.ArgbEvaluator;
 import android.animation.LayoutTransition;
 import android.animation.ValueAnimator;
@@ -83,7 +84,9 @@ import android.widget.TextView.OnEditorActionListener;
 import android.widget.VideoView;
 
 import com.anthonycr.grant.PermissionsManager;
+import com.anthonycr.grant.PermissionsResultAction;
 import com.cliqz.browser.bus.TabManagerEvents;
+import com.cliqz.browser.utils.LocationCache;
 import com.cliqz.browser.webview.CliqzView;
 import com.cliqz.browser.webview.CliqzView.CliqzCallbacks;
 import com.cliqz.browser.webview.TabsManagerView;
@@ -203,6 +206,9 @@ public abstract class BrowserActivity extends ThemableBrowserActivity
     @Inject
     HistoryDatabase mHistoryDatabase;
 
+    @Inject
+    LocationCache mLocationCache;
+
     // Image
     private Bitmap mWebpageBitmap;
     private final ColorDrawable mBackground = new ColorDrawable();
@@ -318,8 +324,23 @@ public abstract class BrowserActivity extends ThemableBrowserActivity
         mSearchContainer = new LightningView(this, "", isIncognito(), "SEARCH_CONTAINER", mCliqzSearch, mHistoryDatabase);
         mTabsManagerView = new TabsManagerView(this);
         mOpenTabsContainer = new LightningView(this, "", isIncognito(), "OPEN_TABS_CONTAINER", mTabsManagerView, mHistoryDatabase);
+        PermissionsManager.getInstance()
+                .requestPermissionsIfNecessaryForResult(this,
+                        new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                        new PermissionsResultAction() {
+                            @Override
+                            public void onGranted() {
+                                // Nothing to do here
+                            }
+
+                            @Override
+                            public void onDenied(String permission) {
+                                // TODO Show a nice message here (SnackBar?)
+                            }
+                        });
         // CLIQZ - END
     }
+
 
     private class SearchListenerClass implements OnKeyListener, OnEditorActionListener, OnFocusChangeListener, OnTouchListener, TextWatcher {
         // Simplify IME_ACTION detection
@@ -1170,6 +1191,9 @@ public abstract class BrowserActivity extends ThemableBrowserActivity
     protected void onPause() {
         super.onPause();
         final LightningView currentTab = mTabsManager.getCurrentTab();
+
+        mLocationCache.stop();
+
         Log.d(Constants.TAG, "onPause");
         if (currentTab != null) {
             currentTab.pauseTimers();
@@ -1219,6 +1243,9 @@ public abstract class BrowserActivity extends ThemableBrowserActivity
     @Override
     protected void onResume() {
         super.onResume();
+
+        mLocationCache.start();
+
         final LightningView currentTab = mTabsManager.getCurrentTab();
         Log.d(Constants.TAG, "onResume");
         if (mSearchAdapter != null) {
@@ -1240,7 +1267,7 @@ public abstract class BrowserActivity extends ThemableBrowserActivity
 
         mEventBus.register(mBusEventListener);
 
-        if(mTabsManager.getCurrentTab().getUrl().equals(Constants.HOMEPAGE)) {
+        if (mTabsManager.getCurrentTab().getUrl().equals(Constants.HOMEPAGE)) {
             mSearch.requestFocus();
         }
     }

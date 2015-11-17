@@ -15,7 +15,10 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
+import com.cliqz.browser.utils.LocationCache;
+
 import java.util.List;
+import java.util.Locale;
 
 import javax.inject.Inject;
 
@@ -46,6 +49,9 @@ public class CliqzView extends WebView implements ILightningTab {
 
     @Inject
     HistoryDatabase historyDatabase;
+
+    @Inject
+    LocationCache locationCache;
 
     public interface CliqzCallbacks {
         void onResultClicked(final String url);
@@ -308,8 +314,16 @@ public class CliqzView extends WebView implements ILightningTab {
         }
         mLastQuery = query;
         final String lowerQuery = query.toLowerCase();
+        final Location location = locationCache.getLastLocation();
+        final boolean hasLocation = location != null;
+        final double lat = hasLocation ? location.getLatitude() : 0.0;
+        final double lon = hasLocation ? location.getLongitude() : 0.0;
+        final String call = String.format(Locale.getDefault(),
+                "search_mobile('%1$s', %2$b, %3$.6f, %4$.6f)",
+                query.toLowerCase(), hasLocation, lat, lon);
+
         if (query.length() > 0) {
-            executeJS("search_mobile('" + lowerQuery + "')");
+            executeJS(call);
         } else {
             executeJS("_cliqzNoResults()");
         }
