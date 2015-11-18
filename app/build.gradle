@@ -41,9 +41,8 @@ android {
     sourceSets {
         main {
             assets.srcDirs += [
-                    '../../navigation/build/dev/androidkit',
-                    // '../../freshtab/dist/mobile'
-                    '../../mobile-tab-manager/build/android'
+                    '../../navigation/dist/mobile',
+                    '../../tab-manager/build/android'
             ]
         }
     }
