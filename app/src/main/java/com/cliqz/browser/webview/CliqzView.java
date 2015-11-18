@@ -36,7 +36,7 @@ public class CliqzView extends WebView implements ILightningTab {
     private static final String TAG = CliqzView.class.getSimpleName();
     private static final boolean DO_PROFILE_QUERY = false;
     // app_debug includes single JS files, app includes minified JS
-    private static final String CLIQZ_URL = "file:///android_asset/navigation/index.html";
+    private static final String CLIQZ_URL = "file:///android_asset/search/index.html";
 
     private CharSequence mLastQuery;
     private boolean mJsReady = false;
