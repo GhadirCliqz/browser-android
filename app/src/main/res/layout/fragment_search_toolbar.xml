@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:gravity="center_vertical"
+              android:orientation="horizontal">
+
+    <ImageView
+        android:layout_width="36dp"
+        android:layout_height="36dp"
+        android:src="@drawable/ic_action_collapse"
+        android:id="@+id/menu_history" />
+    <com.cliqz.browser.widget.AutocompleteEditText
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/search_bar"
+        android:background="?attr/searchBackground"
+        android:gravity="left|center_vertical"
+        android:hint="@string/search_hint"
+        android:imeOptions="actionGo"
+        android:inputType="textUri"
+        android:selectAllOnFocus="true"
+        android:singleLine="true"
+        android:paddingStart="8dp"
+        android:paddingEnd="8dp"
+        android:textColor="@color/gray_dark"
+        android:textColorHint="@color/hint_text"
+        android:textCursorDrawable="@null"
+        android:focusable="true"
+        android:focusableInTouchMode="true" />
+
+</LinearLayout>

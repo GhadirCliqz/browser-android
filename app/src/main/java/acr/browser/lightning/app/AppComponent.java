@@ -3,6 +3,7 @@ package acr.browser.lightning.app;
 import android.content.Context;
 
 import com.cliqz.browser.fragment.BaseSettingsFragment;
+import com.cliqz.browser.main.BaseFragment;
 import com.cliqz.browser.webview.CliqzView;
 import com.cliqz.browser.webview.TabsManagerView;
 import com.squareup.otto.Bus;
@@ -72,4 +73,10 @@ public interface AppComponent {
     void inject(BrowserMenuPopup browserMenuPopup);
 
     void inject(BaseSettingsFragment baseSettingsFragment);
+
+    // This is CLIQZ specific
+    void inject(com.cliqz.browser.main.MainActivity mainActivity);
+
+    // This is CLIQZ Specific too
+    void inject(BaseFragment baseFragment);
 }

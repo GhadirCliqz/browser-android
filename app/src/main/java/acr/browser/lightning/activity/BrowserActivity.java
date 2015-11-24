@@ -298,8 +298,6 @@ public abstract class BrowserActivity extends ThemableBrowserActivity
         mClearIcon.setBounds(0, 0, iconBounds, iconBounds);
         mIcon = mRefreshIcon;
         SearchListenerClass search = new SearchListenerClass();
-        mSearch.setFocusable(true);
-        mSearch.setFocusableInTouchMode(true);
         mSearch.setCompoundDrawables(null, null, mRefreshIcon, null);
         mSearch.setOnKeyListener(search);
         mSearch.setOnFocusChangeListener(search);
@@ -462,20 +460,7 @@ public abstract class BrowserActivity extends ThemableBrowserActivity
 
         @Override
         public void onTextChanged(CharSequence charSequence, int start, int before, int count) {
-            if (!mSearch.hasFocus()) {
-                return;
-            }
-
-            final String q = charSequence.toString();
-
-            final LightningView currentView = mTabsManager.getCurrentTab();
-            if (currentView != null && q.equals(currentView.getUrl())) {
-                Log.d(Constants.TAG, "Not searching because it is current URL");
-                return;
-            }
-            if (!q.isEmpty()) {
-                mCliqzSearch.onQueryChanged(q);
-            }
+            
         }
 
         @Override

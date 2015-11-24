@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+      xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:title="@string/settings"
+        android:id="@+id/menu_dots"
+        android:icon="@drawable/abc_ic_menu_moreoverflow_mtrl_alpha"
+        app:showAsAction="always" />
+    <item
+        android:title="@string/action_history"
+        android:id="@+id/menu_suggestions"
+        android:icon="@drawable/ic_action_expand"
+        app:showAsAction="always" />
+</menu>
