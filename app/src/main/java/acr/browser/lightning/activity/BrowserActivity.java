@@ -460,7 +460,7 @@ public abstract class BrowserActivity extends ThemableBrowserActivity
 
         @Override
         public void onTextChanged(CharSequence charSequence, int start, int before, int count) {
-            
+
         }
 
         @Override

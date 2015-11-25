@@ -26,8 +26,8 @@ import butterknife.OnClick;
  * @author Stefano Pacifici
  * @date 2015/11/23
  */
-public class SearchFragment extends BaseFragment {
-    CliqzView mCliqzView;
+public class SearchFragment extends BaseFragment implements CliqzView.CliqzCallbacks {
+    CliqzView mCliqzView = null;
 
     @Bind(R.id.menu_history)
     ImageView mMenuHistory;
@@ -37,8 +37,15 @@ public class SearchFragment extends BaseFragment {
 
     @Override
     protected View onCreateContentView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        mCliqzView = new CliqzView(inflater.getContext());
-        mCliqzView.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
+        if (mCliqzView == null) {
+            mCliqzView = new CliqzView(inflater.getContext());
+            mCliqzView.setLayoutParams(
+                    new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
+            mCliqzView.setResultListener(this);
+        } else {
+            final ViewGroup parent = (ViewGroup) mCliqzView.getParent();
+            parent.removeView(mCliqzView);
+        }
         return mCliqzView;
     }
 
@@ -76,5 +83,20 @@ public class SearchFragment extends BaseFragment {
     @OnClick(R.id.menu_history)
     void historyClicked() {
         bus.post(new Messages.GoToHistory());
+    }
+
+    @Override
+    public void onResultClicked(String url) {
+        // Display result
+    }
+
+    @Override
+    public void onNotifyQuery(String query) {
+
+    }
+
+    @Override
+    public void onAutocompleteUrl(String str) {
+
     }
 }

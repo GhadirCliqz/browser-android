@@ -131,10 +131,10 @@ public class CliqzView extends WebView implements ILightningTab {
             }
         });
 
-        openCliqzView();
-
         // Callbacks from JS to Java
         addJavascriptInterface(new CliqzBridge(this), "jsBridge");
+
+        openCliqzView();
     }
 
     public void openCliqzView() {
