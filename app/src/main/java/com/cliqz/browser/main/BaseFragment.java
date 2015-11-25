@@ -51,7 +51,10 @@ public abstract class BaseFragment extends Fragment {
         if (mCustomToolbarView != null) {
             mToolbar.addView(mCustomToolbarView);
         }
-        mToolbar.inflateMenu(getMenuResource());
+        final int menuResId = getMenuResource();
+        if (menuResId != 0) {
+            mToolbar.inflateMenu(menuResId);
+        }
         mToolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {

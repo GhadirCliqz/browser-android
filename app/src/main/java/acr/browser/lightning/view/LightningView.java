@@ -76,7 +76,7 @@ public class LightningView implements ILightningTab {
     final LightningViewTitle mTitle;
     private WebView mWebView;
     final boolean mIsIncognitoTab;
-    private final UIController mUIController;
+    //private final UIController mUIController;
     private GestureDetector mGestureDetector;
     private final Activity mActivity;
     private static String mHomepage;
@@ -128,11 +128,11 @@ public class LightningView implements ILightningTab {
         mId = uniqueId;
         mUrl = url;
         mHistoryDatabase = database;
-        mUIController = (UIController) activity;
+       // mUIController = (UIController) activity;
         mIsCustomWebView = overrideWebView != null;
         mWebView = overrideWebView != null ? overrideWebView : new WebView(activity);
         mIsIncognitoTab = isIncognito;
-        mTitle = new LightningViewTitle(activity, mUIController.getUseDarkTheme());
+        mTitle = new LightningViewTitle(activity, false); // mUIController.getUseDarkTheme());
         mAdBlock = AdBlock.getInstance(activity.getApplicationContext());
 
         mMaxFling = ViewConfiguration.get(activity).getScaledMaximumFlingVelocity();
@@ -848,12 +848,13 @@ public class LightningView implements ILightningTab {
             if (mAction == MotionEvent.ACTION_DOWN) {
                 mLocation = mY;
             } else if (mAction == MotionEvent.ACTION_UP) {
-                final float distance = (mY - mLocation);
-                if (distance > SCROLL_UP_THRESHOLD && view.getScrollY() < SCROLL_UP_THRESHOLD) {
-                    mUIController.showActionBar();
-                } else if (distance < -SCROLL_UP_THRESHOLD) {
-                    mUIController.hideActionBar();
-                }
+// TODO This should be done in the fragment
+//                final float distance = (mY - mLocation);
+//                if (distance > SCROLL_UP_THRESHOLD && view.getScrollY() < SCROLL_UP_THRESHOLD) {
+//                    mUIController.showActionBar();
+//                } else if (distance < -SCROLL_UP_THRESHOLD) {
+//                    mUIController.hideActionBar();
+//                }
                 mLocation = 0;
             }
             mGestureDetector.onTouchEvent(arg1);
@@ -865,12 +866,13 @@ public class LightningView implements ILightningTab {
 
         @Override
         public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
-            int power = (int) (velocityY * 100 / mMaxFling);
-            if (power < -10) {
-                mUIController.hideActionBar();
-            } else if (power > 15) {
-                mUIController.showActionBar();
-            }
+// TODO This should be done in the fragment
+//            int power = (int) (velocityY * 100 / mMaxFling);
+//            if (power < -10) {
+//                mUIController.hideActionBar();
+//            } else if (power > 15) {
+//                mUIController.showActionBar();
+//            }
             return super.onFling(e1, e2, velocityX, velocityY);
         }
 

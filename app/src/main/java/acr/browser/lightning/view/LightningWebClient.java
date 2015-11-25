@@ -52,7 +52,8 @@ class LightningWebClient extends WebViewClient {
 
     private final Activity mActivity;
     private final LightningView mLightningView;
-    private final UIController mUIController;
+    //TODO restore this
+    //private final UIController mUIController;
     private final AdBlock mAdBlock;
     private final Bus mEventBus;
     private final IntentUtils mIntentUtils;
@@ -60,7 +61,8 @@ class LightningWebClient extends WebViewClient {
 
     LightningWebClient(Activity activity, LightningView lightningView) {
         mActivity = activity;
-        mUIController = (UIController) activity;
+        //TODO restore this
+        //mUIController = (UIController) activity;
         mLightningView = lightningView;
         mAdBlock = AdBlock.getInstance(activity);
         mAdBlock.updatePreference();
@@ -126,7 +128,8 @@ class LightningWebClient extends WebViewClient {
     @Override
     public void onPageFinished(WebView view, String url) {
         if (view.isShown()) {
-            mUIController.updateUrl(url, true);
+            //TODO restore this
+            //mUIController.updateUrl(url, true);
             view.postInvalidate();
         }
         if (view.getTitle() == null || view.getTitle().isEmpty()) {
@@ -145,8 +148,9 @@ class LightningWebClient extends WebViewClient {
     public void onPageStarted(WebView view, String url, Bitmap favicon) {
         mLightningView.mTitle.setFavicon(null);
         if (mLightningView.isShown()) {
-            mUIController.updateUrl(url, false);
-            mUIController.showActionBar();
+            //TODO restore this
+            //mUIController.updateUrl(url, false);
+            //mUIController.showActionBar();
         }
         mEventBus.post(new BrowserEvents.TabsChanged());
     }

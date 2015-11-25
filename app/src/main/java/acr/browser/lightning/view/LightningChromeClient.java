@@ -42,12 +42,14 @@ class LightningChromeClient extends WebChromeClient {
 
     private final Activity mActivity;
     private final LightningView mLightningView;
-    private final UIController mUIController;
+    //TODO restore this
+    //   private final UIController mUIController;
     private final Bus eventBus;
 
     LightningChromeClient(Activity activity, LightningView lightningView) {
         mActivity = activity;
-        mUIController = (UIController) activity;
+        //TODO restore this
+        //       mUIController = (UIController) activity;
         mLightningView = lightningView;
         eventBus = BrowserApp.getAppComponent().getBus();
     }
@@ -55,7 +57,8 @@ class LightningChromeClient extends WebChromeClient {
     @Override
     public void onProgressChanged(WebView view, int newProgress) {
         if (mLightningView.isShown()) {
-            mUIController.updateProgress(newProgress);
+            //TODO restore this
+  //          mUIController.updateProgress(newProgress);
         }
     }
 
@@ -107,7 +110,8 @@ class LightningChromeClient extends WebChromeClient {
         }
         eventBus.post(new BrowserEvents.TabsChanged());
         if (view != null) {
-            mUIController.updateHistory(title, view.getUrl());
+            //TODO restore this
+            // mUIController.updateHistory(title, view.getUrl());
         }
     }
 
@@ -156,33 +160,39 @@ class LightningChromeClient extends WebChromeClient {
     @Override
     public boolean onCreateWindow(WebView view, boolean isDialog, boolean isUserGesture,
                                   Message resultMsg) {
-        mUIController.onCreateWindow(resultMsg);
+        //TODO restore this
+        //  mUIController.onCreateWindow(resultMsg);
         return true;
     }
 
     @Override
     public void onCloseWindow(WebView window) {
-        mUIController.onCloseWindow(mLightningView);
+        //TODO restore this
+        //mUIController.onCloseWindow(mLightningView);
     }
 
     @SuppressWarnings("unused")
     public void openFileChooser(ValueCallback<Uri> uploadMsg) {
-        mUIController.openFileChooser(uploadMsg);
+        //TODO restore this
+        //  mUIController.openFileChooser(uploadMsg);
     }
 
     @SuppressWarnings("unused")
     public void openFileChooser(ValueCallback<Uri> uploadMsg, String acceptType) {
-        mUIController.openFileChooser(uploadMsg);
+        //TODO restore this
+        // mUIController.openFileChooser(uploadMsg);
     }
 
     @SuppressWarnings("unused")
     public void openFileChooser(ValueCallback<Uri> uploadMsg, String acceptType, String capture) {
-        mUIController.openFileChooser(uploadMsg);
+        //TODO restore this
+        //  mUIController.openFileChooser(uploadMsg);
     }
 
     public boolean onShowFileChooser(WebView webView, ValueCallback<Uri[]> filePathCallback,
                                      WebChromeClient.FileChooserParams fileChooserParams) {
-        mUIController.showFileChooser(filePathCallback);
+        //TODO restore this
+        //  mUIController.showFileChooser(filePathCallback);
         return true;
     }
 
@@ -216,18 +226,21 @@ class LightningChromeClient extends WebChromeClient {
 
     @Override
     public void onHideCustomView() {
-        mUIController.onHideCustomView();
+        //TODO restore this
+        //  mUIController.onHideCustomView();
     }
 
     @Override
     public void onShowCustomView(View view, CustomViewCallback callback) {
-        mUIController.onShowCustomView(view, callback);
+        //TODO restore this
+        //  mUIController.onShowCustomView(view, callback);
     }
 
     @SuppressWarnings("deprecation")
     @Override
     public void onShowCustomView(View view, int requestedOrientation,
                                  CustomViewCallback callback) {
-        mUIController.onShowCustomView(view, callback, requestedOrientation);
+        //TODO restore this
+      //  mUIController.onShowCustomView(view, callback, requestedOrientation);
     }
 }

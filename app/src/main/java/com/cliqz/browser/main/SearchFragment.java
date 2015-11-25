@@ -87,7 +87,18 @@ public class SearchFragment extends BaseFragment implements CliqzView.CliqzCallb
 
     @Override
     public void onResultClicked(String url) {
-        // Display result
+        final FragmentManager fm = getFragmentManager();
+        final LightningFragment lightningFragment = new LightningFragment();
+        final Bundle bundle = new Bundle();
+        bundle.putString(LightningFragment.URL, url);
+        bundle.putString(LightningFragment.UNIQUEID, "1");
+        bundle.putBoolean(LightningFragment.ISINCOGNITO, false);
+        lightningFragment.setArguments(bundle);
+        fm.beginTransaction()
+                .setCustomAnimations(R.anim.slide_in_from_right, R.anim.slide_out_to_right)
+                .add(android.R.id.content, lightningFragment)
+                .addToBackStack(null)
+                .commit();
     }
 
     @Override
