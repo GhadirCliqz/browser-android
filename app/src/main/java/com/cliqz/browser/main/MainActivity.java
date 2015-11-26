@@ -1,5 +1,6 @@
 package com.cliqz.browser.main;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -11,6 +12,7 @@ import com.squareup.otto.Subscribe;
 import javax.inject.Inject;
 
 import acr.browser.lightning.R;
+import acr.browser.lightning.activity.SettingsActivity;
 import acr.browser.lightning.app.BrowserApp;
 
 /**
@@ -85,10 +87,15 @@ public class MainActivity extends AppCompatActivity {
             fragment = new LightningFragment();
             fragment.setUrl(event.url);
             fm.beginTransaction()
-                    .setCustomAnimations(R.anim.slide_in_from_right, R.anim.slide_out_to_right)
+                    .setCustomAnimations(R.anim.slide_in_from_right, R.anim.slide_out_to_left, R.anim.slide_in_from_left, R.anim.slide_out_to_right)
                     .replace(android.R.id.content, fragment, LIGHTNING_FRAGMENT_TAG)
                     .addToBackStack(null)
                     .commit();
         }
+    }
+
+    @Subscribe
+    public void goToSettings(Messages.GoToSettings event) {
+        startActivity(new Intent(this, SettingsActivity.class));
     }
 }

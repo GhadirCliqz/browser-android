@@ -66,6 +66,10 @@ public class SearchFragment extends BaseFragment implements CliqzView.CliqzCallb
                 hideKeyboard();
                 delayedPostOnBus(new Messages.GoToSuggestions());
                 return true;
+            case R.id.menu_settings:
+                hideKeyboard();
+                delayedPostOnBus(new Messages.GoToSettings());
+                return true;
             default:
                 return false;
         }

@@ -56,6 +56,9 @@ public class LightningFragment extends BaseFragment {
             case R.id.menu_suggestions:
                 bus.post(new Messages.GoToSuggestions());
                 return true;
+            case R.id.menu_settings:
+                bus.post(new Messages.GoToSettings());
+                return true;
             default:
                 return false;
         }
