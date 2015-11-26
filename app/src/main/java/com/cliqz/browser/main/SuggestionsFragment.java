@@ -8,6 +8,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 
 import acr.browser.lightning.R;
 
@@ -17,12 +18,13 @@ import acr.browser.lightning.R;
  */
 public class SuggestionsFragment extends BaseFragment {
 
-    private View mView;
+    private ImageView mView;
 
     @Override
     protected View onCreateContentView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        mView = new FrameLayout(container.getContext());
-        mView.setBackgroundColor(Color.BLUE);
+        mView = new ImageView(inflater.getContext());
+        mView.setImageResource(R.drawable.reccomendations);
+        mView.setScaleType(ImageView.ScaleType.FIT_XY);
         return mView;
     }
 

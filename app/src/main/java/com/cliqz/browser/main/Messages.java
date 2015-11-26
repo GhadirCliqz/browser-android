@@ -11,4 +11,12 @@ public final class Messages {
     public static class GoToHistory {}
 
     public static class GoToSuggestions {}
+
+    public static class OpenUrl {
+        public final String url;
+
+        public OpenUrl(String url) {
+            this.url = url;
+        }
+    }
 }

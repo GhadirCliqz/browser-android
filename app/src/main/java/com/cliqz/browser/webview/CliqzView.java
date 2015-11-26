@@ -247,7 +247,7 @@ public class CliqzView extends WebView implements ILightningTab {
     void extensionReady() {
         mJsReady = true;
         // If the user typed a query before JS was ready, fire it now
-        if (mLastQuery != null || mLastLocation != null) {
+        /* if (mLastQuery != null || mLastLocation != null) {
             final CharSequence lastQuery = mLastQuery;
             post(new Runnable() {
                 public void run() {
@@ -262,7 +262,7 @@ public class CliqzView extends WebView implements ILightningTab {
                 }
             });
 
-        }
+        } */
     }
 
     /**

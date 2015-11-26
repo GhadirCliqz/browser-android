@@ -1,17 +1,17 @@
 package com.cliqz.browser.main;
 
-import android.graphics.Color;
+import android.content.Context;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
-import android.widget.EditText;
-import android.widget.FrameLayout;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.ImageView;
 
 import com.cliqz.browser.webview.CliqzView;
@@ -27,6 +27,11 @@ import butterknife.OnClick;
  * @date 2015/11/23
  */
 public class SearchFragment extends BaseFragment implements CliqzView.CliqzCallbacks {
+
+    private final static int KEYBOARD_ANIMATION_DELAY = 200;
+
+    private final Handler handler = new Handler(Looper.getMainLooper());
+
     CliqzView mCliqzView = null;
 
     @Bind(R.id.menu_history)
@@ -56,10 +61,10 @@ public class SearchFragment extends BaseFragment implements CliqzView.CliqzCallb
 
     @Override
     protected boolean onMenuItemClick(MenuItem item) {
-        final FragmentManager fm = getFragmentManager();
         switch (item.getItemId()) {
             case R.id.menu_suggestions:
-                bus.post(new Messages.GoToSuggestions());
+                hideKeyboard();
+                delayedPostOnBus(new Messages.GoToSuggestions());
                 return true;
             default:
                 return false;
@@ -82,23 +87,13 @@ public class SearchFragment extends BaseFragment implements CliqzView.CliqzCallb
 
     @OnClick(R.id.menu_history)
     void historyClicked() {
-        bus.post(new Messages.GoToHistory());
+        hideKeyboard();
+        delayedPostOnBus(new Messages.GoToHistory());
     }
 
     @Override
     public void onResultClicked(String url) {
-        final FragmentManager fm = getFragmentManager();
-        final LightningFragment lightningFragment = new LightningFragment();
-        final Bundle bundle = new Bundle();
-        bundle.putString(LightningFragment.URL, url);
-        bundle.putString(LightningFragment.UNIQUEID, "1");
-        bundle.putBoolean(LightningFragment.ISINCOGNITO, false);
-        lightningFragment.setArguments(bundle);
-        fm.beginTransaction()
-                .setCustomAnimations(R.anim.slide_in_from_right, R.anim.slide_out_to_right)
-                .add(android.R.id.content, lightningFragment)
-                .addToBackStack(null)
-                .commit();
+        delayedPostOnBus(new Messages.OpenUrl(url));
     }
 
     @Override
@@ -109,5 +104,21 @@ public class SearchFragment extends BaseFragment implements CliqzView.CliqzCallb
     @Override
     public void onAutocompleteUrl(String str) {
 
+    }
+
+    // Hide the keyboard, used also in SearchFragmentListener
+    void hideKeyboard() {
+        InputMethodManager imm = (InputMethodManager) mAutocompleteEditText.getContext()
+                .getSystemService(Context.INPUT_METHOD_SERVICE);
+        imm.hideSoftInputFromWindow(mAutocompleteEditText.getWindowToken(), 0);
+    }
+
+    private void delayedPostOnBus(final Object event) {
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                bus.post(event);
+            }
+        }, KEYBOARD_ANIMATION_DELAY);
     }
 }

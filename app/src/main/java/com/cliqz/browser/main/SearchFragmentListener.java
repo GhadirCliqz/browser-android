@@ -3,15 +3,11 @@ package com.cliqz.browser.main;
 import android.content.Context;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.TextView;
-
-import acr.browser.lightning.constant.Constants;
-import acr.browser.lightning.view.LightningView;
 
 /**
  * @author Stefano Pacifici
@@ -38,9 +34,7 @@ class SearchFragmentListener implements EditText.OnKeyListener, View.OnFocusChan
     public boolean onKey(View v, int keyCode, KeyEvent event) {
         switch (keyCode) {
             case KeyEvent.KEYCODE_ENTER:
-                InputMethodManager imm = (InputMethodManager) fragment.getContext()
-                        .getSystemService(Context.INPUT_METHOD_SERVICE);
-                imm.hideSoftInputFromWindow(fragment.mAutocompleteEditText.getWindowToken(), 0);
+                fragment.hideKeyboard();
                 // searchTheWeb(mSearch.getText().toString());
                 return true;
             default:
@@ -52,9 +46,7 @@ class SearchFragmentListener implements EditText.OnKeyListener, View.OnFocusChan
     @Override
     public void onFocusChange(View v, boolean hasFocus) {
         if (!hasFocus) {
-            InputMethodManager imm = (InputMethodManager) fragment.getContext()
-                    .getSystemService(Context.INPUT_METHOD_SERVICE);
-            imm.hideSoftInputFromWindow(fragment.mAutocompleteEditText.getWindowToken(), 0);
+            fragment.hideKeyboard();
         }
     }
 

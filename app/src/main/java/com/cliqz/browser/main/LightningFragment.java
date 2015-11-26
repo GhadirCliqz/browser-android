@@ -7,8 +7,12 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.webkit.WebView;
 
+import acr.browser.lightning.R;
 import acr.browser.lightning.view.LightningView;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
 
 /**
  * @author Ravjit
@@ -20,31 +24,54 @@ public class LightningFragment extends BaseFragment {
     protected static String UNIQUEID = "uniqueId";
     protected static String ISINCOGNITO = "isIncognito";
 
+    private LightningView mLightningView = null;
+    private String mUrl = "";
+
     @Override
     public View onCreateContentView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        Bundle bundle = getArguments();
-        String url = bundle.getString(URL);
-        String uniqueId = bundle.getString(UNIQUEID);
-        boolean isIncognito = bundle.getBoolean(ISINCOGNITO);
-        return new LightningView(getActivity(), url, isIncognito, uniqueId).getWebView();
+        if (mLightningView == null) {
+            mLightningView = new LightningView(getActivity(), mUrl, false, "1");
+        } else {
+            final WebView webView = mLightningView.getWebView();
+            ((ViewGroup) webView.getParent()).removeView(webView);
+        }
+        return mLightningView.getWebView();
     }
 
+    public void setUrl(String url) {
+        mUrl = url; // Cache it, used if we didn't create the view already
+        if (mLightningView != null) {
+            mLightningView.loadUrl(url);
+        }
+    }
     @Override
     protected int getMenuResource() {
-        return 0;
+        return R.menu.fragment_search_menu;
     }
 
     @Override
     protected boolean onMenuItemClick(MenuItem item) {
-        return false;
+        switch (item.getItemId()) {
+            case R.id.menu_suggestions:
+                bus.post(new Messages.GoToSuggestions());
+                return true;
+            default:
+                return false;
+        }
     }
 
     @Nullable
     @Override
     protected View onCreateCustomToolbarView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        return null;
+        final View view = inflater.inflate(R.layout.fragment_lightning_toolbar, container, false);
+        ButterKnife.bind(this, view);
+        return view;
     }
 
+    @OnClick(R.id.menu_history)
+    void historyClicked() {
+        bus.post(new Messages.GoToHistory());
+    }
 
 }
