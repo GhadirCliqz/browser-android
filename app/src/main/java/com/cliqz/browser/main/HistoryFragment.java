@@ -31,7 +31,7 @@ public class HistoryFragment extends BaseFragment {
 
     @Override
     protected int getMenuResource() {
-        return R.menu.main;
+        return 0;
     }
 
     @Override

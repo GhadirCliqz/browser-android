@@ -30,7 +30,7 @@ public class SuggestionsFragment extends BaseFragment {
 
     @Override
     protected int getMenuResource() {
-        return R.menu.main;
+        return 0;
     }
 
     @Override
