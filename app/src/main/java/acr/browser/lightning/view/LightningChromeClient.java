@@ -17,6 +17,7 @@ import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 
+import com.cliqz.browser.main.Messages;
 import com.squareup.otto.Bus;
 
 import java.io.File;
@@ -27,7 +28,7 @@ import acr.browser.lightning.R;
 import acr.browser.lightning.app.BrowserApp;
 import acr.browser.lightning.bus.BrowserEvents;
 import acr.browser.lightning.constant.Constants;
-import acr.browser.lightning.controller.UIController;
+
 import com.anthonycr.grant.PermissionsManager;
 import com.anthonycr.grant.PermissionsResultAction;
 import acr.browser.lightning.utils.Utils;
@@ -42,14 +43,10 @@ class LightningChromeClient extends WebChromeClient {
 
     private final Activity mActivity;
     private final LightningView mLightningView;
-    //TODO restore this
-    //   private final UIController mUIController;
     private final Bus eventBus;
 
     LightningChromeClient(Activity activity, LightningView lightningView) {
         mActivity = activity;
-        //TODO restore this
-        //       mUIController = (UIController) activity;
         mLightningView = lightningView;
         eventBus = BrowserApp.getAppComponent().getBus();
     }
@@ -57,8 +54,7 @@ class LightningChromeClient extends WebChromeClient {
     @Override
     public void onProgressChanged(WebView view, int newProgress) {
         if (mLightningView.isShown()) {
-            //TODO restore this
-  //          mUIController.updateProgress(newProgress);
+            eventBus.post(new BrowserEvents.UpdateProgress(newProgress));
         }
     }
 
@@ -108,11 +104,12 @@ class LightningChromeClient extends WebChromeClient {
         } else {
             mLightningView.mTitle.setTitle(mActivity.getString(R.string.untitled));
         }
+        eventBus.post(new Messages.UpdateTitle());
         eventBus.post(new BrowserEvents.TabsChanged());
-        if (view != null) {
-            //TODO restore this
-            // mUIController.updateHistory(title, view.getUrl());
+        if (view != null && !mLightningView.mIsIncognitoTab) {
+            mLightningView.addItemToHistory(title, view.getUrl());
         }
+
     }
 
     @Override
@@ -160,39 +157,33 @@ class LightningChromeClient extends WebChromeClient {
     @Override
     public boolean onCreateWindow(WebView view, boolean isDialog, boolean isUserGesture,
                                   Message resultMsg) {
-        //TODO restore this
-        //  mUIController.onCreateWindow(resultMsg);
+        eventBus.post(new BrowserEvents.CreateWindow(resultMsg));
         return true;
     }
 
     @Override
     public void onCloseWindow(WebView window) {
-        //TODO restore this
-        //mUIController.onCloseWindow(mLightningView);
+        eventBus.post(new BrowserEvents.CloseWindow(mLightningView));
     }
 
     @SuppressWarnings("unused")
     public void openFileChooser(ValueCallback<Uri> uploadMsg) {
-        //TODO restore this
-        //  mUIController.openFileChooser(uploadMsg);
+        eventBus.post(new BrowserEvents.OpenFileChooser(uploadMsg));
     }
 
     @SuppressWarnings("unused")
     public void openFileChooser(ValueCallback<Uri> uploadMsg, String acceptType) {
-        //TODO restore this
-        // mUIController.openFileChooser(uploadMsg);
+        eventBus.post(new BrowserEvents.OpenFileChooser(uploadMsg));
     }
 
     @SuppressWarnings("unused")
     public void openFileChooser(ValueCallback<Uri> uploadMsg, String acceptType, String capture) {
-        //TODO restore this
-        //  mUIController.openFileChooser(uploadMsg);
+        eventBus.post(new BrowserEvents.OpenFileChooser(uploadMsg));
     }
 
     public boolean onShowFileChooser(WebView webView, ValueCallback<Uri[]> filePathCallback,
                                      WebChromeClient.FileChooserParams fileChooserParams) {
-        //TODO restore this
-        //  mUIController.showFileChooser(filePathCallback);
+        eventBus.post(new BrowserEvents.ShowFileChooser(filePathCallback));
         return true;
     }
 
@@ -226,21 +217,17 @@ class LightningChromeClient extends WebChromeClient {
 
     @Override
     public void onHideCustomView() {
-        //TODO restore this
-        //  mUIController.onHideCustomView();
+        eventBus.post(new BrowserEvents.HideCustomView());
     }
 
     @Override
     public void onShowCustomView(View view, CustomViewCallback callback) {
-        //TODO restore this
-        //  mUIController.onShowCustomView(view, callback);
+        eventBus.post(new BrowserEvents.ShowCustomView(view, callback));
     }
 
     @SuppressWarnings("deprecation")
     @Override
-    public void onShowCustomView(View view, int requestedOrientation,
-                                 CustomViewCallback callback) {
-        //TODO restore this
-      //  mUIController.onShowCustomView(view, callback, requestedOrientation);
+    public void onShowCustomView(View view, int requestedOrientation, CustomViewCallback callback) {
+        eventBus.post(new BrowserEvents.ShowCustomView(view, callback, requestedOrientation));
     }
 }

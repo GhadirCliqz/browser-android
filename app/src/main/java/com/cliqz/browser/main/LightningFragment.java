@@ -8,9 +8,20 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.WebView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
+
+import com.squareup.otto.Bus;
+import com.squareup.otto.Subscribe;
+
+import javax.inject.Inject;
 
 import acr.browser.lightning.R;
+import acr.browser.lightning.app.BrowserApp;
+import acr.browser.lightning.bus.BrowserEvents;
+import acr.browser.lightning.view.AnimatedProgressBar;
 import acr.browser.lightning.view.LightningView;
+import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
@@ -26,6 +37,19 @@ public class LightningFragment extends BaseFragment {
 
     private LightningView mLightningView = null;
     private String mUrl = "";
+    private AnimatedProgressBar mProgressBar;
+
+    public LightningFragment() {
+        super();
+        BrowserApp.getAppComponent().inject(this);
+        bus.register(this);
+    }
+
+    @Inject
+    Bus bus;
+
+    @Bind(R.id.title)
+    TextView mTitle;
 
     @Override
     public View onCreateContentView(LayoutInflater inflater, ViewGroup container,
@@ -36,7 +60,11 @@ public class LightningFragment extends BaseFragment {
             final WebView webView = mLightningView.getWebView();
             ((ViewGroup) webView.getParent()).removeView(webView);
         }
-        return mLightningView.getWebView();
+        final View view = inflater.inflate(R.layout.fragment_lightning, container, false);
+        LinearLayout contentContainer = (LinearLayout) view.findViewById(R.id.content_container);
+        mProgressBar = (AnimatedProgressBar) view.findViewById(R.id.progress_view);
+        contentContainer.addView(mLightningView.getWebView());
+        return view;
     }
 
     /**
@@ -82,4 +110,21 @@ public class LightningFragment extends BaseFragment {
         bus.post(new Messages.GoToHistory());
     }
 
+    private void onProgress(int progress) {
+        mProgressBar.setProgress(progress);
+    }
+
+    private void setTitle() {
+        mTitle.setText(mLightningView.getTitle());
+    }
+
+    @Subscribe
+    public void updateProgress(BrowserEvents.UpdateProgress event) {
+        onProgress(event.progress);
+    }
+
+    @Subscribe
+    public void updateTitle(Messages.UpdateTitle event) {
+        setTitle();
+    }
 }

@@ -20,6 +20,7 @@ public final class Messages {
         }
     }
 
-    public static class GoToSettings {
-    }
+    public static class GoToSettings {}
+
+    public static class UpdateTitle {}
 }
