@@ -81,5 +81,4 @@ public interface AppComponent {
     // This is CLIQZ Specific too
     void inject(BaseFragment baseFragment);
 
-    void inject(LightningFragment lightningFragment);
 }

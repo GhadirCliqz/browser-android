@@ -40,13 +40,8 @@ public class LightningFragment extends BaseFragment {
     private AnimatedProgressBar mProgressBar;
 
     public LightningFragment() {
-        super();
-        BrowserApp.getAppComponent().inject(this);
         bus.register(this);
     }
-
-    @Inject
-    Bus bus;
 
     @Bind(R.id.title)
     TextView mTitle;
@@ -102,12 +97,18 @@ public class LightningFragment extends BaseFragment {
     protected View onCreateCustomToolbarView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         final View view = inflater.inflate(R.layout.fragment_lightning_toolbar, container, false);
         ButterKnife.bind(this, view);
+        setTitle();
         return view;
     }
 
     @OnClick(R.id.menu_history)
     void historyClicked() {
         bus.post(new Messages.GoToHistory());
+    }
+
+    @OnClick(R.id.title)
+    void goBack() {
+        getFragmentManager().popBackStack();
     }
 
     private void onProgress(int progress) {

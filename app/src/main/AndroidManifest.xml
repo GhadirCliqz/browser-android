@@ -31,14 +31,6 @@
         <activity android:name="com.cliqz.browser.main.MainActivity"
                   android:label="@string/cliqz_app_name"
                   android:theme="@style/Theme.LightTheme">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.LAUNCHER" />
-                <category android:name="android.intent.category.BROWSABLE" />
-                <category android:name="android.intent.category.APP_BROWSER" />
-            </intent-filter>
         </activity>
         <!--activity
             android:name=".activity.MainActivity"
@@ -156,7 +148,15 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".activity.OnBoardingActivity">
+            android:name="com.cliqz.browser.main.OnBoardingActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <category android:name="android.intent.category.APP_BROWSER" />
+            </intent-filter>
         </activity>
     </application>
 
