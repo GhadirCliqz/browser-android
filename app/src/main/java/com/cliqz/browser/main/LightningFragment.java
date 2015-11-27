@@ -39,9 +39,14 @@ public class LightningFragment extends BaseFragment {
         return mLightningView.getWebView();
     }
 
+    /**
+     * Set the url to load in the LightningView
+     * @param url
+     */
     public void setUrl(String url) {
         mUrl = url; // Cache it, used if we didn't create the view already
         if (mLightningView != null) {
+            mLightningView.getWebView().clearHistory();
             mLightningView.loadUrl(url);
         }
     }

@@ -79,19 +79,15 @@ public class MainActivity extends AppCompatActivity {
         // First check if the lightning fragment is already on the back stack
         LightningFragment fragment =
                 (LightningFragment) fm.findFragmentByTag(LIGHTNING_FRAGMENT_TAG);
-        if (fragment != null) {
-            // fragment.setArguments(bundle);
-            fragment.setUrl(event.url);
-            fm.popBackStack();
-        } else {
+        if (fragment == null) {
             fragment = new LightningFragment();
-            fragment.setUrl(event.url);
-            fm.beginTransaction()
-                    .setCustomAnimations(R.anim.slide_in_from_right, R.anim.slide_out_to_left, R.anim.slide_in_from_left, R.anim.slide_out_to_right)
-                    .replace(android.R.id.content, fragment, LIGHTNING_FRAGMENT_TAG)
-                    .addToBackStack(null)
-                    .commit();
         }
+        fragment.setUrl(event.url);
+        fm.beginTransaction()
+                .setCustomAnimations(R.anim.slide_in_from_right, R.anim.slide_out_to_left, R.anim.slide_in_from_left, R.anim.slide_out_to_right)
+                .replace(android.R.id.content, fragment, LIGHTNING_FRAGMENT_TAG)
+                .addToBackStack(null)
+                .commit();
     }
 
     @Subscribe
