@@ -19,4 +19,6 @@ public final class Messages {
             this.url = url;
         }
     }
+
+    public static class UpdateTitle {}
 }
