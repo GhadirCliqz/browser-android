@@ -31,6 +31,15 @@ import acr.browser.lightning.preference.PreferenceManager;
 @Singleton
 public class Telemetry {
 
+    @Inject
+    public Telemetry(Context context) {
+        this.context = context;
+        signal = new HashMap<>();
+        batteryLevel = -1;
+        context.registerReceiver(mBatteryInfoReceiver, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
+        context.registerReceiver(mNetworkChangeReceiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
+    }
+    
     private static class Key {
 
         private static final String SOURCE = "MA00";
@@ -80,15 +89,6 @@ public class Telemetry {
         public static final String CLOSE = "close";
         public static final String KILL = "kill";
         public static final String LAYER_CHANGE = "layer_change";
-    }
-
-    @Inject
-    public Telemetry(Context context) {
-        this.context = context;
-        signal = new HashMap<>();
-        batteryLevel = -1;
-        context.registerReceiver(mBatteryInfoReceiver, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
-        context.registerReceiver(mNetworkChangeReceiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
     }
 
     @Inject
