@@ -94,4 +94,10 @@ public class MainActivity extends AppCompatActivity {
     public void goToSettings(Messages.GoToSettings event) {
         startActivity(new Intent(this, SettingsActivity.class));
     }
+
+    @Subscribe
+    public void goToSearch(Messages.GoToSearch event) {
+        final FragmentManager fm = getSupportFragmentManager();
+        fm.popBackStack();
+    }
 }

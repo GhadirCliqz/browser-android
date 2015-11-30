@@ -92,6 +92,11 @@ public class LightningFragment extends BaseFragment {
         }
     }
 
+    @Override
+    protected int getFragmentTheme() {
+        return R.style.Theme_Cliqz_Present;
+    }
+
     @Nullable
     @Override
     protected View onCreateCustomToolbarView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {

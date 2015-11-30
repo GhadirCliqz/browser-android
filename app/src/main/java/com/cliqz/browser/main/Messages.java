@@ -23,4 +23,6 @@ public final class Messages {
     public static class GoToSettings {}
 
     public static class UpdateTitle {}
+
+    public static class GoToSearch {}
 }

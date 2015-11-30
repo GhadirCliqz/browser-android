@@ -31,17 +31,28 @@ public class HistoryFragment extends BaseFragment {
 
     @Override
     protected int getMenuResource() {
-        return 0;
+        return R.menu.fragment_history_menu;
     }
 
     @Override
     protected boolean onMenuItemClick(MenuItem item) {
-        return false;
+        switch (item.getItemId()) {
+            case R.id.menu_search:
+                bus.post(new Messages.GoToSearch());
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    @Override
+    protected int getFragmentTheme() {
+        return R.style.Theme_Cliqz_History;
     }
 
     @Nullable
     @Override
     protected View onCreateCustomToolbarView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        return null;
+        return inflater.inflate(R.layout.fragment_history_toolbar, container, false);
     }
 }

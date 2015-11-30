@@ -11,6 +11,8 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 
 import acr.browser.lightning.R;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
 
 /**
  * @author Stefano Pacifici
@@ -38,9 +40,21 @@ public class SuggestionsFragment extends BaseFragment {
         return false;
     }
 
+    @Override
+    protected int getFragmentTheme() {
+        return R.style.Theme_Cliqz_Suggestions;
+    }
+
     @Nullable
     @Override
     protected View onCreateCustomToolbarView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        return null;
+        View view = inflater.inflate(R.layout.fragment_suggestions_toolbar, container, false);
+        ButterKnife.bind(this, view);
+        return view;
+    }
+
+    @OnClick(R.id.menu_search)
+    void onUpClicked(){
+        bus.post(new Messages.GoToSearch());
     }
 }
