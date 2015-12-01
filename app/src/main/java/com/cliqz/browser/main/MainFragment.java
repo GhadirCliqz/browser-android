@@ -5,20 +5,27 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.support.annotation.Nullable;
-import android.support.v4.app.FragmentManager;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.view.inputmethod.InputMethodManager;
+import android.webkit.WebView;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 
 import com.cliqz.browser.webview.CliqzView;
 import com.cliqz.browser.widget.AutocompleteEditText;
 import com.squareup.otto.Subscribe;
 
 import acr.browser.lightning.R;
+import acr.browser.lightning.bus.BrowserEvents;
+import acr.browser.lightning.view.AnimatedProgressBar;
+import acr.browser.lightning.view.LightningView;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -27,16 +34,29 @@ import butterknife.OnClick;
  * @author Stefano Pacifici
  * @date 2015/11/23
  */
-public class MainFragment extends BaseFragment implements CliqzView.CliqzCallbacks {
+public class SearchFragment extends BaseFragment implements CliqzView.CliqzCallbacks {
 
-    private static final String LIGHTNING_FRAGMENT_TAG = "lightning_fragment";
-    private static final String CLIQZ_FRAGMENT_TAG = "cliqz_fragment";
+    private enum State {
+        SHOWING_SEARCH,
+        SHOWING_BROWSER,
+    }
 
     private final static int KEYBOARD_ANIMATION_DELAY = 200;
 
     private final Handler handler = new Handler(Looper.getMainLooper());
 
- //    CliqzView mCliqzView = null;
+    private String mUrl = "";
+
+    private State mState = State.SHOWING_SEARCH;
+
+    CliqzView mCliqzView = null;
+    LightningView mLightningView = null;
+
+    @Bind(R.id.local_container)
+    FrameLayout mContentContainer;
+
+    @Bind(R.id.progress_view)
+    AnimatedProgressBar mProgressBar;
 
     @Bind(R.id.menu_history)
     ImageView mMenuHistory;
@@ -44,26 +64,76 @@ public class MainFragment extends BaseFragment implements CliqzView.CliqzCallbac
     @Bind(R.id.search_bar)
     AutocompleteEditText mAutocompleteEditText;
 
-    @Override
-    protected View onCreateContentView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        // We do not create anything here we will just store a reference to the container
-        return null;
+    public SearchFragment() {
+        getClass();
     }
-
     @Override
     public void onResume() {
         super.onResume();
         bus.register(this);
-        final FragmentManager fm = getChildFragmentManager();
-        CliqzFragment cliqzFragment = (CliqzFragment) fm.findFragmentByTag(CLIQZ_FRAGMENT_TAG);
-        cliqzFragment = cliqzFragment != null ? cliqzFragment : new CliqzFragment();
-        fm.beginTransaction().replace(R.id.content_container, cliqzFragment, CLIQZ_FRAGMENT_TAG).commit();
     }
 
     @Override
     public void onPause() {
         super.onPause();
         bus.unregister(this);
+    }
+
+    @Override
+    protected View onCreateContentView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        return inflater.inflate(R.layout.fragment_search, container, false);
+    }
+
+    @Override
+    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        ButterKnife.bind(this, view);
+        if (mCliqzView == null || mLightningView == null) {
+            mCliqzView = new CliqzView(view.getContext());
+            mLightningView = new LightningView(getActivity(), mUrl, false, "1");
+            mCliqzView.setLayoutParams(
+                    new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
+            mCliqzView.setResultListener(this);
+            SearchFragmentListener.create(this);
+        } else {
+            final WebView webView = mLightningView.getWebView();
+            ((ViewGroup) mCliqzView.getParent()).removeView(mCliqzView);
+            ((ViewGroup) webView.getParent()).removeView(webView);
+        }
+        mLightningView.resumeTimers();
+        final WebView webView = mLightningView.getWebView();
+        webView.setId(R.id.right_drawer_list);
+        // TODO I don't like this is too dirty, let's see if we can do better
+        if (mState == State.SHOWING_SEARCH) {
+            mContentContainer.addView(webView);
+            mContentContainer.addView(mCliqzView);
+        } else {
+            mContentContainer.addView(mCliqzView);
+            mContentContainer.addView(webView);
+        }
+    }
+
+    @Override
+    public void onDestroyView() {
+        mLightningView.pauseTimers();
+        super.onDestroyView();
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+    }
+
+    @Override
+    public void onViewStateRestored(@Nullable Bundle savedInstanceState) {
+        super.onViewStateRestored(savedInstanceState);
+        }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        mLightningView.getWebView().saveState(outState);
+        mCliqzView.saveState(outState);
     }
 
     @Override
@@ -95,15 +165,7 @@ public class MainFragment extends BaseFragment implements CliqzView.CliqzCallbac
     @Nullable
     @Override
     protected View onCreateCustomToolbarView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        final View view = inflater.inflate(R.layout.fragment_search_toolbar, container, false);
-        ButterKnife.bind(this, view);
-        return view;
-    }
-
-    @Override
-    protected void onViewCreated() {
-        // Wire the search here
-        MainFragmentListener.create(this);
+        return inflater.inflate(R.layout.fragment_search_toolbar, container, false);
     }
 
     @OnClick(R.id.menu_history)
@@ -144,20 +206,47 @@ public class MainFragment extends BaseFragment implements CliqzView.CliqzCallbac
     }
 
     @Subscribe
-    public void openUrl(Messages.OpenUrl event) {
-        final FragmentManager fm = getChildFragmentManager();
-        // First check if the lightning fragment is already on the back stack
-        LightningFragment fragment =
-                (LightningFragment) fm.findFragmentByTag(LIGHTNING_FRAGMENT_TAG);
-        if (fragment == null) {
-            fragment = new LightningFragment();
-        }
-        fragment.setUrl(event.url);
-        fm.beginTransaction()
-                .setCustomAnimations(R.anim.slide_in_from_right, R.anim.slide_out_to_left, R.anim.slide_in_from_left, R.anim.slide_out_to_right)
-                .replace(R.id.content_container, fragment, LIGHTNING_FRAGMENT_TAG)
-                .addToBackStack(null)
-                .commit();
+    public void updateProgress(BrowserEvents.UpdateProgress event) {
+        mProgressBar.setProgress(event.progress);
     }
 
+    @Subscribe
+    public void updateTitle(Messages.UpdateTitle event) {
+        // setTitle();
+    }
+
+    @Subscribe
+    public void openUrl(Messages.OpenUrl event) {
+        final WebView webView = mLightningView.getWebView();
+        if (mState != State.SHOWING_BROWSER){
+//            final Animation slideInAnimation =
+//                    AnimationUtils.loadAnimation(getContext(), R.anim.slide_in_from_right);
+//            final Animation slideOutAnimation =
+//                    AnimationUtils.loadAnimation(getContext(), R.anim.slide_out_to_left);
+//            slideInAnimation.setFillAfter(true);
+//            slideOutAnimation.setFillAfter(true);
+//            mCliqzView.startAnimation(slideOutAnimation);
+//            webView.startAnimation(slideInAnimation);
+            webView.clearHistory();
+            webView.bringToFront();
+            mState = State.SHOWING_BROWSER;
+        }
+        webView.loadUrl(event.url);
+    }
+
+    void showSearch() {
+        if (mState != State.SHOWING_SEARCH) {
+//            final WebView webView = mLightningView.getWebView();
+//            final Animation slideInAnimation =
+//                    AnimationUtils.loadAnimation(getContext(), R.anim.slide_in_from_left);
+//            final Animation slideOutAnimation =
+//                    AnimationUtils.loadAnimation(getContext(), R.anim.slide_out_to_right);
+//            slideInAnimation.setFillAfter(true);
+//            slideOutAnimation.setFillAfter(true);
+//            mCliqzView.startAnimation(slideInAnimation);
+            mCliqzView.bringToFront();
+//            webView.startAnimation(slideOutAnimation);
+            mState = State.SHOWING_SEARCH;
+        }
+    }
 }
