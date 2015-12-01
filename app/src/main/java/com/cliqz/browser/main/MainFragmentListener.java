@@ -1,11 +1,9 @@
 package com.cliqz.browser.main;
 
-import android.content.Context;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.KeyEvent;
 import android.view.View;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.TextView;
 
@@ -13,15 +11,15 @@ import android.widget.TextView;
  * @author Stefano Pacifici
  * @date 2015/11/24
  */
-class SearchFragmentListener implements EditText.OnKeyListener, View.OnFocusChangeListener,
+class MainFragmentListener implements EditText.OnKeyListener, View.OnFocusChangeListener,
         TextView.OnEditorActionListener, TextWatcher {
-    private final SearchFragment fragment;
+    private final MainFragment fragment;
 
-    public static SearchFragmentListener create(SearchFragment fragment) {
-        return new SearchFragmentListener(fragment);
+    public static MainFragmentListener create(MainFragment fragment) {
+        return new MainFragmentListener(fragment);
     }
 
-    private SearchFragmentListener(SearchFragment fragment) {
+    private MainFragmentListener(MainFragment fragment) {
         this.fragment = fragment;
         fragment.mAutocompleteEditText.setOnKeyListener(this);
         fragment.mAutocompleteEditText.setOnFocusChangeListener(this);
@@ -69,7 +67,7 @@ class SearchFragmentListener implements EditText.OnKeyListener, View.OnFocusChan
         final String q = s.toString();
 
         if (!q.isEmpty()) {
-            fragment.mCliqzView.onQueryChanged(q);
+            fragment.bus.post(new Messages.SearchFor(q));
         }
     }
 

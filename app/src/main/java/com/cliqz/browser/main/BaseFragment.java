@@ -28,19 +28,11 @@ import acr.browser.lightning.app.BrowserApp;
  * @author Stefano Pacifici
  * @date 2015/11/23
  */
-public abstract class BaseFragment extends Fragment {
+public abstract class BaseFragment extends FragmentWithBus {
 
     private ViewGroup mContentContainer;
     private Toolbar mToolbar;
     private View mCustomToolbarView;
-
-    @Inject
-    Bus bus;
-
-    public BaseFragment() {
-        super();
-        BrowserApp.getAppComponent().inject(this);
-    }
 
     @Nullable
     @Override
@@ -58,7 +50,9 @@ public abstract class BaseFragment extends Fragment {
         mToolbar = (Toolbar) view.findViewById(R.id.toolbar);
         mContentContainer = (ViewGroup) view.findViewById(R.id.content_container);
         final View content = onCreateContentView(localInflater, mContentContainer, savedInstanceState);
-        mContentContainer.addView(content, new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
+        if (content != null) {
+            mContentContainer.addView(content, new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
+        }
         mCustomToolbarView = onCreateCustomToolbarView(localInflater, mToolbar, savedInstanceState);
         if (mCustomToolbarView != null) {
             mToolbar.addView(mCustomToolbarView);
@@ -82,9 +76,9 @@ public abstract class BaseFragment extends Fragment {
      * @param inflater
      * @param container
      * @param savedInstanceState
-     * @return the content view
+     * @return the content view, can be null if you do not want anything to be added
      */
-    @NonNull
+    @Nullable
     protected abstract View onCreateContentView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState);
 
     /**
