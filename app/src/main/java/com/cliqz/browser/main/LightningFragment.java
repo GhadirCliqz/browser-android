@@ -29,7 +29,7 @@ import butterknife.OnClick;
  * @author Ravjit
  * @date 2015/11/24
  */
-public class LightningFragment extends BaseFragment {
+public class LightningFragment extends FragmentWithBus {
 
     protected static String URL = "url";
     protected static String UNIQUEID = "uniqueId";
@@ -46,9 +46,9 @@ public class LightningFragment extends BaseFragment {
     @Bind(R.id.title)
     TextView mTitle;
 
+    @Nullable
     @Override
-    public View onCreateContentView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         if (mLightningView == null) {
             mLightningView = new LightningView(getActivity(), mUrl, false, "1");
         } else {
@@ -73,33 +73,6 @@ public class LightningFragment extends BaseFragment {
             mLightningView.loadUrl(url);
         }
     }
-    @Override
-    protected int getMenuResource() {
-        return R.menu.fragment_search_menu;
-    }
-
-    @Override
-    protected boolean onMenuItemClick(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.menu_suggestions:
-                bus.post(new Messages.GoToSuggestions());
-                return true;
-            case R.id.menu_settings:
-                bus.post(new Messages.GoToSettings());
-                return true;
-            default:
-                return false;
-        }
-    }
-
-    @Nullable
-    @Override
-    protected View onCreateCustomToolbarView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        final View view = inflater.inflate(R.layout.fragment_lightning_toolbar, container, false);
-        ButterKnife.bind(this, view);
-        setTitle();
-        return view;
-    }
 
     @OnClick(R.id.menu_history)
     void historyClicked() {
@@ -116,7 +89,7 @@ public class LightningFragment extends BaseFragment {
     }
 
     private void setTitle() {
-        mTitle.setText(mLightningView.getTitle());
+        // mTitle.setText(mLightningView.getTitle());
     }
 
     @Subscribe

@@ -9,15 +9,17 @@
         android:layout_width="24dp"
         android:layout_height="24dp"
         android:src="@drawable/ic_action_cliqz_up"
-        android:id="@+id/menu_history" />
+        android:id="@+id/menu_search" />
     <TextView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:id="@+id/title"
+        android:text="@string/recommendations"
         android:singleLine="true"
         android:paddingStart="8dp"
         android:paddingEnd="8dp"
         android:textColor="@color/primary_color_dark"
         android:textColorHint="@color/hint_text" />
+
 
 </LinearLayout>

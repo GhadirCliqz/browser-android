@@ -16,6 +16,7 @@ import android.widget.ImageView;
 
 import com.cliqz.browser.webview.CliqzView;
 import com.cliqz.browser.widget.AutocompleteEditText;
+import com.squareup.otto.Subscribe;
 
 import acr.browser.lightning.R;
 import butterknife.Bind;
@@ -26,13 +27,16 @@ import butterknife.OnClick;
  * @author Stefano Pacifici
  * @date 2015/11/23
  */
-public class SearchFragment extends BaseFragment implements CliqzView.CliqzCallbacks {
+public class MainFragment extends BaseFragment implements CliqzView.CliqzCallbacks {
+
+    private static final String LIGHTNING_FRAGMENT_TAG = "lightning_fragment";
+    private static final String CLIQZ_FRAGMENT_TAG = "cliqz_fragment";
 
     private final static int KEYBOARD_ANIMATION_DELAY = 200;
 
     private final Handler handler = new Handler(Looper.getMainLooper());
 
-    CliqzView mCliqzView = null;
+ //    CliqzView mCliqzView = null;
 
     @Bind(R.id.menu_history)
     ImageView mMenuHistory;
@@ -42,16 +46,24 @@ public class SearchFragment extends BaseFragment implements CliqzView.CliqzCallb
 
     @Override
     protected View onCreateContentView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        if (mCliqzView == null) {
-            mCliqzView = new CliqzView(inflater.getContext());
-            mCliqzView.setLayoutParams(
-                    new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
-            mCliqzView.setResultListener(this);
-        } else {
-            final ViewGroup parent = (ViewGroup) mCliqzView.getParent();
-            parent.removeView(mCliqzView);
-        }
-        return mCliqzView;
+        // We do not create anything here we will just store a reference to the container
+        return null;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        bus.register(this);
+        final FragmentManager fm = getChildFragmentManager();
+        CliqzFragment cliqzFragment = (CliqzFragment) fm.findFragmentByTag(CLIQZ_FRAGMENT_TAG);
+        cliqzFragment = cliqzFragment != null ? cliqzFragment : new CliqzFragment();
+        fm.beginTransaction().replace(R.id.content_container, cliqzFragment, CLIQZ_FRAGMENT_TAG).commit();
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        bus.unregister(this);
     }
 
     @Override
@@ -75,6 +87,11 @@ public class SearchFragment extends BaseFragment implements CliqzView.CliqzCallb
         }
     }
 
+    @Override
+    protected int getFragmentTheme() {
+        return R.style.Theme_Cliqz_Present;
+    }
+
     @Nullable
     @Override
     protected View onCreateCustomToolbarView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -86,7 +103,7 @@ public class SearchFragment extends BaseFragment implements CliqzView.CliqzCallb
     @Override
     protected void onViewCreated() {
         // Wire the search here
-        SearchFragmentListener.create(this);
+        MainFragmentListener.create(this);
     }
 
     @OnClick(R.id.menu_history)
@@ -125,4 +142,22 @@ public class SearchFragment extends BaseFragment implements CliqzView.CliqzCallb
             }
         }, KEYBOARD_ANIMATION_DELAY);
     }
+
+    @Subscribe
+    public void openUrl(Messages.OpenUrl event) {
+        final FragmentManager fm = getChildFragmentManager();
+        // First check if the lightning fragment is already on the back stack
+        LightningFragment fragment =
+                (LightningFragment) fm.findFragmentByTag(LIGHTNING_FRAGMENT_TAG);
+        if (fragment == null) {
+            fragment = new LightningFragment();
+        }
+        fragment.setUrl(event.url);
+        fm.beginTransaction()
+                .setCustomAnimations(R.anim.slide_in_from_right, R.anim.slide_out_to_left, R.anim.slide_in_from_left, R.anim.slide_out_to_right)
+                .replace(R.id.content_container, fragment, LIGHTNING_FRAGMENT_TAG)
+                .addToBackStack(null)
+                .commit();
+    }
+
 }

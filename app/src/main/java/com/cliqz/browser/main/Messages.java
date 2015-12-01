@@ -23,4 +23,14 @@ public final class Messages {
     public static class GoToSettings {}
 
     public static class UpdateTitle {}
+
+    public static class GoToSearch {}
+
+    public static class SearchFor {
+        public final String query;
+
+        public SearchFor(String query) {
+            this.query = query;
+        }
+    }
 }
