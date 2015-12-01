@@ -47,6 +47,8 @@ class SearchFragmentListener implements EditText.OnKeyListener, View.OnFocusChan
     public void onFocusChange(View v, boolean hasFocus) {
         if (!hasFocus) {
             fragment.hideKeyboard();
+        } else {
+            fragment.showSearch();
         }
     }
 

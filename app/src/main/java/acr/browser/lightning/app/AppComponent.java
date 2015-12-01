@@ -4,7 +4,6 @@ import android.content.Context;
 
 import com.cliqz.browser.fragment.BaseSettingsFragment;
 import com.cliqz.browser.main.BaseFragment;
-import com.cliqz.browser.main.LightningFragment;
 import com.cliqz.browser.webview.CliqzView;
 import com.cliqz.browser.webview.TabsManagerView;
 import com.squareup.otto.Bus;
@@ -13,7 +12,6 @@ import javax.inject.Singleton;
 
 import acr.browser.lightning.activity.BrowserActivity;
 import acr.browser.lightning.activity.BrowserMenuPopup;
-import acr.browser.lightning.activity.MainActivity;
 import acr.browser.lightning.activity.OnBoardingActivity;
 import acr.browser.lightning.activity.ThemableBrowserActivity;
 import acr.browser.lightning.constant.BookmarkPage;

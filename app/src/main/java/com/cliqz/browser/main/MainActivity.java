@@ -28,7 +28,7 @@ public class MainActivity extends AppCompatActivity {
     private static final String SUGGESTIONS_FRAGMENT_TAG = "suggestions_fragment";
     private static final String LIGHTNING_FRAGMENT_TAG = "lightning_fragment";
 
-    private Fragment mHistoryFragment, mSearchFragment, mSuggestionsFragment;
+    // private Fragment mHistoryFragment, mSearchFragment, mSuggestionsFragment;
 
     @Inject
     Bus bus;
@@ -39,12 +39,12 @@ public class MainActivity extends AppCompatActivity {
         BrowserApp.getAppComponent().inject(this);
         bus.register(this);
 
-        mHistoryFragment = new HistoryFragment();
-        mSearchFragment = new SearchFragment();
-        mSuggestionsFragment = new SuggestionsFragment();
+        // mHistoryFragment = new HistoryFragment();
+        // mSearchFragment = new SearchFragment();
+        // mSuggestionsFragment = new SuggestionsFragment();
 
         final FragmentManager fm = getSupportFragmentManager();
-        fm.beginTransaction().add(android.R.id.content, mSearchFragment, SEARCH_FRAGMENT_TAG).commit();
+        fm.beginTransaction().add(android.R.id.content, new SearchFragment(), SEARCH_FRAGMENT_TAG).commit();
     }
 
     @Override
@@ -58,7 +58,7 @@ public class MainActivity extends AppCompatActivity {
         final FragmentManager fm = getSupportFragmentManager();
         fm.beginTransaction()
                 .setCustomAnimations(R.anim.enter_slide_down, R.anim.exit_slide_down, R.anim.enter_slide_up, R.anim.exit_slide_up)
-                .replace(android.R.id.content, mHistoryFragment, HISTORY_FRAGMENT_TAG)
+                .replace(android.R.id.content, new HistoryFragment(), HISTORY_FRAGMENT_TAG)
                 .addToBackStack(null)
                 .commit();
     }
@@ -68,24 +68,7 @@ public class MainActivity extends AppCompatActivity {
         final FragmentManager fm = getSupportFragmentManager();
         fm.beginTransaction()
                 .setCustomAnimations(R.anim.enter_slide_up, R.anim.exit_slide_up, R.anim.enter_slide_down, R.anim.exit_slide_down)
-                .replace(android.R.id.content, mSuggestionsFragment, SUGGESTIONS_FRAGMENT_TAG)
-                .addToBackStack(null)
-                .commit();
-    }
-
-    @Subscribe
-    public void openUrl(Messages.OpenUrl event) {
-        final FragmentManager fm = getSupportFragmentManager();
-        // First check if the lightning fragment is already on the back stack
-        LightningFragment fragment =
-                (LightningFragment) fm.findFragmentByTag(LIGHTNING_FRAGMENT_TAG);
-        if (fragment == null) {
-            fragment = new LightningFragment();
-        }
-        fragment.setUrl(event.url);
-        fm.beginTransaction()
-                .setCustomAnimations(R.anim.slide_in_from_right, R.anim.slide_out_to_left, R.anim.slide_in_from_left, R.anim.slide_out_to_right)
-                .replace(android.R.id.content, fragment, LIGHTNING_FRAGMENT_TAG)
+                .replace(android.R.id.content, new SuggestionsFragment(), SUGGESTIONS_FRAGMENT_TAG)
                 .addToBackStack(null)
                 .commit();
     }
