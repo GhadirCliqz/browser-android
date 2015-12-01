@@ -2,6 +2,7 @@ package com.cliqz.browser.main;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
@@ -61,11 +62,7 @@ public class MainActivity extends AppCompatActivity {
         mSuggestionsFragment = new SuggestionsFragment();
 
         if(!preferenceManager.getOnBoardingComplete()) {
-            preferenceManager.setSessionId(telemetry.generateSessionID());
-            telemetry.sendLifeCycleSignal(Telemetry.Action.INSTALL);
-            telemetry.sendOnBoardingShowSignal(0);
-            startTime = System.currentTimeMillis();
-            preferenceManager.setVersionCode(BuildConfig.VERSION_CODE);
+            setupApp();
             setContentView(R.layout.activity_on_boarding);
             pager = (ViewPager) findViewById(R.id.viewpager);
             pager.setAdapter(new PagerAdapter(getSupportFragmentManager()));
@@ -215,5 +212,24 @@ public class MainActivity extends AppCompatActivity {
         telemetry.sendOnBoardingHideSignal(1, curTime - startTime);
         final FragmentManager fm = getSupportFragmentManager();
         fm.beginTransaction().add(android.R.id.content, mSearchFragment, SEARCH_FRAGMENT_TAG).commit();
+    }
+
+    private void setupApp() {
+        createShortCut();
+        preferenceManager.setSessionId(telemetry.generateSessionID());
+        preferenceManager.setVersionCode(BuildConfig.VERSION_CODE);
+        startTime = System.currentTimeMillis();
+        telemetry.sendLifeCycleSignal(Telemetry.Action.INSTALL);
+        telemetry.sendOnBoardingShowSignal(0);
+    }
+
+    private void createShortCut(){
+        Intent shortCutIntent = new Intent("com.android.launcher.action.INSTALL_SHORTCUT");
+        shortCutIntent.putExtra("duplicate", false);
+        shortCutIntent.putExtra(Intent.EXTRA_SHORTCUT_NAME, getString(R.string.cliqz_app_name));
+        Parcelable icon = Intent.ShortcutIconResource.fromContext(getApplicationContext(), R.mipmap.ic_launcher);
+        shortCutIntent.putExtra(Intent.EXTRA_SHORTCUT_ICON_RESOURCE, icon);
+        shortCutIntent.putExtra(Intent.EXTRA_SHORTCUT_INTENT, new Intent(getApplicationContext(), MainActivity.class));
+        sendBroadcast(shortCutIntent);
     }
 }
