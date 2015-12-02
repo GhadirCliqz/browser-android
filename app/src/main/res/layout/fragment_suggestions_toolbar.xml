@@ -18,7 +18,6 @@
         android:singleLine="true"
         android:paddingStart="8dp"
         android:paddingEnd="8dp"
-        android:textColor="@color/primary_color_dark"
         android:textColorHint="@color/hint_text" />
 
 

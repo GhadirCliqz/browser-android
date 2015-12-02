@@ -12,6 +12,8 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 
 import acr.browser.lightning.R;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
 
 /**
  * @author Stefano Pacifici
@@ -36,13 +38,18 @@ public class HistoryFragment extends BaseFragment {
 
     @Override
     protected boolean onMenuItemClick(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.menu_search:
-                bus.post(new Messages.GoToSearch());
-                return true;
-            default:
-                return false;
-        }
+        return false;
+    }
+
+    @Override
+    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        ButterKnife.bind(this, view);
+    }
+
+    @OnClick(R.id.menu_search)
+    void downClicked() {
+        bus.post(new Messages.GoToSearch());
     }
 
     @Override
