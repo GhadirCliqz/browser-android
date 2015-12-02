@@ -7,6 +7,7 @@ import com.cliqz.browser.main.BaseFragment;
 import com.cliqz.browser.main.FragmentWithBus;
 import com.cliqz.browser.webview.CliqzView;
 import com.cliqz.browser.webview.TabsManagerView;
+import com.cliqz.browser.widget.AutocompleteEditText;
 import com.squareup.otto.Bus;
 
 import javax.inject.Singleton;
@@ -73,6 +74,8 @@ public interface AppComponent {
     void inject(BrowserMenuPopup browserMenuPopup);
 
     void inject(BaseSettingsFragment baseSettingsFragment);
+
+    void inject(AutocompleteEditText autocompleteEditText);
 
     // This is CLIQZ specific
     void inject(com.cliqz.browser.main.MainActivity mainActivity);

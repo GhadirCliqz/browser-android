@@ -183,7 +183,6 @@ public abstract class BrowserActivity extends ThemableBrowserActivity
     private CliqzView mCliqzSearch;
     private TabsManagerView mTabsManagerView;
 
-
     // The singleton BookmarkManager
     @Inject
     BookmarkManager mBookmarkManager;

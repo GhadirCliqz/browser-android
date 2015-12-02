@@ -1,13 +1,21 @@
 package com.cliqz.browser.widget;
 
+import android.content.ClipboardManager;
 import android.content.Context;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.widget.EditText;
 
+import com.cliqz.browser.utils.Telemetry;
+
 import java.util.ArrayList;
+
+import javax.inject.Inject;
+
+import acr.browser.lightning.app.BrowserApp;
 
 /**
  * Custom EditText widget with autocompletion
@@ -16,6 +24,9 @@ import java.util.ArrayList;
  * @date 2015/10/13
  */
 public class AutocompleteEditText extends EditText {
+
+    @Inject
+    Telemetry mTelemetry;
 
     private final ArrayList<TextWatcher> mListeners = new ArrayList<>();
     private boolean mIsAutocompleting;
@@ -27,6 +38,8 @@ public class AutocompleteEditText extends EditText {
 
     public AutocompleteEditText(Context context, AttributeSet attrs) {
         this(context, attrs, 0);
+        BrowserApp.getAppComponent().inject(this);
+
     }
 
     public AutocompleteEditText(Context context, AttributeSet attrs, int defStyleAttr) {
@@ -98,6 +111,14 @@ public class AutocompleteEditText extends EditText {
             for (TextWatcher watcher: mListeners) {
                 watcher.onTextChanged(s, start, before, count);
             }
+
+            if (!mDeleting) {
+                if(count == 1) { //check to prevent sending keystroke signal when something is pasted in the url bar
+                    mTelemetry.sendTypingSignal(Telemetry.Action.KEY_STROKE, s.length());
+                }
+            } else {
+                mTelemetry.sendTypingSignal(Telemetry.Action.KEYSTROKE_DEL, s.length());
+            }
         }
 
         @Override
@@ -105,7 +126,6 @@ public class AutocompleteEditText extends EditText {
             if (mIsAutocompleting) {
                 return;
             }
-
             for (TextWatcher watcher: mListeners) {
                 watcher.afterTextChanged(s);
             }
@@ -118,5 +138,17 @@ public class AutocompleteEditText extends EditText {
             }
             mDeleting = false;
         }
+    }
+
+    @Override
+    public boolean onTextContextMenuItem(int id) {
+        ClipboardManager clipboard = (ClipboardManager) getContext()
+                .getSystemService(getContext().CLIPBOARD_SERVICE);
+        switch (id){
+            case android.R.id.paste:
+                mTelemetry.sendPasteSignal(clipboard.getPrimaryClip().getItemAt(0).getText().length());
+                break;
+        }
+        return super.onTextContextMenuItem(id);
     }
 }
