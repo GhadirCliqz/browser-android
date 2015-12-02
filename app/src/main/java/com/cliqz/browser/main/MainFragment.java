@@ -10,13 +10,10 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
 import android.view.inputmethod.InputMethodManager;
 import android.webkit.WebView;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 
 import com.cliqz.browser.webview.CliqzView;
 import com.cliqz.browser.widget.AutocompleteEditText;
@@ -34,7 +31,7 @@ import butterknife.OnClick;
  * @author Stefano Pacifici
  * @date 2015/11/23
  */
-public class SearchFragment extends BaseFragment implements CliqzView.CliqzCallbacks {
+public class MainFragment extends BaseFragment implements CliqzView.CliqzCallbacks {
 
     private enum State {
         SHOWING_SEARCH,
@@ -64,9 +61,6 @@ public class SearchFragment extends BaseFragment implements CliqzView.CliqzCallb
     @Bind(R.id.search_bar)
     AutocompleteEditText mAutocompleteEditText;
 
-    public SearchFragment() {
-        getClass();
-    }
     @Override
     public void onResume() {
         super.onResume();
@@ -94,7 +88,7 @@ public class SearchFragment extends BaseFragment implements CliqzView.CliqzCallb
             mCliqzView.setLayoutParams(
                     new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
             mCliqzView.setResultListener(this);
-            SearchFragmentListener.create(this);
+            MainFragmentListener.create(this);
         } else {
             final WebView webView = mLightningView.getWebView();
             ((ViewGroup) mCliqzView.getParent()).removeView(mCliqzView);

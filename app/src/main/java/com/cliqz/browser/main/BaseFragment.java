@@ -67,7 +67,6 @@ public abstract class BaseFragment extends FragmentWithBus {
                 return BaseFragment.this.onMenuItemClick(item);
             }
         });
-        onViewCreated();
         return view;
     }
 
@@ -112,9 +111,4 @@ public abstract class BaseFragment extends FragmentWithBus {
      */
     @Nullable
     protected abstract View onCreateCustomToolbarView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState);
-
-    /**
-     * Override this to get notified when the view has been created
-     */
-    protected void onViewCreated() {}
 }

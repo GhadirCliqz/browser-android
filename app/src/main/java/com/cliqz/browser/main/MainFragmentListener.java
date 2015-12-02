@@ -68,8 +68,8 @@ class MainFragmentListener implements EditText.OnKeyListener, View.OnFocusChange
 
         final String q = s.toString();
 
-        if (!q.isEmpty()) {
-            fragment.bus.post(new Messages.SearchFor(q));
+        if (!q.isEmpty() && fragment.mCliqzView != null) {
+            fragment.mCliqzView.onQueryChanged(q);
         }
     }
 
