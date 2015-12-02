@@ -16,6 +16,9 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
 import com.cliqz.browser.utils.LocationCache;
+import com.cliqz.browser.utils.Telemetry;
+
+import org.json.JSONObject;
 
 import java.util.List;
 import java.util.Locale;
@@ -52,6 +55,9 @@ public class CliqzView extends WebView implements ILightningTab {
 
     @Inject
     LocationCache locationCache;
+
+    @Inject
+    Telemetry telemetry;
 
     public interface CliqzCallbacks {
         void onResultClicked(final String url);
@@ -263,6 +269,14 @@ public class CliqzView extends WebView implements ILightningTab {
             });
 
         } */
+    }
+
+    /**
+     * Send the signals pushed by the extension to the Telemetry class
+     * @param signal
+     */
+    void sendTelemetry(JSONObject signal) {
+        telemetry.sendSignal(signal);
     }
 
     /**

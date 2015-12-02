@@ -13,6 +13,7 @@ import android.os.Debug;
 import android.util.Log;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.HashMap;
@@ -22,6 +23,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import acr.browser.lightning.BuildConfig;
+import acr.browser.lightning.constant.Constants;
 import acr.browser.lightning.database.HistoryDatabase;
 import acr.browser.lightning.preference.PreferenceManager;
 
@@ -47,7 +49,7 @@ public class Telemetry {
         private static final String NUMERIC_SPACE = "0123456789";
         private static final String SESSION = "session";
         private static final String TIME_STAMP = "ts";
-        private static final String TELEMETRY_SEQUENCE = "telemetrySeq";
+        private static final String TELEMETRY_SEQUENCE = "seq";
         private static final String ACTION = "action";
         private static final String TYPE = "type";
         private static final String VERSION = "version";
@@ -277,13 +279,24 @@ public class Telemetry {
     //converts the signal to json and post the signal to the logger
     private void sendSignal() {
         addIdentifiers();
-        JSONObject js = new JSONObject(signal);
-        JSONArray jss = new JSONArray().put(js);
-        new HttpHandler(mPreferenceManager).execute(jss.toString());
+        JSONObject jsonObject = new JSONObject(signal);
+        JSONArray jsonArray = new JSONArray().put(jsonObject);
+        //new HttpHandler(mPreferenceManager).execute(jsonArray.toString());
     }
 
-    //TODO for signals from javascript
-    public void sendSignal(String signal) {
+    public void sendSignal(JSONObject signal) {
+        int telemetrySequence = mPreferenceManager.getTelemetrySequence();
+        try {
+            signal.put(Key.SESSION, mPreferenceManager.getSessionId());
+            signal.put(Key.TIME_STAMP, getUnixTimeStamp());
+            signal.put(Key.TELEMETRY_SEQUENCE, telemetrySequence);
+            mPreferenceManager.setTelemetrySequence(telemetrySequence);
+            JSONArray jsonArray = new JSONArray().put(signal);
+            //new HttpHandler(mPreferenceManager).execute(jsonArray.toString());
+            Log.d("Telemetry Extension", signal.toString());
+        } catch (JSONException e) {
+            Log.e(Constants.TAG, "JSONException in Telemetry", e);
+        }
 
     }
 

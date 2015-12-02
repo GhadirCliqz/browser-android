@@ -130,6 +130,14 @@ class CliqzBridge extends Bridge {
             }
         }),
 
+        pushTelemetry(new IAction() {
+            @Override
+            public void execute(Bridge bridge, Object data, String callback) {
+                final JSONObject signal = (data instanceof JSONObject) ? (JSONObject) data : null;
+                ((CliqzView) bridge.getWebView()).sendTelemetry(signal);
+            }
+        }),
+
         none(new IAction() {
             @Override
             public void execute(Bridge bridge, Object data, String callback) {
