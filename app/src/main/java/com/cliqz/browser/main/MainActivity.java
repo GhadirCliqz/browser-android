@@ -1,10 +1,14 @@
 package com.cliqz.browser.main;
 
 import android.content.Intent;
+import android.graphics.Color;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
+import android.view.Window;
+import android.view.WindowManager;
 
 import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
@@ -37,14 +41,16 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         BrowserApp.getAppComponent().inject(this);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            final Window window = getWindow();
+            window.setFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS,
+                    WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+        }
+
         bus.register(this);
-
-        // mHistoryFragment = new HistoryFragment();
-        // mSearchFragment = new SearchFragment();
-        // mSuggestionsFragment = new SuggestionsFragment();
-
         final FragmentManager fm = getSupportFragmentManager();
-        fm.beginTransaction().add(android.R.id.content, new SearchFragment(), SEARCH_FRAGMENT_TAG).commit();
+        fm.beginTransaction().add(android.R.id.content, new MainFragment(), SEARCH_FRAGMENT_TAG).commit();
     }
 
     @Override

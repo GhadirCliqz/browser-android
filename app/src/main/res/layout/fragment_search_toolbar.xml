@@ -1,18 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
               android:layout_width="match_parent"
-              android:layout_height="match_parent"
+              android:layout_height="?attr/actionBarSize"
+              android:layout_gravity="center_vertical"
               android:gravity="center_vertical"
               android:orientation="horizontal">
 
-    <ImageView
-        android:layout_width="24dp"
-        android:layout_height="24dp"
-        android:src="@drawable/ic_action_cliqz_up"
-        android:id="@+id/menu_history" />
+    <FrameLayout
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:id="@+id/menu_history"
+        android:background="?attr/actionBarItemBackground">
+        <ImageView
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_gravity="center"
+            android:src="@drawable/ic_action_cliqz_up"/>
+    </FrameLayout>
     <com.cliqz.browser.widget.AutocompleteEditText
+        android:layout_toRightOf="@+id/menu_history"
+        android:layout_centerVertical="true"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:id="@+id/search_bar"
         android:background="?attr/searchBackground"
         android:gravity="left|center_vertical"
@@ -29,4 +38,4 @@
         android:focusable="true"
         android:focusableInTouchMode="true" />
 
-</LinearLayout>
+</RelativeLayout>

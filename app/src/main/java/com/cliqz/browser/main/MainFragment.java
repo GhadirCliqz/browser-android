@@ -56,7 +56,7 @@ public class MainFragment extends BaseFragment implements CliqzView.CliqzCallbac
     AnimatedProgressBar mProgressBar;
 
     @Bind(R.id.menu_history)
-    ImageView mMenuHistory;
+    View mMenuHistory;
 
     @Bind(R.id.search_bar)
     AutocompleteEditText mAutocompleteEditText;
