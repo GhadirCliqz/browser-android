@@ -17,6 +17,7 @@ import android.view.ViewGroup.LayoutParams;
 import android.widget.FrameLayout;
 
 import com.squareup.otto.Bus;
+import com.squareup.otto.Subscribe;
 
 import javax.inject.Inject;
 
@@ -111,4 +112,5 @@ public abstract class BaseFragment extends FragmentWithBus {
      */
     @Nullable
     protected abstract View onCreateCustomToolbarView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState);
+
 }

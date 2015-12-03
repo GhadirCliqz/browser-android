@@ -8,6 +8,8 @@ public final class Messages {
     // No instances, please
     private Messages() {}
 
+    public static class Exit {}
+
     public static class GoToHistory {}
 
     public static class GoToSuggestions {}
@@ -33,4 +35,6 @@ public final class Messages {
             this.query = query;
         }
     }
+
+    public static class BackPressed {}
 }

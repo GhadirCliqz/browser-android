@@ -66,18 +66,6 @@ public class MainFragment extends BaseFragment implements CliqzView.CliqzCallbac
     TextView mTitleBar;
 
     @Override
-    public void onResume() {
-        super.onResume();
-        bus.register(this);
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-        bus.unregister(this);
-    }
-
-    @Override
     protected View onCreateContentView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_search, container, false);
     }
@@ -247,6 +235,16 @@ public class MainFragment extends BaseFragment implements CliqzView.CliqzCallbac
         webView.loadUrl(event.url);
     }
 
+    @Subscribe
+    public void onBackPressed(Messages.BackPressed event) {
+        if (mState == State.SHOWING_SEARCH) {
+            bus.post(new Messages.Exit());
+        } else if (mLightningView.canGoBack()) {
+            mLightningView.goBack();
+        } else {
+            showSearch();
+        }
+    }
     void showSearch() {
 //            final WebView webView = mLightningView.getWebView();
 //            final Animation slideInAnimation =
@@ -257,6 +255,8 @@ public class MainFragment extends BaseFragment implements CliqzView.CliqzCallbac
 //            slideOutAnimation.setFillAfter(true);
 //            mCliqzView.startAnimation(slideInAnimation);
 //            webView.startAnimation(slideOutAnimation);
+        mAutocompleteEditText.setVisibility(View.VISIBLE);
+        mTitleBar.setVisibility(View.GONE);
         mCliqzView.bringToFront();
         mState = State.SHOWING_SEARCH;
     }

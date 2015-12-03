@@ -1,14 +1,14 @@
 package com.cliqz.browser.main;
 
-import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.FrameLayout;
 import android.widget.ImageView;
+
+import com.squareup.otto.Subscribe;
 
 import acr.browser.lightning.R;
 import butterknife.ButterKnife;
@@ -55,6 +55,11 @@ public class SuggestionsFragment extends BaseFragment {
 
     @OnClick(R.id.menu_search)
     void onUpClicked(){
+        bus.post(new Messages.GoToSearch());
+    }
+
+    @Subscribe
+    public void onBackPressed(Messages.BackPressed event) {
         bus.post(new Messages.GoToSearch());
     }
 }

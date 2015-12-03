@@ -126,6 +126,11 @@ public class MainActivity extends AppCompatActivity {
         bus.unregister(this);
     }
 
+    @Override
+    public void onBackPressed() {
+        bus.post(new Messages.BackPressed());
+    }
+
     @Subscribe
     public void goToHistory(Messages.GoToHistory event) {
         final FragmentManager fm = getSupportFragmentManager();
@@ -155,6 +160,11 @@ public class MainActivity extends AppCompatActivity {
     public void goToSearch(Messages.GoToSearch event) {
         final FragmentManager fm = getSupportFragmentManager();
         fm.popBackStack();
+    }
+
+    @Subscribe
+    public void exit(Messages.Exit event) {
+        finish();
     }
 
     private class PagerAdapter extends FragmentPagerAdapter {

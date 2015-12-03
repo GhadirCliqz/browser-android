@@ -9,6 +9,8 @@ import javax.inject.Inject;
 import acr.browser.lightning.app.BrowserApp;
 
 /**
+ * A fragment with a bus that register/unregister itself (children) to it automatically
+ *
  * @author Stefano Pacifici
  * @date 2015/11/30
  */
@@ -20,5 +22,17 @@ public abstract class FragmentWithBus extends Fragment {
     public FragmentWithBus() {
         super();
         BrowserApp.getAppComponent().inject(this);
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        bus.unregister(this);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        bus.register(this);
     }
 }
