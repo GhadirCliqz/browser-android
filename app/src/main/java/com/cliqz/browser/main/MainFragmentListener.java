@@ -45,8 +45,8 @@ class MainFragmentListener implements EditText.OnKeyListener, View.OnFocusChange
     public void onFocusChange(View v, boolean hasFocus) {
         if (!hasFocus) {
             fragment.hideKeyboard();
-        } else {
-            fragment.showSearch();
+            fragment.mAutocompleteEditText.setVisibility(View.GONE);
+            fragment.mTitleBar.setVisibility(View.VISIBLE);
         }
     }
 
@@ -66,8 +66,9 @@ class MainFragmentListener implements EditText.OnKeyListener, View.OnFocusChange
             return;
         }
 
-        final String q = s.toString();
+        fragment.showSearch();
 
+        final String q = s.toString();
         if (!q.isEmpty() && fragment.mCliqzView != null) {
             fragment.mCliqzView.onQueryChanged(q);
         }
