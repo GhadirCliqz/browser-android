@@ -8,13 +8,13 @@ android {
     defaultConfig {
         minSdkVersion 14
         targetSdkVersion 23
-        versionName "0.2"
+        versionName "0.2.2"
 
         buildConfigField 'String', 'LIGHTNING_VERSION_NAME', '"4.2.3.1"'
         buildConfigField "boolean", "FULL_VERSION", "true"
 
         applicationId "com.cliqz.browser"
-        versionCode 1
+        versionCode 15
     }
     buildTypes {
         debug {
@@ -24,13 +24,13 @@ android {
         }
 
         release {
-            minifyEnabled true
+            minifyEnabled false
             shrinkResources true
             proguardFiles 'proguard-project.txt'
         }
     }
     lintOptions {
-        abortOnError true
+        abortOnError false
     }
     packagingOptions {
         exclude '.readme'
@@ -41,9 +41,9 @@ android {
     sourceSets {
         main {
             assets.srcDirs += [
-                    '../../navigation/build/dev/androidkit',
+                    '../../navigation/dist/mobile',
                     // '../../freshtab/dist/mobile'
-                    '../../mobile-tab-manager/build/android'
+                    '../../tab-manager/build/android'
             ]
         }
     }
@@ -63,7 +63,6 @@ dependencies {
     compile 'com.android.support:appcompat-v7:23.0.1'
     compile 'com.android.support:design:23.0.1'
     compile 'com.android.support:recyclerview-v7:23.0.1'
-    compile 'com.google.guava:guava:18.0'
 
     // html parsing fo reading mode
     compile 'org.jsoup:jsoup:1.8.3'

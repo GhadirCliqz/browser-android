@@ -91,12 +91,13 @@ import com.cliqz.browser.webview.CliqzView;
 import com.cliqz.browser.webview.CliqzView.CliqzCallbacks;
 import com.cliqz.browser.webview.TabsManagerView;
 import com.cliqz.browser.widget.AutocompleteEditText;
-import com.google.common.collect.ImmutableSet;
 import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -344,11 +345,12 @@ public abstract class BrowserActivity extends ThemableBrowserActivity
 
     private class SearchListenerClass implements OnKeyListener, OnEditorActionListener, OnFocusChangeListener, OnTouchListener, TextWatcher {
         // Simplify IME_ACTION detection
-        private final Set IME_ACTIONS = ImmutableSet.of(
+        private final Integer[] IME_ACTIONS_ARRAY = new Integer[] {
                 EditorInfo.IME_ACTION_GO, EditorInfo.IME_ACTION_DONE,
                 EditorInfo.IME_ACTION_NEXT, EditorInfo.IME_ACTION_SEND,
                 EditorInfo.IME_ACTION_SEARCH
-        );
+        };
+        private final Set<Integer> IME_ACTIONS = new HashSet<>(Arrays.asList(IME_ACTIONS_ARRAY));
 
         @Override
         public boolean onKey(View v, int keyCode, KeyEvent event) {
