@@ -14,6 +14,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.webkit.WebView;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.cliqz.browser.webview.CliqzView;
 import com.cliqz.browser.widget.AutocompleteEditText;
@@ -61,6 +62,9 @@ public class MainFragment extends BaseFragment implements CliqzView.CliqzCallbac
     @Bind(R.id.search_bar)
     AutocompleteEditText mAutocompleteEditText;
 
+    @Bind(R.id.title_bar)
+    TextView mTitleBar;
+
     @Override
     public void onResume() {
         super.onResume();
@@ -87,21 +91,26 @@ public class MainFragment extends BaseFragment implements CliqzView.CliqzCallbac
             mLightningView = new LightningView(getActivity(), mUrl, false, "1");
             mCliqzView.setLayoutParams(
                     new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
-            mCliqzView.setResultListener(this);
-            MainFragmentListener.create(this);
         } else {
             final WebView webView = mLightningView.getWebView();
             ((ViewGroup) mCliqzView.getParent()).removeView(mCliqzView);
             ((ViewGroup) webView.getParent()).removeView(webView);
         }
+        mCliqzView.setResultListener(this);
+        MainFragmentListener.create(this);
         mLightningView.resumeTimers();
         final WebView webView = mLightningView.getWebView();
         webView.setId(R.id.right_drawer_list);
         // TODO I don't like this is too dirty, let's see if we can do better
         if (mState == State.SHOWING_SEARCH) {
+            mAutocompleteEditText.setVisibility(View.VISIBLE);
+            mTitleBar.setVisibility(View.GONE);
             mContentContainer.addView(webView);
             mContentContainer.addView(mCliqzView);
         } else {
+            mAutocompleteEditText.setVisibility(View.GONE);
+            mTitleBar.setVisibility(View.VISIBLE);
+            mTitleBar.setText(mLightningView.getTitle());
             mContentContainer.addView(mCliqzView);
             mContentContainer.addView(webView);
         }
@@ -168,6 +177,16 @@ public class MainFragment extends BaseFragment implements CliqzView.CliqzCallbac
         delayedPostOnBus(new Messages.GoToHistory());
     }
 
+    @OnClick(R.id.title_bar)
+    void titleClicked() {
+        mAutocompleteEditText.setVisibility(View.VISIBLE);
+        mTitleBar.setVisibility(View.GONE);
+        mAutocompleteEditText.setText(mLightningView.getUrl());
+        mAutocompleteEditText.requestFocus();
+        InputMethodManager inputMethodManager = (InputMethodManager) getActivity().getSystemService(getActivity().INPUT_METHOD_SERVICE);
+        inputMethodManager.showSoftInput(mAutocompleteEditText, InputMethodManager.SHOW_IMPLICIT);
+    }
+
     @Override
     public void onResultClicked(String url) {
         delayedPostOnBus(new Messages.OpenUrl(url));
@@ -206,7 +225,7 @@ public class MainFragment extends BaseFragment implements CliqzView.CliqzCallbac
 
     @Subscribe
     public void updateTitle(Messages.UpdateTitle event) {
-        // setTitle();
+        updateTitle();
     }
 
     @Subscribe
@@ -229,7 +248,6 @@ public class MainFragment extends BaseFragment implements CliqzView.CliqzCallbac
     }
 
     void showSearch() {
-        if (mState != State.SHOWING_SEARCH) {
 //            final WebView webView = mLightningView.getWebView();
 //            final Animation slideInAnimation =
 //                    AnimationUtils.loadAnimation(getContext(), R.anim.slide_in_from_left);
@@ -238,9 +256,16 @@ public class MainFragment extends BaseFragment implements CliqzView.CliqzCallbac
 //            slideInAnimation.setFillAfter(true);
 //            slideOutAnimation.setFillAfter(true);
 //            mCliqzView.startAnimation(slideInAnimation);
-            mCliqzView.bringToFront();
 //            webView.startAnimation(slideOutAnimation);
-            mState = State.SHOWING_SEARCH;
+        mCliqzView.bringToFront();
+        mState = State.SHOWING_SEARCH;
+    }
+
+    void updateTitle() {
+        if(!mAutocompleteEditText.hasFocus()) {
+            mTitleBar.setText(mLightningView.getTitle());
+            mState = State.SHOWING_BROWSER;
         }
     }
+
 }
