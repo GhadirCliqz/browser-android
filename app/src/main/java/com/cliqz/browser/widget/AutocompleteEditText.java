@@ -69,6 +69,7 @@ public class AutocompleteEditText extends EditText {
     public boolean onKeyPreIme (int keyCode, KeyEvent event) {
         if(keyCode == KeyEvent.KEYCODE_BACK && this.hasFocus()) {
             this.clearFocus();
+            return true;
         }
         return super.onKeyPreIme(keyCode, event);
     }

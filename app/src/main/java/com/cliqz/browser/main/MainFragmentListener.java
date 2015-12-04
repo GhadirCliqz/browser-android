@@ -45,8 +45,10 @@ class MainFragmentListener implements EditText.OnKeyListener, View.OnFocusChange
     public void onFocusChange(View v, boolean hasFocus) {
         if (!hasFocus) {
             fragment.hideKeyboard();
-            fragment.mAutocompleteEditText.setVisibility(View.GONE);
-            fragment.mTitleBar.setVisibility(View.VISIBLE);
+            if(fragment.mState == MainFragment.State.SHOWING_BROWSER) {
+                fragment.mAutocompleteEditText.setVisibility(View.GONE);
+                fragment.mTitleBar.setVisibility(View.VISIBLE);
+            }
         }
     }
 
