@@ -14,10 +14,10 @@ import android.view.ViewGroup.LayoutParams;
 import android.view.inputmethod.InputMethodManager;
 import android.webkit.WebView;
 import android.widget.FrameLayout;
-import android.widget.TextView;
 
 import com.cliqz.browser.webview.CliqzView;
 import com.cliqz.browser.widget.AutocompleteEditText;
+import com.cliqz.browser.widget.SearchBar;
 import com.squareup.otto.Subscribe;
 
 import acr.browser.lightning.R;
@@ -34,7 +34,7 @@ import butterknife.OnClick;
  */
 public class MainFragment extends BaseFragment implements CliqzView.CliqzCallbacks {
 
-    private enum State {
+    enum State {
         SHOWING_SEARCH,
         SHOWING_BROWSER,
     }
@@ -44,8 +44,9 @@ public class MainFragment extends BaseFragment implements CliqzView.CliqzCallbac
     private final Handler handler = new Handler(Looper.getMainLooper());
 
     private String mUrl = "";
+    private String lastQuery = "";
 
-    private State mState = State.SHOWING_SEARCH;
+    State mState = State.SHOWING_SEARCH;
 
     CliqzView mCliqzView = null;
     LightningView mLightningView = null;
@@ -60,10 +61,10 @@ public class MainFragment extends BaseFragment implements CliqzView.CliqzCallbac
     View mMenuHistory;
 
     @Bind(R.id.search_bar)
-    AutocompleteEditText mAutocompleteEditText;
+    SearchBar searchBar;
 
-    @Bind(R.id.title_bar)
-    TextView mTitleBar;
+    @Bind(R.id.search_edit_text)
+    AutocompleteEditText mAutocompleteEditText;
 
     @Override
     protected View onCreateContentView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -91,14 +92,12 @@ public class MainFragment extends BaseFragment implements CliqzView.CliqzCallbac
         webView.setId(R.id.right_drawer_list);
         // TODO I don't like this is too dirty, let's see if we can do better
         if (mState == State.SHOWING_SEARCH) {
-            mAutocompleteEditText.setVisibility(View.VISIBLE);
-            mTitleBar.setVisibility(View.GONE);
+            searchBar.showSearchEditText();
             mContentContainer.addView(webView);
             mContentContainer.addView(mCliqzView);
         } else {
-            mAutocompleteEditText.setVisibility(View.GONE);
-            mTitleBar.setVisibility(View.VISIBLE);
-            mTitleBar.setText(mLightningView.getTitle());
+            searchBar.setTitle(mLightningView.getTitle());
+            searchBar.showTitleBar();
             mContentContainer.addView(mCliqzView);
             mContentContainer.addView(webView);
         }
@@ -167,12 +166,10 @@ public class MainFragment extends BaseFragment implements CliqzView.CliqzCallbac
 
     @OnClick(R.id.title_bar)
     void titleClicked() {
-        mAutocompleteEditText.setVisibility(View.VISIBLE);
-        mTitleBar.setVisibility(View.GONE);
+        searchBar.showSearchEditText();
         mAutocompleteEditText.setText(mLightningView.getUrl());
         mAutocompleteEditText.requestFocus();
-        InputMethodManager inputMethodManager = (InputMethodManager) getActivity().getSystemService(getActivity().INPUT_METHOD_SERVICE);
-        inputMethodManager.showSoftInput(mAutocompleteEditText, InputMethodManager.SHOW_IMPLICIT);
+        showKeyBoard();
     }
 
     @Override
@@ -189,6 +186,12 @@ public class MainFragment extends BaseFragment implements CliqzView.CliqzCallbac
     @Override
     public void onAutocompleteUrl(String str) {
 
+    }
+
+    void showKeyBoard() {
+        InputMethodManager inputMethodManager = (InputMethodManager) getActivity()
+                .getSystemService(getActivity().INPUT_METHOD_SERVICE);
+        inputMethodManager.showSoftInput(mAutocompleteEditText, InputMethodManager.SHOW_IMPLICIT);
     }
 
     // Hide the keyboard, used also in SearchFragmentListener
@@ -220,7 +223,6 @@ public class MainFragment extends BaseFragment implements CliqzView.CliqzCallbac
     @Subscribe
     public void openResutl(Messages.OpenResult event) {
         final WebView webView = mLightningView.getWebView();
-        if (mState != State.SHOWING_BROWSER){
 //            final Animation slideInAnimation =
 //                    AnimationUtils.loadAnimation(getContext(), R.anim.slide_in_from_right);
 //            final Animation slideOutAnimation =
@@ -229,10 +231,10 @@ public class MainFragment extends BaseFragment implements CliqzView.CliqzCallbac
 //            slideOutAnimation.setFillAfter(true);
 //            mCliqzView.startAnimation(slideOutAnimation);
 //            webView.startAnimation(slideInAnimation);
-            // webView.clearHistory();
+        searchBar.showTitleBar();
             webView.bringToFront();
             mState = State.SHOWING_BROWSER;
-        }
+        lastQuery = mAutocompleteEditText.getText().toString();
         final String url = Uri.parse("cliqz://trampoline/goto.html")
                 .buildUpon()
                 .appendQueryParameter("url", event.url)
@@ -245,13 +247,16 @@ public class MainFragment extends BaseFragment implements CliqzView.CliqzCallbac
     public void onBackPressed(Messages.BackPressed event) {
         if (mLightningView.canGoBack()) {
             mLightningView.goBack();
-            if (mState == State.SHOWING_SEARCH) {
+        if (mState == State.SHOWING_SEARCH) {
                 final WebView webView = mLightningView.getWebView();
                 webView.bringToFront();
                 mState = State.SHOWING_BROWSER;
             }
         } else {
             bus.post(new Messages.Exit());
+            mAutocompleteEditText.setText(lastQuery);
+            mAutocompleteEditText.requestFocus();
+            showKeyBoard();
         }
     }
 
@@ -266,8 +271,7 @@ public class MainFragment extends BaseFragment implements CliqzView.CliqzCallbac
 //            slideOutAnimation.setFillAfter(true);
 //            mCliqzView.startAnimation(slideInAnimation);
 //            webView.startAnimation(slideOutAnimation);
-        mAutocompleteEditText.setVisibility(View.VISIBLE);
-        mTitleBar.setVisibility(View.GONE);
+        searchBar.showSearchEditText();
         mCliqzView.bringToFront();
         mAutocompleteEditText.requestFocus();
         if (event != null) {
@@ -277,10 +281,7 @@ public class MainFragment extends BaseFragment implements CliqzView.CliqzCallbac
     }
 
     void updateTitle() {
-        if(!mAutocompleteEditText.hasFocus()) {
-            mTitleBar.setText(mLightningView.getTitle());
-            mState = State.SHOWING_BROWSER;
-        }
+        searchBar.setTitle(mLightningView.getTitle());
     }
 
 }
