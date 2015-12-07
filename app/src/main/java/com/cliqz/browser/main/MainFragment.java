@@ -1,6 +1,7 @@
 package com.cliqz.browser.main;
 
 import android.content.Context;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -13,7 +14,6 @@ import android.view.ViewGroup.LayoutParams;
 import android.view.inputmethod.InputMethodManager;
 import android.webkit.WebView;
 import android.widget.FrameLayout;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.cliqz.browser.webview.CliqzView;
@@ -177,7 +177,8 @@ public class MainFragment extends BaseFragment implements CliqzView.CliqzCallbac
 
     @Override
     public void onResultClicked(String url) {
-        delayedPostOnBus(new Messages.OpenUrl(url));
+        final String query = mAutocompleteEditText.getText().toString();
+        delayedPostOnBus(new Messages.OpenResult(query, url));
     }
 
     @Override
@@ -217,7 +218,7 @@ public class MainFragment extends BaseFragment implements CliqzView.CliqzCallbac
     }
 
     @Subscribe
-    public void openUrl(Messages.OpenUrl event) {
+    public void openResutl(Messages.OpenResult event) {
         final WebView webView = mLightningView.getWebView();
         if (mState != State.SHOWING_BROWSER){
 //            final Animation slideInAnimation =
@@ -228,24 +229,34 @@ public class MainFragment extends BaseFragment implements CliqzView.CliqzCallbac
 //            slideOutAnimation.setFillAfter(true);
 //            mCliqzView.startAnimation(slideOutAnimation);
 //            webView.startAnimation(slideInAnimation);
-            webView.clearHistory();
+            // webView.clearHistory();
             webView.bringToFront();
             mState = State.SHOWING_BROWSER;
         }
-        webView.loadUrl(event.url);
+        final String url = Uri.parse("cliqz://trampoline/goto.html")
+                .buildUpon()
+                .appendQueryParameter("url", event.url)
+                .appendQueryParameter("q", event.query)
+                .build().toString();
+        webView.loadUrl(url);
     }
 
     @Subscribe
     public void onBackPressed(Messages.BackPressed event) {
-        if (mState == State.SHOWING_SEARCH) {
-            bus.post(new Messages.Exit());
-        } else if (mLightningView.canGoBack()) {
+        if (mLightningView.canGoBack()) {
             mLightningView.goBack();
+            if (mState == State.SHOWING_SEARCH) {
+                final WebView webView = mLightningView.getWebView();
+                webView.bringToFront();
+                mState = State.SHOWING_BROWSER;
+            }
         } else {
-            showSearch();
+            bus.post(new Messages.Exit());
         }
     }
-    void showSearch() {
+
+    @Subscribe
+    public void showSearch(Messages.ShowSearch event) {
 //            final WebView webView = mLightningView.getWebView();
 //            final Animation slideInAnimation =
 //                    AnimationUtils.loadAnimation(getContext(), R.anim.slide_in_from_left);
@@ -258,6 +269,10 @@ public class MainFragment extends BaseFragment implements CliqzView.CliqzCallbac
         mAutocompleteEditText.setVisibility(View.VISIBLE);
         mTitleBar.setVisibility(View.GONE);
         mCliqzView.bringToFront();
+        mAutocompleteEditText.requestFocus();
+        if (event != null) {
+            mAutocompleteEditText.setText(event.query);
+        }
         mState = State.SHOWING_SEARCH;
     }
 

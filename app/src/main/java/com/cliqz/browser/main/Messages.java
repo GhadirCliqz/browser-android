@@ -14,10 +14,12 @@ public final class Messages {
 
     public static class GoToSuggestions {}
 
-    public static class OpenUrl {
+    public static class OpenResult {
+        public final String query;
         public final String url;
 
-        public OpenUrl(String url) {
+        public OpenResult(String query, String url) {
+            this.query = query;
             this.url = url;
         }
     }
@@ -37,4 +39,18 @@ public final class Messages {
     }
 
     public static class BackPressed {}
+
+    /**
+     * !!! THIS IS VERY DIFFERENT FROM {@link com.cliqz.browser.main.Messages.GoToSearch} MESSAGE !!!
+     *
+     * This message is fired by the web view client when we navigate back to search from web
+     * navigation, it is not a transaction between different app statuses.
+     */
+    public static class ShowSearch {
+        public final String query;
+
+        public ShowSearch(String query) {
+            this.query = query;
+        }
+    }
 }

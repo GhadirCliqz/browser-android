@@ -66,7 +66,7 @@ class MainFragmentListener implements EditText.OnKeyListener, View.OnFocusChange
             return;
         }
 
-        fragment.showSearch();
+        fragment.showSearch(null);
 
         final String q = s.toString();
         if (!q.isEmpty() && fragment.mCliqzView != null) {

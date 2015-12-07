@@ -65,13 +65,15 @@ public class AutocompleteEditText extends EditText {
         }
     }
 
+    /*
     @Override
     public boolean onKeyPreIme (int keyCode, KeyEvent event) {
         if(keyCode == KeyEvent.KEYCODE_BACK && this.hasFocus()) {
             this.clearFocus();
+            return true;
         }
         return super.onKeyPreIme(keyCode, event);
-    }
+    }*/
 
     private void setAutocompleteText(CharSequence text) {
         mIsAutocompleting = true;

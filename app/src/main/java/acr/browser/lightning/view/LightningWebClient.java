@@ -3,9 +3,9 @@ package acr.browser.lightning.view;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.net.MailTo;
 import android.net.Uri;
@@ -30,7 +30,6 @@ import com.cliqz.browser.main.Messages;
 import com.squareup.otto.Bus;
 
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
@@ -39,7 +38,6 @@ import acr.browser.lightning.R;
 import acr.browser.lightning.app.BrowserApp;
 import acr.browser.lightning.bus.BrowserEvents;
 import acr.browser.lightning.constant.Constants;
-import acr.browser.lightning.controller.UIController;
 import acr.browser.lightning.utils.AdBlock;
 import acr.browser.lightning.utils.IntentUtils;
 import acr.browser.lightning.utils.ProxyUtils;
@@ -50,6 +48,11 @@ import acr.browser.lightning.utils.Utils;
  * @date 2015/09/22
  */
 class LightningWebClient extends WebViewClient {
+
+    private static final String CLIQZ_SCHEME = "cliqz";
+    private static final String CLIQZ_TRAMPOLINE_AUTHORITY = "trampoline";
+    private static final String CLIQZ_TRAMPOLINE_FORWARD = "/goto.html";
+    private static final String CLIQZ_TRAMPOLINE_SEARCH = "/search.html";
 
     private final Activity mActivity;
     private final LightningView mLightningView;
@@ -71,52 +74,43 @@ class LightningWebClient extends WebViewClient {
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     @Override
     public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
-        final String url = request.getUrl().toString();
-        final Context context = mWebView != null ? mWebView.getContext() : null;
-        if (url.startsWith("http://antiphishing.clyqz.com/") && context != null) {
-            try {
-                return new WebResourceResponse("application/json", "utf-8",
-                        context.getContentResolver().openInputStream(request.getUrl()));
-            } catch (IOException e) {
-                Log.e(Constants.TAG, "Cannot load antiphishing API", e);
-            }
-        }
-        if (url.equals("cliqz://js/CliqzAntiPhishing.js") && context != null) {
-            try {
-                return new WebResourceResponse("application/javascript", "utf-8",
-                        context.getAssets().open("navigation/js/CliqzAntiPhishing.js"));
-            } catch (IOException e) {
-                Log.e(Constants.TAG, "Cannot load antiphishing", e);
-            }
-        }
-        if (mAdBlock.isAd(request.getUrl().toString())) {
-            ByteArrayInputStream EMPTY = new ByteArrayInputStream("".getBytes());
-            return new WebResourceResponse("text/plain", "utf-8", EMPTY);
-        }
-        return super.shouldInterceptRequest(view, request);
+        final WebResourceResponse cliqzResponse = handleCliqzUrl(view, request.getUrl());
+        return cliqzResponse != null ? cliqzResponse : super.shouldInterceptRequest(view, request);
     }
 
-    @SuppressWarnings("deprecation")
-    @TargetApi(Build.VERSION_CODES.KITKAT_WATCH)
     @Override
     public WebResourceResponse shouldInterceptRequest(WebView view, String url) {
-        if (url.startsWith("http://antiphishing.clyqz.com/")) {
-            try {
-                return new WebResourceResponse("application/json", "utf-8", mWebView.getContext().getContentResolver().openInputStream(Uri.parse(url)));
-            } catch (IOException e) {
-                Log.e(Constants.TAG, "Cannot load antiphishing API", e);
-            }
+        final WebResourceResponse cliqzResponse = handleCliqzUrl(view, Uri.parse(url));
+        return cliqzResponse != null ? cliqzResponse : super.shouldInterceptRequest(view, url);
+    }
+
+    private WebResourceResponse handleCliqzUrl(WebView view, Uri uri) {
+        if (!CLIQZ_SCHEME.equals(uri.getScheme())) {
+            return null;
         }
-        if (url.equals("cliqz://js/CliqzAntiPhishing.js")) {
-            try {
-                return new WebResourceResponse("application/javascript", "utf-8", mWebView.getContext().getAssets().open("tool_androidkit/js/CliqzAntiPhishing.js"));
-            } catch (IOException e) {
-                Log.e(Constants.TAG, "Cannot load antiphishing", e);
+
+        final String path = uri.getPath();
+        if (CLIQZ_TRAMPOLINE_AUTHORITY.equals(uri.getAuthority())) {
+            if (CLIQZ_TRAMPOLINE_FORWARD.equals(uri.getPath())) {
+                final Resources resources = view.getResources();
+                final WebResourceResponse response =
+                        new WebResourceResponse("text/html", "UTF-8",
+                                resources.openRawResource(R.raw.trampoline_forward));
+                return response;
             }
-        }
-        if (mAdBlock.isAd(url)) {
-            ByteArrayInputStream EMPTY = new ByteArrayInputStream("".getBytes());
-            return new WebResourceResponse("text/plain", "utf-8", EMPTY);
+            if (CLIQZ_TRAMPOLINE_SEARCH.equals(uri.getPath())) {
+                final String query = uri.getQueryParameter("q");
+                view.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        mEventBus.post(new Messages.ShowSearch(query));
+                    }
+                });
+                final WebResourceResponse response =
+                        new WebResourceResponse("test/plain", "UTF-8",
+                                new ByteArrayInputStream("OK".getBytes()));
+                return response;
+            }
         }
         return null;
     }

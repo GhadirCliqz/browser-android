@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <script>
+        "use strict";
+
+        function redirect() {
+            if (history.state == null) {
+                let queryStr = window.location.search.substring(1).split('+').join(' ');
+                let query = queryStr.split('&')
+                    .reduce(function(acc, par) {
+                        let kv = par.split('=');
+                        acc[kv[0]] = decodeURIComponent(kv[1]);
+                        return acc;
+                    }, {});
+                console.log(query);
+                history.pushState(query, "page", "goto.html");
+                // Workaround
+                setTimeout(() => { window.location.href = query.url}, 0);
+            } else {
+                let query = history.state.q;
+                let oReq = new XMLHttpRequest();
+                oReq.addEventListener("load", () => {
+                    history.back();
+                });
+                oReq.open("GET", "cliqz://trampoline/search.html?q=" + encodeURIComponent(query));
+                oReq.send();
+            }
+        }
+    </script>
+</head>
+<body onload="redirect()">
+</body>
+</html>
