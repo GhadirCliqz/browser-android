@@ -19,46 +19,11 @@
             android:src="@drawable/ic_action_cliqz_up"/>
     </FrameLayout>
 
-    <FrameLayout
+    <com.cliqz.browser.widget.SearchBar
+        android:id="@+id/search_bar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_centerVertical="true"
-        android:focusable="true"
-        android:focusableInTouchMode="true"
-        android:layout_toRightOf="@+id/menu_history">
-
-        <com.cliqz.browser.widget.AutocompleteEditText
-            android:id="@+id/search_bar"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_centerVertical="true"
-            android:layout_toRightOf="@+id/menu_history"
-            android:background="?attr/searchBackground"
-            android:focusable="true"
-            android:focusableInTouchMode="true"
-            android:gravity="left|center_vertical"
-            android:hint="@string/search_hint"
-            android:imeOptions="actionGo"
-            android:inputType="textUri"
-            android:paddingEnd="8dp"
-            android:paddingStart="8dp"
-            android:selectAllOnFocus="true"
-            android:singleLine="true"
-            android:textColor="@color/gray_dark"
-            android:textColorHint="@color/hint_text"
-            android:textCursorDrawable="@null"/>
-
-        <TextView
-            android:id="@+id/title_bar"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:paddingEnd="8dp"
-            android:paddingStart="8dp"
-            android:singleLine="true"
-            android:text="@string/default_page_title"
-            android:textColor="@color/white"
-            android:visibility="gone"/>
-
-    </FrameLayout>
+        android:layout_toRightOf="@+id/menu_history"/>
 
 </RelativeLayout>

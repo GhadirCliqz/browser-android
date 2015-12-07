@@ -13,10 +13,10 @@ import android.view.ViewGroup.LayoutParams;
 import android.view.inputmethod.InputMethodManager;
 import android.webkit.WebView;
 import android.widget.FrameLayout;
-import android.widget.TextView;
 
 import com.cliqz.browser.webview.CliqzView;
 import com.cliqz.browser.widget.AutocompleteEditText;
+import com.cliqz.browser.widget.SearchBar;
 import com.squareup.otto.Subscribe;
 
 import acr.browser.lightning.R;
@@ -60,10 +60,10 @@ public class MainFragment extends BaseFragment implements CliqzView.CliqzCallbac
     View mMenuHistory;
 
     @Bind(R.id.search_bar)
-    AutocompleteEditText mAutocompleteEditText;
+    SearchBar searchBar;
 
-    @Bind(R.id.title_bar)
-    TextView mTitleBar;
+    @Bind(R.id.search_edit_text)
+    AutocompleteEditText mAutocompleteEditText;
 
     @Override
     protected View onCreateContentView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -91,14 +91,12 @@ public class MainFragment extends BaseFragment implements CliqzView.CliqzCallbac
         webView.setId(R.id.right_drawer_list);
         // TODO I don't like this is too dirty, let's see if we can do better
         if (mState == State.SHOWING_SEARCH) {
-            mAutocompleteEditText.setVisibility(View.VISIBLE);
-            mTitleBar.setVisibility(View.GONE);
+            searchBar.showSearchEditText();
             mContentContainer.addView(webView);
             mContentContainer.addView(mCliqzView);
         } else {
-            mAutocompleteEditText.setVisibility(View.GONE);
-            mTitleBar.setVisibility(View.VISIBLE);
-            mTitleBar.setText(mLightningView.getTitle());
+            searchBar.setTitle(mLightningView.getTitle());
+            searchBar.showTitleBar();
             mContentContainer.addView(mCliqzView);
             mContentContainer.addView(webView);
         }
@@ -167,8 +165,7 @@ public class MainFragment extends BaseFragment implements CliqzView.CliqzCallbac
 
     @OnClick(R.id.title_bar)
     void titleClicked() {
-        mAutocompleteEditText.setVisibility(View.VISIBLE);
-        mTitleBar.setVisibility(View.GONE);
+        searchBar.showSearchEditText();
         mAutocompleteEditText.setText(mLightningView.getUrl());
         mAutocompleteEditText.requestFocus();
         showKeyBoard();
@@ -232,8 +229,7 @@ public class MainFragment extends BaseFragment implements CliqzView.CliqzCallbac
 //            slideOutAnimation.setFillAfter(true);
 //            mCliqzView.startAnimation(slideOutAnimation);
 //            webView.startAnimation(slideInAnimation);
-        mAutocompleteEditText.setVisibility(View.GONE);
-        mTitleBar.setVisibility(View.VISIBLE);
+        searchBar.showTitleBar();
         webView.clearHistory();
         webView.bringToFront();
         mState = State.SHOWING_BROWSER;
@@ -264,14 +260,13 @@ public class MainFragment extends BaseFragment implements CliqzView.CliqzCallbac
 //            slideOutAnimation.setFillAfter(true);
 //            mCliqzView.startAnimation(slideInAnimation);
 //            webView.startAnimation(slideOutAnimation);
-        mAutocompleteEditText.setVisibility(View.VISIBLE);
-        mTitleBar.setVisibility(View.GONE);
+        searchBar.showSearchEditText();
         mCliqzView.bringToFront();
         mState = State.SHOWING_SEARCH;
     }
 
     void updateTitle() {
-        mTitleBar.setText(mLightningView.getTitle());
+        searchBar.setTitle(mLightningView.getTitle());
     }
 
 }
