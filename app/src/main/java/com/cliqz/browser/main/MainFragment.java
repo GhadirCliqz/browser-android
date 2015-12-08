@@ -22,6 +22,7 @@ import com.squareup.otto.Subscribe;
 
 import acr.browser.lightning.R;
 import acr.browser.lightning.bus.BrowserEvents;
+import acr.browser.lightning.constant.Constants;
 import acr.browser.lightning.view.AnimatedProgressBar;
 import acr.browser.lightning.view.LightningView;
 import butterknife.Bind;
@@ -44,7 +45,8 @@ public class MainFragment extends BaseFragment implements SearchWebView.CliqzCal
     private final Handler handler = new Handler(Looper.getMainLooper());
 
     private String mUrl = "";
-    private String lastQuery = "";
+
+    String lastQuery = "";
 
     State mState = State.SHOWING_SEARCH;
 
@@ -96,7 +98,7 @@ public class MainFragment extends BaseFragment implements SearchWebView.CliqzCal
             mContentContainer.addView(webView);
             mContentContainer.addView(mSearchWebView);
         } else {
-            searchBar.setTitle(mLightningView.getTitle());
+            updateTitle();
             searchBar.showTitleBar();
             mContentContainer.addView(mSearchWebView);
             mContentContainer.addView(webView);
@@ -182,8 +184,7 @@ public class MainFragment extends BaseFragment implements SearchWebView.CliqzCal
 
     @Override
     public void onResultClicked(String url) {
-        final String query = mAutocompleteEditText.getText().toString();
-        delayedPostOnBus(new Messages.OpenResult(query, url));
+        delayedPostOnBus(new Messages.OpenResult(lastQuery, url));
     }
 
     @Override
@@ -232,10 +233,9 @@ public class MainFragment extends BaseFragment implements SearchWebView.CliqzCal
     public void openResult(Messages.OpenResult event) {
         final WebView webView = mLightningView.getWebView();
         searchBar.showTitleBar();
-            webView.bringToFront();
-            mState = State.SHOWING_BROWSER;
-        lastQuery = mAutocompleteEditText.getText().toString();
-        final String url = Uri.parse("cliqz://trampoline/goto.html")
+        webView.bringToFront();
+        mState = State.SHOWING_BROWSER;
+        final String url = Uri.parse(Constants.CLIQZ_TRAMPOLINE)
                 .buildUpon()
                 .appendQueryParameter("url", event.url)
                 .appendQueryParameter("q", event.query)
@@ -247,16 +247,14 @@ public class MainFragment extends BaseFragment implements SearchWebView.CliqzCal
     public void onBackPressed(Messages.BackPressed event) {
         if (mLightningView.canGoBack()) {
             mLightningView.goBack();
-        if (mState == State.SHOWING_SEARCH) {
+            if (mState == State.SHOWING_SEARCH) {
                 final WebView webView = mLightningView.getWebView();
+                searchBar.showTitleBar();
                 webView.bringToFront();
                 mState = State.SHOWING_BROWSER;
             }
         } else {
             bus.post(new Messages.Exit());
-            mAutocompleteEditText.setText(lastQuery);
-            mAutocompleteEditText.requestFocus();
-            showKeyBoard();
         }
     }
 
@@ -267,8 +265,10 @@ public class MainFragment extends BaseFragment implements SearchWebView.CliqzCal
         mAutocompleteEditText.requestFocus();
         if (event != null) {
             mAutocompleteEditText.setText(event.query);
+            mAutocompleteEditText.setSelection(event.query.length());
         }
         mState = State.SHOWING_SEARCH;
+        showKeyBoard();
     }
 
     void updateTitle() {
