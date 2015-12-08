@@ -146,7 +146,7 @@ public class MainActivity extends AppCompatActivity {
         final FragmentManager fm = getSupportFragmentManager();
         fm.beginTransaction()
                 .setCustomAnimations(R.anim.enter_slide_up, R.anim.exit_slide_up, R.anim.enter_slide_down, R.anim.exit_slide_down)
-                .replace(android.R.id.content, new SuggestionsFragment(), SUGGESTIONS_FRAGMENT_TAG)
+                .replace(android.R.id.content, new FreshTabFragment(), SUGGESTIONS_FRAGMENT_TAG)
                 .addToBackStack(null)
                 .commit();
     }

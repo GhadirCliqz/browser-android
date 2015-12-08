@@ -3,9 +3,10 @@ package acr.browser.lightning.app;
 import android.content.Context;
 
 import com.cliqz.browser.fragment.BaseSettingsFragment;
-import com.cliqz.browser.main.BaseFragment;
 import com.cliqz.browser.main.FragmentWithBus;
-import com.cliqz.browser.webview.CliqzView;
+import com.cliqz.browser.webview.BaseWebView;
+import com.cliqz.browser.webview.Bridge;
+import com.cliqz.browser.webview.SearchWebView;
 import com.cliqz.browser.webview.TabsManagerView;
 import com.cliqz.browser.widget.AutocompleteEditText;
 import com.squareup.otto.Bus;
@@ -67,7 +68,7 @@ public interface AppComponent {
 
     void inject(ThemableBrowserActivity activity);
 
-    void inject(CliqzView cliqzView);
+    void inject(BaseWebView searchWebView);
 
     void inject(TabsManagerView tabsManagerView);
 
@@ -83,4 +84,5 @@ public interface AppComponent {
     // This is CLIQZ Specific too
     void inject(FragmentWithBus baseFragment);
 
+    void inject(Bridge bridge);
 }

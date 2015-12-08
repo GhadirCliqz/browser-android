@@ -6,6 +6,11 @@ import android.util.Log;
 
 import org.json.JSONObject;
 
+import java.util.List;
+
+import acr.browser.lightning.database.HistoryDatabase;
+import acr.browser.lightning.database.HistoryItem;
+
 /**
  * @author Stefano Pacifici
  * @date 2015/11/09
@@ -23,13 +28,13 @@ class CliqzBridge extends Bridge {
             @Override
             public void execute(Bridge bridge, Object data, String callback) {
                 final String query = (data instanceof String) ? (String) data: null;
-                final CliqzView cliqzView = (CliqzView) bridge.getWebView();
+                final SearchWebView searchWebView = (SearchWebView) bridge.getWebView();
                 if (callback == null || callback.isEmpty() || query == null) {
                     Log.e(TAG, "Can't perform searchHistory without a query and/or a callback");
                     return; // Nothing to do without callback or data
                 }
 
-                final String result = cliqzView.searchHistory(query);
+                final String result = searchWebView.searchHistory(query);
                 final StringBuilder builder = new StringBuilder();
                 builder.append(callback).append("({results:").append(result).append(",query:\"")
                         .append(query).append("\"})");
@@ -43,7 +48,7 @@ class CliqzBridge extends Bridge {
         isReady(new IAction() {
             @Override
             public void execute(Bridge bridge, Object data, String callback) {
-                ((CliqzView) bridge.getWebView()).extensionReady();
+                ((BaseWebView) bridge.getWebView()).extensionReady();
             }
         }),
 
@@ -54,8 +59,8 @@ class CliqzBridge extends Bridge {
             @Override
             public void execute(Bridge bridge, Object data, String callback) {
                 final String url = (data instanceof String) ? (String) data : null;
-                final CliqzView cliqzView = (CliqzView) bridge.getWebView();
-                final CliqzView.CliqzCallbacks listener = cliqzView.mListener;
+                final SearchWebView searchWebView = (SearchWebView) bridge.getWebView();
+                final SearchWebView.CliqzCallbacks listener = searchWebView.mListener;
                 if (url != null && listener != null) {
                     listener.onResultClicked(url);
                 }
@@ -69,7 +74,7 @@ class CliqzBridge extends Bridge {
             @Override
             public void execute(final Bridge bridge, Object data, String callback) {
                 final JSONObject params = (data instanceof JSONObject) ? (JSONObject) data : null;
-                final CliqzView cliqzView = (CliqzView) bridge.getWebView();
+                final SearchWebView searchWebView = (SearchWebView) bridge.getWebView();
                 final String dataPar = params != null ? params.optString("data") : null;
                 final String typePar = params != null ? params.optString("type") : null;
                 if (dataPar == null || typePar == null) {
@@ -78,9 +83,9 @@ class CliqzBridge extends Bridge {
                 }
 
                 final BrowserActionTypes action = BrowserActionTypes.fromTypeString(typePar);
-                final Intent intent = action.getIntent(cliqzView.getContext(), dataPar);
+                final Intent intent = action.getIntent(searchWebView.getContext(), dataPar);
                 if (intent != null) {
-                    cliqzView.getContext().startActivity(intent);
+                    searchWebView.getContext().startActivity(intent);
                 }
             }
         }),
@@ -88,12 +93,21 @@ class CliqzBridge extends Bridge {
         getTopSites(new IAction() {
             @Override
             public void execute(Bridge bridge, Object data, String callback) {
+                final int no = data instanceof Integer ? (Integer) data : 5;
                 if (callback == null) {
                     Log.e(TAG, "Can't perform getTopSites without a callback");
                     return; // Nothing to do without callback or data
                 }
-
-                final String result = ((CliqzView) bridge.getWebView()).getTopSites();
+                final HistoryDatabase history = ((BaseWebView) bridge.getWebView()).historyDatabase;
+                String result = "[]";
+                if (history != null) {
+                    final List<HistoryItem> items = history.getTopSites(no);
+                    try {
+                        result = String.format("%s(%s)", callback, historyToJSON(items));
+                    } catch (Exception e) {
+                        Log.e(TAG, "Cannot serialize History", e);
+                    }
+                }
                 bridge.executeJavascript(String.format("%s(%s)", callback, result));
             }
         }),
@@ -102,12 +116,12 @@ class CliqzBridge extends Bridge {
             @Override
             public void execute(Bridge bridge, Object data, String callback) {
                 final String url = (data instanceof String) ? (String) data : null;
-                final CliqzView cliqzView = (CliqzView) bridge.getWebView();
+                final SearchWebView searchWebView = (SearchWebView) bridge.getWebView();
                 if (url == null) {
                     Log.w(TAG, "No url for autocompletion");
                     return;
                 }
-                final CliqzView.CliqzCallbacks listener = cliqzView.mListener;
+                final SearchWebView.CliqzCallbacks listener = searchWebView.mListener;
                 if(listener != null) {
                     listener.onAutocompleteUrl(url);
                 }
@@ -118,12 +132,12 @@ class CliqzBridge extends Bridge {
             @Override
             public void execute(Bridge bridge, Object data, String callback) {
                 final String query = (data instanceof String) ? (String) data : null;
-                final CliqzView cliqzView = (CliqzView) bridge.getWebView();
+                final SearchWebView searchWebView = (SearchWebView) bridge.getWebView();
                 if (query == null) {
                     Log.w(TAG, "No url to notify");
                     return;
                 }
-                final CliqzView.CliqzCallbacks listener = cliqzView.mListener;
+                final SearchWebView.CliqzCallbacks listener = searchWebView.mListener;
                 if(listener != null) {
                     listener.onNotifyQuery(query);
                 }
@@ -134,7 +148,7 @@ class CliqzBridge extends Bridge {
             @Override
             public void execute(Bridge bridge, Object data, String callback) {
                 final JSONObject signal = (data instanceof JSONObject) ? (JSONObject) data : null;
-                ((CliqzView) bridge.getWebView()).sendTelemetry(signal);
+                bridge.telemetry.sendSignal(signal);
             }
         }),
 
@@ -157,8 +171,8 @@ class CliqzBridge extends Bridge {
         }
     }
 
-    CliqzBridge(CliqzView searchView) {
-        super(searchView);
+    CliqzBridge(BaseWebView baseWebView) {
+        super(baseWebView);
     }
 
     @Override
@@ -177,5 +191,16 @@ class CliqzBridge extends Bridge {
         return true;
     }
 
-
+    private static String historyToJSON(final List<HistoryItem> items) {
+        final StringBuilder sb = new StringBuilder(items.size() * 100);
+        sb.append("[");
+        String sep = "";
+        for (final HistoryItem item : items) {
+            sb.append(sep);
+            item.toJsonString(sb);
+            sep = ",";
+        }
+        sb.append("]");
+        return sb.toString();
+    }
 }

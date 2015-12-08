@@ -8,6 +8,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 
+import com.cliqz.browser.webview.FreshTabView;
 import com.squareup.otto.Subscribe;
 
 import acr.browser.lightning.R;
@@ -18,15 +19,17 @@ import butterknife.OnClick;
  * @author Stefano Pacifici
  * @date 2015/11/23
  */
-public class SuggestionsFragment extends BaseFragment {
+public class FreshTabFragment extends BaseFragment {
 
-    private ImageView mView;
+    private FreshTabView mView;
 
     @Override
     protected View onCreateContentView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        mView = new ImageView(inflater.getContext());
-        mView.setImageResource(R.drawable.reccomendations);
-        mView.setScaleType(ImageView.ScaleType.FIT_XY);
+        if (mView == null) {
+            mView = new FreshTabView(inflater.getContext());
+        } else {
+            ((ViewGroup) mView.getParent()).removeView(mView);
+        }
         return mView;
     }
 

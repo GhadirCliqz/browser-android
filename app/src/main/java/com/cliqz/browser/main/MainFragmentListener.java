@@ -2,10 +2,7 @@ package com.cliqz.browser.main;
 
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.view.KeyEvent;
 import android.view.View;
-import android.widget.EditText;
-import android.widget.TextView;
 
 /**
  * @author Stefano Pacifici
@@ -48,8 +45,8 @@ class MainFragmentListener implements View.OnFocusChangeListener, TextWatcher {
         fragment.showSearch(null);
 
         final String q = s.toString();
-        if (!q.isEmpty() && fragment.mCliqzView != null) {
-            fragment.mCliqzView.onQueryChanged(q);
+        if (!q.isEmpty() && fragment.mSearchWebView != null) {
+            fragment.mSearchWebView.onQueryChanged(q);
         }
     }
 

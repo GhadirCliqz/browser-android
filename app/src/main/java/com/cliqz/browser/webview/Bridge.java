@@ -7,23 +7,33 @@ import android.util.Log;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebView;
 
+import com.cliqz.browser.utils.Telemetry;
+
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import javax.inject.Inject;
+
+import acr.browser.lightning.app.BrowserApp;
 
 /**
  * @author Stefano Pacifici
  * @date 2015/11/13
  */
-abstract class Bridge {
+public abstract class Bridge {
 
     private static final String TAG = Bridge.class.getSimpleName();
 
     private final Handler handler;
     private final WebView webView;
 
-    Bridge(@NonNull WebView webView) {
+    @Inject
+    Telemetry telemetry;
+
+    protected Bridge(@NonNull WebView webView) {
         this.webView = webView;
         this.handler = new Handler(webView.getContext().getMainLooper());
+        BrowserApp.getAppComponent().inject(this);
     }
 
     interface IAction {
@@ -61,7 +71,7 @@ abstract class Bridge {
         }
     }
 
-    void executeJavascript(final String javascript) {
+    protected void executeJavascript(final String javascript) {
         if (javascript != null || !javascript.isEmpty()) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
                 webView.evaluateJavascript(javascript, null);

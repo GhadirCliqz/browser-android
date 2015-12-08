@@ -1,7 +1,8 @@
-<?xml version="1.0" encoding="utf-8"?><!-- Copyright 2014 A.C.R. Development -->
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright 2014 A.C.R. Development -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    package="acr.browser.lightning">
+    package="acr.browser.lightning" >
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
@@ -28,12 +29,12 @@
         android:hardwareAccelerated="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/cliqz_app_name"
-        tools:replace="android:label">
+        tools:replace="android:label" >
         <activity
             android:name="com.cliqz.browser.main.MainActivity"
             android:label="@string/cliqz_app_name"
             android:screenOrientation="portrait"
-            android:theme="@style/Theme.LightTheme">
+            android:theme="@style/Theme.LightTheme" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -43,7 +44,8 @@
                 <category android:name="android.intent.category.APP_BROWSER" />
             </intent-filter>
         </activity>
-        <!--activity
+        <!--
+        activity
             android:name=".activity.MainActivity"
             android:alwaysRetainTaskState="true"
             android:configChanges="orientation|screenSize|keyboardHidden|keyboard"
@@ -120,12 +122,13 @@
                 <data android:scheme="http" />
                 <data android:scheme="https" />
             </intent-filter>
-        </activity -->
+        </activity
+        -->
         <activity
             android:name=".activity.SettingsActivity"
             android:configChanges="orientation|screenSize|keyboardHidden|keyboard"
             android:label="@string/settings"
-            android:theme="@style/Theme.SettingsTheme">
+            android:theme="@style/Theme.SettingsTheme" >
             <intent-filter>
                 <action android:name="android.intent.action.SETTINGS" />
 
@@ -140,7 +143,7 @@
             android:launchMode="singleTask"
             android:process=":incognito"
             android:theme="@style/Theme.DarkTheme"
-            android:windowSoftInputMode="stateHidden">
+            android:windowSoftInputMode="stateHidden" >
             <intent-filter>
                 <action android:name="android.intent.action.INCOGNITO" />
 
@@ -151,7 +154,7 @@
             android:name=".activity.ReadingActivity"
             android:configChanges="orientation|screenSize|keyboardHidden|keyboard"
             android:label="@string/reading_mode"
-            android:theme="@style/Theme.SettingsTheme">
+            android:theme="@style/Theme.SettingsTheme" >
             <intent-filter>
                 <action android:name="android.intent.action.READING" />
 
