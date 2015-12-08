@@ -122,7 +122,8 @@ class LightningWebClient extends WebViewClient {
             mEventBus.post(new BrowserEvents.UpdateUrl(url,true));
             view.postInvalidate();
         }
-        if (view.getTitle() == null || view.getTitle().isEmpty()) {
+        if (view.getTitle() == null || view.getTitle().isEmpty()
+                || view.getTitle().contains(Constants.CLIQZ_TRAMPOLINE)) {
             mLightningView.mTitle.setTitle(mActivity.getString(R.string.untitled));
         } else {
             mLightningView.mTitle.setTitle(view.getTitle());

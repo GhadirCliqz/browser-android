@@ -7,21 +7,21 @@
 
         function redirect() {
             if (history.state == null) {
-                let queryStr = window.location.search.substring(1).split('+').join(' ');
-                let query = queryStr.split('&')
+                var queryStr = window.location.search.substring(1).split('+').join(' ');
+                var query = queryStr.split('&')
                     .reduce(function(acc, par) {
-                        let kv = par.split('=');
+                        var kv = par.split('=');
                         acc[kv[0]] = decodeURIComponent(kv[1]);
                         return acc;
                     }, {});
                 console.log(query);
                 history.pushState(query, "page", "goto.html");
                 // Workaround
-                setTimeout(() => { window.location.href = query.url}, 0);
+                setTimeout(function() { window.location.href = query.url}, 0);
             } else {
-                let query = history.state.q;
-                let oReq = new XMLHttpRequest();
-                oReq.addEventListener("load", () => {
+                var query = history.state.q;
+                var oReq = new XMLHttpRequest();
+                oReq.addEventListener("load", function() {
                     history.back();
                 });
                 oReq.open("GET", "cliqz://trampoline/search.html?q=" + encodeURIComponent(query));

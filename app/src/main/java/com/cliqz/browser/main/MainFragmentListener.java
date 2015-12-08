@@ -49,6 +49,7 @@ class MainFragmentListener implements View.OnFocusChangeListener, TextWatcher {
 
         final String q = s.toString();
         if (!q.isEmpty() && fragment.mCliqzView != null) {
+            fragment.lastQuery = q;
             fragment.mCliqzView.onQueryChanged(q);
         }
     }
