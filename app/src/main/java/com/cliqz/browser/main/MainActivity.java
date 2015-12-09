@@ -41,6 +41,8 @@ public class MainActivity extends AppCompatActivity {
 
     // private Fragment mHistoryFragment, mSearchFragment, mSuggestionsFragment;
 
+    private Fragment mFreshTabFragment;
+
     @Inject
     Bus bus;
 
@@ -66,6 +68,9 @@ public class MainActivity extends AppCompatActivity {
         }
 
         bus.register(this);
+
+        mFreshTabFragment = new FreshTabFragment();
+
         if(!preferenceManager.getOnBoardingComplete()) {
             setupApp();
             setContentView(R.layout.activity_on_boarding);
@@ -146,7 +151,7 @@ public class MainActivity extends AppCompatActivity {
         final FragmentManager fm = getSupportFragmentManager();
         fm.beginTransaction()
                 .setCustomAnimations(R.anim.enter_slide_up, R.anim.exit_slide_up, R.anim.enter_slide_down, R.anim.exit_slide_down)
-                .replace(android.R.id.content, new FreshTabFragment(), SUGGESTIONS_FRAGMENT_TAG)
+                .replace(android.R.id.content, mFreshTabFragment, SUGGESTIONS_FRAGMENT_TAG)
                 .addToBackStack(null)
                 .commit();
     }

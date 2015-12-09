@@ -6,9 +6,9 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
+import android.view.ViewGroup.LayoutParams;
 
-import com.cliqz.browser.webview.FreshTabView;
+import com.cliqz.browser.webview.FreshTabWebView;
 import com.squareup.otto.Subscribe;
 
 import acr.browser.lightning.R;
@@ -21,16 +21,34 @@ import butterknife.OnClick;
  */
 public class FreshTabFragment extends BaseFragment {
 
-    private FreshTabView mView;
+    private FreshTabWebView mFreshTabWebView;
 
     @Override
     protected View onCreateContentView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        if (mView == null) {
-            mView = new FreshTabView(inflater.getContext());
+        if (mFreshTabWebView == null) {
+            mFreshTabWebView = new FreshTabWebView(inflater.getContext());
+            mFreshTabWebView.setLayoutParams(
+                    new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
         } else {
-            ((ViewGroup) mView.getParent()).removeView(mView);
+            ((ViewGroup) mFreshTabWebView.getParent()).removeView(mFreshTabWebView);
         }
-        return mView;
+        return mFreshTabWebView;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (mFreshTabWebView != null) {
+            mFreshTabWebView.onResume();
+        }
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        if (mFreshTabWebView != null) {
+            mFreshTabWebView.onPause();
+        }
     }
 
     @Override

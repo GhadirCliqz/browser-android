@@ -109,7 +109,15 @@ public class MainFragment extends BaseFragment implements SearchWebView.CliqzCal
     public void onResume() {
         super.onResume();
         if (mSearchWebView != null) {
-            // mCliqzView.on
+            mSearchWebView.onResume();
+        }
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        if (mSearchWebView != null) {
+            mSearchWebView.onPause();
         }
     }
 

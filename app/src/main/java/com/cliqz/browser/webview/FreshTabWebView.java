@@ -11,24 +11,24 @@ import android.webkit.WebViewClient;
  * @author Stefano Pacifici
  * @date 2015/12/08
  */
-public class FreshTabView extends BaseWebView {
+public class FreshTabWebView extends BaseWebView {
 
-    private static final String FRESHTAB_URL = "file:///android_asset/incognito/index.html";
+    private static final String FRESHTAB_URL = "file:///android_asset/search/freshtab.html";
 
-    public FreshTabView(Context context) {
+    public FreshTabWebView(Context context) {
         this(context, null);
     }
 
-    public FreshTabView(Context context, AttributeSet attrs) {
+    public FreshTabWebView(Context context, AttributeSet attrs) {
         this(context, attrs, 0);
     }
 
-    public FreshTabView(Context context, AttributeSet attrs, int defStyleAttr) {
+    public FreshTabWebView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
     }
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-    public FreshTabView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+    public FreshTabWebView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
     }
 
