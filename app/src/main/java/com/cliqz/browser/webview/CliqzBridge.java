@@ -3,6 +3,7 @@ package com.cliqz.browser.webview;
 import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.util.Log;
+import android.webkit.WebView;
 
 import org.json.JSONObject;
 
@@ -23,13 +24,17 @@ class CliqzBridge extends Bridge {
 
         /**
          * Search through the browser history
+         *
+         * TODO Is it used, can it not be more generic and not SearchWebView dependant?
          */
         searchHistory(new IAction() {
             @Override
             public void execute(Bridge bridge, Object data, String callback) {
                 final String query = (data instanceof String) ? (String) data: null;
-                final SearchWebView searchWebView = (SearchWebView) bridge.getWebView();
-                if (callback == null || callback.isEmpty() || query == null) {
+                final WebView webView = bridge.getWebView();
+                final SearchWebView searchWebView = (webView instanceof SearchWebView) ?
+                        (SearchWebView) bridge.getWebView() : null;
+                if (searchWebView == null || callback == null || callback.isEmpty() || query == null) {
                     Log.e(TAG, "Can't perform searchHistory without a query and/or a callback");
                     return; // Nothing to do without callback or data
                 }
@@ -59,10 +64,8 @@ class CliqzBridge extends Bridge {
             @Override
             public void execute(Bridge bridge, Object data, String callback) {
                 final String url = (data instanceof String) ? (String) data : null;
-                final SearchWebView searchWebView = (SearchWebView) bridge.getWebView();
-                final SearchWebView.CliqzCallbacks listener = searchWebView.mListener;
-                if (url != null && listener != null) {
-                    listener.onResultClicked(url);
+                if (url != null) {
+                    bridge.bus.post(new CliqzMessages.OpenLink(url));
                 }
             }
         }),
@@ -74,7 +77,7 @@ class CliqzBridge extends Bridge {
             @Override
             public void execute(final Bridge bridge, Object data, String callback) {
                 final JSONObject params = (data instanceof JSONObject) ? (JSONObject) data : null;
-                final SearchWebView searchWebView = (SearchWebView) bridge.getWebView();
+                final WebView webView = bridge.getWebView();
                 final String dataPar = params != null ? params.optString("data") : null;
                 final String typePar = params != null ? params.optString("type") : null;
                 if (dataPar == null || typePar == null) {
@@ -83,9 +86,9 @@ class CliqzBridge extends Bridge {
                 }
 
                 final BrowserActionTypes action = BrowserActionTypes.fromTypeString(typePar);
-                final Intent intent = action.getIntent(searchWebView.getContext(), dataPar);
+                final Intent intent = action.getIntent(webView.getContext(), dataPar);
                 if (intent != null) {
-                    searchWebView.getContext().startActivity(intent);
+                    webView.getContext().startActivity(intent);
                 }
             }
         }),
@@ -116,15 +119,11 @@ class CliqzBridge extends Bridge {
             @Override
             public void execute(Bridge bridge, Object data, String callback) {
                 final String url = (data instanceof String) ? (String) data : null;
-                final SearchWebView searchWebView = (SearchWebView) bridge.getWebView();
                 if (url == null) {
                     Log.w(TAG, "No url for autocompletion");
                     return;
                 }
-                final SearchWebView.CliqzCallbacks listener = searchWebView.mListener;
-                if(listener != null) {
-                    listener.onAutocompleteUrl(url);
-                }
+                bridge.bus.post(new CliqzMessages.Autocomplete(url));
             }
         }),
 
@@ -132,15 +131,11 @@ class CliqzBridge extends Bridge {
             @Override
             public void execute(Bridge bridge, Object data, String callback) {
                 final String query = (data instanceof String) ? (String) data : null;
-                final SearchWebView searchWebView = (SearchWebView) bridge.getWebView();
                 if (query == null) {
                     Log.w(TAG, "No url to notify");
                     return;
                 }
-                final SearchWebView.CliqzCallbacks listener = searchWebView.mListener;
-                if(listener != null) {
-                    listener.onNotifyQuery(query);
-                }
+                bridge.bus.post(new CliqzMessages.NotifyQuery(query));
             }
         }),
 

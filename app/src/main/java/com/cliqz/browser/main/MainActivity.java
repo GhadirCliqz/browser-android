@@ -15,6 +15,7 @@ import android.view.Window;
 import android.view.WindowManager;
 
 import com.cliqz.browser.utils.Telemetry;
+import com.cliqz.browser.webview.CliqzMessages;
 import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
 
@@ -154,6 +155,20 @@ public class MainActivity extends AppCompatActivity {
                 .replace(android.R.id.content, mFreshTabFragment, SUGGESTIONS_FRAGMENT_TAG)
                 .addToBackStack(null)
                 .commit();
+    }
+
+    @Subscribe
+    public void goToLink(Messages.GoToLink event) {
+        final FragmentManager fm = getSupportFragmentManager();
+        final String url = event.url;
+        fm.popBackStack();
+        fm.addOnBackStackChangedListener(new FragmentManager.OnBackStackChangedListener() {
+            @Override
+            public void onBackStackChanged() {
+                fm.removeOnBackStackChangedListener(this);
+                bus.post(new CliqzMessages.OpenLink(url));
+            }
+        });
     }
 
     @Subscribe

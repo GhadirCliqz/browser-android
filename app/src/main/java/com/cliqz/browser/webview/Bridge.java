@@ -8,6 +8,7 @@ import android.webkit.JavascriptInterface;
 import android.webkit.WebView;
 
 import com.cliqz.browser.utils.Telemetry;
+import com.squareup.otto.Bus;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -29,6 +30,9 @@ public abstract class Bridge {
 
     @Inject
     Telemetry telemetry;
+
+    @Inject
+    Bus bus;
 
     protected Bridge(@NonNull WebView webView) {
         this.webView = webView;

@@ -8,6 +8,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 
+import com.cliqz.browser.webview.CliqzMessages;
 import com.cliqz.browser.webview.FreshTabWebView;
 import com.squareup.otto.Subscribe;
 
@@ -82,5 +83,10 @@ public class FreshTabFragment extends BaseFragment {
     @Subscribe
     public void onBackPressed(Messages.BackPressed event) {
         bus.post(new Messages.GoToSearch());
+    }
+
+    @Subscribe
+    public void onOpenLink(CliqzMessages.OpenLink event) {
+        bus.post(new Messages.GoToLink(event.url));
     }
 }

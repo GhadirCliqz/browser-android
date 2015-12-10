@@ -87,8 +87,8 @@ import com.anthonycr.grant.PermissionsManager;
 import com.anthonycr.grant.PermissionsResultAction;
 import com.cliqz.browser.bus.TabManagerEvents;
 import com.cliqz.browser.utils.LocationCache;
+import com.cliqz.browser.webview.CliqzMessages;
 import com.cliqz.browser.webview.SearchWebView;
-import com.cliqz.browser.webview.SearchWebView.CliqzCallbacks;
 import com.cliqz.browser.webview.TabsManagerView;
 import com.cliqz.browser.widget.AutocompleteEditText;
 import com.squareup.otto.Bus;
@@ -131,7 +131,7 @@ import butterknife.Bind;
 import butterknife.ButterKnife;
 
 public abstract class BrowserActivity extends ThemableBrowserActivity
-        implements UIController, OnClickListener, OnLongClickListener, CliqzCallbacks {
+        implements UIController, OnClickListener, OnLongClickListener {
 
     private static final String BOOKMARKS_FRAGMENT_TAG = "bookmarks_tag";
 
@@ -318,7 +318,6 @@ public abstract class BrowserActivity extends ThemableBrowserActivity
 
         // CLIQZ - BEGIN
         mCliqzSearch = new SearchWebView(this);
-        mCliqzSearch.setResultListener(this);
         mSearchContainer = new LightningView(this, "", isIncognito(), "SEARCH_CONTAINER", mCliqzSearch, mHistoryDatabase);
         mTabsManagerView = new TabsManagerView(this);
         mOpenTabsContainer = new LightningView(this, "", isIncognito(), "OPEN_TABS_CONTAINER", mTabsManagerView, mHistoryDatabase);
@@ -376,7 +375,7 @@ public abstract class BrowserActivity extends ThemableBrowserActivity
             if (IME_ACTIONS.contains(actionId) || (keycode == KeyEvent.KEYCODE_ENTER)) {
                 if (Patterns.WEB_URL.matcher(text).matches()) {
                     final String url = URLUtil.guessUrl(text.toString());
-                    onResultClicked(url);
+                    mEventBus.post(new CliqzMessages.OpenLink(url));
                     handled = true;
                 } else if (text.length() > 0) {
                     searchTheWeb(text.toString());
@@ -528,41 +527,6 @@ public abstract class BrowserActivity extends ThemableBrowserActivity
     }
 
     // CLIQZ - BEGIN
-    @Override
-    public void onAutocompleteUrl(final String url) {
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                mSearch.getAutocompleteService().improveAutocomplete(url);
-            }
-        });
-    }
-
-    @Override
-    public void onNotifyQuery(String query) {
-        mSearch.setText(query);
-    }
-
-    @Override
-    public void onResultClicked(final String url) {
-        final LightningView currentTab = mTabsManager.getCurrentTab();
-        if (currentTab != null) {
-            switchTabs(mSearchContainer, currentTab);
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-                final WebView currentWebView = currentTab.getWebView();
-                currentWebView.evaluateJavascript("document.body.innerHTML=\"\"", new ValueCallback<String>() {
-                    @Override
-                    public void onReceiveValue(String value) {
-                        currentTab.loadUrl(url);
-                    }
-                });
-            } else {
-                currentTab.getWebView().clearView();
-                currentTab.loadUrl(url);
-            }
-        }
-    }
-
     private final Runnable showCliqzInterface = new Runnable() {
 
         @Override
@@ -2245,6 +2209,37 @@ public abstract class BrowserActivity extends ThemableBrowserActivity
                 showAlert(deleteTabsList);
             } else {
                 deleteTabs(deleteTabsList);
+            }
+        }
+
+        @Subscribe
+        public void autocomplete(CliqzMessages.Autocomplete event) {
+            mSearch.getAutocompleteService().improveAutocomplete(event.completion);
+        }
+
+        @Subscribe
+        public void notifyQuery(CliqzMessages.NotifyQuery event) {
+            mSearch.setText(event.query);
+        }
+
+        @Subscribe
+        public void openLink(CliqzMessages.OpenLink event) {
+            final LightningView currentTab = mTabsManager.getCurrentTab();
+            final String url = event.url;
+            if (currentTab != null) {
+                switchTabs(mSearchContainer, currentTab);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                    final WebView currentWebView = currentTab.getWebView();
+                    currentWebView.evaluateJavascript("document.body.innerHTML=\"\"", new ValueCallback<String>() {
+                        @Override
+                        public void onReceiveValue(String value) {
+                            currentTab.loadUrl(url);
+                        }
+                    });
+                } else {
+                    currentTab.getWebView().clearView();
+                    currentTab.loadUrl(url);
+                }
             }
         }
     };

@@ -15,6 +15,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.webkit.WebView;
 import android.widget.FrameLayout;
 
+import com.cliqz.browser.webview.CliqzMessages;
 import com.cliqz.browser.webview.SearchWebView;
 import com.cliqz.browser.widget.AutocompleteEditText;
 import com.cliqz.browser.widget.SearchBar;
@@ -33,7 +34,7 @@ import butterknife.OnClick;
  * @author Stefano Pacifici
  * @date 2015/11/23
  */
-public class MainFragment extends BaseFragment implements SearchWebView.CliqzCallbacks {
+public class MainFragment extends BaseFragment {
 
     enum State {
         SHOWING_SEARCH,
@@ -87,8 +88,7 @@ public class MainFragment extends BaseFragment implements SearchWebView.CliqzCal
             ((ViewGroup) mSearchWebView.getParent()).removeView(mSearchWebView);
             ((ViewGroup) webView.getParent()).removeView(webView);
         }
-        mSearchWebView.setResultListener(this);
-        MainFragmentListener.create(this);
+         MainFragmentListener.create(this);
         mLightningView.resumeTimers();
         final WebView webView = mLightningView.getWebView();
         webView.setId(R.id.right_drawer_list);
@@ -190,21 +190,6 @@ public class MainFragment extends BaseFragment implements SearchWebView.CliqzCal
         showKeyBoard();
     }
 
-    @Override
-    public void onResultClicked(String url) {
-        delayedPostOnBus(new Messages.OpenResult(lastQuery, url));
-    }
-
-    @Override
-    public void onNotifyQuery(String query) {
-
-    }
-
-    @Override
-    public void onAutocompleteUrl(String str) {
-
-    }
-
     void showKeyBoard() {
         InputMethodManager inputMethodManager = (InputMethodManager) getActivity()
                 .getSystemService(getActivity().INPUT_METHOD_SERVICE);
@@ -238,15 +223,17 @@ public class MainFragment extends BaseFragment implements SearchWebView.CliqzCal
     }
 
     @Subscribe
-    public void openResult(Messages.OpenResult event) {
+    public void openLink(CliqzMessages.OpenLink event) {
         final WebView webView = mLightningView.getWebView();
+        final String eventUrl = event.url;
+        // final String eventQuery = lastQuery;
         searchBar.showTitleBar();
         webView.bringToFront();
         mState = State.SHOWING_BROWSER;
         final String url = Uri.parse(Constants.CLIQZ_TRAMPOLINE)
                 .buildUpon()
                 .appendQueryParameter("url", event.url)
-                .appendQueryParameter("q", event.query)
+                .appendQueryParameter("q", lastQuery)
                 .build().toString();
         webView.loadUrl(url);
     }
