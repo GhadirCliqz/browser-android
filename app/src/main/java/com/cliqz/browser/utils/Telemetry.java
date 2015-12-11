@@ -318,7 +318,6 @@ public class Telemetry {
         signal.put(Key.STEP, forwardStep);
         signal.put(Key.URL_LENGTH, this.urlLength);
         signal.put(Key.DISPLAY_TIME, getUnixTimeStamp() - pageStartTime);
-        signal.put(Key.HAS_SCROLLED, String.valueOf(hasPageScrolled));
         forwardStep++;
         pageStartTime = getUnixTimeStamp();
         this.urlLength =urlLength;
@@ -446,7 +445,7 @@ public class Telemetry {
         int searchChoice = mPreferenceManager.getSearchChoice();
         return searchEngines[searchChoice];
     }
-    
+
     private String getNetworkState() {
         ConnectivityManager manager = (ConnectivityManager)
                 context.getSystemService(context.CONNECTIVITY_SERVICE);

@@ -7,8 +7,10 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
+import android.view.ViewGroup.LayoutParams;
 
+import com.cliqz.browser.webview.CliqzMessages;
+import com.cliqz.browser.webview.FreshTabWebView;
 import com.squareup.otto.Subscribe;
 
 import acr.browser.lightning.R;
@@ -19,16 +21,36 @@ import butterknife.OnClick;
  * @author Stefano Pacifici
  * @date 2015/11/23
  */
-public class SuggestionsFragment extends BaseFragment {
+public class FreshTabFragment extends BaseFragment {
 
-    private ImageView mView;
+    private FreshTabWebView mFreshTabWebView;
 
     @Override
     protected View onCreateContentView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        mView = new ImageView(inflater.getContext());
-        mView.setImageResource(R.drawable.reccomendations);
-        mView.setScaleType(ImageView.ScaleType.FIT_XY);
-        return mView;
+        if (mFreshTabWebView == null) {
+            mFreshTabWebView = new FreshTabWebView(inflater.getContext());
+            mFreshTabWebView.setLayoutParams(
+                    new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
+        } else {
+            ((ViewGroup) mFreshTabWebView.getParent()).removeView(mFreshTabWebView);
+        }
+        return mFreshTabWebView;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (mFreshTabWebView != null) {
+            mFreshTabWebView.onResume();
+        }
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        if (mFreshTabWebView != null) {
+            mFreshTabWebView.onPause();
+        }
     }
 
     @Override
@@ -68,5 +90,10 @@ public class SuggestionsFragment extends BaseFragment {
     @Subscribe
     public void onBackPressed(Messages.BackPressed event) {
         bus.post(new Messages.GoToSearch());
+    }
+
+    @Subscribe
+    public void onOpenLink(CliqzMessages.OpenLink event) {
+        bus.post(new Messages.GoToLink(event.url));
     }
 }

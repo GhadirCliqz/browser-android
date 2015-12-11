@@ -15,6 +15,7 @@ import android.view.Window;
 import android.view.WindowManager;
 
 import com.cliqz.browser.utils.Telemetry;
+import com.cliqz.browser.webview.CliqzMessages;
 import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
 
@@ -39,9 +40,7 @@ public class MainActivity extends AppCompatActivity {
     private static final String SUGGESTIONS_FRAGMENT_TAG = "suggestions_fragment";
     private static final String LIGHTNING_FRAGMENT_TAG = "lightning_fragment";
 
-    private MainFragment mMainFragment;
-    private HistoryFragment mHistoryFragment;
-    private SuggestionsFragment mSuggestionsFragment;
+    private Fragment mFreshTabFragment, mMainFragment, mHistoryFragment;
 
     @Inject
     Bus bus;
@@ -68,6 +67,9 @@ public class MainActivity extends AppCompatActivity {
         }
 
         bus.register(this);
+
+        mFreshTabFragment = new FreshTabFragment();
+
         if(!preferenceManager.getOnBoardingComplete()) {
             setupApp();
             setContentView(R.layout.activity_on_boarding);
@@ -90,18 +92,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        String context = "";
-        if (mMainFragment != null && mMainFragment.isVisible()) {
-            if (mMainFragment.mState == MainFragment.State.SHOWING_BROWSER) {
-                context = "web";
-            } else {
-                context = "cards";
-            }
-        } else if (mHistoryFragment != null && mHistoryFragment.isVisible()) {
-            context = "past";
-        } else if (mSuggestionsFragment != null && mSuggestionsFragment.isVisible()) {
-            context = "future";
-        }
+        String context = getContext();
         if(!context.isEmpty()) {
             telemetry.sendStartingSignals(context);
         }
@@ -110,18 +101,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onPause() {
         super.onPause();
-        String context = "";
-        if (mMainFragment != null && mMainFragment.isVisible()) {
-            if (mMainFragment.mState == MainFragment.State.SHOWING_BROWSER) {
-                context = "web";
-            } else {
-                context = "cards";
-            }
-        } else if (mHistoryFragment != null && mHistoryFragment.isVisible()) {
-            context = "past";
-        } else if (mSuggestionsFragment != null && mSuggestionsFragment.isVisible()) {
-            context = "future";
-        }
+        String context = getContext();
         if(!context.isEmpty()) {
             telemetry.sendClosingSignals(Telemetry.Action.CLOSE, context);
         }
@@ -131,18 +111,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
         bus.unregister(this);
-        String context = "";
-        if (mMainFragment != null && mMainFragment.isVisible()) {
-            if (mMainFragment.mState == MainFragment.State.SHOWING_BROWSER) {
-                context = "web";
-            } else {
-                context = "cards";
-            }
-        } else if (mHistoryFragment != null && mHistoryFragment.isVisible()) {
-            context = "past";
-        } else if (mSuggestionsFragment != null && mSuggestionsFragment.isVisible()) {
-            context = "future";
-        }
+        String context = getContext();
         if(!context.isEmpty()) {
             telemetry.sendClosingSignals(Telemetry.Action.KILL, context);
         }
@@ -168,9 +137,23 @@ public class MainActivity extends AppCompatActivity {
         final FragmentManager fm = getSupportFragmentManager();
         fm.beginTransaction()
                 .setCustomAnimations(R.anim.enter_slide_up, R.anim.exit_slide_up, R.anim.enter_slide_down, R.anim.exit_slide_down)
-                .replace(android.R.id.content, mSuggestionsFragment = new SuggestionsFragment(), SUGGESTIONS_FRAGMENT_TAG)
+                .replace(android.R.id.content, mFreshTabFragment, SUGGESTIONS_FRAGMENT_TAG)
                 .addToBackStack(null)
                 .commit();
+    }
+
+    @Subscribe
+    public void goToLink(Messages.GoToLink event) {
+        final FragmentManager fm = getSupportFragmentManager();
+        final String url = event.url;
+        fm.popBackStack();
+        fm.addOnBackStackChangedListener(new FragmentManager.OnBackStackChangedListener() {
+            @Override
+            public void onBackStackChanged() {
+                fm.removeOnBackStackChangedListener(this);
+                bus.post(new CliqzMessages.OpenLink(url));
+            }
+        });
     }
 
     @Subscribe
@@ -259,5 +242,22 @@ public class MainActivity extends AppCompatActivity {
         shortCutIntent.putExtra(Intent.EXTRA_SHORTCUT_ICON_RESOURCE, icon);
         shortCutIntent.putExtra(Intent.EXTRA_SHORTCUT_INTENT, new Intent(getApplicationContext(), MainActivity.class));
         sendBroadcast(shortCutIntent);
+    }
+
+    //returns screen that is visible
+    private String getContext() {
+        String context = "";
+        if (mMainFragment != null && mMainFragment.isVisible()) {
+            if (((MainFragment)mMainFragment).mState == MainFragment.State.SHOWING_BROWSER) {
+                context = "web";
+            } else {
+                context = "cards";
+            }
+        } else if (mHistoryFragment != null && mHistoryFragment.isVisible()) {
+            context = "past";
+        } else if (mFreshTabFragment != null && mFreshTabFragment.isVisible()) {
+            context = "future";
+        }
+        return context;
     }
 }

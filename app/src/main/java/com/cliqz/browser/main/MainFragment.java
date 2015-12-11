@@ -6,7 +6,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.support.annotation.Nullable;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -16,13 +15,11 @@ import android.view.inputmethod.InputMethodManager;
 import android.webkit.WebView;
 import android.widget.FrameLayout;
 
-import com.cliqz.browser.utils.Telemetry;
-import com.cliqz.browser.webview.CliqzView;
+import com.cliqz.browser.webview.CliqzMessages;
+import com.cliqz.browser.webview.SearchWebView;
 import com.cliqz.browser.widget.AutocompleteEditText;
 import com.cliqz.browser.widget.SearchBar;
 import com.squareup.otto.Subscribe;
-
-import javax.inject.Inject;
 
 import acr.browser.lightning.R;
 import acr.browser.lightning.bus.BrowserEvents;
@@ -37,7 +34,7 @@ import butterknife.OnClick;
  * @author Stefano Pacifici
  * @date 2015/11/23
  */
-public class MainFragment extends BaseFragment implements CliqzView.CliqzCallbacks {
+public class MainFragment extends BaseFragment {
 
     enum State {
         SHOWING_SEARCH,
@@ -54,7 +51,7 @@ public class MainFragment extends BaseFragment implements CliqzView.CliqzCallbac
 
     State mState = State.SHOWING_SEARCH;
 
-    CliqzView mCliqzView = null;
+    SearchWebView mSearchWebView = null;
     LightningView mLightningView = null;
 
     @Bind(R.id.local_container)
@@ -81,18 +78,17 @@ public class MainFragment extends BaseFragment implements CliqzView.CliqzCallbac
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         ButterKnife.bind(this, view);
-        if (mCliqzView == null || mLightningView == null) {
-            mCliqzView = new CliqzView(view.getContext());
+        if (mSearchWebView == null || mLightningView == null) {
+            mSearchWebView = new SearchWebView(view.getContext());
             mLightningView = new LightningView(getActivity(), mUrl, false, "1");
-            mCliqzView.setLayoutParams(
+            mSearchWebView.setLayoutParams(
                     new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
         } else {
             final WebView webView = mLightningView.getWebView();
-            ((ViewGroup) mCliqzView.getParent()).removeView(mCliqzView);
+            ((ViewGroup) mSearchWebView.getParent()).removeView(mSearchWebView);
             ((ViewGroup) webView.getParent()).removeView(webView);
         }
-        mCliqzView.setResultListener(this);
-        MainFragmentListener.create(this);
+         MainFragmentListener.create(this);
         mLightningView.resumeTimers();
         final WebView webView = mLightningView.getWebView();
         webView.setId(R.id.right_drawer_list);
@@ -100,12 +96,34 @@ public class MainFragment extends BaseFragment implements CliqzView.CliqzCallbac
         if (mState == State.SHOWING_SEARCH) {
             searchBar.showSearchEditText();
             mContentContainer.addView(webView);
-            mContentContainer.addView(mCliqzView);
+            mContentContainer.addView(mSearchWebView);
         } else {
             updateTitle();
             searchBar.showTitleBar();
-            mContentContainer.addView(mCliqzView);
+            mContentContainer.addView(mSearchWebView);
             mContentContainer.addView(webView);
+        }
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        telemetry.sendLayerChangeSignal("present");
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (mSearchWebView != null) {
+            mSearchWebView.onResume();
+        }
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        if (mSearchWebView != null) {
+            mSearchWebView.onPause();
         }
     }
 
@@ -121,12 +139,6 @@ public class MainFragment extends BaseFragment implements CliqzView.CliqzCallbac
     }
 
     @Override
-    public void onStart() {
-        super.onStart();
-        telemetry.sendLayerChangeSignal("present");
-    }
-
-    @Override
     public void onViewStateRestored(@Nullable Bundle savedInstanceState) {
         super.onViewStateRestored(savedInstanceState);
         }
@@ -135,7 +147,7 @@ public class MainFragment extends BaseFragment implements CliqzView.CliqzCallbac
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         mLightningView.getWebView().saveState(outState);
-        mCliqzView.saveState(outState);
+        mSearchWebView.saveState(outState);
     }
 
     @Override
@@ -184,22 +196,6 @@ public class MainFragment extends BaseFragment implements CliqzView.CliqzCallbac
         showKeyBoard();
     }
 
-    @Override
-    public void onResultClicked(String url) {
-        telemetry.resetNavigationVariables(url.length());
-        delayedPostOnBus(new Messages.OpenResult(lastQuery, url));
-    }
-
-    @Override
-    public void onNotifyQuery(String query) {
-
-    }
-
-    @Override
-    public void onAutocompleteUrl(String str) {
-
-    }
-
     void showKeyBoard() {
         InputMethodManager inputMethodManager = (InputMethodManager) getActivity()
                 .getSystemService(getActivity().INPUT_METHOD_SERVICE);
@@ -233,23 +229,18 @@ public class MainFragment extends BaseFragment implements CliqzView.CliqzCallbac
     }
 
     @Subscribe
-    public void openResult(Messages.OpenResult event) {
+    public void openLink(CliqzMessages.OpenLink event) {
         final WebView webView = mLightningView.getWebView();
-//            final Animation slideInAnimation =
-//                    AnimationUtils.loadAnimation(getContext(), R.anim.slide_in_from_right);
-//            final Animation slideOutAnimation =
-//                    AnimationUtils.loadAnimation(getContext(), R.anim.slide_out_to_left);
-//            slideInAnimation.setFillAfter(true);
-//            slideOutAnimation.setFillAfter(true);
-//            mCliqzView.startAnimation(slideOutAnimation);
-//            webView.startAnimation(slideInAnimation);
+        final String eventUrl = event.url;
+        // final String eventQuery = lastQuery;
         searchBar.showTitleBar();
         webView.bringToFront();
         mState = State.SHOWING_BROWSER;
+        telemetry.resetNavigationVariables(eventUrl.length());
         final String url = Uri.parse(Constants.CLIQZ_TRAMPOLINE)
                 .buildUpon()
-                .appendQueryParameter("url", event.url)
-                .appendQueryParameter("q", event.query)
+                .appendQueryParameter("url", eventUrl)
+                .appendQueryParameter("q", lastQuery)
                 .build().toString();
         webView.loadUrl(url);
     }
@@ -271,17 +262,8 @@ public class MainFragment extends BaseFragment implements CliqzView.CliqzCallbac
 
     @Subscribe
     public void showSearch(Messages.ShowSearch event) {
-//            final WebView webView = mLightningView.getWebView();
-//            final Animation slideInAnimation =
-//                    AnimationUtils.loadAnimation(getContext(), R.anim.slide_in_from_left);
-//            final Animation slideOutAnimation =
-//                    AnimationUtils.loadAnimation(getContext(), R.anim.slide_out_to_right);
-//            slideInAnimation.setFillAfter(true);
-//            slideOutAnimation.setFillAfter(true);
-//            mCliqzView.startAnimation(slideInAnimation);
-//            webView.startAnimation(slideOutAnimation);
         searchBar.showSearchEditText();
-        mCliqzView.bringToFront();
+        mSearchWebView.bringToFront();
         mAutocompleteEditText.requestFocus();
         if (event != null) {
             mAutocompleteEditText.setText(event.query);

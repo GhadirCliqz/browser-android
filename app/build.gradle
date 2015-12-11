@@ -3,6 +3,14 @@ apply plugin: 'com.neenbedankt.android-apt'
 apply plugin: 'com.getkeepsafe.dexcount'
 
 android {
+    signingConfigs {
+        config {
+            keyAlias 'browser'
+            keyPassword 'cliqz-245'
+            storeFile file('/Users/stefano/Dropbox/cliqz/androidkey.jks')
+            storePassword 'cliqz-245'
+        }
+    }
     compileSdkVersion 23
     buildToolsVersion "23.0.1"
     defaultConfig {
@@ -62,31 +70,23 @@ dependencies {
     compile 'com.android.support:appcompat-v7:23.0.1'
     compile 'com.android.support:design:23.0.1'
     compile 'com.android.support:recyclerview-v7:23.0.1'
-    compile 'com.google.guava:guava:18.0'
-
     // html parsing fo reading mode
     compile 'org.jsoup:jsoup:1.8.3'
-
     // event bus
     compile 'com.squareup:otto:1.3.8'
-
     // dependency injection
     compile 'com.google.dagger:dagger:2.0.1'
     apt 'com.google.dagger:dagger-compiler:2.0.1'
-
     // view binding
     compile 'com.jakewharton:butterknife:7.0.1'
-
     // proxy support
     compile 'net.i2p.android:client:0.7'
     // Use the following code to update the libnetcipher submodule
     // git submodule foreach git reset --hard
     // git submodule update --remote
-    compile(project(':libnetcipher'))
-
+    compile project(':libnetcipher')
     // memory leak analysis
     debugCompile 'com.squareup.leakcanary:leakcanary-android:1.3.1'
     releaseCompile 'com.squareup.leakcanary:leakcanary-android-no-op:1.3.1'
-
     provided 'javax.annotation:jsr250-api:1.0'
 }

@@ -106,8 +106,9 @@ class LightningChromeClient extends WebChromeClient {
         }
         eventBus.post(new Messages.UpdateTitle());
         eventBus.post(new BrowserEvents.TabsChanged());
-        if (view != null && !mLightningView.mIsIncognitoTab) {
-            mLightningView.addItemToHistory(title, view.getUrl());
+        final String url = view != null ? view.getUrl() : null;
+        if (url != null && !url.startsWith("cliqz://") && !mLightningView.mIsIncognitoTab) {
+            mLightningView.addItemToHistory(title, url);
         }
 
     }

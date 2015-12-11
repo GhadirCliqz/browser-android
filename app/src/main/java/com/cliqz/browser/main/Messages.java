@@ -14,29 +14,11 @@ public final class Messages {
 
     public static class GoToSuggestions {}
 
-    public static class OpenResult {
-        public final String query;
-        public final String url;
-
-        public OpenResult(String query, String url) {
-            this.query = query;
-            this.url = url;
-        }
-    }
-
     public static class GoToSettings {}
 
     public static class UpdateTitle {}
 
     public static class GoToSearch {}
-
-    public static class SearchFor {
-        public final String query;
-
-        public SearchFor(String query) {
-            this.query = query;
-        }
-    }
 
     public static class BackPressed {}
 
@@ -51,6 +33,18 @@ public final class Messages {
 
         public ShowSearch(String query) {
             this.query = query;
+        }
+    }
+
+    /**
+     * This will make the app to transact to the Main fragment, the main fragment then will switch
+     * to browsing mode displaying the relative web page
+     */
+    public static class GoToLink {
+        public final String url;
+
+        public GoToLink(String url) {
+            this.url = url;
         }
     }
 }
