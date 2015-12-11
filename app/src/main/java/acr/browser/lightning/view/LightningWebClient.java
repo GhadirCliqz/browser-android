@@ -26,7 +26,6 @@ import android.webkit.WebViewClient;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 
-import com.cliqz.browser.main.MainActivity;
 import com.cliqz.browser.main.Messages;
 import com.squareup.otto.Bus;
 
@@ -343,7 +342,9 @@ class LightningWebClient extends WebViewClient {
             }
         }
         boolean startActivityForUrl = mIntentUtils.startActivityForUrl(view, url);
-        if(startActivityForUrl == false) {
+        if(startActivityForUrl == false && !url.contains(Constants.CLIQZ_TRAMPOLINE)
+                && mLightningView.clicked) {
+            mLightningView.clicked = false;
             mLightningView.telemetry.sendNavigationSignal(url.length());
         }
         return startActivityForUrl;

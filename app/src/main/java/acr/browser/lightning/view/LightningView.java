@@ -66,7 +66,6 @@ import acr.browser.lightning.preference.PreferenceManager;
 import acr.browser.lightning.utils.AdBlock;
 import acr.browser.lightning.utils.ProxyUtils;
 import acr.browser.lightning.utils.ThemeUtils;
-import acr.browser.lightning.utils.UrlUtils;
 import acr.browser.lightning.utils.Utils;
 
 public class LightningView implements ILightningTab {
@@ -97,6 +96,7 @@ public class LightningView implements ILightningTab {
     // TODO fix so that mWebpageBitmap can be static - static changes the icon when switching from light to dark and then back to light
     private Bitmap mWebpageBitmap;
     private boolean mTextReflow = false;
+    public boolean clicked = false;
 
 
     private static final float[] mNegativeColorArray = {
@@ -147,12 +147,7 @@ public class LightningView implements ILightningTab {
         mWebView.setFocusable(true);
         mWebView.setDrawingCacheEnabled(false);
         mWebView.setWillNotCacheDrawing(true);
-        mWebView.setOnScrollChangeListener(new View.OnScrollChangeListener() {
-            @Override
-            public void onScrollChange(View v, int scrollX, int scrollY, int oldScrollX, int oldScrollY) {
-                telemetry.hasPageScrolled = true;
-            }
-        });
+
         if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.LOLLIPOP_MR1) {
             //noinspection deprecation
             mWebView.setAnimationCacheEnabled(false);
@@ -858,6 +853,7 @@ public class LightningView implements ILightningTab {
             mY = arg1.getY();
             if (mAction == MotionEvent.ACTION_DOWN) {
                 mLocation = mY;
+                clicked = true;
             } else if (mAction == MotionEvent.ACTION_UP) {
                 final float distance = (mY - mLocation);
                 if (distance > SCROLL_UP_THRESHOLD && view.getScrollY() < SCROLL_UP_THRESHOLD) {
