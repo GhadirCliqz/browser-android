@@ -2,10 +2,7 @@ package com.cliqz.browser.main;
 
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.view.KeyEvent;
 import android.view.View;
-import android.widget.EditText;
-import android.widget.TextView;
 
 /**
  * @author Stefano Pacifici
@@ -27,10 +24,14 @@ class MainFragmentListener implements View.OnFocusChangeListener, TextWatcher {
     @Override
     public void onFocusChange(View v, boolean hasFocus) {
         if (!hasFocus) {
+            fragment.telemetry.sendURLBarBlurSignal();
             fragment.hideKeyboard();
             if(fragment.mState == MainFragment.State.SHOWING_BROWSER) {
                 fragment.searchBar.showTitleBar();
             }
+        } else {
+            String context = fragment.mState == MainFragment.State.SHOWING_BROWSER ? "web" : "cards";
+            fragment.telemetry.sendURLBarFocusSignal(context);
         }
     }
 

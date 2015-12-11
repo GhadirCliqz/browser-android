@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.support.annotation.Nullable;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -15,10 +16,13 @@ import android.view.inputmethod.InputMethodManager;
 import android.webkit.WebView;
 import android.widget.FrameLayout;
 
+import com.cliqz.browser.utils.Telemetry;
 import com.cliqz.browser.webview.CliqzView;
 import com.cliqz.browser.widget.AutocompleteEditText;
 import com.cliqz.browser.widget.SearchBar;
 import com.squareup.otto.Subscribe;
+
+import javax.inject.Inject;
 
 import acr.browser.lightning.R;
 import acr.browser.lightning.bus.BrowserEvents;
@@ -117,6 +121,12 @@ public class MainFragment extends BaseFragment implements CliqzView.CliqzCallbac
     }
 
     @Override
+    public void onStart() {
+        super.onStart();
+        telemetry.sendLayerChangeSignal("present");
+    }
+
+    @Override
     public void onViewStateRestored(@Nullable Bundle savedInstanceState) {
         super.onViewStateRestored(savedInstanceState);
         }
@@ -176,6 +186,7 @@ public class MainFragment extends BaseFragment implements CliqzView.CliqzCallbac
 
     @Override
     public void onResultClicked(String url) {
+        telemetry.resetNavigationVariables(url.length());
         delayedPostOnBus(new Messages.OpenResult(lastQuery, url));
     }
 

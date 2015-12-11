@@ -26,6 +26,7 @@ import android.webkit.WebViewClient;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 
+import com.cliqz.browser.main.MainActivity;
 import com.cliqz.browser.main.Messages;
 import com.squareup.otto.Bus;
 
@@ -341,6 +342,10 @@ class LightningWebClient extends WebViewClient {
                 return true;
             }
         }
-        return mIntentUtils.startActivityForUrl(view, url);
+        boolean startActivityForUrl = mIntentUtils.startActivityForUrl(view, url);
+        if(startActivityForUrl == false) {
+            mLightningView.telemetry.sendNavigationSignal(url.length());
+        }
+        return startActivityForUrl;
     }
 }

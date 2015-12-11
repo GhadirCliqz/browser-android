@@ -265,7 +265,7 @@ public class HistoryDatabase extends SQLiteOpenHelper {
         return n;
     }
 
-    public HistoryItem getFirstHistoryItem() {
+    public synchronized HistoryItem getFirstHistoryItem() {
         openIfNecessary();
         HistoryItem firstHistoryItem = null;
         String selectQuery = "SELECT * FROM " + TABLE_HISTORY + " ORDER BY " + KEY_TIME_VISITED
@@ -274,6 +274,7 @@ public class HistoryDatabase extends SQLiteOpenHelper {
         Cursor cursor = mDatabase.rawQuery(selectQuery, null);
 
         if(cursor.moveToFirst()) {
+            firstHistoryItem = new HistoryItem();
             firstHistoryItem.setUrl(cursor.getString(1));
             firstHistoryItem.setTitle(cursor.getString(2));
             firstHistoryItem.setTimestamp(cursor.getLong(3));

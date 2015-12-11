@@ -39,6 +39,7 @@ import android.webkit.WebSettings.LayoutAlgorithm;
 import android.webkit.WebSettings.PluginState;
 import android.webkit.WebView;
 
+import com.cliqz.browser.utils.Telemetry;
 import com.squareup.otto.Bus;
 
 import java.io.File;
@@ -119,6 +120,9 @@ public class LightningView implements ILightningTab {
     @Inject
     HistoryDatabase mHistoryDatabase;
 
+    @Inject
+    Telemetry telemetry;
+
     public LightningView(Activity activity, String url, boolean isIncognito, String uniqueId) {
         this(activity, url, isIncognito, uniqueId, null, null);
     }
@@ -143,6 +147,12 @@ public class LightningView implements ILightningTab {
         mWebView.setFocusable(true);
         mWebView.setDrawingCacheEnabled(false);
         mWebView.setWillNotCacheDrawing(true);
+        mWebView.setOnScrollChangeListener(new View.OnScrollChangeListener() {
+            @Override
+            public void onScrollChange(View v, int scrollX, int scrollY, int oldScrollX, int oldScrollY) {
+                telemetry.hasPageScrolled = true;
+            }
+        });
         if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.LOLLIPOP_MR1) {
             //noinspection deprecation
             mWebView.setAnimationCacheEnabled(false);

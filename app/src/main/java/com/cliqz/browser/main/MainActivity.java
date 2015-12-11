@@ -39,7 +39,9 @@ public class MainActivity extends AppCompatActivity {
     private static final String SUGGESTIONS_FRAGMENT_TAG = "suggestions_fragment";
     private static final String LIGHTNING_FRAGMENT_TAG = "lightning_fragment";
 
-    // private Fragment mHistoryFragment, mSearchFragment, mSuggestionsFragment;
+    private MainFragment mMainFragment;
+    private HistoryFragment mHistoryFragment;
+    private SuggestionsFragment mSuggestionsFragment;
 
     @Inject
     Bus bus;
@@ -74,7 +76,7 @@ public class MainActivity extends AppCompatActivity {
             pager.addOnPageChangeListener(onPageChangeListener);
         } else {
             final FragmentManager fm = getSupportFragmentManager();
-            fm.beginTransaction().add(android.R.id.content, new MainFragment(), SEARCH_FRAGMENT_TAG).commit();
+            fm.beginTransaction().add(android.R.id.content, mMainFragment = new MainFragment(), SEARCH_FRAGMENT_TAG).commit();
         }
 
         int currentVersionCode = BuildConfig.VERSION_CODE;
@@ -85,45 +87,65 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    /* TODO Restore this
     @Override
     protected void onResume() {
         super.onResume();
-        String context;
-        //TODO Split present into web and card
-        if(mSearchFragment.isVisible()) {
-            context = "present";
-        } else if(mHistoryFragment.isVisible()) {
+        String context = "";
+        if (mMainFragment != null && mMainFragment.isVisible()) {
+            if (mMainFragment.mState == MainFragment.State.SHOWING_BROWSER) {
+                context = "web";
+            } else {
+                context = "cards";
+            }
+        } else if (mHistoryFragment != null && mHistoryFragment.isVisible()) {
             context = "past";
-        } else if(mSuggestionsFragment.isVisible()) {
+        } else if (mSuggestionsFragment != null && mSuggestionsFragment.isVisible()) {
             context = "future";
-        } else {
-            context = "present";
         }
-        telemetry.sendStartingSignals(context);
+        if(!context.isEmpty()) {
+            telemetry.sendStartingSignals(context);
+        }
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        String context;
-        //TODO Split present into web and card
-        if(mSearchFragment.isVisible()) {
-            context = "present";
-        } else if(mHistoryFragment.isVisible()) {
+        String context = "";
+        if (mMainFragment != null && mMainFragment.isVisible()) {
+            if (mMainFragment.mState == MainFragment.State.SHOWING_BROWSER) {
+                context = "web";
+            } else {
+                context = "cards";
+            }
+        } else if (mHistoryFragment != null && mHistoryFragment.isVisible()) {
             context = "past";
-        } else if(mSuggestionsFragment.isVisible()) {
+        } else if (mSuggestionsFragment != null && mSuggestionsFragment.isVisible()) {
             context = "future";
-        } else {
-            context = "present";
         }
-        telemetry.sendClosingSignals(context);
-    }*/
+        if(!context.isEmpty()) {
+            telemetry.sendClosingSignals(Telemetry.Action.CLOSE, context);
+        }
+    }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
         bus.unregister(this);
+        String context = "";
+        if (mMainFragment != null && mMainFragment.isVisible()) {
+            if (mMainFragment.mState == MainFragment.State.SHOWING_BROWSER) {
+                context = "web";
+            } else {
+                context = "cards";
+            }
+        } else if (mHistoryFragment != null && mHistoryFragment.isVisible()) {
+            context = "past";
+        } else if (mSuggestionsFragment != null && mSuggestionsFragment.isVisible()) {
+            context = "future";
+        }
+        if(!context.isEmpty()) {
+            telemetry.sendClosingSignals(Telemetry.Action.KILL, context);
+        }
     }
 
     @Override
@@ -136,7 +158,7 @@ public class MainActivity extends AppCompatActivity {
         final FragmentManager fm = getSupportFragmentManager();
         fm.beginTransaction()
                 .setCustomAnimations(R.anim.enter_slide_down, R.anim.exit_slide_down, R.anim.enter_slide_up, R.anim.exit_slide_up)
-                .replace(android.R.id.content, new HistoryFragment(), HISTORY_FRAGMENT_TAG)
+                .replace(android.R.id.content, mHistoryFragment = new HistoryFragment(), HISTORY_FRAGMENT_TAG)
                 .addToBackStack(null)
                 .commit();
     }
@@ -146,7 +168,7 @@ public class MainActivity extends AppCompatActivity {
         final FragmentManager fm = getSupportFragmentManager();
         fm.beginTransaction()
                 .setCustomAnimations(R.anim.enter_slide_up, R.anim.exit_slide_up, R.anim.enter_slide_down, R.anim.exit_slide_down)
-                .replace(android.R.id.content, new SuggestionsFragment(), SUGGESTIONS_FRAGMENT_TAG)
+                .replace(android.R.id.content, mSuggestionsFragment = new SuggestionsFragment(), SUGGESTIONS_FRAGMENT_TAG)
                 .addToBackStack(null)
                 .commit();
     }
@@ -217,7 +239,7 @@ public class MainActivity extends AppCompatActivity {
         long curTime = System.currentTimeMillis();
         telemetry.sendOnBoardingHideSignal(1, curTime - startTime);
         final FragmentManager fm = getSupportFragmentManager();
-        fm.beginTransaction().add(android.R.id.content, new MainFragment(), SEARCH_FRAGMENT_TAG).commit();
+        fm.beginTransaction().add(android.R.id.content, mMainFragment = new MainFragment(), SEARCH_FRAGMENT_TAG).commit();
     }
 
     private void setupApp() {
