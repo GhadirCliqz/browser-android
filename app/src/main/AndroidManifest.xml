@@ -33,8 +33,8 @@
         <activity
             android:name="com.cliqz.browser.main.MainActivity"
             android:label="@string/cliqz_app_name"
-            android:screenOrientation="portrait"
             android:theme="@style/Theme.LightTheme" >
+            <!-- android:screenOrientation="portrait" -->
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

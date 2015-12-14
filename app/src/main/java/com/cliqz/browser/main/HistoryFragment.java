@@ -7,11 +7,15 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewGroup.LayoutParams;
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
 import android.widget.ImageView;
 
 import com.squareup.otto.Subscribe;
 
 import acr.browser.lightning.R;
+import acr.browser.lightning.constant.HistoryPage;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
@@ -21,13 +25,24 @@ import butterknife.OnClick;
  */
 public class HistoryFragment extends BaseFragment {
 
-    private ImageView mView;
+    private WebView mView;
 
     @Override
     protected View onCreateContentView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        mView = new ImageView(inflater.getContext());
-        mView.setImageResource(R.drawable.history);
-        mView.setScaleType(ImageView.ScaleType.FIT_XY);
+        mView = new WebView(inflater.getContext());
+        mView.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
+        mView.loadUrl(HistoryPage.getHistoryPage(inflater.getContext()));
+        mView.setWebViewClient(new WebViewClient() {
+            @Override
+            public boolean shouldOverrideUrlLoading(WebView view, String url) {
+                if (url.startsWith("file")) {
+                    return false;
+                }
+
+                bus.post(new Messages.GoToLink(url));
+                return true;
+            }
+        });
         return mView;
     }
 
