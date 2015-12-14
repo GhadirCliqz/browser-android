@@ -106,6 +106,12 @@ public class MainFragment extends BaseFragment {
     }
 
     @Override
+    public void onStart() {
+        super.onStart();
+        telemetry.sendLayerChangeSignal("present");
+    }
+
+    @Override
     public void onResume() {
         super.onResume();
         if (mSearchWebView != null) {
@@ -230,9 +236,10 @@ public class MainFragment extends BaseFragment {
         searchBar.showTitleBar();
         webView.bringToFront();
         mState = State.SHOWING_BROWSER;
+        telemetry.resetNavigationVariables(eventUrl.length());
         final String url = Uri.parse(Constants.CLIQZ_TRAMPOLINE)
                 .buildUpon()
-                .appendQueryParameter("url", event.url)
+                .appendQueryParameter("url", eventUrl)
                 .appendQueryParameter("q", lastQuery)
                 .build().toString();
         webView.loadUrl(url);

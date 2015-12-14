@@ -2,6 +2,7 @@ package com.cliqz.browser.main;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -54,6 +55,12 @@ public class HistoryFragment extends BaseFragment {
     @Override
     protected int getFragmentTheme() {
         return R.style.Theme_Cliqz_History;
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        telemetry.sendLayerChangeSignal("past");
     }
 
     @Nullable

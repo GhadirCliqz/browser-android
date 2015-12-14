@@ -2,6 +2,7 @@ package com.cliqz.browser.main;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -73,6 +74,12 @@ public class FreshTabFragment extends BaseFragment {
         View view = inflater.inflate(R.layout.fragment_suggestions_toolbar, container, false);
         ButterKnife.bind(this, view);
         return view;
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        telemetry.sendLayerChangeSignal("future");
     }
 
     @OnClick(R.id.menu_search)

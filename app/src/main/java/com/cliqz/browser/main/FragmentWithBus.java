@@ -2,6 +2,7 @@ package com.cliqz.browser.main;
 
 import android.support.v4.app.Fragment;
 
+import com.cliqz.browser.utils.Telemetry;
 import com.squareup.otto.Bus;
 
 import javax.inject.Inject;
@@ -19,6 +20,9 @@ public abstract class FragmentWithBus extends Fragment {
     @Inject
     Bus bus;
 
+    @Inject
+    Telemetry telemetry;
+
     public FragmentWithBus() {
         super();
         BrowserApp.getAppComponent().inject(this);
@@ -35,4 +39,5 @@ public abstract class FragmentWithBus extends Fragment {
         super.onResume();
         bus.register(this);
     }
+
 }

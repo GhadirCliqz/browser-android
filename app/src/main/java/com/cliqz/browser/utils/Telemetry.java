@@ -74,6 +74,12 @@ public class Telemetry {
         private static final String ONBOARDING = "onboarding";
         private static final String CURRENT_LAYER = "current_layer";
         private static final String NEXT_LAYER = "next_layer";
+        private static final String STEP = "step";
+        private static final String URL_LENGTH = "url_length";
+        private static final String HAS_SCROLLED = "has_scrolled";
+        private static final String NAVIGATION = "navigation";
+        private static final String CURRENT_CONTEXT = "current_context";
+        private static final String NEXT_CONTEXT = "next_context";
     }
 
     public static class Action {
@@ -81,6 +87,7 @@ public class Telemetry {
         public static final String INSTALL = "install";
         public static final String UPDATE = "update";
         public static final String URLBAR_FOCUS = "urlbar_focus";
+        public static final String URLBAR_BLUR = "urlbar_blur";
         public static final String KEY_STROKE = "key_stroke";
         public static final String KEYSTROKE_DEL = "keystroke_del";
         public static final String PASTE = "paste";
@@ -91,6 +98,8 @@ public class Telemetry {
         public static final String CLOSE = "close";
         public static final String KILL = "kill";
         public static final String LAYER_CHANGE = "layer_change";
+        public static final String LOCATION_CHANGE = "location_change";
+        public static final String BACK = "back";
     }
 
     @Inject
@@ -100,10 +109,12 @@ public class Telemetry {
     HistoryDatabase mHistoryDatabase;
 
     private HashMap<String, Object> signal;
-    private String currentNetwork;
+    private String currentNetwork, currentLayer;
     private Context context;
-    private int batteryLevel;
-    private long appStartTime, appEndTime, networkStartTime;
+    private int batteryLevel, forwardStep, backStep, urlLength;
+    private long appStartTime, appEndTime, networkStartTime, layerStartTime, pageStartTime;
+
+    public boolean hasPageScrolled;
 
     /**
      * Sends a telemetry signal related to the application life cycle: install/update
@@ -136,11 +147,25 @@ public class Telemetry {
         sendSignal();
     }
 
-    public void sendURLBarFocusChange(String focused) {
+    /**
+     * Send a telemetry signal when the url bar gets focus
+     * @param context The screen which is visible when the signal is sent. (Web or Cards)
+     */
+    public void sendURLBarFocusSignal(String context) {
         signal.clear();
         signal.put(Key.TYPE, Key.ACTIVITY);
         signal.put(Key.ACTION, Action.URLBAR_FOCUS);
-        signal.put(Key.CONTEXT, focused);
+        signal.put(Key.CONTEXT, context);
+        sendSignal();
+    }
+
+    /**
+     * Send a telemetry signal when the url bar looses focus
+     */
+    public void sendURLBarBlurSignal() {
+        signal.clear();
+        signal.put(Key.TYPE, Key.ACTIVITY);
+        signal.put(Key.ACTION, Action.URLBAR_BLUR);
         sendSignal();
     }
 
@@ -198,18 +223,23 @@ public class Telemetry {
 
     /**
      * Send a telemetry signal when the user switches between the past, present and future layers
-     * @param currentLayer The layer visible before switching/changing
-     * @param nextLayer The layer visible after switching/changing
+     * @param newLayer The layer visible after switching/changing fragments
      */
-    //TODO Implement function calls in MainActivity
-    public void sendLayerChangeSignal(String currentLayer, String nextLayer, long displayTime) {
-        signal.clear();
-        signal.put(Key.TYPE, Key.ACTIVITY);
-        signal.put(Key.ACTION, Action.LAYER_CHANGE);
-        signal.put(Key.CURRENT_LAYER, currentLayer);
-        signal.put(Key.NEXT_LAYER, nextLayer);
-        signal.put(Key.DISPLAY_TIME, displayTime);
-        sendSignal();
+    public void sendLayerChangeSignal(String newLayer) {
+        if(currentLayer == null || currentLayer.isEmpty()) {
+            layerStartTime = getUnixTimeStamp();
+            currentLayer = newLayer;
+        } else {
+            signal.clear();
+            signal.put(Key.TYPE, Key.ACTIVITY);
+            signal.put(Key.ACTION, Action.LAYER_CHANGE);
+            signal.put(Key.CURRENT_LAYER, currentLayer);
+            signal.put(Key.NEXT_LAYER, newLayer);
+            signal.put(Key.DISPLAY_TIME, getUnixTimeStamp() - layerStartTime);
+            layerStartTime = getUnixTimeStamp();
+            currentLayer = newLayer;
+            sendSignal();
+        }
     }
 
     /**
@@ -255,7 +285,7 @@ public class Telemetry {
     }
 
     /**
-     * Send telemetry signals when the app starts/comes to foreground
+     * Send telemetry signal when the app starts/comes to foreground
      * @param context the layer which is visble
      */
     public void sendStartingSignals(String context) {
@@ -267,13 +297,74 @@ public class Telemetry {
     }
 
     /**
-     * Send telemtry signals when the app closes/goes to background
+     * Send telemetry signal when the app closes/goes to background
      * @param context the layer which is visible
      */
-    public void sendClosingSignals(String context) {
+    public void sendClosingSignals(String context, String closeOrKill) {
         appEndTime = getUnixTimeStamp();
+        currentLayer = "";
         sendNetworkStatus();
-        sendAppUsageSignal("close", context);
+        sendAppUsageSignal(closeOrKill, context);
+    }
+
+    /**
+     * Send telemetry signal when the user navigates deeper into the web-page
+     * @param urlLength length of the url of the new page
+     */
+    public void sendNavigationSignal(int urlLength) {
+        signal.clear();
+        signal.put(Key.TYPE, Key.NAVIGATION);
+        signal.put(Key.ACTION, Action.LOCATION_CHANGE);
+        signal.put(Key.STEP, forwardStep);
+        signal.put(Key.URL_LENGTH, this.urlLength);
+        signal.put(Key.DISPLAY_TIME, getUnixTimeStamp() - pageStartTime);
+        forwardStep++;
+        pageStartTime = getUnixTimeStamp();
+        this.urlLength =urlLength;
+        resetBackNavigationVariables(urlLength);
+        sendSignal();
+    }
+
+    /**
+     * Send telemetry signal when the user presses the back button
+     * @param currentContext The screen which was visible before pressing back
+     * @param nextContext The screen which is visible after pressing back
+     * @param urlLength Length of the url/query in the url bar
+     */
+    public void sendBackPressedSignal(String currentContext, String nextContext, int urlLength) {
+        signal.clear();
+        signal.put(Key.TYPE, Key.NAVIGATION);
+        signal.put(Key.ACTION, Action.BACK);
+        signal.put(Key.STEP, this.backStep);
+        signal.put(Key.URL_LENGTH, this.urlLength);
+        signal.put(Key.DISPLAY_TIME, getUnixTimeStamp() - pageStartTime);
+        signal.put(Key.CURRENT_CONTEXT, currentContext);
+        signal.put(Key.NEXT_CONTEXT, nextContext);
+        backStep++;
+        this.urlLength = urlLength;
+        pageStartTime = getUnixTimeStamp();
+        sendSignal();
+    }
+
+    /**
+     * Reset counter for the internet navigation signal.
+     * Currently it is reset when the user clicks on a link from the search results(cards)
+     * @param urlLength length of the url of the current web page
+     */
+    public void resetNavigationVariables(int urlLength) {
+        pageStartTime = getUnixTimeStamp();
+        forwardStep = 1;
+        this.urlLength = urlLength;
+    }
+
+    /**
+     * Reset counter for the back navigation signal
+     * @param urlLength length of the url of the current web page
+     */
+    public void resetBackNavigationVariables(int urlLength) {
+        pageStartTime = getUnixTimeStamp();
+        backStep = 1;
+        this.urlLength = urlLength;
     }
 
     //converts the signal to json and post the signal to the logger
@@ -284,6 +375,10 @@ public class Telemetry {
         //new HttpHandler(mPreferenceManager).execute(jsonArray.toString());
     }
 
+    /**
+     * Posts the telemetry signal sent by the extension, to the logger
+     * @param signal Telemetry signal by the extension
+     */
     public void sendSignal(JSONObject signal) {
         int telemetrySequence = mPreferenceManager.getTelemetrySequence();
         try {
@@ -293,7 +388,6 @@ public class Telemetry {
             mPreferenceManager.setTelemetrySequence(telemetrySequence);
             JSONArray jsonArray = new JSONArray().put(signal);
             //new HttpHandler(mPreferenceManager).execute(jsonArray.toString());
-            Log.d("Telemetry Extension", signal.toString());
         } catch (JSONException e) {
             Log.e(Constants.TAG, "JSONException in Telemetry", e);
         }
