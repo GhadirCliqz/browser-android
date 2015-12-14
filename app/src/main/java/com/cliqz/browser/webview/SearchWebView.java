@@ -27,18 +27,6 @@ public class SearchWebView extends BaseWebView {
     private CharSequence mLastQuery;
     private boolean mProfilingRunning = false;
 
-    // Package visible to support the new brigde
-    // CliqzCallbacks mListener;
-
-
-    /* public interface CliqzCallbacks {
-        void onResultClicked(final String url);
-
-        void onNotifyQuery(final String query);
-
-        void onAutocompleteUrl(final String str);
-    } */
-
     public SearchWebView(Context context) {
         super(context);
     }

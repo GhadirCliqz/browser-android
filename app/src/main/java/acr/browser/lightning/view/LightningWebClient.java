@@ -341,6 +341,8 @@ class LightningWebClient extends WebViewClient {
                 return true;
             }
         }
-        return mIntentUtils.startActivityForUrl(view, url);
+        // CLIQZ! We do not want to open external app from our browser, so we return false here
+        // return mIntentUtils.startActivityForUrl(view, url);
+        return false;
     }
 }

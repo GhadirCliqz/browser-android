@@ -135,7 +135,7 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
-        <activity
+        <!-- activity
             android:name=".activity.IncognitoActivity"
             android:alwaysRetainTaskState="true"
             android:configChanges="orientation|screenSize|keyboardHidden|keyboard"
@@ -149,7 +149,7 @@
 
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
-        </activity>
+        </activity -->
         <activity
             android:name=".activity.ReadingActivity"
             android:configChanges="orientation|screenSize|keyboardHidden|keyboard"
