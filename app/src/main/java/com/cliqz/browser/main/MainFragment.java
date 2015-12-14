@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.support.annotation.Nullable;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -35,6 +36,10 @@ import butterknife.OnClick;
  * @date 2015/11/23
  */
 public class MainFragment extends BaseFragment {
+
+    private static final String TAG = MainFragment.class.getSimpleName();
+    private static final String STATE_KEY = TAG + ".STATE";
+    private static final String NAVIGATION_STATE_KEY = TAG + ".NAVIGATION_STATE";
 
     enum State {
         SHOWING_SEARCH,
@@ -88,11 +93,23 @@ public class MainFragment extends BaseFragment {
             ((ViewGroup) mSearchWebView.getParent()).removeView(mSearchWebView);
             ((ViewGroup) webView.getParent()).removeView(webView);
         }
-         MainFragmentListener.create(this);
+
+        MainFragmentListener.create(this);
         mLightningView.resumeTimers();
         final WebView webView = mLightningView.getWebView();
         webView.setId(R.id.right_drawer_list);
-        // TODO I don't like this is too dirty, let's see if we can do better
+        if (savedInstanceState != null) {
+            final String stateName = savedInstanceState.getString(STATE_KEY);
+            final Bundle webViewOutState = savedInstanceState.getBundle(NAVIGATION_STATE_KEY);
+            if (webViewOutState != null) {
+                webView.restoreState(webViewOutState);
+            }
+            try {
+                mState = State.valueOf(stateName);
+            } catch (IllegalArgumentException e) {
+                Log.i(TAG, "Can't convert " + stateName + " to state enum");
+            }
+        }
         if (mState == State.SHOWING_SEARCH) {
             searchBar.showSearchEditText();
             mContentContainer.addView(webView);
@@ -106,16 +123,37 @@ public class MainFragment extends BaseFragment {
     }
 
     @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+    }
+
+    @Override
     public void onStart() {
         super.onStart();
         telemetry.sendLayerChangeSignal("present");
     }
 
     @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putString(STATE_KEY, mState.toString());
+        final WebView webView = mLightningView != null ? mLightningView.getWebView() : null;
+        if (webView != null) {
+            final Bundle webViewOutState = new Bundle();
+            webView.saveState(webViewOutState);
+            outState.putBundle(NAVIGATION_STATE_KEY, webViewOutState);
+        }
+    }
+
+    @Override
     public void onResume() {
         super.onResume();
+        final String query = mAutocompleteEditText.getQuery();
         if (mSearchWebView != null) {
             mSearchWebView.onResume();
+            if (query != null && !query.isEmpty()) {
+                mSearchWebView.onQueryChanged(query);
+            }
         }
     }
 
@@ -138,17 +176,19 @@ public class MainFragment extends BaseFragment {
         super.onDestroy();
     }
 
-    @Override
+/*    @Override
     public void onViewStateRestored(@Nullable Bundle savedInstanceState) {
         super.onViewStateRestored(savedInstanceState);
-        }
+    }
+
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        mLightningView.getWebView().saveState(outState);
-        mSearchWebView.saveState(outState);
-    }
+        if (mSearchWebView != null) {
+            mSearchWebView.saveState(outState);
+        }
+    } */
 
     @Override
     protected int getMenuResource() {

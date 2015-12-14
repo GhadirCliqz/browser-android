@@ -38,7 +38,6 @@ public class MainActivity extends AppCompatActivity {
     private static final String HISTORY_FRAGMENT_TAG = "history_fragment";
     private static final String SEARCH_FRAGMENT_TAG = "search_fragment";
     private static final String SUGGESTIONS_FRAGMENT_TAG = "suggestions_fragment";
-    private static final String LIGHTNING_FRAGMENT_TAG = "lightning_fragment";
 
     private Fragment mFreshTabFragment, mMainFragment, mHistoryFragment;
 
@@ -69,6 +68,8 @@ public class MainActivity extends AppCompatActivity {
         bus.register(this);
 
         mFreshTabFragment = new FreshTabFragment();
+        mHistoryFragment = new HistoryFragment();
+        mMainFragment = new MainFragment();
 
         if(!preferenceManager.getOnBoardingComplete()) {
             setupApp();
@@ -76,9 +77,9 @@ public class MainActivity extends AppCompatActivity {
             pager = (ViewPager) findViewById(R.id.viewpager);
             pager.setAdapter(new PagerAdapter(getSupportFragmentManager()));
             pager.addOnPageChangeListener(onPageChangeListener);
-        } else {
+        } else if (savedInstanceState == null) {
             final FragmentManager fm = getSupportFragmentManager();
-            fm.beginTransaction().add(android.R.id.content, mMainFragment = new MainFragment(), SEARCH_FRAGMENT_TAG).commit();
+            fm.beginTransaction().add(android.R.id.content, mMainFragment, SEARCH_FRAGMENT_TAG).commit();
         }
 
         int currentVersionCode = BuildConfig.VERSION_CODE;
@@ -127,7 +128,7 @@ public class MainActivity extends AppCompatActivity {
         final FragmentManager fm = getSupportFragmentManager();
         fm.beginTransaction()
                 .setCustomAnimations(R.anim.enter_slide_down, R.anim.exit_slide_down, R.anim.enter_slide_up, R.anim.exit_slide_up)
-                .replace(android.R.id.content, mHistoryFragment = new HistoryFragment(), HISTORY_FRAGMENT_TAG)
+                .replace(android.R.id.content, mHistoryFragment, HISTORY_FRAGMENT_TAG)
                 .addToBackStack(null)
                 .commit();
     }

@@ -69,6 +69,10 @@ public class AutocompleteEditText extends EditText {
         }
     }
 
+    public String getQuery() {
+        return getText().toString().substring(0, getSelectionStart());
+    }
+
     /*
     @Override
     public boolean onKeyPreIme (int keyCode, KeyEvent event) {
