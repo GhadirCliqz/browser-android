@@ -1,6 +1,7 @@
 package com.cliqz.browser.main;
 
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcelable;
@@ -14,6 +15,7 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 
+import com.cliqz.browser.utils.LocationCache;
 import com.cliqz.browser.utils.Telemetry;
 import com.cliqz.browser.webview.CliqzMessages;
 import com.squareup.otto.Bus;
@@ -49,6 +51,9 @@ public class MainActivity extends AppCompatActivity {
 
     @Inject
     Telemetry telemetry;
+
+    @Inject
+    LocationCache locationCache;
 
     ViewPager pager;
 
@@ -91,28 +96,36 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        // Handle configuration changes
+        super.onConfigurationChanged(newConfig);
+    }
+
+    @Override
     protected void onResume() {
         super.onResume();
-        String context = getContext();
+        String context = getCurrentVisibleFragmentName();
         if(!context.isEmpty()) {
             telemetry.sendStartingSignals(context);
         }
+        locationCache.start();
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        String context = getContext();
+        String context = getCurrentVisibleFragmentName();
         if(!context.isEmpty()) {
             telemetry.sendClosingSignals(Telemetry.Action.CLOSE, context);
         }
+        locationCache.stop();
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
         bus.unregister(this);
-        String context = getContext();
+        String context = getCurrentVisibleFragmentName();
         if(!context.isEmpty()) {
             telemetry.sendClosingSignals(Telemetry.Action.KILL, context);
         }
@@ -246,7 +259,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     //returns screen that is visible
-    private String getContext() {
+    private String getCurrentVisibleFragmentName() {
         String context = "";
         if (mMainFragment != null && mMainFragment.isVisible()) {
             if (((MainFragment)mMainFragment).mState == MainFragment.State.SHOWING_BROWSER) {

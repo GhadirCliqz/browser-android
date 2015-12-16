@@ -142,7 +142,7 @@ public class SearchWebView extends BaseWebView {
         final double lon = hasLocation ? location.getLongitude() : 0.0;
         final String call = String.format(Locale.getDefault(),
                 "search_mobile('%1$s', %2$b, %3$.6f, %4$.6f)",
-                query.toLowerCase(), hasLocation, lat, lon);
+                lowerQuery, hasLocation, lat, lon);
 
         if (query.length() > 0) {
             executeJS(call);

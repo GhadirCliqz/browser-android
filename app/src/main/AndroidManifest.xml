@@ -29,6 +29,7 @@
         android:hardwareAccelerated="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/cliqz_app_name"
+        android:configChanges="orientation|screenSize|keyboardHidden|keyboard"
         tools:replace="android:label" >
         <activity
             android:name="com.cliqz.browser.main.MainActivity"

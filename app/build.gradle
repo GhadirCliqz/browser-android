@@ -16,13 +16,13 @@ android {
     defaultConfig {
         minSdkVersion 14
         targetSdkVersion 23
-        versionName "0.2"
+        versionName "0.3"
 
         buildConfigField 'String', 'LIGHTNING_VERSION_NAME', '"4.2.3.1"'
         buildConfigField "boolean", "FULL_VERSION", "true"
 
         applicationId "com.cliqz.browser"
-        versionCode 1
+        versionCode 16
     }
     buildTypes {
         debug {
@@ -32,7 +32,7 @@ android {
         }
 
         release {
-            minifyEnabled true
+            minifyEnabled false
             shrinkResources true
             proguardFiles 'proguard-project.txt'
         }
