@@ -2,6 +2,7 @@ package com.cliqz.browser.main;
 
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcelable;
@@ -12,12 +13,16 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewGroup.LayoutParams;
 import android.view.Window;
+import android.view.WindowInsets;
 import android.view.WindowManager;
+import android.widget.FrameLayout;
 
 import com.cliqz.browser.utils.LocationCache;
 import com.cliqz.browser.utils.Telemetry;
 import com.cliqz.browser.webview.CliqzMessages;
+import com.cliqz.browser.widget.MainViewContainer;
 import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
 
@@ -28,6 +33,8 @@ import acr.browser.lightning.R;
 import acr.browser.lightning.activity.SettingsActivity;
 import acr.browser.lightning.app.BrowserApp;
 import acr.browser.lightning.preference.PreferenceManager;
+
+import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 
 /**
  * Flat navigation browser
@@ -41,6 +48,8 @@ public class MainActivity extends AppCompatActivity {
     private static final String SEARCH_FRAGMENT_TAG = "search_fragment";
     private static final String SUGGESTIONS_FRAGMENT_TAG = "suggestions_fragment";
 
+    private static final int CONTENT_VIEW_ID = R.id.main_activity_content;
+    
     private Fragment mFreshTabFragment, mMainFragment, mHistoryFragment;
 
     @Inject
@@ -77,14 +86,13 @@ public class MainActivity extends AppCompatActivity {
         mMainFragment = new MainFragment();
 
         if(!preferenceManager.getOnBoardingComplete()) {
-            setupApp();
+            createAppShortcutOnHomeScreen();
             setContentView(R.layout.activity_on_boarding);
             pager = (ViewPager) findViewById(R.id.viewpager);
             pager.setAdapter(new PagerAdapter(getSupportFragmentManager()));
             pager.addOnPageChangeListener(onPageChangeListener);
         } else if (savedInstanceState == null) {
-            final FragmentManager fm = getSupportFragmentManager();
-            fm.beginTransaction().add(android.R.id.content, mMainFragment, SEARCH_FRAGMENT_TAG).commit();
+            setupContentView();
         }
 
         int currentVersionCode = BuildConfig.VERSION_CODE;
@@ -93,6 +101,17 @@ public class MainActivity extends AppCompatActivity {
             preferenceManager.setVersionCode(currentVersionCode);
             telemetry.sendLifeCycleSignal(Telemetry.Action.UPDATE);
         }
+    }
+
+    private void setupContentView() {
+        final MainViewContainer content = new MainViewContainer(this);
+        content.setFitsSystemWindows(true);
+        content.setBackgroundColor(Color.RED);
+        final LayoutParams params = new LayoutParams(MATCH_PARENT, MATCH_PARENT);
+        content.setId(CONTENT_VIEW_ID);
+        setContentView(content, params);
+        final FragmentManager fm = getSupportFragmentManager();
+        fm.beginTransaction().add(CONTENT_VIEW_ID, mMainFragment, SEARCH_FRAGMENT_TAG).commit();
     }
 
     @Override
@@ -141,7 +160,7 @@ public class MainActivity extends AppCompatActivity {
         final FragmentManager fm = getSupportFragmentManager();
         fm.beginTransaction()
                 .setCustomAnimations(R.anim.enter_slide_down, R.anim.exit_slide_down, R.anim.enter_slide_up, R.anim.exit_slide_up)
-                .replace(android.R.id.content, mHistoryFragment, HISTORY_FRAGMENT_TAG)
+                .replace(CONTENT_VIEW_ID, mHistoryFragment, HISTORY_FRAGMENT_TAG)
                 .addToBackStack(null)
                 .commit();
     }
@@ -151,7 +170,7 @@ public class MainActivity extends AppCompatActivity {
         final FragmentManager fm = getSupportFragmentManager();
         fm.beginTransaction()
                 .setCustomAnimations(R.anim.enter_slide_up, R.anim.exit_slide_up, R.anim.enter_slide_down, R.anim.exit_slide_down)
-                .replace(android.R.id.content, mFreshTabFragment, SUGGESTIONS_FRAGMENT_TAG)
+                .replace(CONTENT_VIEW_ID, mFreshTabFragment, SUGGESTIONS_FRAGMENT_TAG)
                 .addToBackStack(null)
                 .commit();
     }
@@ -235,12 +254,20 @@ public class MainActivity extends AppCompatActivity {
         preferenceManager.setOnBoardingComplete(true);
         long curTime = System.currentTimeMillis();
         telemetry.sendOnBoardingHideSignal(1, curTime - startTime);
-        final FragmentManager fm = getSupportFragmentManager();
-        fm.beginTransaction().add(android.R.id.content, mMainFragment = new MainFragment(), SEARCH_FRAGMENT_TAG).commit();
+        setupContentView();
     }
 
-    private void setupApp() {
-        createShortCut();
+    private void createAppShortcutOnHomeScreen() {
+        // Create the shortcut on the home screen
+        Intent shortCutIntent = new Intent("com.android.launcher.action.INSTALL_SHORTCUT");
+        shortCutIntent.putExtra("duplicate", false);
+        shortCutIntent.putExtra(Intent.EXTRA_SHORTCUT_NAME, getString(R.string.cliqz_app_name));
+        Parcelable icon = Intent.ShortcutIconResource.fromContext(getApplicationContext(), R.mipmap.ic_launcher);
+        shortCutIntent.putExtra(Intent.EXTRA_SHORTCUT_ICON_RESOURCE, icon);
+        shortCutIntent.putExtra(Intent.EXTRA_SHORTCUT_INTENT, new Intent(getApplicationContext(), MainActivity.class));
+        sendBroadcast(shortCutIntent);
+
+        // Send telemetry "installed" signal
         preferenceManager.setSessionId(telemetry.generateSessionID());
         preferenceManager.setVersionCode(BuildConfig.VERSION_CODE);
         startTime = System.currentTimeMillis();
@@ -249,13 +276,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void createShortCut(){
-        Intent shortCutIntent = new Intent("com.android.launcher.action.INSTALL_SHORTCUT");
-        shortCutIntent.putExtra("duplicate", false);
-        shortCutIntent.putExtra(Intent.EXTRA_SHORTCUT_NAME, getString(R.string.cliqz_app_name));
-        Parcelable icon = Intent.ShortcutIconResource.fromContext(getApplicationContext(), R.mipmap.ic_launcher);
-        shortCutIntent.putExtra(Intent.EXTRA_SHORTCUT_ICON_RESOURCE, icon);
-        shortCutIntent.putExtra(Intent.EXTRA_SHORTCUT_INTENT, new Intent(getApplicationContext(), MainActivity.class));
-        sendBroadcast(shortCutIntent);
     }
 
     //returns screen that is visible
