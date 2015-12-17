@@ -10,10 +10,11 @@
             android:key="allow_cookies"
             android:summary="@string/recommended"
             android:title="@string/cookies" />
+        <!-- !!! We don't have incognito anymore !!!
         <CheckBoxPreference
             android:defaultValue="false"
             android:key="incognito_cookies"
-            android:title="@string/incognito_cookies" />
+            android:title="@string/incognito_cookies" /> -->
         <CheckBoxPreference
             android:defaultValue="false"
             android:key="third_party"
@@ -23,6 +24,7 @@
             android:key="password"
             android:summary="@string/recommended"
             android:title="@string/password" />
+        <!-- !!! Too many unuseful checkboxes !!!
         <CheckBoxPreference
             android:defaultValue="false"
             android:key="clear_cache_exit"
@@ -50,6 +52,6 @@
             android:title="@string/clear_cookies" />
         <Preference
             android:key="clear_webstorage"
-            android:title="@string/clear_web_storage" />
+            android:title="@string/clear_web_storage" /> -->
 
 </PreferenceScreen>

@@ -354,12 +354,14 @@ class LightningWebClient extends WebViewClient {
                 return true;
             }
         }
-        boolean startActivityForUrl = mIntentUtils.startActivityForUrl(view, url);
-        if(startActivityForUrl == false && !url.contains(Constants.CLIQZ_TRAMPOLINE)
-                && mLightningView.clicked) {
-            mLightningView.clicked = false;
-            mLightningView.telemetry.sendNavigationSignal(url.length());
-        }
-        return startActivityForUrl;
+        // CLIQZ! We do not want to open external app from our browser, so we return false here
+        // boolean startActivityForUrl = mIntentUtils.startActivityForUrl(view, url);
+        // if(startActivityForUrl == false && !url.contains(Constants.CLIQZ_TRAMPOLINE)
+        //         && mLightningView.clicked) {
+        //     mLightningView.clicked = false;
+        //     mLightningView.telemetry.sendNavigationSignal(url.length());
+        // }
+        // return startActivityForUrl;
+        return false;
     }
 }

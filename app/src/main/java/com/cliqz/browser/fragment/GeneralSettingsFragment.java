@@ -23,14 +23,14 @@ public class GeneralSettingsFragment extends BaseSettingsFragment {
     private static final String SETTINGS_ADS = "cb_ads";
     private static final String SETTINGS_IMAGES = "cb_images";
     private static final String SETTINGS_SEARCHENGINE = "search";
-    private static final String SETTINGS_DRAWERTABS = "cb_drawertabs";
-    private static final String SETTINGS_BROWSER_IMPORT = "import_browser_bookmark";
+    // private static final String SETTINGS_DRAWERTABS = "cb_drawertabs";
+    // private static final String SETTINGS_BROWSER_IMPORT = "import_browser_bookmark";
 
     private Activity mActivity;
 
     private static final int API = Build.VERSION.SDK_INT;
     private Preference searchengine;
-    private CheckBoxPreference cbAds, cbImages, cbDrawerTabs;
+    private CheckBoxPreference cbAds, cbImages; // , cbDrawerTabs;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -45,18 +45,18 @@ public class GeneralSettingsFragment extends BaseSettingsFragment {
 
     private void initPrefs() {
         // mPreferenceManager storage
-        Preference importBrowserpref = findPreference(SETTINGS_BROWSER_IMPORT);
+        // Preference importBrowserpref = findPreference(SETTINGS_BROWSER_IMPORT);
         searchengine = findPreference(SETTINGS_SEARCHENGINE);
 
         cbAds = (CheckBoxPreference) findPreference(SETTINGS_ADS);
         cbImages = (CheckBoxPreference) findPreference(SETTINGS_IMAGES);
-        cbDrawerTabs = (CheckBoxPreference) findPreference(SETTINGS_DRAWERTABS);
+        // cbDrawerTabs = (CheckBoxPreference) findPreference(SETTINGS_DRAWERTABS);
 
-        importBrowserpref.setOnPreferenceClickListener(this);
+        // importBrowserpref.setOnPreferenceClickListener(this);
         searchengine.setOnPreferenceClickListener(this);
         cbAds.setOnPreferenceChangeListener(this);
         cbImages.setOnPreferenceChangeListener(this);
-        cbDrawerTabs.setOnPreferenceChangeListener(this);
+        // cbDrawerTabs.setOnPreferenceChangeListener(this);
 
         if (API >= 19) {
             mPreferenceManager.setFlashSupport(0);
@@ -71,7 +71,7 @@ public class GeneralSettingsFragment extends BaseSettingsFragment {
 
         cbImages.setChecked(imagesBool);
         cbAds.setChecked(Constants.FULL_VERSION && mPreferenceManager.getAdBlockEnabled());
-        cbDrawerTabs.setChecked(mPreferenceManager.getShowTabsInDrawer(true));
+        // cbDrawerTabs.setChecked(mPreferenceManager.getShowTabsInDrawer(true));
     }
 
     private void searchDialog() {
@@ -164,13 +164,13 @@ public class GeneralSettingsFragment extends BaseSettingsFragment {
             case SETTINGS_SEARCHENGINE:
                 searchDialog();
                 return true;
-            case SETTINGS_BROWSER_IMPORT:
+//            case SETTINGS_BROWSER_IMPORT:
 //                try {
 //                    mBookmarkManager.importBookmarksFromBrowser(getActivity());
 //                } catch (Exception e) {
 //                    e.printStackTrace();
 //                }
-                return true;
+//                return true;
             default:
                 return false;
         }
@@ -188,9 +188,9 @@ public class GeneralSettingsFragment extends BaseSettingsFragment {
                 mPreferenceManager.setBlockImagesEnabled((Boolean) newValue);
                 cbImages.setChecked((Boolean) newValue);
                 return true;
-            case  SETTINGS_DRAWERTABS:
-                mPreferenceManager.setShowTabsInDrawer((Boolean) newValue);
-                cbDrawerTabs.setChecked((Boolean) newValue);
+//            case  SETTINGS_DRAWERTABS:
+//                mPreferenceManager.setShowTabsInDrawer((Boolean) newValue);
+//                cbDrawerTabs.setChecked((Boolean) newValue);
             default:
                 return false;
         }

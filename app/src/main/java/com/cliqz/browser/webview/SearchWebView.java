@@ -24,20 +24,8 @@ public class SearchWebView extends BaseWebView {
     // app_debug includes single JS files, app includes minified JS
     private static final String CLIQZ_URL = "file:///android_asset/search/index.html";
 
-    private CharSequence mLastQuery;
+    private String mLastQuery;
     private boolean mProfilingRunning = false;
-
-    // Package visible to support the new brigde
-    // CliqzCallbacks mListener;
-
-
-    /* public interface CliqzCallbacks {
-        void onResultClicked(final String url);
-
-        void onNotifyQuery(final String query);
-
-        void onAutocompleteUrl(final String str);
-    } */
 
     public SearchWebView(Context context) {
         super(context);
@@ -134,6 +122,18 @@ public class SearchWebView extends BaseWebView {
         if (query.equals(mLastQuery)) {
             return;
         }
+        performSearch(query);
+    }
+
+    @Override
+    void extensionReady() {
+        super.extensionReady();
+        if (mLastQuery != null && !mLastQuery.isEmpty()) {
+            performSearch(mLastQuery);
+        }
+    }
+
+    private void performSearch(String query) {
         mLastQuery = query;
         final String lowerQuery = query.toLowerCase();
         final Location location = locationCache.getLastLocation();
@@ -142,44 +142,12 @@ public class SearchWebView extends BaseWebView {
         final double lon = hasLocation ? location.getLongitude() : 0.0;
         final String call = String.format(Locale.getDefault(),
                 "search_mobile('%1$s', %2$b, %3$.6f, %4$.6f)",
-                query.toLowerCase(), hasLocation, lat, lon);
+                lowerQuery, hasLocation, lat, lon);
 
         if (query.length() > 0) {
             executeJS(call);
         } else {
             executeJS("_cliqzNoResults()");
         }
-
-        /*
-
-        // Add your results to this map
-        final Map<String, String> results = new HashMap<>();
-        results.put("contacts", mContactStore.retrieveContacts(query));
-
-
-        final StringBuilder builder = new StringBuilder("{");
-        Iterator<Map.Entry<String, String>> iter = results.entrySet().iterator();
-        String sep = "";
-        while (iter.hasNext()) {
-            Map.Entry<String, String> entry = iter.next();
-            builder.append(sep)
-                    .append("\"")
-                    .append(entry.getKey())
-                    .append("\":")
-                    .append(entry.getValue());
-            sep = ",";
-        }
-        builder.append("}");
-        // Call with contacts
-        mWebView.loadUrl("javascript:_cliqzLocalResults('" + builder.toString() + "')");
-
-        // TODO: @Kevin - History disabled for now as it is far too slow
-        // searchHistory(query);
-
-        if (DO_PROFILE_QUERY) {
-            Debug.stopMethodTracing();
-        }
-        */
     }
-
 }

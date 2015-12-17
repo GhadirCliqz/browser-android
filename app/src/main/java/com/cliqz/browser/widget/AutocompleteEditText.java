@@ -7,7 +7,10 @@ import android.text.TextWatcher;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputConnection;
 import android.widget.EditText;
+import android.widget.TextView;
 
 import com.cliqz.browser.utils.Telemetry;
 
@@ -40,16 +43,17 @@ public class AutocompleteEditText extends EditText {
 
     public AutocompleteEditText(Context context, AttributeSet attrs) {
         this(context, attrs, 0);
-        BrowserApp.getAppComponent().inject(this);
-
     }
 
     public AutocompleteEditText(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         super.addTextChangedListener(new DefaultTextWatcher());
+        final int imeOptions = getImeOptions() | EditorInfo.IME_FLAG_NO_EXTRACT_UI;
+        setImeOptions(imeOptions);
         mIsAutocompleting = false;
         mIsAutocompleted = false;
         mAutocompleteService = AutocompleteService.createInstance(context);
+        BrowserApp.getAppComponent().inject(this);
     }
 
     @Override
@@ -66,6 +70,10 @@ public class AutocompleteEditText extends EditText {
         if (index >= 0) {
             mListeners.remove(index);
         }
+    }
+
+    public String getQuery() {
+        return getText().toString().substring(0, getSelectionStart());
     }
 
     /*

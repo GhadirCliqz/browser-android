@@ -3,9 +3,9 @@
     <header
         android:fragment="com.cliqz.browser.fragment.GeneralSettingsFragment"
         android:title="@string/settings_general" />
-    <header
+    <!-- <header
         android:fragment="com.cliqz.browser.fragment.DisplaySettingsFragment"
-        android:title="@string/settings_display" />
+        android:title="@string/settings_display" /> -->
     <header
         android:fragment="com.cliqz.browser.fragment.PrivacySettingsFragment"
         android:title="@string/settings_privacy" />

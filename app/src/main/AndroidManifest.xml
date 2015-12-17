@@ -33,8 +33,10 @@
         <activity
             android:name="com.cliqz.browser.main.MainActivity"
             android:label="@string/cliqz_app_name"
-            android:screenOrientation="portrait"
-            android:theme="@style/Theme.LightTheme" >
+            android:theme="@style/Theme.LightTheme"
+            android:configChanges="orientation|screenSize|keyboardHidden|keyboard"
+            android:windowSoftInputMode="adjustResize">
+            <!-- android:screenOrientation="portrait" -->
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -135,7 +137,7 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
-        <activity
+        <!-- activity
             android:name=".activity.IncognitoActivity"
             android:alwaysRetainTaskState="true"
             android:configChanges="orientation|screenSize|keyboardHidden|keyboard"
@@ -149,7 +151,7 @@
 
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
-        </activity>
+        </activity -->
         <activity
             android:name=".activity.ReadingActivity"
             android:configChanges="orientation|screenSize|keyboardHidden|keyboard"
