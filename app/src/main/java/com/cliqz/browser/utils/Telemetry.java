@@ -92,6 +92,8 @@ public class Telemetry {
         private static final String NEW_TAB = "new_tab";
         private static final String REACTION_TIME = "reaction_time";
         private static final String URLBAR_TIME = "urlbar_time";
+        private static final String POSITION_TYPE = "position_type";
+        private static final String INBAR_URL = "inbar_url";
     }
 
     public static class Action {
@@ -370,6 +372,7 @@ public class Telemetry {
      */
     public void sendResultEnterSignal(boolean isAutocompleted, int queryLength, int autoCompleteLength) {
         signal.clear();
+        final String[] positionType = {Key.INBAR_URL};
         signal.put(Key.TYPE, Key.ACTIVITY);
         signal.put(Key.ACTION, Action.RESULT_ENTER);
         signal.put(Key.CURRENT_POSITION, -1);
@@ -382,6 +385,7 @@ public class Telemetry {
         signal.put(Key.QUERY_LENGTH, queryLength);
         signal.put(Key.REACTION_TIME, timings.getReactionTime());
         signal.put(Key.URLBAR_TIME, timings.getUrlBarTime());
+        signal.put(Key.POSITION_TYPE, positionType);
         if(isAutocompleted) {
             signal.put(Key.AUTOCOMPLETED, "url");
             signal.put(Key.AUTOCOMPLETED_LENGTH, autoCompleteLength);
