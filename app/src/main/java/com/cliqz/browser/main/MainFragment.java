@@ -7,12 +7,16 @@ import android.os.Handler;
 import android.os.Looper;
 import android.support.annotation.Nullable;
 import android.util.Log;
+import android.util.Patterns;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
+import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
+import android.webkit.URLUtil;
 import android.webkit.WebView;
 import android.widget.FrameLayout;
 
@@ -22,6 +26,9 @@ import com.cliqz.browser.widget.AutocompleteEditText;
 import com.cliqz.browser.widget.SearchBar;
 import com.squareup.otto.Subscribe;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+
 import acr.browser.lightning.R;
 import acr.browser.lightning.bus.BrowserEvents;
 import acr.browser.lightning.constant.Constants;
@@ -30,6 +37,7 @@ import acr.browser.lightning.view.LightningView;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import butterknife.OnEditorAction;
 
 /**
  * @author Stefano Pacifici
@@ -176,20 +184,6 @@ public class MainFragment extends BaseFragment {
         super.onDestroy();
     }
 
-/*    @Override
-    public void onViewStateRestored(@Nullable Bundle savedInstanceState) {
-        super.onViewStateRestored(savedInstanceState);
-    }
-
-
-    @Override
-    public void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-        if (mSearchWebView != null) {
-            mSearchWebView.saveState(outState);
-        }
-    } */
-
     @Override
     protected int getMenuResource() {
         return R.menu.fragment_search_menu;
@@ -234,6 +228,30 @@ public class MainFragment extends BaseFragment {
         mAutocompleteEditText.setText(mLightningView.getUrl());
         mAutocompleteEditText.requestFocus();
         showKeyBoard();
+    }
+
+    @OnEditorAction(R.id.search_edit_text)
+    boolean onEditorAction(int actionId) {
+        // Navigate to autocomplete url or search otherwise
+        if (actionId == EditorInfo.IME_ACTION_GO) {
+            final String content = mAutocompleteEditText.getText().toString();
+            if (content != null && !content.isEmpty()) {
+                if (Patterns.WEB_URL.matcher(content).matches()) {
+                    final String guessedUrl = URLUtil.guessUrl(content);
+                    bus.post(new CliqzMessages.OpenLink(guessedUrl));
+                } else {
+                    try {
+                        final String query = URLEncoder.encode(content, "UTF-8");
+                        bus.post(new CliqzMessages.OpenLink("https://www.google.com/search?q=" + query));
+                    } catch (UnsupportedEncodingException e) {
+                        e.printStackTrace();
+                        return  false;
+                    }
+                }
+                return true;
+            }
+        }
+        return false;
     }
 
     void showKeyBoard() {

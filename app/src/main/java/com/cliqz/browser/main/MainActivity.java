@@ -106,7 +106,7 @@ public class MainActivity extends AppCompatActivity {
     private void setupContentView() {
         final MainViewContainer content = new MainViewContainer(this);
         content.setFitsSystemWindows(true);
-        content.setBackgroundColor(Color.RED);
+        content.setBackgroundColor(Color.WHITE);
         final LayoutParams params = new LayoutParams(MATCH_PARENT, MATCH_PARENT);
         content.setId(CONTENT_VIEW_ID);
         setContentView(content, params);
@@ -273,9 +273,6 @@ public class MainActivity extends AppCompatActivity {
         startTime = System.currentTimeMillis();
         telemetry.sendLifeCycleSignal(Telemetry.Action.INSTALL);
         telemetry.sendOnBoardingShowSignal(0);
-    }
-
-    private void createShortCut(){
     }
 
     //returns screen that is visible

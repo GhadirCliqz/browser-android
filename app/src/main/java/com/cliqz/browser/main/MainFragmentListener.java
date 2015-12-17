@@ -2,7 +2,9 @@ package com.cliqz.browser.main;
 
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.view.KeyEvent;
 import android.view.View;
+import android.widget.TextView;
 
 /**
  * @author Stefano Pacifici
@@ -59,5 +61,4 @@ class MainFragmentListener implements View.OnFocusChangeListener, TextWatcher {
     public void afterTextChanged(Editable s) {
 
     }
-
 }
