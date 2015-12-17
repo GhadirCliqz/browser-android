@@ -95,9 +95,6 @@ public class SearchWebView extends BaseWebView {
     }
 
     public void onQueryChanged(String q) {
-        if (q.length() == 0) {
-            return;
-        }
         // If we only want to profile the query itself, start here
         if (DO_PROFILE_QUERY) {
             if (mProfilingRunning) {
@@ -144,10 +141,10 @@ public class SearchWebView extends BaseWebView {
                 "search_mobile('%1$s', %2$b, %3$.6f, %4$.6f)",
                 lowerQuery, hasLocation, lat, lon);
 
-        if (query.length() > 0) {
+        // if (query.length() > 0) {
             executeJS(call);
-        } else {
-            executeJS("_cliqzNoResults()");
-        }
+//        } else {
+//            executeJS("_cliqzNoResults()");
+//        }
     }
 }
