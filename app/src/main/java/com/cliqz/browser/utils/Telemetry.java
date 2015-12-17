@@ -80,6 +80,18 @@ public class Telemetry {
         private static final String NAVIGATION = "navigation";
         private static final String CURRENT_CONTEXT = "current_context";
         private static final String NEXT_CONTEXT = "next_context";
+        private static final String QUERY_LENGTH = "query_length";
+        private static final String AUTOCOMPLETED_LENGTH = "autocompleted_length";
+        private static final String CURRENT_POSITION = "current_position";
+        private static final String INNER_LINK = "inner_link";
+        private static final String EXTRA = "extra";
+        private static final String SEARCH = "search";
+        private static final String HAS_IMAGE = "has_image";
+        private static final String CLUSTERING_OVERRIDE = "clustering_override";
+        private static final String AUTOCOMPLETED = "autocompleted";
+        private static final String NEW_TAB = "new_tab";
+        private static final String REACTION_TIME = "reaction_time";
+        private static final String URLBAR_TIME = "urlbar_time";
     }
 
     public static class Action {
@@ -88,7 +100,6 @@ public class Telemetry {
         public static final String UPDATE = "update";
         public static final String URLBAR_FOCUS = "urlbar_focus";
         public static final String URLBAR_BLUR = "urlbar_blur";
-        public static final String KEY_STROKE = "key_stroke";
         public static final String KEYSTROKE_DEL = "keystroke_del";
         public static final String PASTE = "paste";
         public static final String SHOW = "show";
@@ -100,7 +111,10 @@ public class Telemetry {
         public static final String LAYER_CHANGE = "layer_change";
         public static final String LOCATION_CHANGE = "location_change";
         public static final String BACK = "back";
+        public static final String RESULT_ENTER = "result_enter";
     }
+
+    private static final int BATCH_SIZE = 25;
 
     @Inject
     PreferenceManager mPreferenceManager;
@@ -108,13 +122,17 @@ public class Telemetry {
     @Inject
     HistoryDatabase mHistoryDatabase;
 
+    @Inject
+    Timings timings;
+
     private HashMap<String, Object> signal;
     private String currentNetwork, currentLayer;
     private Context context;
     private int batteryLevel, forwardStep, backStep, urlLength;
-    private long appStartTime, appEndTime, networkStartTime, layerStartTime, pageStartTime;
 
     public boolean hasPageScrolled;
+    public boolean backPressed;
+    public boolean showingCards;
 
     /**
      * Sends a telemetry signal related to the application life cycle: install/update
@@ -124,7 +142,7 @@ public class Telemetry {
         signal.clear();
         signal.put(Key.TYPE, Key.ACTIVITY);
         signal.put(Key.ACTION, action);
-        sendSignal();
+        saveSignal();
     }
 
     /**
@@ -142,9 +160,9 @@ public class Telemetry {
         signal.put(Key.MEMORY, getMemoryUsage());
         signal.put(Key.CONTEXT, context);
         if(action.equals(Action.CLOSE) || action.equals(Action.KILL)) {
-            signal.put(Key.TIME_USED, appEndTime - appStartTime);
+            signal.put(Key.TIME_USED, timings.getAppUsageTime());
         }
-        sendSignal();
+        saveSignal();
     }
 
     /**
@@ -156,7 +174,7 @@ public class Telemetry {
         signal.put(Key.TYPE, Key.ACTIVITY);
         signal.put(Key.ACTION, Action.URLBAR_FOCUS);
         signal.put(Key.CONTEXT, context);
-        sendSignal();
+        saveSignal();
     }
 
     /**
@@ -166,7 +184,7 @@ public class Telemetry {
         signal.clear();
         signal.put(Key.TYPE, Key.ACTIVITY);
         signal.put(Key.ACTION, Action.URLBAR_BLUR);
-        sendSignal();
+        saveSignal();
     }
 
     /**
@@ -180,7 +198,7 @@ public class Telemetry {
         signal.put(Key.TYPE, Key.ACTIVITY);
         signal.put(Key.ACTION, action);
         signal.put(Key.LENGTH, length);
-        sendSignal();
+        saveSignal();
     }
 
     /**
@@ -192,7 +210,7 @@ public class Telemetry {
         signal.put(Key.TYPE, Key.ACTIVITY);
         signal.put(Key.ACTION, Action.PASTE);
         signal.put(Key.LENGTH, length);
-        sendSignal();
+        saveSignal();
     }
 
     /**
@@ -204,7 +222,7 @@ public class Telemetry {
         signal.put(Key.TYPE, Key.ONBOARDING);
         signal.put(Key.ACTION, Action.SHOW);
         signal.put(Key.PAGE, page);
-        sendSignal();
+        saveSignal();
     }
 
     /**
@@ -218,7 +236,7 @@ public class Telemetry {
         signal.put(Key.ACTION, Action.HIDE);
         signal.put(Key.PAGE, page);
         signal.put(Key.DISPLAY_TIME,time);
-        sendSignal();
+        saveSignal();
     }
 
     /**
@@ -227,7 +245,7 @@ public class Telemetry {
      */
     public void sendLayerChangeSignal(String newLayer) {
         if(currentLayer == null || currentLayer.isEmpty()) {
-            layerStartTime = getUnixTimeStamp();
+            timings.setLayerStartTime();
             currentLayer = newLayer;
         } else {
             signal.clear();
@@ -235,10 +253,10 @@ public class Telemetry {
             signal.put(Key.ACTION, Action.LAYER_CHANGE);
             signal.put(Key.CURRENT_LAYER, currentLayer);
             signal.put(Key.NEXT_LAYER, newLayer);
-            signal.put(Key.DISPLAY_TIME, getUnixTimeStamp() - layerStartTime);
-            layerStartTime = getUnixTimeStamp();
+            signal.put(Key.DISPLAY_TIME, timings.getLayerDisplayTime());
+            timings.setLayerStartTime();
             currentLayer = newLayer;
-            sendSignal();
+            saveSignal();
         }
     }
 
@@ -248,13 +266,13 @@ public class Telemetry {
      */
     private void sendEnvironmentSignal() {
         long oneHour = 3600000;
-        long currentTime = getUnixTimeStamp();
+        long oneDay = 86400000;
         long days = 0;
-        long previousTime = mPreferenceManager.getTimeOfLastEnvSignal();
-        if(currentTime-previousTime < oneHour) {
+        long timeSinceLastSingal = timings.getTimeSinceLastEnvSignal();
+        if(timeSinceLastSingal < oneHour) {
             return;
         }
-        mPreferenceManager.setTimeOfLastEnvSignal(currentTime);
+        timings.setLastEnvSingalTime();
         signal.clear();
         signal.put(Key.TYPE, Key.ENVIRONMENT);
         signal.put(Key.DEVICE, Build.MODEL);
@@ -265,23 +283,23 @@ public class Telemetry {
         signal.put(Key.HISTORY_URLS, mHistoryDatabase.getHistoryItemsCount());
         if(mHistoryDatabase.getHistoryItemsCount() > 0) {
             long firstItemTime = mHistoryDatabase.getFirstHistoryItem().getTimestamp();
-            days = (currentTime - firstItemTime) / 86400000;
+            days = (getUnixTimeStamp() - firstItemTime) / oneDay;
         }
         signal.put(Key.HISTORY_DAYS, days);
-        sendSignal();
+        saveSignal();
     }
 
     //Send a telemetry signal of the network state, when the app closes and when the network changes
     private void sendNetworkStatus() {
-        long duration = getUnixTimeStamp() - networkStartTime;
+        long duration = timings.getNetworkUsageTime();
         signal.clear();
         signal.put(Key.TYPE, Key.ACTIVITY);
         signal.put(Key.ACTION, Action.NETWORK_STATUS);
         signal.put(Key.NETWORK, currentNetwork);
         signal.put(Key.DURATION, duration);
-        networkStartTime = getUnixTimeStamp();
+        timings.setNetworkStartTime();
         currentNetwork = getNetworkState();
-        sendSignal();
+        saveSignal();
     }
 
     /**
@@ -289,8 +307,7 @@ public class Telemetry {
      * @param context the layer which is visble
      */
     public void sendStartingSignals(String context) {
-        appStartTime = getUnixTimeStamp();
-        networkStartTime = getUnixTimeStamp();
+        timings.setNetworkStartTime();
         currentNetwork = getNetworkState();
         sendEnvironmentSignal();
         sendAppUsageSignal(Action.OPEN, context);
@@ -301,7 +318,6 @@ public class Telemetry {
      * @param context the layer which is visible
      */
     public void sendClosingSignals(String context, String closeOrKill) {
-        appEndTime = getUnixTimeStamp();
         currentLayer = "";
         sendNetworkStatus();
         sendAppUsageSignal(closeOrKill, context);
@@ -317,12 +333,12 @@ public class Telemetry {
         signal.put(Key.ACTION, Action.LOCATION_CHANGE);
         signal.put(Key.STEP, forwardStep);
         signal.put(Key.URL_LENGTH, this.urlLength);
-        signal.put(Key.DISPLAY_TIME, getUnixTimeStamp() - pageStartTime);
+        signal.put(Key.DISPLAY_TIME, timings.getPageDisplayTime());
         forwardStep++;
-        pageStartTime = getUnixTimeStamp();
+        timings.setPageStartTime();
         this.urlLength =urlLength;
         resetBackNavigationVariables(urlLength);
-        sendSignal();
+        saveSignal();
     }
 
     /**
@@ -337,13 +353,40 @@ public class Telemetry {
         signal.put(Key.ACTION, Action.BACK);
         signal.put(Key.STEP, this.backStep);
         signal.put(Key.URL_LENGTH, this.urlLength);
-        signal.put(Key.DISPLAY_TIME, getUnixTimeStamp() - pageStartTime);
+        signal.put(Key.DISPLAY_TIME, timings.getPageDisplayTime());
         signal.put(Key.CURRENT_CONTEXT, currentContext);
         signal.put(Key.NEXT_CONTEXT, nextContext);
         backStep++;
+        timings.setPageStartTime();
         this.urlLength = urlLength;
-        pageStartTime = getUnixTimeStamp();
-        sendSignal();
+        saveSignal();
+    }
+
+    /**
+     * Send telemetry signal when the user presses enter after typing/autocompleting an url
+     * @param isAutocompleted Flag if the url was typed or autocompleted
+     * @param queryLength Length of the typed characters
+     * @param autoCompleteLength Length of the entire url if it is autcompleted, -1 if not autocompleted
+     */
+    public void sendResultEnterSignal(boolean isAutocompleted, int queryLength, int autoCompleteLength) {
+        signal.clear();
+        signal.put(Key.TYPE, Key.ACTIVITY);
+        signal.put(Key.ACTION, Action.RESULT_ENTER);
+        signal.put(Key.CURRENT_POSITION, -1);
+        signal.put(Key.INNER_LINK, false);
+        signal.put(Key.EXTRA, null);
+        signal.put(Key.SEARCH, false);
+        signal.put(Key.HAS_IMAGE, false);
+        signal.put(Key.CLUSTERING_OVERRIDE, false);
+        signal.put(Key.NEW_TAB, false);
+        signal.put(Key.QUERY_LENGTH, queryLength);
+        signal.put(Key.REACTION_TIME, timings.getReactionTime());
+        signal.put(Key.URLBAR_TIME, timings.getUrlBarTime());
+        if(isAutocompleted) {
+            signal.put(Key.AUTOCOMPLETED, "url");
+            signal.put(Key.AUTOCOMPLETED_LENGTH, autoCompleteLength);
+        }
+        saveSignal();
     }
 
     /**
@@ -352,7 +395,7 @@ public class Telemetry {
      * @param urlLength length of the url of the current web page
      */
     public void resetNavigationVariables(int urlLength) {
-        pageStartTime = getUnixTimeStamp();
+        timings.setPageStartTime();
         forwardStep = 1;
         this.urlLength = urlLength;
     }
@@ -362,36 +405,77 @@ public class Telemetry {
      * @param urlLength length of the url of the current web page
      */
     public void resetBackNavigationVariables(int urlLength) {
-        pageStartTime = getUnixTimeStamp();
+        timings.setPageStartTime();
         backStep = 1;
         this.urlLength = urlLength;
     }
 
-    //converts the signal to json and post the signal to the logger
-    private void sendSignal() {
+    private void saveSignal() {
         addIdentifiers();
         JSONObject jsonObject = new JSONObject(signal);
-        JSONArray jsonArray = new JSONArray().put(jsonObject);
-        //new HttpHandler(mPreferenceManager).execute(jsonArray.toString());
+        String savedSignals = mPreferenceManager.getTelemetrySignals();
+        if(savedSignals!=null && !savedSignals.isEmpty()) {
+            try {
+                JSONArray jsonArray = new JSONArray(savedSignals);
+                jsonArray.put(jsonObject);
+                if(getNetworkState().equals("Disconnected")) {
+                    mPreferenceManager.setTelemetrySignals(jsonArray.toString());
+                } else {
+                    int totalSignals = jsonArray.length();
+                    if(totalSignals < BATCH_SIZE) {
+                        mPreferenceManager.setTelemetrySignals(jsonArray.toString());
+                    } else {
+                        sendSignal(jsonArray);
+                    }
+                }
+            } catch (JSONException e) {
+                Log.e(Constants.TAG, "JSONException in Telemetry", e);
+            }
+        } else {
+            JSONArray jsonArray = new JSONArray().put(jsonObject);
+            mPreferenceManager.setTelemetrySignals(jsonArray.toString());
+        }
+
     }
 
     /**
      * Posts the telemetry signal sent by the extension, to the logger
      * @param signal Telemetry signal by the extension
      */
-    public void sendSignal(JSONObject signal) {
+    public void saveSignal(JSONObject signal) {
         int telemetrySequence = mPreferenceManager.getTelemetrySequence();
         try {
             signal.put(Key.SESSION, mPreferenceManager.getSessionId());
             signal.put(Key.TIME_STAMP, getUnixTimeStamp());
             signal.put(Key.TELEMETRY_SEQUENCE, telemetrySequence);
             mPreferenceManager.setTelemetrySequence(telemetrySequence);
-            JSONArray jsonArray = new JSONArray().put(signal);
-            //new HttpHandler(mPreferenceManager).execute(jsonArray.toString());
+            String savedSignals = mPreferenceManager.getTelemetrySignals();
+            if(savedSignals != null && !savedSignals.isEmpty()) {
+                JSONArray jsonArray = new JSONArray(savedSignals);
+                jsonArray.put(signal);
+                if(getNetworkState().equals("Disconnected")) {
+                    mPreferenceManager.setTelemetrySignals(jsonArray.toString());
+                } else {
+                    int totalSignals = jsonArray.length();
+                    if(totalSignals < BATCH_SIZE) {
+                        mPreferenceManager.setTelemetrySignals(jsonArray.toString());
+                    } else {
+                        sendSignal(jsonArray);
+                    }
+                }
+            } else {
+                JSONArray jsonArray = new JSONArray().put(signal);
+                mPreferenceManager.setTelemetrySignals(jsonArray.toString());
+            }
         } catch (JSONException e) {
             Log.e(Constants.TAG, "JSONException in Telemetry", e);
         }
 
+    }
+
+    private void sendSignal(JSONArray jsonArray) {
+        mPreferenceManager.setTelemetrySignals("");
+        new HttpHandler(mPreferenceManager).execute(jsonArray.toString());
     }
 
     //adds session id. timestamp, sequence number to the signals
@@ -497,7 +581,7 @@ public class Telemetry {
         @Override
         public void onReceive(Context context, Intent intent) {
             //check to make sure the app is in foreground
-            if(appStartTime > appEndTime) {
+            if(timings.getAppUsageTime() < 0) {
                 sendNetworkStatus();
             }
         }

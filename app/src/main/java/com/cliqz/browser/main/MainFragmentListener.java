@@ -2,9 +2,16 @@ package com.cliqz.browser.main;
 
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
+import android.util.Patterns;
 import android.view.KeyEvent;
 import android.view.View;
 import android.widget.TextView;
+import android.webkit.URLUtil;
+import android.widget.EditText;
+
+import acr.browser.lightning.app.BrowserApp;
+import acr.browser.lightning.utils.UrlUtils;
 
 /**
  * @author Stefano Pacifici
@@ -12,6 +19,7 @@ import android.widget.TextView;
  */
 class MainFragmentListener implements View.OnFocusChangeListener, TextWatcher {
     private final MainFragment fragment;
+    private int queryLength;
 
     public static MainFragmentListener create(MainFragment fragment) {
         return new MainFragmentListener(fragment);
@@ -32,6 +40,7 @@ class MainFragmentListener implements View.OnFocusChangeListener, TextWatcher {
                 fragment.searchBar.showTitleBar();
             }
         } else {
+            fragment.timings.setUrlBarFocusedTime();
             String context = fragment.mState == MainFragment.State.SHOWING_BROWSER ? "web" : "cards";
             fragment.telemetry.sendURLBarFocusSignal(context);
         }
@@ -59,6 +68,6 @@ class MainFragmentListener implements View.OnFocusChangeListener, TextWatcher {
 
     @Override
     public void afterTextChanged(Editable s) {
-
+        fragment.timings.setLastTypedTime();
     }
 }

@@ -239,13 +239,19 @@ public class MainFragment extends BaseFragment {
                 if (Patterns.WEB_URL.matcher(content).matches()) {
                     final String guessedUrl = URLUtil.guessUrl(content);
                     bus.post(new CliqzMessages.OpenLink(guessedUrl));
+                    if(mAutocompleteEditText.mIsAutocompleted) {
+                        telemetry.sendResultEnterSignal(true,
+                                mAutocompleteEditText.getQuery().length(), guessedUrl.length());
+                    } else {
+                        telemetry.sendResultEnterSignal(false, guessedUrl.length(), -1);
+                    }
                 } else {
                     try {
                         final String query = URLEncoder.encode(content, "UTF-8");
                         bus.post(new CliqzMessages.OpenLink("https://www.google.com/search?q=" + query));
                     } catch (UnsupportedEncodingException e) {
                         e.printStackTrace();
-                        return  false;
+                        return false;
                     }
                 }
                 return true;
@@ -306,6 +312,8 @@ public class MainFragment extends BaseFragment {
     @Subscribe
     public void onBackPressed(Messages.BackPressed event) {
         if (mLightningView.canGoBack()) {
+            telemetry.backPressed = true;
+            telemetry.showingCards = mState == State.SHOWING_SEARCH ? true : false;
             mLightningView.goBack();
             if (mState == State.SHOWING_SEARCH) {
                 final WebView webView = mLightningView.getWebView();
@@ -317,7 +325,7 @@ public class MainFragment extends BaseFragment {
             bus.post(new Messages.Exit());
         }
     }
-
+    
     @Subscribe
     public void showSearch(Messages.ShowSearch event) {
         searchBar.showSearchEditText();

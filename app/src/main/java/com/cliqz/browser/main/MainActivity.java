@@ -21,6 +21,7 @@ import android.widget.FrameLayout;
 
 import com.cliqz.browser.utils.LocationCache;
 import com.cliqz.browser.utils.Telemetry;
+import com.cliqz.browser.utils.Timings;
 import com.cliqz.browser.webview.CliqzMessages;
 import com.cliqz.browser.widget.MainViewContainer;
 import com.squareup.otto.Bus;
@@ -45,8 +46,8 @@ import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 public class MainActivity extends AppCompatActivity {
 
     private static final String HISTORY_FRAGMENT_TAG = "history_fragment";
-    private static final String SEARCH_FRAGMENT_TAG = "search_fragment";
     private static final String SUGGESTIONS_FRAGMENT_TAG = "suggestions_fragment";
+    static final String SEARCH_FRAGMENT_TAG = "search_fragment";
 
     private static final int CONTENT_VIEW_ID = R.id.main_activity_content;
     
@@ -63,6 +64,9 @@ public class MainActivity extends AppCompatActivity {
 
     @Inject
     LocationCache locationCache;
+	
+	@Inject
+    Timings timings;
 
     ViewPager pager;
 
@@ -124,6 +128,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         String context = getCurrentVisibleFragmentName();
+        timings.setAppStartTime();
         if(!context.isEmpty()) {
             telemetry.sendStartingSignals(context);
         }
@@ -134,6 +139,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onPause() {
         super.onPause();
         String context = getCurrentVisibleFragmentName();
+        timings.setAppStopTime();
         if(!context.isEmpty()) {
             telemetry.sendClosingSignals(Telemetry.Action.CLOSE, context);
         }
@@ -157,6 +163,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Subscribe
     public void goToHistory(Messages.GoToHistory event) {
+        telemetry.resetBackNavigationVariables(-1);
         final FragmentManager fm = getSupportFragmentManager();
         fm.beginTransaction()
                 .setCustomAnimations(R.anim.enter_slide_down, R.anim.exit_slide_down, R.anim.enter_slide_up, R.anim.exit_slide_up)
@@ -167,6 +174,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Subscribe
     public void goToSuggestions(Messages.GoToSuggestions event) {
+        telemetry.resetBackNavigationVariables(-1);
         final FragmentManager fm = getSupportFragmentManager();
         fm.beginTransaction()
                 .setCustomAnimations(R.anim.enter_slide_up, R.anim.exit_slide_up, R.anim.enter_slide_down, R.anim.exit_slide_down)

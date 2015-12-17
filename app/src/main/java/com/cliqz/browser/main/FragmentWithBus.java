@@ -3,6 +3,7 @@ package com.cliqz.browser.main;
 import android.support.v4.app.Fragment;
 
 import com.cliqz.browser.utils.Telemetry;
+import com.cliqz.browser.utils.Timings;
 import com.squareup.otto.Bus;
 
 import javax.inject.Inject;
@@ -23,6 +24,9 @@ public abstract class FragmentWithBus extends Fragment {
 
     @Inject
     Telemetry telemetry;
+
+    @Inject
+    Timings timings;
 
     public FragmentWithBus() {
         super();

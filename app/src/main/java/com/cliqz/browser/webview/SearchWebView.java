@@ -141,10 +141,6 @@ public class SearchWebView extends BaseWebView {
                 "search_mobile('%1$s', %2$b, %3$.6f, %4$.6f)",
                 lowerQuery, hasLocation, lat, lon);
 
-        // if (query.length() > 0) {
-            executeJS(call);
-//        } else {
-//            executeJS("_cliqzNoResults()");
-//        }
+        executeJS(call);
     }
 }
