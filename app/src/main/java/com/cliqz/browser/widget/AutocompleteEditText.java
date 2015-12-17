@@ -32,6 +32,8 @@ public class AutocompleteEditText extends EditText {
     private boolean mIsAutocompleting;
     private AutocompleteService mAutocompleteService;
 
+    public boolean mIsAutocompleted;
+
     public AutocompleteEditText(Context context) {
         this(context, null);
     }
@@ -46,6 +48,7 @@ public class AutocompleteEditText extends EditText {
         super(context, attrs, defStyleAttr);
         super.addTextChangedListener(new DefaultTextWatcher());
         mIsAutocompleting = false;
+        mIsAutocompleted = false;
         mAutocompleteService = AutocompleteService.createInstance(context);
     }
 
@@ -77,6 +80,7 @@ public class AutocompleteEditText extends EditText {
 
     private void setAutocompleteText(CharSequence text) {
         mIsAutocompleting = true;
+        mIsAutocompleted = true;
         final CharSequence currentText = getText();
         if (text.toString().startsWith(currentText.toString())) {
             setTextKeepState(text);
@@ -122,11 +126,7 @@ public class AutocompleteEditText extends EditText {
                 watcher.onTextChanged(s, start, before, count);
             }
 
-            if (!mDeleting) {
-                if(count == 1) { //check to prevent sending keystroke signal when something is pasted in the url bar
-                    mTelemetry.sendTypingSignal(Telemetry.Action.KEY_STROKE, s.length());
-                }
-            } else {
+            if (mDeleting) {
                 mTelemetry.sendTypingSignal(Telemetry.Action.KEYSTROKE_DEL, s.length());
             }
         }
@@ -136,6 +136,7 @@ public class AutocompleteEditText extends EditText {
             if (mIsAutocompleting) {
                 return;
             }
+            mIsAutocompleted = false;
             for (TextWatcher watcher: mListeners) {
                 watcher.afterTextChanged(s);
             }

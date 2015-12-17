@@ -65,6 +65,7 @@ public class PreferenceManager {
         public static final String TELEMETRY_SEQUENCE = "telemetrySequence";
         public static final String VERSION_CODE = "versionCode";
         public static final String TIME_OF_LAST_ENVIRONMENT_SIGNAL = "lastEnvironmentSignal";
+        public static final String TELEMETRY_SIGNALS = "telemetrySignals";
     }
 
     private final SharedPreferences mPrefs;
@@ -282,6 +283,10 @@ public class PreferenceManager {
 
     public long getTimeOfLastEnvSignal() {
         return mPrefs.getLong(Name.TIME_OF_LAST_ENVIRONMENT_SIGNAL, 0);
+    }
+
+    public String getTelemetrySignals() {
+        return mPrefs.getString(Name.TELEMETRY_SIGNALS, "");
     }
 
     private void putBoolean(String name, boolean value) {
@@ -510,5 +515,9 @@ public class PreferenceManager {
 
     public void setTimeOfLastEnvSignal(long time) {
         putLong(Name.TIME_OF_LAST_ENVIRONMENT_SIGNAL, time);
+    }
+
+    public void setTelemetrySignals(String signals) {
+        putString(Name.TELEMETRY_SIGNALS, signals);
     }
 }

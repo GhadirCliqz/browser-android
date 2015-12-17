@@ -43,7 +43,6 @@ public class SearchBar extends FrameLayout {
         inflate(getContext(), R.layout.search_bar_widget, this);
         ButterKnife.bind(this);
         searchEditText.setOnTouchListener(onTouchListener);
-        searchEditText.setOnKeyListener(onKeyListener);
     }
 
     public void showSearchEditText() {
@@ -69,20 +68,6 @@ public class SearchBar extends FrameLayout {
                     searchEditText.setText("");
                     return false;
                 }
-            }
-            return false;
-        }
-    };
-
-    private OnKeyListener onKeyListener = new OnKeyListener() {
-        @Override
-        public boolean onKey(View v, int keyCode, KeyEvent event) {
-            switch (keyCode) {
-                case KeyEvent.KEYCODE_ENTER:
-                    hideKeyboard();
-                    return true;
-                default:
-                    break;
             }
             return false;
         }

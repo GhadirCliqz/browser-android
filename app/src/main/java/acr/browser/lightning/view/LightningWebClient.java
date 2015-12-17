@@ -100,6 +100,7 @@ class LightningWebClient extends WebViewClient {
             }
             if (CLIQZ_TRAMPOLINE_SEARCH.equals(uri.getPath())) {
                 final String query = uri.getQueryParameter("q");
+                mLightningView.telemetry.sendBackPressedSignal("web", "cards", query.length());
                 view.post(new Runnable() {
                     @Override
                     public void run() {
@@ -138,6 +139,18 @@ class LightningWebClient extends WebViewClient {
 
     @Override
     public void onPageStarted(WebView view, String url, Bitmap favicon) {
+        if(mLightningView.telemetry.backPressed) {
+            if(!url.contains(Constants.CLIQZ_TRAMPOLINE)) {
+                if(mLightningView.telemetry.showingCards) {
+                    mLightningView.telemetry.sendBackPressedSignal("cards", "web", url.length());
+                    mLightningView.telemetry.showingCards = false;
+                } else {
+                    mLightningView.telemetry.sendBackPressedSignal("web", "web", url.length());
+                }
+            }
+            mLightningView.telemetry.backPressed = false;
+        }
+
         mLightningView.mTitle.setFavicon(null);
         if (mLightningView.isShown()) {
             mEventBus.post(new BrowserEvents.UpdateUrl(url, false));

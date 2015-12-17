@@ -22,6 +22,10 @@ import acr.browser.lightning.preference.PreferenceManager;
  */
 public class HttpHandler extends AsyncTask {
 
+    private static final String HEADER_CONTENT_TYPE = "Content-Type";
+    private static final String HEADER_CONTENT_ENCODING = "Content-Encoding";
+    private static final String ENCODING_GZIP = "gzip";
+    private static final String TYPE_JSON = "application/json";
     private String responseMessage;
     private int responseCode;
 
@@ -36,15 +40,15 @@ public class HttpHandler extends AsyncTask {
         try {
             URL url = new URL("https://logging.cliqz.com");
             String postMessage = (String) params[0];
-            //TODO Remove log
-            Log.d("Telemetry - request", postMessage);
             HttpURLConnection httpURLConnection = (HttpURLConnection) url.openConnection();
             httpURLConnection.setRequestMethod("POST");
             httpURLConnection.setDoOutput(true);
             httpURLConnection.setUseCaches(false);
             httpURLConnection.setConnectTimeout(10000);
             httpURLConnection.setReadTimeout(10000);
-            httpURLConnection.setRequestProperty("Content-Type", "application/json");
+            httpURLConnection.setRequestProperty(HEADER_CONTENT_TYPE, TYPE_JSON);
+            //TODO uncomment when decompression implemented in server
+            // httpURLConnection.setRequestProperty(HEADER_CONTENT_ENCODING, ENCODING_GZIP);
             httpURLConnection.connect();
             DataOutputStream dataOutputStream = new DataOutputStream(httpURLConnection.getOutputStream());
             dataOutputStream.writeBytes(postMessage);

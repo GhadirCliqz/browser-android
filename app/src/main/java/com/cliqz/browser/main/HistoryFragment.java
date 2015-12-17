@@ -71,6 +71,13 @@ public class HistoryFragment extends BaseFragment {
 
     @Subscribe
     public void onBackPressed(Messages.BackPressed event) {
+        MainFragment mainFragment = (MainFragment)getActivity()
+                .getSupportFragmentManager()
+                .findFragmentByTag(MainActivity.SEARCH_FRAGMENT_TAG);
+        if(mainFragment != null) {
+            String state = mainFragment.mState == MainFragment.State.SHOWING_BROWSER ? "web" : "cards";
+            telemetry.sendBackPressedSignal("past", state, mainFragment.mAutocompleteEditText.length());
+        }
         bus.post(new Messages.GoToSearch());
     }
 }

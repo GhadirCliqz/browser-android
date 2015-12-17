@@ -248,6 +248,8 @@ public class MainFragment extends BaseFragment {
     @Subscribe
     public void onBackPressed(Messages.BackPressed event) {
         if (mLightningView.canGoBack()) {
+            telemetry.backPressed = true;
+            telemetry.showingCards = mState == State.SHOWING_SEARCH ? true : false;
             mLightningView.goBack();
             if (mState == State.SHOWING_SEARCH) {
                 final WebView webView = mLightningView.getWebView();
@@ -258,6 +260,13 @@ public class MainFragment extends BaseFragment {
         } else {
             bus.post(new Messages.Exit());
         }
+    }
+
+    void loadUrl(String url) {
+        final WebView webView = mLightningView.getWebView();
+        webView.bringToFront();
+        mState = State.SHOWING_BROWSER;
+        webView.loadUrl(url);
     }
 
     @Subscribe
