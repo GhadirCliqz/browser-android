@@ -13,12 +13,12 @@
             android:defaultValue="false"
             android:key="cb_images"
             android:title="@string/block" />
-        <Preference
-            android:key="search"
-            android:title="@string/search" />
-        <!-- <Preference
-            android:key="import_browser_bookmark"
-            android:title="@string/importbookmarks"
-            android:summary="@string/recommended" /> -->
+    <!-- <Preference
+        android:key="search"
+        android:title="@string/search" />
+    <Preference
+        android:key="import_browser_bookmark"
+        android:title="@string/importbookmarks"
+        android:summary="@string/recommended" /> -->
 
 </PreferenceScreen>

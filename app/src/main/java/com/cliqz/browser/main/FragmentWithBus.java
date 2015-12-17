@@ -9,6 +9,7 @@ import com.squareup.otto.Bus;
 import javax.inject.Inject;
 
 import acr.browser.lightning.app.BrowserApp;
+import acr.browser.lightning.preference.PreferenceManager;
 
 /**
  * A fragment with a bus that register/unregister itself (children) to it automatically

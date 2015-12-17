@@ -6,6 +6,7 @@ import android.util.Log;
 import android.util.Patterns;
 import android.view.KeyEvent;
 import android.view.View;
+import android.widget.TextView;
 import android.webkit.URLUtil;
 import android.widget.EditText;
 
@@ -16,7 +17,7 @@ import acr.browser.lightning.utils.UrlUtils;
  * @author Stefano Pacifici
  * @date 2015/11/24
  */
-class MainFragmentListener implements View.OnFocusChangeListener, TextWatcher, View.OnKeyListener {
+class MainFragmentListener implements View.OnFocusChangeListener, TextWatcher {
     private final MainFragment fragment;
     private int queryLength;
 
@@ -28,7 +29,6 @@ class MainFragmentListener implements View.OnFocusChangeListener, TextWatcher, V
         this.fragment = fragment;
         fragment.mAutocompleteEditText.setOnFocusChangeListener(this);
         fragment.mAutocompleteEditText.addTextChangedListener(this);
-        fragment.mAutocompleteEditText.setOnKeyListener(this);
     }
 
     @Override
@@ -60,8 +60,7 @@ class MainFragmentListener implements View.OnFocusChangeListener, TextWatcher, V
         fragment.showSearch(null);
 
         final String q = s.toString();
-        queryLength = q.length();
-        if (!q.isEmpty() && fragment.mSearchWebView != null) {
+        if (fragment.mSearchWebView != null) {
             fragment.lastQuery = q;
             fragment.mSearchWebView.onQueryChanged(q);
         }
@@ -70,27 +69,5 @@ class MainFragmentListener implements View.OnFocusChangeListener, TextWatcher, V
     @Override
     public void afterTextChanged(Editable s) {
         fragment.timings.setLastTypedTime();
-    }
-
-    @Override
-    public boolean onKey(View v, int keyCode, KeyEvent event) {
-        if(event.getAction() == KeyEvent.ACTION_DOWN) {
-            switch (keyCode) {
-                case KeyEvent.KEYCODE_ENTER:
-                    String urlOrQuery = ((EditText)v).getText().toString().trim();
-                    if(Patterns.WEB_URL.matcher(urlOrQuery).matches()) {
-                        String finalUrl = URLUtil.guessUrl(urlOrQuery);
-                        fragment.loadUrl(finalUrl);
-                        if(fragment.mAutocompleteEditText.mIsAutocompleted) {
-                            fragment.telemetry.sendResultEnterSignal(true, queryLength, finalUrl.length());
-                        } else {
-                            fragment.telemetry.sendResultEnterSignal(false, finalUrl.length(), -1);
-                        }
-                    }
-                default:
-                    break;
-            }
-        }
-        return false;
     }
 }

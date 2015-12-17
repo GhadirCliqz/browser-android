@@ -8,6 +8,7 @@ import android.webkit.WebView;
 import org.json.JSONObject;
 
 import java.util.List;
+import java.util.Locale;
 
 import acr.browser.lightning.database.HistoryDatabase;
 import acr.browser.lightning.database.HistoryItem;
@@ -54,6 +55,7 @@ class CliqzBridge extends Bridge {
             @Override
             public void execute(Bridge bridge, Object data, String callback) {
                 ((BaseWebView) bridge.getWebView()).extensionReady();
+                bridge.executeJavascript(String.format(Locale.US,  "%s(-1)", callback));
             }
         }),
 
