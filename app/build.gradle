@@ -16,13 +16,13 @@ android {
     defaultConfig {
         minSdkVersion 14
         targetSdkVersion 23
-        versionName "0.3"
+        versionName "0.3.1"
 
         buildConfigField 'String', 'LIGHTNING_VERSION_NAME', '"4.2.3.1"'
         buildConfigField "boolean", "FULL_VERSION", "true"
 
         applicationId "com.cliqz.browser"
-        versionCode 16
+        versionCode 17
     }
     buildTypes {
         debug {
