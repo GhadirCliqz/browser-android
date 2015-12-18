@@ -55,12 +55,18 @@ public class FreshTabFragment extends BaseFragment {
 
     @Override
     protected int getMenuResource() {
-        return 0;
+        return R.menu.fragment_future_menu;
     }
 
     @Override
     protected boolean onMenuItemClick(MenuItem item) {
-        return false;
+        switch (item.getItemId()) {
+            case R.id.menu_settings:
+                delayedPostOnBus(new Messages.GoToSettings());
+                return true;
+            default:
+                return false;
+        }
     }
 
     @Override

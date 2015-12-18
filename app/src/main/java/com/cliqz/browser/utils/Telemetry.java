@@ -94,6 +94,7 @@ public class Telemetry {
         private static final String URLBAR_TIME = "urlbar_time";
         private static final String POSITION_TYPE = "position_type";
         private static final String INBAR_URL = "inbar_url";
+        private static final String INBAR_QUERY = "inbar_query";
     }
 
     public static class Action {
@@ -365,18 +366,29 @@ public class Telemetry {
     }
 
     /**
-     * Send telemetry signal when the user presses enter after typing/autocompleting an url
-     * @param isAutocompleted Flag if the url was typed or autocompleted
+     * Send telemetry signal when the user presses enter after typing in the url bar
+     * @param isQuery True if the content of the urlbar is a query, false if its an url(direct/autcompleted)
+     * @param isAutocompleted True if the url is autocompleted, false if it is typed completely
      * @param queryLength Length of the typed characters
      * @param autoCompleteLength Length of the entire url if it is autcompleted, -1 if not autocompleted
      */
-    public void sendResultEnterSignal(boolean isAutocompleted, int queryLength, int autoCompleteLength) {
+    public void sendResultEnterSignal(boolean isQuery, boolean isAutocompleted, int queryLength, int autoCompleteLength) {
         signal.clear();
-        final String[] positionType = {Key.INBAR_URL};
+        final String[] positionType = new String[1];
+        final boolean innerLink;
+        if(isQuery) {
+            positionType[0] = Key.INBAR_QUERY;
+        } else {
+            positionType[0] = Key.INBAR_URL;
+        }
+        if(isAutocompleted) {
+            innerLink = true;
+        } else {
+            innerLink = false;
+        }
         signal.put(Key.TYPE, Key.ACTIVITY);
         signal.put(Key.ACTION, Action.RESULT_ENTER);
         signal.put(Key.CURRENT_POSITION, -1);
-        signal.put(Key.INNER_LINK, false);
         signal.put(Key.EXTRA, null);
         signal.put(Key.SEARCH, false);
         signal.put(Key.HAS_IMAGE, false);
@@ -386,6 +398,7 @@ public class Telemetry {
         signal.put(Key.REACTION_TIME, timings.getReactionTime());
         signal.put(Key.URLBAR_TIME, timings.getUrlBarTime());
         signal.put(Key.POSITION_TYPE, positionType);
+        signal.put(Key.INNER_LINK, innerLink);
         if(isAutocompleted) {
             signal.put(Key.AUTOCOMPLETED, "url");
             signal.put(Key.AUTOCOMPLETED_LENGTH, autoCompleteLength);

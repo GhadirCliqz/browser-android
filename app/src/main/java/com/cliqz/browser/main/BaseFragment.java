@@ -2,6 +2,8 @@ package com.cliqz.browser.main;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.support.annotation.MenuRes;
 import android.support.annotation.Nullable;
 import android.support.annotation.StyleRes;
@@ -24,6 +26,8 @@ public abstract class BaseFragment extends FragmentWithBus {
     private ViewGroup mContentContainer;
     private Toolbar mToolbar;
     private View mCustomToolbarView;
+    private final Handler handler = new Handler(Looper.getMainLooper());
+    private final static int KEYBOARD_ANIMATION_DELAY = 200;
 
     @Nullable
     @Override
@@ -60,6 +64,16 @@ public abstract class BaseFragment extends FragmentWithBus {
         });
         return view;
     }
+
+    void delayedPostOnBus(final Object event) {
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                bus.post(event);
+            }
+        }, KEYBOARD_ANIMATION_DELAY);
+    }
+
 
     /**
      * Should return the content view of the children (of this class) fragments
