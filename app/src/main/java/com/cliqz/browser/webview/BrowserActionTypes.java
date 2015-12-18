@@ -7,7 +7,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 /**
- * An enumeration of action that the {@link CliqzView} can invoke
+ * An enumeration of action that the {@link SearchWebView} can invoke
  *
  * @author Stefano Pacifici
  * @date 2015/10/22

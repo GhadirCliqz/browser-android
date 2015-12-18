@@ -112,6 +112,18 @@
         <item name="selectedBackground">@drawable/list_bg_dark</item>
     </style>
 
+    <style name="Theme.Cliqz.Present" parent="Theme.AppCompat.Light">
+        <item name="colorPrimary">#1F68AD</item>
+    </style>
+
+    <style name="Theme.Cliqz.History" parent="Theme.AppCompat.Light">
+        <item name="colorPrimary">#F87140</item>
+    </style>
+
+    <style name="Theme.Cliqz.Suggestions" parent="Theme.AppCompat.Light">
+        <item name="colorPrimary">#55B046</item>
+    </style>
+
     <style name="overFlowButtonStyle" parent="@style/Widget.AppCompat.ActionButton.Overflow">
         <item name="android:minWidth">48dp</item>
         <item name="android:padding">0dp</item>

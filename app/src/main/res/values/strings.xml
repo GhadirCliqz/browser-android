@@ -233,4 +233,7 @@
     <string name="mail_to_feedback_at_cliqz.com">mailto:feedback@cliqz.com?subject=[ANDROID]+</string>
     <string name="search_with_cliqz">Search with Cliqz</string>
     <string name="action_refresh">Reload current page</string>
+    <string name="recommendations">Recommendations</string>
+    <string name="history">History</string>
+    <string name="default_page_title">Untitled</string>
 </resources>

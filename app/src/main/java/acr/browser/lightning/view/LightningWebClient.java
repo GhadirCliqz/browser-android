@@ -3,9 +3,9 @@ package acr.browser.lightning.view;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.net.MailTo;
 import android.net.Uri;
@@ -26,10 +26,10 @@ import android.webkit.WebViewClient;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 
+import com.cliqz.browser.main.Messages;
 import com.squareup.otto.Bus;
 
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
@@ -38,7 +38,6 @@ import acr.browser.lightning.R;
 import acr.browser.lightning.app.BrowserApp;
 import acr.browser.lightning.bus.BrowserEvents;
 import acr.browser.lightning.constant.Constants;
-import acr.browser.lightning.controller.UIController;
 import acr.browser.lightning.utils.AdBlock;
 import acr.browser.lightning.utils.IntentUtils;
 import acr.browser.lightning.utils.ProxyUtils;
@@ -50,9 +49,13 @@ import acr.browser.lightning.utils.Utils;
  */
 class LightningWebClient extends WebViewClient {
 
+    private static final String CLIQZ_SCHEME = "cliqz";
+    private static final String CLIQZ_TRAMPOLINE_AUTHORITY = "trampoline";
+    private static final String CLIQZ_TRAMPOLINE_FORWARD = "/goto.html";
+    private static final String CLIQZ_TRAMPOLINE_SEARCH = "/search.html";
+
     private final Activity mActivity;
     private final LightningView mLightningView;
-    private final UIController mUIController;
     private final AdBlock mAdBlock;
     private final Bus mEventBus;
     private final IntentUtils mIntentUtils;
@@ -60,7 +63,6 @@ class LightningWebClient extends WebViewClient {
 
     LightningWebClient(Activity activity, LightningView lightningView) {
         mActivity = activity;
-        mUIController = (UIController) activity;
         mLightningView = lightningView;
         mAdBlock = AdBlock.getInstance(activity);
         mAdBlock.updatePreference();
@@ -72,52 +74,44 @@ class LightningWebClient extends WebViewClient {
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     @Override
     public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
-        final String url = request.getUrl().toString();
-        final Context context = mWebView != null ? mWebView.getContext() : null;
-        if (url.startsWith("http://antiphishing.clyqz.com/") && context != null) {
-            try {
-                return new WebResourceResponse("application/json", "utf-8",
-                        context.getContentResolver().openInputStream(request.getUrl()));
-            } catch (IOException e) {
-                Log.e(Constants.TAG, "Cannot load antiphishing API", e);
-            }
-        }
-        if (url.equals("cliqz://js/CliqzAntiPhishing.js") && context != null) {
-            try {
-                return new WebResourceResponse("application/javascript", "utf-8",
-                        context.getAssets().open("navigation/js/CliqzAntiPhishing.js"));
-            } catch (IOException e) {
-                Log.e(Constants.TAG, "Cannot load antiphishing", e);
-            }
-        }
-        if (mAdBlock.isAd(request.getUrl().toString())) {
-            ByteArrayInputStream EMPTY = new ByteArrayInputStream("".getBytes());
-            return new WebResourceResponse("text/plain", "utf-8", EMPTY);
-        }
-        return super.shouldInterceptRequest(view, request);
+        final WebResourceResponse cliqzResponse = handleCliqzUrl(view, request.getUrl());
+        return cliqzResponse != null ? cliqzResponse : super.shouldInterceptRequest(view, request);
     }
 
-    @SuppressWarnings("deprecation")
-    @TargetApi(Build.VERSION_CODES.KITKAT_WATCH)
     @Override
     public WebResourceResponse shouldInterceptRequest(WebView view, String url) {
-        if (url.startsWith("http://antiphishing.clyqz.com/")) {
-            try {
-                return new WebResourceResponse("application/json", "utf-8", mWebView.getContext().getContentResolver().openInputStream(Uri.parse(url)));
-            } catch (IOException e) {
-                Log.e(Constants.TAG, "Cannot load antiphishing API", e);
-            }
+        final WebResourceResponse cliqzResponse = handleCliqzUrl(view, Uri.parse(url));
+        return cliqzResponse != null ? cliqzResponse : super.shouldInterceptRequest(view, url);
+    }
+
+    private WebResourceResponse handleCliqzUrl(WebView view, Uri uri) {
+        if (!CLIQZ_SCHEME.equals(uri.getScheme())) {
+            return null;
         }
-        if (url.equals("cliqz://js/CliqzAntiPhishing.js")) {
-            try {
-                return new WebResourceResponse("application/javascript", "utf-8", mWebView.getContext().getAssets().open("tool_androidkit/js/CliqzAntiPhishing.js"));
-            } catch (IOException e) {
-                Log.e(Constants.TAG, "Cannot load antiphishing", e);
+
+        final String path = uri.getPath();
+        if (CLIQZ_TRAMPOLINE_AUTHORITY.equals(uri.getAuthority())) {
+            if (CLIQZ_TRAMPOLINE_FORWARD.equals(uri.getPath())) {
+                final Resources resources = view.getResources();
+                final WebResourceResponse response =
+                        new WebResourceResponse("text/html", "UTF-8",
+                                resources.openRawResource(R.raw.trampoline_forward));
+                return response;
             }
-        }
-        if (mAdBlock.isAd(url)) {
-            ByteArrayInputStream EMPTY = new ByteArrayInputStream("".getBytes());
-            return new WebResourceResponse("text/plain", "utf-8", EMPTY);
+            if (CLIQZ_TRAMPOLINE_SEARCH.equals(uri.getPath())) {
+                final String query = uri.getQueryParameter("q");
+                mLightningView.telemetry.sendBackPressedSignal("web", "cards", query.length());
+                view.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        mEventBus.post(new Messages.ShowSearch(query));
+                    }
+                });
+                final WebResourceResponse response =
+                        new WebResourceResponse("test/plain", "UTF-8",
+                                new ByteArrayInputStream("OK".getBytes()));
+                return response;
+            }
         }
         return null;
     }
@@ -126,14 +120,16 @@ class LightningWebClient extends WebViewClient {
     @Override
     public void onPageFinished(WebView view, String url) {
         if (view.isShown()) {
-            mUIController.updateUrl(url, true);
+            mEventBus.post(new BrowserEvents.UpdateUrl(url,true));
             view.postInvalidate();
         }
-        if (view.getTitle() == null || view.getTitle().isEmpty()) {
+        if (view.getTitle() == null || view.getTitle().isEmpty()
+                || view.getTitle().contains(Constants.CLIQZ_TRAMPOLINE)) {
             mLightningView.mTitle.setTitle(mActivity.getString(R.string.untitled));
         } else {
             mLightningView.mTitle.setTitle(view.getTitle());
         }
+        mEventBus.post(new Messages.UpdateTitle());
         if (Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT &&
                 mLightningView.getInvertePage()) {
             view.evaluateJavascript(Constants.JAVASCRIPT_INVERT_PAGE, null);
@@ -143,10 +139,22 @@ class LightningWebClient extends WebViewClient {
 
     @Override
     public void onPageStarted(WebView view, String url, Bitmap favicon) {
+        if(mLightningView.telemetry.backPressed) {
+            if(!url.contains(Constants.CLIQZ_TRAMPOLINE)) {
+                if(mLightningView.telemetry.showingCards) {
+                    mLightningView.telemetry.sendBackPressedSignal("cards", "web", url.length());
+                    mLightningView.telemetry.showingCards = false;
+                } else {
+                    mLightningView.telemetry.sendBackPressedSignal("web", "web", url.length());
+                }
+            }
+            mLightningView.telemetry.backPressed = false;
+        }
+
         mLightningView.mTitle.setFavicon(null);
         if (mLightningView.isShown()) {
-            mUIController.updateUrl(url, false);
-            mUIController.showActionBar();
+            mEventBus.post(new BrowserEvents.UpdateUrl(url, false));
+            mEventBus.post(new BrowserEvents.ShowActionBar());
         }
         mEventBus.post(new BrowserEvents.TabsChanged());
     }
@@ -346,6 +354,14 @@ class LightningWebClient extends WebViewClient {
                 return true;
             }
         }
-        return mIntentUtils.startActivityForUrl(view, url);
+        // CLIQZ! We do not want to open external app from our browser, so we return false here
+        // boolean startActivityForUrl = mIntentUtils.startActivityForUrl(view, url);
+        // if(startActivityForUrl == false && !url.contains(Constants.CLIQZ_TRAMPOLINE)
+        //         && mLightningView.clicked) {
+        //     mLightningView.clicked = false;
+        //     mLightningView.telemetry.sendNavigationSignal(url.length());
+        // }
+        // return startActivityForUrl;
+        return false;
     }
 }

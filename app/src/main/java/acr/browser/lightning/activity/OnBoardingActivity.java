@@ -62,5 +62,5 @@ public class OnBoardingActivity extends FragmentActivity {
         mPreferences.setOnBoardingComplete(true);
         finish();
     }
-
+    
 }
