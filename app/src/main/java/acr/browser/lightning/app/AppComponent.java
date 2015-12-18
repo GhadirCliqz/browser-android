@@ -3,15 +3,18 @@ package acr.browser.lightning.app;
 import android.content.Context;
 
 import com.cliqz.browser.fragment.BaseSettingsFragment;
-import com.cliqz.browser.webview.CliqzView;
+import com.cliqz.browser.main.FragmentWithBus;
+import com.cliqz.browser.webview.BaseWebView;
+import com.cliqz.browser.webview.Bridge;
+import com.cliqz.browser.webview.SearchWebView;
 import com.cliqz.browser.webview.TabsManagerView;
+import com.cliqz.browser.widget.AutocompleteEditText;
 import com.squareup.otto.Bus;
 
 import javax.inject.Singleton;
 
 import acr.browser.lightning.activity.BrowserActivity;
 import acr.browser.lightning.activity.BrowserMenuPopup;
-import acr.browser.lightning.activity.MainActivity;
 import acr.browser.lightning.activity.OnBoardingActivity;
 import acr.browser.lightning.activity.ThemableBrowserActivity;
 import acr.browser.lightning.constant.BookmarkPage;
@@ -65,11 +68,21 @@ public interface AppComponent {
 
     void inject(ThemableBrowserActivity activity);
 
-    void inject(CliqzView cliqzView);
+    void inject(BaseWebView searchWebView);
 
     void inject(TabsManagerView tabsManagerView);
 
     void inject(BrowserMenuPopup browserMenuPopup);
 
     void inject(BaseSettingsFragment baseSettingsFragment);
+
+    void inject(AutocompleteEditText autocompleteEditText);
+
+    // This is CLIQZ specific
+    void inject(com.cliqz.browser.main.MainActivity mainActivity);
+
+    // This is CLIQZ Specific too
+    void inject(FragmentWithBus baseFragment);
+
+    void inject(Bridge bridge);
 }

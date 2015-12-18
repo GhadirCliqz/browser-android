@@ -1,13 +1,24 @@
 package com.cliqz.browser.widget;
 
+import android.content.ClipboardManager;
 import android.content.Context;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.KeyEvent;
+import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputConnection;
 import android.widget.EditText;
+import android.widget.TextView;
+
+import com.cliqz.browser.utils.Telemetry;
 
 import java.util.ArrayList;
+
+import javax.inject.Inject;
+
+import acr.browser.lightning.app.BrowserApp;
 
 /**
  * Custom EditText widget with autocompletion
@@ -17,9 +28,14 @@ import java.util.ArrayList;
  */
 public class AutocompleteEditText extends EditText {
 
+    @Inject
+    Telemetry mTelemetry;
+
     private final ArrayList<TextWatcher> mListeners = new ArrayList<>();
     private boolean mIsAutocompleting;
     private AutocompleteService mAutocompleteService;
+
+    public boolean mIsAutocompleted;
 
     public AutocompleteEditText(Context context) {
         this(context, null);
@@ -32,8 +48,12 @@ public class AutocompleteEditText extends EditText {
     public AutocompleteEditText(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         super.addTextChangedListener(new DefaultTextWatcher());
+        final int imeOptions = getImeOptions() | EditorInfo.IME_FLAG_NO_EXTRACT_UI;
+        setImeOptions(imeOptions);
         mIsAutocompleting = false;
+        mIsAutocompleted = false;
         mAutocompleteService = AutocompleteService.createInstance(context);
+        BrowserApp.getAppComponent().inject(this);
     }
 
     @Override
@@ -52,16 +72,23 @@ public class AutocompleteEditText extends EditText {
         }
     }
 
+    public String getQuery() {
+        return getText().toString().substring(0, getSelectionStart());
+    }
+
+    /*
     @Override
     public boolean onKeyPreIme (int keyCode, KeyEvent event) {
         if(keyCode == KeyEvent.KEYCODE_BACK && this.hasFocus()) {
             this.clearFocus();
+            return true;
         }
         return super.onKeyPreIme(keyCode, event);
-    }
+    }*/
 
     private void setAutocompleteText(CharSequence text) {
         mIsAutocompleting = true;
+        mIsAutocompleted = true;
         final CharSequence currentText = getText();
         if (text.toString().startsWith(currentText.toString())) {
             setTextKeepState(text);
@@ -106,6 +133,10 @@ public class AutocompleteEditText extends EditText {
             for (TextWatcher watcher: mListeners) {
                 watcher.onTextChanged(s, start, before, count);
             }
+
+            if (mDeleting) {
+                mTelemetry.sendTypingSignal(Telemetry.Action.KEYSTROKE_DEL, s.length());
+            }
         }
 
         @Override
@@ -113,7 +144,7 @@ public class AutocompleteEditText extends EditText {
             if (mIsAutocompleting) {
                 return;
             }
-
+            mIsAutocompleted = false;
             for (TextWatcher watcher: mListeners) {
                 watcher.afterTextChanged(s);
             }
@@ -126,5 +157,17 @@ public class AutocompleteEditText extends EditText {
             }
             mDeleting = false;
         }
+    }
+
+    @Override
+    public boolean onTextContextMenuItem(int id) {
+        ClipboardManager clipboard = (ClipboardManager) getContext()
+                .getSystemService(getContext().CLIPBOARD_SERVICE);
+        switch (id){
+            case android.R.id.paste:
+                mTelemetry.sendPasteSignal(clipboard.getPrimaryClip().getItemAt(0).getText().length());
+                break;
+        }
+        return super.onTextContextMenuItem(id);
     }
 }

@@ -8,6 +8,7 @@ import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
+import android.database.sqlite.SQLiteException;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -38,6 +39,7 @@ import android.webkit.WebSettings.LayoutAlgorithm;
 import android.webkit.WebSettings.PluginState;
 import android.webkit.WebView;
 
+import com.cliqz.browser.utils.Telemetry;
 import com.squareup.otto.Bus;
 
 import java.io.File;
@@ -56,7 +58,6 @@ import acr.browser.lightning.bus.BrowserEvents;
 import acr.browser.lightning.constant.Constants;
 import acr.browser.lightning.constant.HistoryPage;
 import acr.browser.lightning.constant.StartPage;
-import acr.browser.lightning.controller.UIController;
 import acr.browser.lightning.database.HistoryDatabase;
 import acr.browser.lightning.database.HistoryItem;
 import acr.browser.lightning.dialog.LightningDialogBuilder;
@@ -76,7 +77,6 @@ public class LightningView implements ILightningTab {
     final LightningViewTitle mTitle;
     private WebView mWebView;
     final boolean mIsIncognitoTab;
-    private final UIController mUIController;
     private GestureDetector mGestureDetector;
     private final Activity mActivity;
     private static String mHomepage;
@@ -93,10 +93,10 @@ public class LightningView implements ILightningTab {
     private final String mId;
     private final AdBlock mAdBlock;
     private String mUrl;
-    private HistoryDatabase mHistoryDatabase;
     // TODO fix so that mWebpageBitmap can be static - static changes the icon when switching from light to dark and then back to light
     private Bitmap mWebpageBitmap;
     private boolean mTextReflow = false;
+    public boolean clicked = false;
 
 
     private static final float[] mNegativeColorArray = {
@@ -117,6 +117,12 @@ public class LightningView implements ILightningTab {
     @Inject
     LightningDialogBuilder mBookmarksDialogBuilder;
 
+    @Inject
+    HistoryDatabase mHistoryDatabase;
+
+    @Inject
+    Telemetry telemetry;
+
     public LightningView(Activity activity, String url, boolean isIncognito, String uniqueId) {
         this(activity, url, isIncognito, uniqueId, null, null);
     }
@@ -127,12 +133,11 @@ public class LightningView implements ILightningTab {
         mActivity = activity;
         mId = uniqueId;
         mUrl = url;
-        mHistoryDatabase = database;
-        mUIController = (UIController) activity;
         mIsCustomWebView = overrideWebView != null;
         mWebView = overrideWebView != null ? overrideWebView : new WebView(activity);
         mIsIncognitoTab = isIncognito;
-        mTitle = new LightningViewTitle(activity, mUIController.getUseDarkTheme());
+        Boolean useDarkTheme = mPreferences.getUseTheme() != 0 || isIncognito;
+        mTitle = new LightningViewTitle(activity, useDarkTheme);
         mAdBlock = AdBlock.getInstance(activity.getApplicationContext());
 
         mMaxFling = ViewConfiguration.get(activity).getScaledMaximumFlingVelocity();
@@ -142,6 +147,7 @@ public class LightningView implements ILightningTab {
         mWebView.setFocusable(true);
         mWebView.setDrawingCacheEnabled(false);
         mWebView.setWillNotCacheDrawing(true);
+
         if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.LOLLIPOP_MR1) {
             //noinspection deprecation
             mWebView.setAnimationCacheEnabled(false);
@@ -847,12 +853,13 @@ public class LightningView implements ILightningTab {
             mY = arg1.getY();
             if (mAction == MotionEvent.ACTION_DOWN) {
                 mLocation = mY;
+                clicked = true;
             } else if (mAction == MotionEvent.ACTION_UP) {
                 final float distance = (mY - mLocation);
                 if (distance > SCROLL_UP_THRESHOLD && view.getScrollY() < SCROLL_UP_THRESHOLD) {
-                    mUIController.showActionBar();
+                    mEventBus.post(new BrowserEvents.ShowActionBar());
                 } else if (distance < -SCROLL_UP_THRESHOLD) {
-                    mUIController.hideActionBar();
+                    mEventBus.post(new BrowserEvents.HideActionBar());
                 }
                 mLocation = 0;
             }
@@ -867,9 +874,9 @@ public class LightningView implements ILightningTab {
         public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
             int power = (int) (velocityY * 100 / mMaxFling);
             if (power < -10) {
-                mUIController.hideActionBar();
+                mEventBus.post(new BrowserEvents.HideActionBar());
             } else if (power > 15) {
-                mUIController.showActionBar();
+                mEventBus.post(new BrowserEvents.ShowActionBar());
             }
             return super.onFling(e1, e2, velocityX, velocityY);
         }
@@ -970,4 +977,26 @@ public class LightningView implements ILightningTab {
         File file = new File(directory, mId + ".jpeg");
         file.delete();
     }
+
+
+    void addItemToHistory(@Nullable final String title, @NonNull final String url) {
+        Runnable update = new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    mHistoryDatabase.visitHistoryItem(url, title);
+                } catch (IllegalStateException e) {
+                    Log.e(Constants.TAG, "IllegalStateException in updateHistory", e);
+                } catch (NullPointerException e) {
+                    Log.e(Constants.TAG, "NullPointerException in updateHistory", e);
+                } catch (SQLiteException e) {
+                    Log.e(Constants.TAG, "SQLiteException in updateHistory", e);
+                }
+            }
+        };
+        if (!url.startsWith(Constants.FILE)) {
+            new Thread(update).start();
+        }
+    }
+
 }

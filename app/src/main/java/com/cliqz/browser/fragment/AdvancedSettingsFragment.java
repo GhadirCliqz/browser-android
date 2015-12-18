@@ -32,9 +32,9 @@ import acr.browser.lightning.utils.Utils;
 
 public class AdvancedSettingsFragment extends BaseSettingsFragment {
 
-    private static final String SETTINGS_NEWWINDOW = "allow_new_window";
-    private static final String SETTINGS_RESTORETABS = "restore_tabs";
-    private static final String SETTINGS_URLCONTENT = "url_contents";
+    // private static final String SETTINGS_NEWWINDOW = "allow_new_window";
+    // private static final String SETTINGS_RESTORETABS = "restore_tabs";
+    // private static final String SETTINGS_URLCONTENT = "url_contents";
     private static final String SETTINGS_TEXTENCODING = "text_encoding";
     private static final String SETTINGS_USERAGENT = "agent";
     private static final String SETTINGS_DOWNLOAD = "download";
@@ -46,8 +46,8 @@ public class AdvancedSettingsFragment extends BaseSettingsFragment {
     private CharSequence[] mProxyChoices;
     private int mAgentChoice;
     private String mDownloadLocation;
-    private CheckBoxPreference cbAllowPopups, cbJsScript, cbrestoreTabs;
-    private Preference urlcontent, textEncoding, useragent, downloadloc, proxy;
+    private CheckBoxPreference cbJsScript; //cbAllowPopups, cbrestoreTabs
+    private Preference textEncoding, useragent, downloadloc, proxy; //urlcontent,
     private CharSequence[] mUrlOptions;
 
     @Override
@@ -64,31 +64,31 @@ public class AdvancedSettingsFragment extends BaseSettingsFragment {
     private void initPrefs() {
         // mPreferenceManager storage
         textEncoding = findPreference(SETTINGS_TEXTENCODING);
-        urlcontent = findPreference(SETTINGS_URLCONTENT);
-        cbAllowPopups = (CheckBoxPreference) findPreference(SETTINGS_NEWWINDOW);
-        cbrestoreTabs = (CheckBoxPreference) findPreference(SETTINGS_RESTORETABS);
+        // urlcontent = findPreference(SETTINGS_URLCONTENT);
+        // cbAllowPopups = (CheckBoxPreference) findPreference(SETTINGS_NEWWINDOW);
+        // cbrestoreTabs = (CheckBoxPreference) findPreference(SETTINGS_RESTORETABS);
         cbJsScript = (CheckBoxPreference) findPreference(SETTINGS_JAVASCRIPT);
         proxy = findPreference(SETTINGS_PROXY);
         useragent = findPreference(SETTINGS_USERAGENT);
         downloadloc = findPreference(SETTINGS_DOWNLOAD);
 
         textEncoding.setOnPreferenceClickListener(this);
-        urlcontent.setOnPreferenceClickListener(this);
+        // urlcontent.setOnPreferenceClickListener(this);
         proxy.setOnPreferenceClickListener(this);
         useragent.setOnPreferenceClickListener(this);
         downloadloc.setOnPreferenceClickListener(this);
-        cbAllowPopups.setOnPreferenceChangeListener(this);
-        cbrestoreTabs.setOnPreferenceChangeListener(this);
+        // cbAllowPopups.setOnPreferenceChangeListener(this);
+        // cbrestoreTabs.setOnPreferenceChangeListener(this);
         cbJsScript.setOnPreferenceChangeListener(this);
 
         textEncoding.setSummary(mPreferenceManager.getTextEncoding());
 
         mUrlOptions = getResources().getStringArray(R.array.url_content_array);
         int option = mPreferenceManager.getUrlBoxContentChoice();
-        urlcontent.setSummary(mUrlOptions[option]);
+        // urlcontent.setSummary(mUrlOptions[option]);
 
-        cbAllowPopups.setChecked(mPreferenceManager.getPopupsEnabled());
-        cbrestoreTabs.setChecked(mPreferenceManager.getRestoreLostTabsEnabled());
+        // cbAllowPopups.setChecked(mPreferenceManager.getPopupsEnabled());
+        // cbrestoreTabs.setChecked(mPreferenceManager.getRestoreLostTabsEnabled());
         cbJsScript.setChecked(mPreferenceManager.getJavaScriptEnabled());
 
         mProxyChoices = getResources().getStringArray(R.array.proxy_choices_array);
@@ -117,8 +117,6 @@ public class AdvancedSettingsFragment extends BaseSettingsFragment {
 
         mDownloadLocation = mPreferenceManager.getDownloadDirectory();
         downloadloc.setSummary(Constants.EXTERNAL_STORAGE + '/' + mDownloadLocation);
-
-
     }
 
     @Override
@@ -133,9 +131,9 @@ public class AdvancedSettingsFragment extends BaseSettingsFragment {
             case SETTINGS_DOWNLOAD:
                 downloadLocDialog();
                 return true;
-            case SETTINGS_URLCONTENT:
-                urlBoxPicker();
-                return true;
+//            case SETTINGS_URLCONTENT:
+//                urlBoxPicker();
+//                return true;
             case SETTINGS_TEXTENCODING:
                 textEncodingPicker();
                 return true;
@@ -148,14 +146,14 @@ public class AdvancedSettingsFragment extends BaseSettingsFragment {
     public boolean onPreferenceChange(Preference preference, Object newValue) {
         // switch preferences
         switch (preference.getKey()) {
-            case SETTINGS_NEWWINDOW:
-                mPreferenceManager.setPopupsEnabled((Boolean) newValue);
-                cbAllowPopups.setChecked((Boolean) newValue);
-                return true;
-            case SETTINGS_RESTORETABS:
-                mPreferenceManager.setRestoreLostTabsEnabled((Boolean) newValue);
-                cbrestoreTabs.setChecked((Boolean) newValue);
-                return true;
+//            case SETTINGS_NEWWINDOW:
+//                mPreferenceManager.setPopupsEnabled((Boolean) newValue);
+//                cbAllowPopups.setChecked((Boolean) newValue);
+//                return true;
+//            case SETTINGS_RESTORETABS:
+//                mPreferenceManager.setRestoreLostTabsEnabled((Boolean) newValue);
+//                cbrestoreTabs.setChecked((Boolean) newValue);
+//                return true;
             case SETTINGS_JAVASCRIPT:
                 mPreferenceManager.setJavaScriptEnabled((Boolean) newValue);
                 cbJsScript.setChecked((Boolean) newValue);
@@ -410,15 +408,15 @@ public class AdvancedSettingsFragment extends BaseSettingsFragment {
 
         int n = mPreferenceManager.getUrlBoxContentChoice();
 
-        picker.setSingleChoiceItems(mUrlOptions, n, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                mPreferenceManager.setUrlBoxContentChoice(which);
-                if (which < mUrlOptions.length) {
-                    urlcontent.setSummary(mUrlOptions[which]);
-                }
-            }
-        });
+//        picker.setSingleChoiceItems(mUrlOptions, n, new DialogInterface.OnClickListener() {
+//            @Override
+//            public void onClick(DialogInterface dialog, int which) {
+//                mPreferenceManager.setUrlBoxContentChoice(which);
+//                if (which < mUrlOptions.length) {
+//                    urlcontent.setSummary(mUrlOptions[which]);
+//                }
+//            }
+//        });
         picker.setNeutralButton(getResources().getString(R.string.action_ok),
                 new DialogInterface.OnClickListener() {
                     @Override

@@ -114,7 +114,7 @@ public class AutocompleteService {
                 updatesIs = new FileInputStream(sExtraCompletionFile);
                 readFrom(updatesIs, trie, completions);
             } catch (FileNotFoundException e) {
-                Log.e(TAG, "Can't read updates for completion", e);
+                Log.i(TAG, "Can't read updates for completion", e);
             }
 
             close(defaultIs);

@@ -61,6 +61,11 @@ public class PreferenceManager {
         public static final String INITIAL_CHECK_FOR_TOR = "checkForTor";
         public static final String INITIAL_CHECK_FOR_I2P = "checkForI2P";
         public static final String ONBOARDING_COMPLETE = "onboardingComplete";
+        public static final String SESSION_ID = "sessionId";
+        public static final String TELEMETRY_SEQUENCE = "telemetrySequence";
+        public static final String VERSION_CODE = "versionCode";
+        public static final String TIME_OF_LAST_ENVIRONMENT_SIGNAL = "lastEnvironmentSignal";
+        public static final String TELEMETRY_SIGNALS = "telemetrySignals";
     }
 
     private final SharedPreferences mPrefs;
@@ -264,6 +269,26 @@ public class PreferenceManager {
         return mPrefs.getBoolean(Name.ONBOARDING_COMPLETE, false);
     }
 
+    public String getSessionId() {
+        return mPrefs.getString(Name.SESSION_ID, null);
+    }
+
+    public int getTelemetrySequence() {
+        return mPrefs.getInt(Name.TELEMETRY_SEQUENCE, 0);
+    }
+
+    public int getVersionCode() {
+        return mPrefs.getInt(Name.VERSION_CODE, 1);
+    }
+
+    public long getTimeOfLastEnvSignal() {
+        return mPrefs.getLong(Name.TIME_OF_LAST_ENVIRONMENT_SIGNAL, 0);
+    }
+
+    public String getTelemetrySignals() {
+        return mPrefs.getString(Name.TELEMETRY_SIGNALS, "");
+    }
+
     private void putBoolean(String name, boolean value) {
         mPrefs.edit().putBoolean(name, value).apply();
     }
@@ -274,6 +299,10 @@ public class PreferenceManager {
 
     private void putString(String name, String value) {
         mPrefs.edit().putString(name, value).apply();
+    }
+
+    private void putLong(String name, long value) {
+        mPrefs.edit().putLong(name, value).apply();
     }
 
     public void setRemoveIdentifyingHeadersEnabled(boolean enabled){
@@ -469,5 +498,26 @@ public class PreferenceManager {
 
     public void setOnBoardingComplete(boolean done) {
         putBoolean(Name.ONBOARDING_COMPLETE, done);
+    }
+
+    public void setSessionId(String sessionId) {
+        putString(Name.SESSION_ID, sessionId);
+    }
+
+    public void setTelemetrySequence(int telemetrySequence) {
+        telemetrySequence = (telemetrySequence+1) % 2147483647;
+        putInt(Name.TELEMETRY_SEQUENCE, telemetrySequence);
+    }
+
+    public void setVersionCode(int versionCode) {
+        putInt(Name.VERSION_CODE, versionCode);
+    }
+
+    public void setTimeOfLastEnvSignal(long time) {
+        putLong(Name.TIME_OF_LAST_ENVIRONMENT_SIGNAL, time);
+    }
+
+    public void setTelemetrySignals(String signals) {
+        putString(Name.TELEMETRY_SIGNALS, signals);
     }
 }
