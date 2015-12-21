@@ -45,12 +45,15 @@ import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
  */
 public class MainActivity extends AppCompatActivity {
 
+    private final static String TAG = MainActivity.class.getSimpleName();
+
     private static final String HISTORY_FRAGMENT_TAG = "history_fragment";
     private static final String SUGGESTIONS_FRAGMENT_TAG = "suggestions_fragment";
     static final String SEARCH_FRAGMENT_TAG = "search_fragment";
 
     private static final int CONTENT_VIEW_ID = R.id.main_activity_content;
-    
+    private static final String SAVED_STATE = TAG + ".SAVED_STATE";
+
     private Fragment mFreshTabFragment, mMainFragment, mHistoryFragment;
 
     @Inject
@@ -63,9 +66,12 @@ public class MainActivity extends AppCompatActivity {
     Telemetry telemetry;
 
     @Inject
+    CliqzBrowserState state;
+
+    @Inject
     LocationCache locationCache;
-	
-	@Inject
+
+    @Inject
     Timings timings;
 
     ViewPager pager;
@@ -133,6 +139,7 @@ public class MainActivity extends AppCompatActivity {
             telemetry.sendStartingSignals(context);
         }
         locationCache.start();
+        state.load();
     }
 
     @Override
@@ -144,6 +151,8 @@ public class MainActivity extends AppCompatActivity {
             telemetry.sendClosingSignals(Telemetry.Action.CLOSE, context);
         }
         locationCache.stop();
+        state.setTimestamp(System.currentTimeMillis());
+        state.store();
     }
 
     @Override

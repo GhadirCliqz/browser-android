@@ -293,6 +293,14 @@ public class MainFragment extends BaseFragment {
     }
 
     @Subscribe
+    public void updateUrl(BrowserEvents.UpdateUrl event) {
+        final String url = event.url;
+        if (url != null && !url.isEmpty() && !url.startsWith(Constants.CLIQZ_TRAMPOLINE)) {
+            state.setUrl(url);
+        }
+    }
+
+    @Subscribe
     public void openLink(CliqzMessages.OpenLink event) {
         final WebView webView = mLightningView.getWebView();
         final String eventUrl = event.url;
@@ -340,7 +348,9 @@ public class MainFragment extends BaseFragment {
     }
 
     void updateTitle() {
-        searchBar.setTitle(mLightningView.getTitle());
+        final String title = mLightningView.getTitle();
+        searchBar.setTitle(title);
+        state.setTitle(title);
     }
 
 }
