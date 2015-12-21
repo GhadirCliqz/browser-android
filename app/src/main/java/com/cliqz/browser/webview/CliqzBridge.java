@@ -108,12 +108,13 @@ class CliqzBridge extends Bridge {
                 if (history != null) {
                     final List<HistoryItem> items = history.getTopSites(no);
                     try {
-                        result = String.format("%s(%s)", callback, historyToJSON(items));
+                        result = historyToJSON(items);
                     } catch (Exception e) {
                         Log.e(TAG, "Cannot serialize History", e);
                     }
                 }
-                bridge.executeJavascript(String.format("%s(%s)", callback, result));
+                final String js = String.format("%s(%s)", callback, result);
+                bridge.executeJavascript(js);
             }
         }),
 

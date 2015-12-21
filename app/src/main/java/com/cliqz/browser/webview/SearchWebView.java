@@ -61,7 +61,8 @@ public class SearchWebView extends BaseWebView {
 
 
     private boolean isCliqzUrl() {
-        return CLIQZ_URL.equals(getUrl());
+        final String url = getUrl();
+        return url != null && url.startsWith(CLIQZ_URL);
     }
 
     private String historyToJSON(final List<HistoryItem> items) {
@@ -137,7 +138,7 @@ public class SearchWebView extends BaseWebView {
         final boolean hasLocation = location != null;
         final double lat = hasLocation ? location.getLatitude() : 0.0;
         final double lon = hasLocation ? location.getLongitude() : 0.0;
-        final String call = String.format(Locale.getDefault(),
+        final String call = String.format(Locale.US,
                 "search_mobile('%1$s', %2$b, %3$.6f, %4$.6f)",
                 lowerQuery, hasLocation, lat, lon);
 
