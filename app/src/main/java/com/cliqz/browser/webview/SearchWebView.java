@@ -9,9 +9,14 @@ import android.util.Log;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
+import com.cliqz.browser.main.CliqzBrowserState;
+
 import java.util.List;
 import java.util.Locale;
 
+import javax.inject.Inject;
+
+import acr.browser.lightning.app.BrowserApp;
 import acr.browser.lightning.database.HistoryItem;
 
 /**
@@ -29,16 +34,19 @@ public class SearchWebView extends BaseWebView {
 
     public SearchWebView(Context context) {
         super(context);
+        BrowserApp.getAppComponent().inject(this);
     }
-
-    /*public void setResultListener(final CliqzCallbacks cb) {
-        mListener = cb;
-    }*/
 
     @Nullable
     @Override
     protected WebViewClient createWebViewClient() {
         return new WebViewClient() {
+            @Override
+            public void onPageFinished(WebView view, String url) {
+                super.onPageFinished(view, url);
+                executeJS(String.format(Locale.US,"initSearch(%s);", state.toJSON()));
+            }
+
             @Override
             public boolean shouldOverrideUrlLoading(final WebView wv, final String url) {
                 Log.d(TAG, "New url: " + url);
@@ -134,10 +142,18 @@ public class SearchWebView extends BaseWebView {
     private void performSearch(String query) {
         mLastQuery = query;
         final String lowerQuery = query.toLowerCase();
+        state.setQuery(lowerQuery);
         final Location location = locationCache.getLastLocation();
         final boolean hasLocation = location != null;
         final double lat = hasLocation ? location.getLatitude() : 0.0;
         final double lon = hasLocation ? location.getLongitude() : 0.0;
+        if (hasLocation) {
+            state.setLatitude((float) lat);
+            state.setLongitude((float) lon);
+        } else {
+            state.setLongitude(Float.MAX_VALUE);
+            state.setLatitude(Float.MAX_VALUE);
+        }
         final String call = String.format(Locale.US,
                 "search_mobile('%1$s', %2$b, %3$.6f, %4$.6f)",
                 lowerQuery, hasLocation, lat, lon);

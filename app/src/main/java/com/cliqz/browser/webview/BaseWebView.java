@@ -14,6 +14,7 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
+import com.cliqz.browser.main.CliqzBrowserState;
 import com.cliqz.browser.utils.LocationCache;
 import com.cliqz.browser.utils.Telemetry;
 
@@ -44,6 +45,10 @@ public abstract class BaseWebView extends WebView {
 
     @Inject
     Telemetry telemetry;
+
+    @Inject
+    CliqzBrowserState state;
+
 
     public BaseWebView(Context context) {
         this(context, null);

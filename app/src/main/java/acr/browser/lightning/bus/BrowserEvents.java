@@ -56,10 +56,6 @@ public final class BrowserEvents {
     }
 
     /**
-     *
-     */
-
-    /**
      * Notify the Browser to display a SnackBar in the main activity
      */
     public static class ShowSnackBarMessage {

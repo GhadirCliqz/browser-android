@@ -5,6 +5,7 @@ import android.content.Context;
 import android.os.Build;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
+import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
 /**
@@ -35,7 +36,13 @@ public class FreshTabWebView extends BaseWebView {
     @Nullable
     @Override
     protected WebViewClient createWebViewClient() {
-        return null;
+        return new WebViewClient() {
+            @Override
+            public void onPageFinished(WebView view, String url) {
+                super.onPageFinished(view, url);
+                executeJS("initFreshtab()");
+            }
+        };
     }
 
     @Nullable
