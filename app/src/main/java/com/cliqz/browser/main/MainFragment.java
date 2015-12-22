@@ -118,16 +118,8 @@ public class MainFragment extends BaseFragment {
                 Log.i(TAG, "Can't convert " + stateName + " to state enum");
             }
         }
-        if (mState == State.SHOWING_SEARCH) {
-            searchBar.showSearchEditText();
-            mContentContainer.addView(webView);
-            mContentContainer.addView(mSearchWebView);
-        } else {
-            updateTitle();
-            searchBar.showTitleBar();
-            mContentContainer.addView(mSearchWebView);
-            mContentContainer.addView(webView);
-        }
+        mContentContainer.addView(webView);
+        mContentContainer.addView(mSearchWebView);
     }
 
     @Override
@@ -156,12 +148,20 @@ public class MainFragment extends BaseFragment {
     @Override
     public void onResume() {
         super.onResume();
-        final String query = mAutocompleteEditText.getQuery();
+//        final String query = mAutocompleteEditText.getQuery();
         if (mSearchWebView != null) {
             mSearchWebView.onResume();
-            if (query != null && !query.isEmpty()) {
-                mSearchWebView.onQueryChanged(query);
-            }
+//            if (query != null && !query.isEmpty()) {
+//                mSearchWebView.onQueryChanged(query);
+//            }
+        }
+        final boolean reset = System.currentTimeMillis() - state.getTimestamp() >= Constants.HOME_RESET_DELAY;
+        mState = reset ? State.SHOWING_SEARCH : mState;
+        final String query = reset ? "" : state.getQuery();
+        if (mState == State.SHOWING_SEARCH) {
+            bus.post(new Messages.ShowSearch(query));
+        } else {
+            bus.post(new CliqzMessages.OpenLink(state.getUrl()));
         }
     }
 
@@ -315,6 +315,11 @@ public class MainFragment extends BaseFragment {
                 .appendQueryParameter("q", lastQuery)
                 .build().toString();
         webView.loadUrl(url);
+    }
+
+    @Subscribe
+    public void notifyQuery(CliqzMessages.NotifyQuery event) {
+        bus.post(new Messages.ShowSearch(event.query));
     }
 
     @Subscribe

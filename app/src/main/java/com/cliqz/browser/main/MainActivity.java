@@ -15,9 +15,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.view.Window;
-import android.view.WindowInsets;
 import android.view.WindowManager;
-import android.widget.FrameLayout;
 
 import com.cliqz.browser.utils.LocationCache;
 import com.cliqz.browser.utils.Telemetry;
@@ -52,9 +50,12 @@ public class MainActivity extends AppCompatActivity {
     static final String SEARCH_FRAGMENT_TAG = "search_fragment";
 
     private static final int CONTENT_VIEW_ID = R.id.main_activity_content;
+
     private static final String SAVED_STATE = TAG + ".SAVED_STATE";
 
-    private Fragment mFreshTabFragment, mMainFragment, mHistoryFragment;
+    private FreshTabFragment mFreshTabFragment;
+    private MainFragment mMainFragment;
+    private HistoryFragment mHistoryFragment;
 
     @Inject
     Bus bus;
@@ -74,14 +75,23 @@ public class MainActivity extends AppCompatActivity {
     @Inject
     Timings timings;
 
-    ViewPager pager;
+    private ViewPager pager;
 
-    long startTime;
+    // Used for telemetry
+    private long startTime;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         BrowserApp.getAppComponent().inject(this);
+
+        if (savedInstanceState != null) {
+            final CliqzBrowserState oldState =
+                    (CliqzBrowserState) savedInstanceState.getSerializable(SAVED_STATE);
+            if (oldState != null) {
+                state.copyFrom(oldState);
+            }
+        }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
             final Window window = getWindow();
@@ -101,7 +111,7 @@ public class MainActivity extends AppCompatActivity {
             pager = (ViewPager) findViewById(R.id.viewpager);
             pager.setAdapter(new PagerAdapter(getSupportFragmentManager()));
             pager.addOnPageChangeListener(onPageChangeListener);
-        } else if (savedInstanceState == null) {
+        } else {
             setupContentView();
         }
 
@@ -139,7 +149,6 @@ public class MainActivity extends AppCompatActivity {
             telemetry.sendStartingSignals(context);
         }
         locationCache.start();
-        state.load();
     }
 
     @Override
@@ -152,7 +161,14 @@ public class MainActivity extends AppCompatActivity {
         }
         locationCache.stop();
         state.setTimestamp(System.currentTimeMillis());
-        state.store();
+        state.setMode(mMainFragment.mState == MainFragment.State.SHOWING_SEARCH ?
+                CliqzBrowserState.Mode.SEARCH : CliqzBrowserState.Mode.WEBPAGE);
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        outState.putSerializable(SAVED_STATE, state);
+        super.onSaveInstanceState(outState);
     }
 
     @Override

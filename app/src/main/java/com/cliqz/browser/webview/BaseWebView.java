@@ -163,7 +163,7 @@ public abstract class BaseWebView extends WebView {
      * Evaluate JS in web context
      * @param js JS command
      */
-    protected final void executeJS(final String js) {
+     protected final void executeJS(final String js) {
         if (js != null && !js.isEmpty()) {
             post(new Runnable() {
                 @Override

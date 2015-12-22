@@ -133,7 +133,8 @@ class CliqzBridge extends Bridge {
         notifyQuery(new IAction() {
             @Override
             public void execute(Bridge bridge, Object data, String callback) {
-                final String query = (data instanceof String) ? (String) data : null;
+                final JSONObject json = (data instanceof JSONObject) ? (JSONObject) data : null;
+                final String query = json != null ? json.optString("q", null): null;
                 if (query == null) {
                     Log.w(TAG, "No url to notify");
                     return;
