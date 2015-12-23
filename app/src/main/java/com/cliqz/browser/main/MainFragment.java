@@ -54,10 +54,6 @@ public class MainFragment extends BaseFragment {
         SHOWING_BROWSER,
     }
 
-    private final static int KEYBOARD_ANIMATION_DELAY = 200;
-
-    private final Handler handler = new Handler(Looper.getMainLooper());
-
     private String mUrl = "";
 
     String lastQuery = "";
@@ -205,10 +201,6 @@ public class MainFragment extends BaseFragment {
                 hideKeyboard();
                 delayedPostOnBus(new Messages.GoToSuggestions());
                 return true;
-            case R.id.menu_settings:
-                hideKeyboard();
-                delayedPostOnBus(new Messages.GoToSettings());
-                return true;
             default:
                 return false;
         }
@@ -247,16 +239,17 @@ public class MainFragment extends BaseFragment {
             if (content != null && !content.isEmpty()) {
                 if (Patterns.WEB_URL.matcher(content).matches()) {
                     final String guessedUrl = URLUtil.guessUrl(content);
-                    bus.post(new CliqzMessages.OpenLink(guessedUrl));
                     if(mAutocompleteEditText.mIsAutocompleted) {
-                        telemetry.sendResultEnterSignal(true,
+                        telemetry.sendResultEnterSignal(false, true,
                                 mAutocompleteEditText.getQuery().length(), guessedUrl.length());
                     } else {
-                        telemetry.sendResultEnterSignal(false, guessedUrl.length(), -1);
+                        telemetry.sendResultEnterSignal(false, false, content.length(), -1);
                     }
+                    bus.post(new CliqzMessages.OpenLink(guessedUrl));
                 } else {
                     try {
                         final String query = URLEncoder.encode(content, "UTF-8");
+                        telemetry.sendResultEnterSignal(true, false, query.length(), -1);
                         bus.post(new CliqzMessages.OpenLink("https://www.google.com/search?q=" + query));
                     } catch (UnsupportedEncodingException e) {
                         e.printStackTrace();
@@ -280,15 +273,6 @@ public class MainFragment extends BaseFragment {
         InputMethodManager imm = (InputMethodManager) mAutocompleteEditText.getContext()
                 .getSystemService(Context.INPUT_METHOD_SERVICE);
         imm.hideSoftInputFromWindow(mAutocompleteEditText.getWindowToken(), 0);
-    }
-
-    private void delayedPostOnBus(final Object event) {
-        handler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                bus.post(event);
-            }
-        }, KEYBOARD_ANIMATION_DELAY);
     }
 
     @Subscribe
