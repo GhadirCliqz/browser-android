@@ -1,7 +1,7 @@
 /*
  * Copyright 2014 A.C.R. Development
  */
-package com.cliqz.browser.fragment;
+package com.cliqz.browser.settings;
 
 import android.app.Activity;
 import android.content.DialogInterface;
@@ -26,7 +26,6 @@ import java.util.List;
 
 import acr.browser.lightning.R;
 import acr.browser.lightning.constant.Constants;
-import acr.browser.lightning.preference.PreferenceManager;
 import acr.browser.lightning.utils.ProxyUtils;
 import acr.browser.lightning.utils.Utils;
 

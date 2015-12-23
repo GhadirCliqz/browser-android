@@ -1,4 +1,4 @@
-package com.cliqz.browser.fragment;
+package com.cliqz.browser.settings;
 
 import android.os.Bundle;
 import android.preference.Preference;
