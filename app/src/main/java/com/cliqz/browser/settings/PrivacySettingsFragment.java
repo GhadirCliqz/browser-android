@@ -1,7 +1,7 @@
 /*
  * Copyright 2014 A.C.R. Development
  */
-package com.cliqz.browser.fragment;
+package com.cliqz.browser.settings;
 
 import android.app.Activity;
 import android.content.DialogInterface;
@@ -11,12 +11,10 @@ import android.os.Handler;
 import android.os.Message;
 import android.preference.CheckBoxPreference;
 import android.preference.Preference;
-import android.preference.PreferenceFragment;
 import android.support.v7.app.AlertDialog;
 import android.webkit.WebView;
 
 import acr.browser.lightning.R;
-import acr.browser.lightning.preference.PreferenceManager;
 import acr.browser.lightning.utils.Utils;
 import acr.browser.lightning.utils.WebUtils;
 

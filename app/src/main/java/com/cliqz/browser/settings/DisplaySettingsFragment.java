@@ -1,7 +1,7 @@
 /*
  * Copyright 2014 A.C.R. Development
  */
-package com.cliqz.browser.fragment;
+package com.cliqz.browser.settings;
 
 import android.app.Activity;
 import android.content.DialogInterface;
@@ -18,7 +18,6 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 
 import acr.browser.lightning.R;
-import acr.browser.lightning.preference.PreferenceManager;
 
 public class DisplaySettingsFragment extends BaseSettingsFragment {
 

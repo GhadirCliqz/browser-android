@@ -30,11 +30,15 @@ public final class Messages {
      */
     public static class ShowSearch {
         public final String query;
-
         public ShowSearch(String query) {
             this.query = query;
         }
     }
+
+    /**
+     * Force the app to show the home page
+     */
+    public static class ShowHomePage {}
 
     /**
      * This will make the app to transact to the Main fragment, the main fragment then will switch

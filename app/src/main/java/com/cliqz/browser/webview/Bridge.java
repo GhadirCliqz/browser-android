@@ -16,6 +16,7 @@ import org.json.JSONObject;
 import javax.inject.Inject;
 
 import acr.browser.lightning.app.BrowserApp;
+import acr.browser.lightning.database.HistoryDatabase;
 
 /**
  * @author Stefano Pacifici
@@ -33,6 +34,9 @@ public abstract class Bridge {
 
     @Inject
     Bus bus;
+
+    @Inject
+    HistoryDatabase historyDatabase;
 
     protected Bridge(@NonNull WebView webView) {
         this.webView = webView;

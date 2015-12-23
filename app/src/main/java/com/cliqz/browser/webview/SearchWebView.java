@@ -9,14 +9,14 @@ import android.util.Log;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
-import com.cliqz.browser.main.CliqzBrowserState;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.List;
 import java.util.Locale;
 
-import javax.inject.Inject;
-
 import acr.browser.lightning.app.BrowserApp;
+import acr.browser.lightning.constant.Constants;
 import acr.browser.lightning.database.HistoryItem;
 
 /**
@@ -41,12 +41,6 @@ public class SearchWebView extends BaseWebView {
     @Override
     protected WebViewClient createWebViewClient() {
         return new WebViewClient() {
-            @Override
-            public void onPageFinished(WebView view, String url) {
-                super.onPageFinished(view, url);
-                executeJS(String.format(Locale.US,"initSearch(%s);", state.toJSON()));
-            }
-
             @Override
             public boolean shouldOverrideUrlLoading(final WebView wv, final String url) {
                 Log.d(TAG, "New url: " + url);
@@ -134,7 +128,10 @@ public class SearchWebView extends BaseWebView {
     @Override
     void extensionReady() {
         super.extensionReady();
-        if (mLastQuery != null && !mLastQuery.isEmpty()) {
+        final long t = System.currentTimeMillis() - state.getTimestamp();
+        if (shouldShowHomePage()) {
+            showHomepage();
+        } else if (mLastQuery != null && !mLastQuery.isEmpty()) {
             performSearch(mLastQuery);
         }
     }
@@ -159,5 +156,41 @@ public class SearchWebView extends BaseWebView {
                 lowerQuery, hasLocation, lat, lon);
 
         executeJS(call);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (isExtesionReady() && shouldShowHomePage()) {
+            showHomepage();
+        }
+    }
+
+    private boolean shouldShowHomePage() {
+        return (System.currentTimeMillis() - state.getTimestamp() >= Constants.HOME_RESET_DELAY);
+    }
+
+    private void showHomepage() {
+        final JSONObject params = new JSONObject();
+        try {
+            switch (state.getMode()) {
+                case SEARCH:
+                    final float lon = state.getLongitude();
+                    final float lat = state.getLatitude();
+                    if ((lon < Float.MAX_VALUE - 1) && (lat < Float.MAX_VALUE - 1)) {
+                        params.put("lat", lat);
+                        params.put("lon", lon);
+                    }
+                    params.put("q", state.getQuery());
+                    break;
+                case WEBPAGE:
+                    params.put("url", state.getUrl());
+                    params.put("title", state.getTitle());
+                    break;
+            }
+            executeJS(String.format(Locale.US, "resetState(%s);", params.toString()));
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
     }
 }

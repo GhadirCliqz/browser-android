@@ -1,7 +1,7 @@
 /*
  * Copyright 2014 A.C.R. Development
  */
-package com.cliqz.browser.fragment;
+package com.cliqz.browser.settings;
 
 import android.app.Activity;
 import android.content.Intent;
