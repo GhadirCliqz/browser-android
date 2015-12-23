@@ -11,6 +11,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Patterns;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
@@ -84,7 +85,9 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         BrowserApp.getAppComponent().inject(this);
+        bus.register(this);
 
+        // Restore state
         if (savedInstanceState != null) {
             final CliqzBrowserState oldState =
                     (CliqzBrowserState) savedInstanceState.getSerializable(SAVED_STATE);
@@ -93,17 +96,26 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
+        // Translucent status bar only on selected platforms
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
             final Window window = getWindow();
             window.setFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS,
                     WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
         }
 
-        bus.register(this);
-
         mFreshTabFragment = new FreshTabFragment();
         mHistoryFragment = new HistoryFragment();
         mMainFragment = new MainFragment();
+
+        final Intent intent = getIntent();
+        final String url = (intent != null) && (intent.getAction() == Intent.ACTION_VIEW) ?
+                intent.getDataString() : null;
+        if (url != null && Patterns.WEB_URL.matcher(url).matches()) {
+            setIntent(null);
+            final Bundle args = new Bundle();
+            args.putString("URL", url);
+            mMainFragment.setArguments(args);
+        }
 
         if(!preferenceManager.getOnBoardingComplete()) {
             createAppShortcutOnHomeScreen();
@@ -115,6 +127,7 @@ public class MainActivity extends AppCompatActivity {
             setupContentView();
         }
 
+        // Telemetry (were we updated?)
         int currentVersionCode = BuildConfig.VERSION_CODE;
         int previousVersionCode = preferenceManager.getVersionCode();
         if(currentVersionCode > previousVersionCode) {
@@ -143,10 +156,10 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        String context = getCurrentVisibleFragmentName();
+        final String name = getCurrentVisibleFragmentName();
         timings.setAppStartTime();
-        if(!context.isEmpty()) {
-            telemetry.sendStartingSignals(context);
+        if(!name.isEmpty()) {
+            telemetry.sendStartingSignals(name);
         }
         locationCache.start();
     }

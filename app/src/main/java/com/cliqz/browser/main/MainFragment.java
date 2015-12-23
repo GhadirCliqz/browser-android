@@ -155,13 +155,22 @@ public class MainFragment extends BaseFragment {
 //                mSearchWebView.onQueryChanged(query);
 //            }
         }
-        final boolean reset = System.currentTimeMillis() - state.getTimestamp() >= Constants.HOME_RESET_DELAY;
-        mState = reset ? State.SHOWING_SEARCH : mState;
-        final String query = reset ? "" : state.getQuery();
-        if (mState == State.SHOWING_SEARCH) {
-            bus.post(new Messages.ShowSearch(query));
+        final Bundle arguments = getArguments();
+        final String url = arguments != null ? arguments.getString("URL", ""): null;
+
+        if (url != null && !url.isEmpty()) {
+            mState = State.SHOWING_BROWSER;
+            bus.post(new CliqzMessages.OpenLink(url));
+            arguments.clear();
         } else {
-            bus.post(new CliqzMessages.OpenLink(state.getUrl()));
+            final boolean reset = System.currentTimeMillis() - state.getTimestamp() >= Constants.HOME_RESET_DELAY;
+            mState = reset ? State.SHOWING_SEARCH : mState;
+            final String query = reset ? "" : state.getQuery();
+            if (mState == State.SHOWING_SEARCH) {
+                bus.post(new Messages.ShowSearch(query));
+            } else {
+                bus.post(new CliqzMessages.OpenLink(state.getUrl()));
+            }
         }
     }
 
