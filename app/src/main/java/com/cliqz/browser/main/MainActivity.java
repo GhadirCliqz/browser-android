@@ -244,6 +244,16 @@ public class MainActivity extends AppCompatActivity {
     public void goToSearch(Messages.GoToSearch event) {
         final FragmentManager fm = getSupportFragmentManager();
         fm.popBackStack();
+        final String query = event.query;
+        if (event.query != null) {
+            fm.addOnBackStackChangedListener(new FragmentManager.OnBackStackChangedListener() {
+                @Override
+                public void onBackStackChanged() {
+                    fm.removeOnBackStackChangedListener(this);
+                    bus.post(new CliqzMessages.NotifyQuery(query));
+                }
+            });
+        }
     }
 
     @Subscribe

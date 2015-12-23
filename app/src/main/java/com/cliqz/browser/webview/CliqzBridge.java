@@ -38,7 +38,7 @@ class CliqzBridge extends Bridge {
                 }
 
                 final List<HistoryItem> items =
-                        bridge.historyDatabase.findItemsContaining(query, 100);
+                        bridge.historyDatabase.findItemsContaining(query, 50);
 
                 final StringBuilder builder = new StringBuilder();
                 builder.append(callback).append("({results: [");

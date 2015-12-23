@@ -24,9 +24,12 @@ public class HistoryFragment extends BaseFragment {
 
     private HistoryWebView mHistoryWebView;
 
+    private boolean mJustCreated;
+    
     @Override
     protected View onCreateContentView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         if (mHistoryWebView == null) {
+            mJustCreated = true;
             mHistoryWebView = new HistoryWebView(inflater.getContext());
             mHistoryWebView.setLayoutParams(
                     new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
@@ -41,6 +44,10 @@ public class HistoryFragment extends BaseFragment {
         super.onResume();
         if (mHistoryWebView != null) {
             mHistoryWebView.onResume();
+            if (!mJustCreated) {
+                mHistoryWebView.reload();
+            }
+            mJustCreated = false;
         }
     }
 
@@ -105,5 +112,10 @@ public class HistoryFragment extends BaseFragment {
     @Subscribe
     public void onOpenLink(CliqzMessages.OpenLink event) {
         bus.post(new Messages.GoToLink(event.url));
+    }
+
+    @Subscribe
+    public void onNotifyQuery(CliqzMessages.NotifyQuery event) {
+        bus.post(new Messages.GoToSearch(event.query));
     }
 }

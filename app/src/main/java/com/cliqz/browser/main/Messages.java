@@ -18,7 +18,17 @@ public final class Messages {
 
     public static class UpdateTitle {}
 
-    public static class GoToSearch {}
+    public static class GoToSearch {
+        public final String query;
+
+        public GoToSearch() {
+            this.query = null;
+        }
+
+        public GoToSearch(String query) {
+            this.query = query;
+        }
+    }
 
     public static class BackPressed {}
 
