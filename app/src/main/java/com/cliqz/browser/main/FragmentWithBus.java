@@ -30,6 +30,9 @@ public abstract class FragmentWithBus extends Fragment {
 
     @Inject
     CliqzBrowserState state;
+
+    @Inject
+    PreferenceManager preferenceManager;
     
     public FragmentWithBus() {
         super();
