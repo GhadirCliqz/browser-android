@@ -35,7 +35,8 @@
         android:paddingStart="8dp"
         android:singleLine="true"
         android:text="@string/default_page_title"
-        android:textColor="@color/white"
-        android:visibility="gone"/>
+        android:textColor="@android:color/black"
+        android:visibility="gone"
+        android:background="@android:drawable/editbox_background"/>
 
 </FrameLayout>
