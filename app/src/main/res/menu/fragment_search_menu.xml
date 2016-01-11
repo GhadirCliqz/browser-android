@@ -4,6 +4,6 @@
     <item
         android:title="@string/action_history"
         android:id="@+id/menu_suggestions"
-        android:icon="@drawable/ic_action_cliqz_down"
+        android:icon="@drawable/ic_action_cliqz_future"
         app:showAsAction="always" />
 </menu>
