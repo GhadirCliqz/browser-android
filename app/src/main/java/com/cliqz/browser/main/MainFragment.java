@@ -3,12 +3,9 @@ package com.cliqz.browser.main;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
 import android.support.annotation.Nullable;
 import android.util.Log;
 import android.util.Patterns;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -32,6 +29,7 @@ import java.net.URLEncoder;
 import acr.browser.lightning.R;
 import acr.browser.lightning.bus.BrowserEvents;
 import acr.browser.lightning.constant.Constants;
+import acr.browser.lightning.utils.UrlUtils;
 import acr.browser.lightning.view.AnimatedProgressBar;
 import acr.browser.lightning.view.LightningView;
 import butterknife.Bind;
@@ -56,6 +54,7 @@ public class MainFragment extends BaseFragment {
 
     private String mUrl = "";
 
+    private String mSearchEngine;
     String lastQuery = "";
 
     State mState = State.SHOWING_SEARCH;
@@ -248,9 +247,11 @@ public class MainFragment extends BaseFragment {
                     bus.post(new CliqzMessages.OpenLink(guessedUrl));
                 } else {
                     try {
-                        final String query = URLEncoder.encode(content, "UTF-8");
+                        final String query = URLEncoder.encode(content, "UTF-8").trim();
                         telemetry.sendResultEnterSignal(true, false, query.length(), -1);
-                        bus.post(new CliqzMessages.OpenLink("https://www.google.com/search?q=" + query));
+                        setSearchEngine();
+                        String searchUrl = mSearchEngine + UrlUtils.QUERY_PLACE_HOLDER;
+                        bus.post(new CliqzMessages.OpenLink(UrlUtils.smartUrlFilter(query, true, searchUrl)));
                     } catch (UnsupportedEncodingException e) {
                         e.printStackTrace();
                         return false;
@@ -349,6 +350,48 @@ public class MainFragment extends BaseFragment {
         final String title = mLightningView.getTitle();
         searchBar.setTitle(title);
         state.setTitle(title);
+    }
+
+    private void setSearchEngine() {
+        switch (preferenceManager.getSearchChoice()) {
+            case 0:
+                mSearchEngine = preferenceManager.getSearchUrl();
+                if (!mSearchEngine.startsWith(Constants.HTTP)
+                        && !mSearchEngine.startsWith(Constants.HTTPS)) {
+                    mSearchEngine = Constants.GOOGLE_SEARCH;
+                }
+                break;
+            case 1:
+                mSearchEngine = Constants.GOOGLE_SEARCH;
+                break;
+            case 2:
+                mSearchEngine = Constants.ASK_SEARCH;
+                break;
+            case 3:
+                mSearchEngine = Constants.BING_SEARCH;
+                break;
+            case 4:
+                mSearchEngine = Constants.YAHOO_SEARCH;
+                break;
+            case 5:
+                mSearchEngine = Constants.STARTPAGE_SEARCH;
+                break;
+            case 6:
+                mSearchEngine = Constants.STARTPAGE_MOBILE_SEARCH;
+                break;
+            case 7:
+                mSearchEngine = Constants.DUCK_SEARCH;
+                break;
+            case 8:
+                mSearchEngine = Constants.DUCK_LITE_SEARCH;
+                break;
+            case 9:
+                mSearchEngine = Constants.BAIDU_SEARCH;
+                break;
+            case 10:
+                mSearchEngine = Constants.YANDEX_SEARCH;
+                break;
+        }
     }
 
 }

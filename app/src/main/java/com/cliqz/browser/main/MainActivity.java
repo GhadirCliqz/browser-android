@@ -1,5 +1,7 @@
 package com.cliqz.browser.main;
 
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.Color;
@@ -33,6 +35,7 @@ import acr.browser.lightning.R;
 import acr.browser.lightning.activity.SettingsActivity;
 import acr.browser.lightning.app.BrowserApp;
 import acr.browser.lightning.preference.PreferenceManager;
+import acr.browser.lightning.utils.Utils;
 
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 
@@ -259,6 +262,13 @@ public class MainActivity extends AppCompatActivity {
     @Subscribe
     public void exit(Messages.Exit event) {
         finish();
+    }
+
+    @Subscribe
+    public void copyData(CliqzMessages.CopyData event) {
+        ClipboardManager clipboard = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
+        ClipData clip = ClipData.newPlainText("label", event.data);
+        clipboard.setPrimaryClip(clip);
     }
 
     private class PagerAdapter extends FragmentPagerAdapter {

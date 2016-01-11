@@ -3,8 +3,10 @@ package com.cliqz.browser.webview;
 import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.util.Log;
+import android.webkit.JavascriptInterface;
 import android.webkit.WebView;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.List;
@@ -154,6 +156,16 @@ class CliqzBridge extends Bridge {
             public void execute(Bridge bridge, Object data, String callback) {
                 final JSONObject signal = (data instanceof JSONObject) ? (JSONObject) data : null;
                 bridge.telemetry.saveSignal(signal);
+            }
+        }),
+
+        copyResult(new IAction() {
+            @Override
+            public void execute(Bridge bridge, Object data, String callback) {
+                final String copiedData = (data instanceof String) ? (String) data : null;
+                if(copiedData != null) {
+                    bridge.bus.post(new CliqzMessages.CopyData(copiedData));
+                }
             }
         }),
 
