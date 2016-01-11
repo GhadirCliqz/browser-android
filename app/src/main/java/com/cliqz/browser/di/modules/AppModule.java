@@ -1,11 +1,13 @@
-package acr.browser.lightning.app;
+package com.cliqz.browser.di.modules;
 
 import android.content.Context;
 
+import com.cliqz.browser.utils.Telemetry;
 import com.squareup.otto.Bus;
 
 import javax.inject.Singleton;
 
+import acr.browser.lightning.app.BrowserApp;
 import acr.browser.lightning.database.BookmarkManager;
 import acr.browser.lightning.preference.PreferenceManager;
 import dagger.Module;
@@ -36,8 +38,9 @@ public class AppModule {
     }
 
     @Provides
-    public Bus provideBus() {
-        return bus;
+    @Singleton
+    Telemetry provideTelemetry() {
+        return new Telemetry(app.getApplicationContext());
     }
 
     @Provides

@@ -15,6 +15,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.util.Patterns;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,6 +23,10 @@ import android.view.ViewGroup.LayoutParams;
 import android.view.Window;
 import android.view.WindowManager;
 
+import com.cliqz.browser.di.components.ActivityComponent;
+import com.cliqz.browser.di.components.AppComponent;
+import com.cliqz.browser.di.components.DaggerActivityComponent;
+import com.cliqz.browser.di.modules.ActivityModule;
 import com.cliqz.browser.utils.LocationCache;
 import com.cliqz.browser.utils.Telemetry;
 import com.cliqz.browser.utils.Timings;
@@ -52,6 +57,9 @@ import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 public class MainActivity extends AppCompatActivity {
 
     private final static String TAG = MainActivity.class.getSimpleName();
+
+    public static ActivityComponent activityComponent;
+    public ActivityComponent mActivityComponent;
 
     private static final String HISTORY_FRAGMENT_TAG = "history_fragment";
     private static final String SUGGESTIONS_FRAGMENT_TAG = "suggestions_fragment";
@@ -89,7 +97,13 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        BrowserApp.getAppComponent().inject(this);
+        mActivityComponent = DaggerActivityComponent.builder()
+                .appComponent(BrowserApp.getAppComponent())
+                .activityModule(new ActivityModule())
+                .build();
+        mActivityComponent.inject(this);
+        activityComponent = mActivityComponent;
+        bus.register(this);
 
         // Restore state
         if (savedInstanceState != null) {
@@ -164,7 +178,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        bus.register(this);
+        activityComponent = mActivityComponent;
         final String name = getCurrentVisibleFragmentName();
         timings.setAppStartTime();
         if(!name.isEmpty()) {
@@ -176,7 +190,6 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onPause() {
         super.onPause();
-        bus.unregister(this);
         String context = getCurrentVisibleFragmentName();
         timings.setAppStopTime();
         if(!context.isEmpty()) {

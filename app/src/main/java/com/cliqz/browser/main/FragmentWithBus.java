@@ -1,6 +1,7 @@
 package com.cliqz.browser.main;
 
 import android.support.v4.app.Fragment;
+import android.util.Log;
 
 import com.cliqz.browser.utils.Telemetry;
 import com.cliqz.browser.utils.Timings;
@@ -33,10 +34,15 @@ public abstract class FragmentWithBus extends Fragment {
 
     @Inject
     PreferenceManager preferenceManager;
-    
+
     public FragmentWithBus() {
         super();
-        BrowserApp.getAppComponent().inject(this);
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        ((MainActivity) getActivity()).mActivityComponent.inject(this);
     }
 
     @Override

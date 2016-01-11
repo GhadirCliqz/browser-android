@@ -1,10 +1,12 @@
 package com.cliqz.browser.webview;
 
+import android.app.Activity;
 import android.os.Build;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
+import com.cliqz.browser.main.MainActivity;
 import com.cliqz.browser.utils.Telemetry;
 import com.squareup.otto.Bus;
 
@@ -39,7 +41,9 @@ public abstract class Bridge {
     protected Bridge(@NonNull BaseWebView webView) {
         this.webView = webView;
         this.handler = new Handler(webView.getContext().getMainLooper());
-        BrowserApp.getAppComponent().inject(this);
+//        Activity activity = (Activity) webView.getContext();
+  //      ((MainActivity)activity).mActivityComponent.inject(this);
+        MainActivity.activityComponent.inject(this);
     }
 
     interface IAction {

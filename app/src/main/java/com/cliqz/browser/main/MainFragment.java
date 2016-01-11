@@ -4,6 +4,7 @@ import android.animation.Animator;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
@@ -257,6 +258,12 @@ public class MainFragment extends BaseFragment {
     void historyClicked() {
         hideKeyboard();
         delayedPostOnBus(new Messages.GoToHistory());
+    }
+
+    @OnClick(R.id.open_tabs)
+    void tabManagerClicked() {
+        Intent intent = new Intent(getActivity(), MainActivity.class);
+        startActivity(intent);
     }
 
     @OnClick(R.id.title_bar)

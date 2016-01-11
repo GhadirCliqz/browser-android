@@ -3,6 +3,9 @@ package acr.browser.lightning.app;
 import android.app.Application;
 import android.content.Context;
 
+import com.cliqz.browser.di.components.AppComponent;
+import com.cliqz.browser.di.components.DaggerAppComponent;
+import com.cliqz.browser.di.modules.AppModule;
 import com.squareup.leakcanary.LeakCanary;
 
 public class BrowserApp extends Application {

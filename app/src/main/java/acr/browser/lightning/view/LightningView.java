@@ -35,6 +35,7 @@ import android.webkit.WebSettings.LayoutAlgorithm;
 import android.webkit.WebSettings.PluginState;
 import android.webkit.WebView;
 
+import com.cliqz.browser.main.MainActivity;
 import com.cliqz.browser.utils.Telemetry;
 import com.squareup.otto.Bus;
 
@@ -119,7 +120,7 @@ public class LightningView implements ILightningTab {
 
     @SuppressLint("NewApi")
     public LightningView(final Activity activity, boolean isIncognito, String uniqueId) {
-        BrowserApp.getAppComponent().inject(this);
+        ((MainActivity)activity).mActivityComponent.inject(this);
         mActivity = activity;
         mId = uniqueId;
         mWebView = /* overrideWebView != null ? overrideWebView : */new WebView(activity);

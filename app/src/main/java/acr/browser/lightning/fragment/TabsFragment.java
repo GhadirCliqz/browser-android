@@ -83,7 +83,7 @@ public class TabsFragment extends Fragment implements View.OnClickListener, View
     PreferenceManager mPreferences;
 
     public TabsFragment() {
-        BrowserApp.getAppComponent().inject(this);
+        //BrowserApp.getAppComponent().inject(this);
     }
 
     @Override

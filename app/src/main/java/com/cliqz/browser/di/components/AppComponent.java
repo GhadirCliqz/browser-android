@@ -1,9 +1,14 @@
-package acr.browser.lightning.app;
+package com.cliqz.browser.di.components;
 
 import android.content.Context;
 
+import com.cliqz.browser.di.modules.AppModule;
+import com.cliqz.browser.main.CliqzBrowserState;
 import com.cliqz.browser.main.FragmentWithBus;
 import com.cliqz.browser.settings.BaseSettingsFragment;
+import com.cliqz.browser.utils.LocationCache;
+import com.cliqz.browser.utils.Telemetry;
+import com.cliqz.browser.utils.Timings;
 import com.cliqz.browser.webview.BaseWebView;
 import com.cliqz.browser.webview.Bridge;
 import com.cliqz.browser.webview.TabsManagerView;
@@ -17,6 +22,7 @@ import acr.browser.lightning.activity.BrowserMenuPopup;
 import acr.browser.lightning.activity.OnBoardingActivity;
 import acr.browser.lightning.activity.ThemableBrowserActivity;
 import acr.browser.lightning.constant.BookmarkPage;
+import acr.browser.lightning.database.BookmarkManager;
 import acr.browser.lightning.database.HistoryDatabase;
 import acr.browser.lightning.dialog.LightningDialogBuilder;
 import acr.browser.lightning.fragment.BookmarkSettingsFragment;
@@ -35,21 +41,22 @@ import dagger.Component;
 @Component(modules = {AppModule.class})
 public interface AppComponent {
 
+    //TODO Remove classes that are not part of flat-navigation
     void inject(OnBoardingActivity activity);
 
-    void inject(BrowserActivity activity);
+    //void inject(BrowserActivity activity);
 
-    void inject(BookmarksFragment fragment);
+    //void inject(BookmarksFragment fragment);
 
     void inject(BookmarkSettingsFragment fragment);
 
     void inject(SearchAdapter adapter);
 
-    void inject(LightningDialogBuilder builder);
+    //void inject(LightningDialogBuilder builder);
 
     void inject(BookmarkPage bookmarkPage);
 
-    void inject(TabsFragment fragment);
+    //void inject(TabsFragment fragment);
 
     PreferenceManager getPreferenceManager();
 
@@ -57,19 +64,27 @@ public interface AppComponent {
 
     BookmarkPage getBookmarkPage();
 
-    Bus getBus();
+    Telemetry getTelemetry();
+
+    LocationCache getLocationCache();
+
+    Timings getTimings();
+
+    CliqzBrowserState getCliqzBrowserState();
 
     HistoryDatabase getHistoryDatabase();
 
+    BookmarkManager getBookmarkManager();
+
     Context getApplicationContext();
 
-    void inject(LightningView lightningView);
+    //void inject(LightningView lightningView);
 
     void inject(ThemableBrowserActivity activity);
 
     void inject(BaseWebView searchWebView);
 
-    void inject(TabsManagerView tabsManagerView);
+    //void inject(TabsManagerView tabsManagerView);
 
     void inject(BrowserMenuPopup browserMenuPopup);
 
@@ -77,13 +92,8 @@ public interface AppComponent {
 
     void inject(AutocompleteEditText autocompleteEditText);
 
-    // This is CLIQZ specific
-    void inject(com.cliqz.browser.main.MainActivity mainActivity);
+    void inject(Telemetry telemetry);
 
-    // This is CLIQZ Specific too
-    void inject(FragmentWithBus baseFragment);
-
-    void inject(Bridge bridge);
 
     void inject(com.cliqz.browser.main.OnBoardingActivity onBoardingActivity);
 }

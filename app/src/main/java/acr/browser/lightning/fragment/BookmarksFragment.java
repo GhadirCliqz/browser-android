@@ -107,7 +107,7 @@ public class BookmarksFragment extends Fragment implements View.OnClickListener,
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        BrowserApp.getAppComponent().inject(this);
+        //BrowserApp.getAppComponent().inject(this);
         final Bundle arguments = getArguments();
         final Context context = getContext();
         boolean isIncognito = arguments.getBoolean(INCOGNITO_MODE, false);

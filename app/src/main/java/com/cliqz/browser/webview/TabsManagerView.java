@@ -51,7 +51,7 @@ public class TabsManagerView extends BaseWebView implements ILightningTab {
         super(context);
         directory = context.getDir(Constants.TABS_SCREENSHOT_FOLDER_NAME,Context.MODE_PRIVATE);
         directory.mkdirs();
-        BrowserApp.getAppComponent().inject(this);
+       //BrowserApp.getAppComponent().inject(this);
     }
 
     private WebViewClient mWebViewClient = new WebViewClient() {

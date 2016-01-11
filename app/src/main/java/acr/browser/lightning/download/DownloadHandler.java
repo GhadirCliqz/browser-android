@@ -3,6 +3,7 @@
  */
 package acr.browser.lightning.download;
 
+import android.app.Activity;
 import android.app.DownloadManager;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
@@ -47,13 +48,13 @@ public class DownloadHandler {
      * Notify the host application a download should be done, or that the data
      * should be streamed if a streaming viewer is available.
      *
-     * @param context            The context in which the download was requested.
+     * @param activity            The context in which the download was requested.
      * @param url                The full url to the content that should be downloaded
      * @param userAgent          User agent of the downloading application.
      * @param contentDisposition Content-disposition http header, if present.
      * @param mimetype           The mimetype of the content reported by the server
      */
-    public static void onDownloadStart(Context context, String url, String userAgent,
+    public static void onDownloadStart(Activity activity, String url, String userAgent,
                                        String contentDisposition, String mimetype) {
         // if we're dealing wih A/V content that's not explicitly marked
         // for download, check if it's streamable.
@@ -69,7 +70,7 @@ public class DownloadHandler {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH_MR1) {
                 intent.setSelector(null);
             }
-            ResolveInfo info = context.getPackageManager().resolveActivity(intent,
+            ResolveInfo info = activity.getPackageManager().resolveActivity(intent,
                     PackageManager.MATCH_DEFAULT_ONLY);
             if (info != null) {
                 // If we resolved to ourselves, we don't want to attempt to
@@ -79,7 +80,7 @@ public class DownloadHandler {
                     // someone (other than us) knows how to handle this mime
                     // type with this scheme, don't download.
                     try {
-                        context.startActivity(intent);
+                        activity.startActivity(intent);
                         return;
                     } catch (ActivityNotFoundException ex) {
                         // Best behavior is to fall back to a download in this
@@ -88,7 +89,7 @@ public class DownloadHandler {
                 }
             }
         }
-        onDownloadStartNoStream(context, url, userAgent, contentDisposition, mimetype);
+        onDownloadStartNoStream(activity, url, userAgent, contentDisposition, mimetype);
     }
 
     // This is to work around the fact that java.net.URI throws Exceptions
@@ -125,16 +126,16 @@ public class DownloadHandler {
      * Notify the host application a download should be done, even if there is a
      * streaming viewer available for thise type.
      *
-     * @param context            The context in which the download is requested.
+     * @param activity            The context in which the download is requested.
      * @param url                The full url to the content that should be downloaded
      * @param userAgent          User agent of the downloading application.
      * @param contentDisposition Content-disposition http header, if present.
      * @param mimetype           The mimetype of the content reported by the server
      */
     /* package */
-    private static void onDownloadStartNoStream(final Context context, String url, String userAgent,
+    private static void onDownloadStartNoStream(final Activity activity, String url, String userAgent,
                                                 String contentDisposition, String mimetype) {
-        final Bus eventBus = BrowserApp.getAppComponent().getBus();
+        final Bus eventBus = ((com.cliqz.browser.main.MainActivity)activity).mActivityComponent.getBus();
         final String filename = URLUtil.guessFileName(url, contentDisposition, mimetype);
 
         // Check to see if we have an SDCard
@@ -145,14 +146,14 @@ public class DownloadHandler {
 
             // Check to see if the SDCard is busy, same as the music app
             if (status.equals(Environment.MEDIA_SHARED)) {
-                msg = context.getString(R.string.download_sdcard_busy_dlg_msg);
+                msg = activity.getString(R.string.download_sdcard_busy_dlg_msg);
                 title = R.string.download_sdcard_busy_dlg_title;
             } else {
-                msg = context.getString(R.string.download_no_sdcard_dlg_msg, filename);
+                msg = activity.getString(R.string.download_no_sdcard_dlg_msg, filename);
                 title = R.string.download_no_sdcard_dlg_title;
             }
 
-            new AlertDialog.Builder(context).setTitle(title)
+            new AlertDialog.Builder(activity).setTitle(title)
                     .setIcon(android.R.drawable.ic_dialog_alert).setMessage(msg)
                     .setPositiveButton(R.string.action_ok, null).show();
             return;
@@ -225,9 +226,9 @@ public class DownloadHandler {
             }
             // We must have long pressed on a link or image to download it. We
             // are not sure of the mimetype in this case, so do a head request
-            new FetchUrlMimeType(context, request, addressString, cookies, userAgent).start();
+            new FetchUrlMimeType(activity, request, addressString, cookies, userAgent).start();
         } else {
-            final DownloadManager manager = (DownloadManager) context
+            final DownloadManager manager = (DownloadManager) activity
                     .getSystemService(Context.DOWNLOAD_SERVICE);
             new Thread() {
                 @Override
@@ -246,7 +247,7 @@ public class DownloadHandler {
                 }
             }.start();
             eventBus.post(new BrowserEvents.ShowSnackBarMessage(
-                    context.getString(R.string.download_pending) + ' ' + filename));
+                    activity.getString(R.string.download_pending) + ' ' + filename));
         }
 
     }

@@ -17,6 +17,7 @@ import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 
+import com.cliqz.browser.main.MainActivity;
 import com.cliqz.browser.main.Messages;
 import com.squareup.otto.Bus;
 
@@ -48,7 +49,7 @@ class LightningChromeClient extends WebChromeClient {
     LightningChromeClient(Activity activity, LightningView lightningView) {
         mActivity = activity;
         mLightningView = lightningView;
-        eventBus = BrowserApp.getAppComponent().getBus();
+        eventBus = lightningView.mEventBus;
     }
 
     @Override
