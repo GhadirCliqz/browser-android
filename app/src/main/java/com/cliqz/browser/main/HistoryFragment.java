@@ -2,20 +2,17 @@ package com.cliqz.browser.main;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
-import android.webkit.WebView;
-import android.webkit.WebViewClient;
-import android.widget.ImageView;
 
+import com.cliqz.browser.webview.CliqzMessages;
+import com.cliqz.browser.webview.HistoryWebView;
 import com.squareup.otto.Subscribe;
 
 import acr.browser.lightning.R;
-import acr.browser.lightning.constant.HistoryPage;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
@@ -25,25 +22,41 @@ import butterknife.OnClick;
  */
 public class HistoryFragment extends BaseFragment {
 
-    private WebView mView;
+    private HistoryWebView mHistoryWebView;
 
+    private boolean mJustCreated;
+    
     @Override
     protected View onCreateContentView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        mView = new WebView(inflater.getContext());
-        mView.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
-        mView.loadUrl(HistoryPage.getHistoryPage(inflater.getContext()));
-        mView.setWebViewClient(new WebViewClient() {
-            @Override
-            public boolean shouldOverrideUrlLoading(WebView view, String url) {
-                if (url.startsWith("file")) {
-                    return false;
-                }
+        if (mHistoryWebView == null) {
+            mJustCreated = true;
+            mHistoryWebView = new HistoryWebView(inflater.getContext());
+            mHistoryWebView.setLayoutParams(
+                    new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
+        } else {
+            ((ViewGroup) mHistoryWebView.getParent()).removeView(mHistoryWebView);
+        }
+        return mHistoryWebView;
+    }
 
-                bus.post(new Messages.GoToLink(url));
-                return true;
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (mHistoryWebView != null) {
+            mHistoryWebView.onResume();
+            if (!mJustCreated) {
+                mHistoryWebView.reload();
             }
-        });
-        return mView;
+            mJustCreated = false;
+        }
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        if (mHistoryWebView != null) {
+            mHistoryWebView.onPause();
+        }
     }
 
     @Override
@@ -94,5 +107,15 @@ public class HistoryFragment extends BaseFragment {
             telemetry.sendBackPressedSignal("past", state, mainFragment.mAutocompleteEditText.length());
         }
         bus.post(new Messages.GoToSearch());
+    }
+
+    @Subscribe
+    public void onOpenLink(CliqzMessages.OpenLink event) {
+        bus.post(new Messages.GoToLink(event.url));
+    }
+
+    @Subscribe
+    public void onNotifyQuery(CliqzMessages.NotifyQuery event) {
+        bus.post(new Messages.GoToSearch(event.query));
     }
 }

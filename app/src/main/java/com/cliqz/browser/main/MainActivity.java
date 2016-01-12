@@ -1,5 +1,7 @@
 package com.cliqz.browser.main;
 
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.Color;
@@ -11,13 +13,12 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Patterns;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.view.Window;
-import android.view.WindowInsets;
 import android.view.WindowManager;
-import android.widget.FrameLayout;
 
 import com.cliqz.browser.utils.LocationCache;
 import com.cliqz.browser.utils.Telemetry;
@@ -34,6 +35,7 @@ import acr.browser.lightning.R;
 import acr.browser.lightning.activity.SettingsActivity;
 import acr.browser.lightning.app.BrowserApp;
 import acr.browser.lightning.preference.PreferenceManager;
+import acr.browser.lightning.utils.Utils;
 
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 
@@ -45,13 +47,19 @@ import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
  */
 public class MainActivity extends AppCompatActivity {
 
+    private final static String TAG = MainActivity.class.getSimpleName();
+
     private static final String HISTORY_FRAGMENT_TAG = "history_fragment";
     private static final String SUGGESTIONS_FRAGMENT_TAG = "suggestions_fragment";
     static final String SEARCH_FRAGMENT_TAG = "search_fragment";
 
     private static final int CONTENT_VIEW_ID = R.id.main_activity_content;
-    
-    private Fragment mFreshTabFragment, mMainFragment, mHistoryFragment;
+
+    private static final String SAVED_STATE = TAG + ".SAVED_STATE";
+
+    private FreshTabFragment mFreshTabFragment;
+    private MainFragment mMainFragment;
+    private HistoryFragment mHistoryFragment;
 
     @Inject
     Bus bus;
@@ -63,31 +71,54 @@ public class MainActivity extends AppCompatActivity {
     Telemetry telemetry;
 
     @Inject
+    CliqzBrowserState state;
+
+    @Inject
     LocationCache locationCache;
-	
-	@Inject
+
+    @Inject
     Timings timings;
 
-    ViewPager pager;
+    private ViewPager pager;
 
-    long startTime;
+    // Used for telemetry
+    private long startTime;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         BrowserApp.getAppComponent().inject(this);
+        bus.register(this);
 
+        // Restore state
+        if (savedInstanceState != null) {
+            final CliqzBrowserState oldState =
+                    (CliqzBrowserState) savedInstanceState.getSerializable(SAVED_STATE);
+            if (oldState != null) {
+                state.copyFrom(oldState);
+            }
+        }
+
+        // Translucent status bar only on selected platforms
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
             final Window window = getWindow();
             window.setFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS,
                     WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
         }
 
-        bus.register(this);
-
         mFreshTabFragment = new FreshTabFragment();
         mHistoryFragment = new HistoryFragment();
         mMainFragment = new MainFragment();
+
+        final Intent intent = getIntent();
+        final String url = (intent != null) && (intent.getAction() == Intent.ACTION_VIEW) ?
+                intent.getDataString() : null;
+        if (url != null && Patterns.WEB_URL.matcher(url).matches()) {
+            setIntent(null);
+            final Bundle args = new Bundle();
+            args.putString("URL", url);
+            mMainFragment.setArguments(args);
+        }
 
         if(!preferenceManager.getOnBoardingComplete()) {
             createAppShortcutOnHomeScreen();
@@ -95,10 +126,11 @@ public class MainActivity extends AppCompatActivity {
             pager = (ViewPager) findViewById(R.id.viewpager);
             pager.setAdapter(new PagerAdapter(getSupportFragmentManager()));
             pager.addOnPageChangeListener(onPageChangeListener);
-        } else if (savedInstanceState == null) {
+        } else {
             setupContentView();
         }
 
+        // Telemetry (were we updated?)
         int currentVersionCode = BuildConfig.VERSION_CODE;
         int previousVersionCode = preferenceManager.getVersionCode();
         if(currentVersionCode > previousVersionCode) {
@@ -127,10 +159,10 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        String context = getCurrentVisibleFragmentName();
+        final String name = getCurrentVisibleFragmentName();
         timings.setAppStartTime();
-        if(!context.isEmpty()) {
-            telemetry.sendStartingSignals(context);
+        if(!name.isEmpty()) {
+            telemetry.sendStartingSignals(name);
         }
         locationCache.start();
     }
@@ -144,6 +176,15 @@ public class MainActivity extends AppCompatActivity {
             telemetry.sendClosingSignals(Telemetry.Action.CLOSE, context);
         }
         locationCache.stop();
+        state.setTimestamp(System.currentTimeMillis());
+        state.setMode(mMainFragment.mState == MainFragment.State.SHOWING_SEARCH ?
+                CliqzBrowserState.Mode.SEARCH : CliqzBrowserState.Mode.WEBPAGE);
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        outState.putSerializable(SAVED_STATE, state);
+        super.onSaveInstanceState(outState);
     }
 
     @Override
@@ -206,11 +247,28 @@ public class MainActivity extends AppCompatActivity {
     public void goToSearch(Messages.GoToSearch event) {
         final FragmentManager fm = getSupportFragmentManager();
         fm.popBackStack();
+        final String query = event.query;
+        if (event.query != null) {
+            fm.addOnBackStackChangedListener(new FragmentManager.OnBackStackChangedListener() {
+                @Override
+                public void onBackStackChanged() {
+                    fm.removeOnBackStackChangedListener(this);
+                    bus.post(new CliqzMessages.NotifyQuery(query));
+                }
+            });
+        }
     }
 
     @Subscribe
     public void exit(Messages.Exit event) {
         finish();
+    }
+
+    @Subscribe
+    public void copyData(CliqzMessages.CopyData event) {
+        ClipboardManager clipboard = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
+        ClipData clip = ClipData.newPlainText("label", event.data);
+        clipboard.setPrimaryClip(clip);
     }
 
     private class PagerAdapter extends FragmentPagerAdapter {

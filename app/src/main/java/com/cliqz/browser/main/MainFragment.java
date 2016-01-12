@@ -3,12 +3,9 @@ package com.cliqz.browser.main;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
 import android.support.annotation.Nullable;
 import android.util.Log;
 import android.util.Patterns;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -32,6 +29,7 @@ import java.net.URLEncoder;
 import acr.browser.lightning.R;
 import acr.browser.lightning.bus.BrowserEvents;
 import acr.browser.lightning.constant.Constants;
+import acr.browser.lightning.utils.UrlUtils;
 import acr.browser.lightning.view.AnimatedProgressBar;
 import acr.browser.lightning.view.LightningView;
 import butterknife.Bind;
@@ -54,12 +52,9 @@ public class MainFragment extends BaseFragment {
         SHOWING_BROWSER,
     }
 
-    private final static int KEYBOARD_ANIMATION_DELAY = 200;
-
-    private final Handler handler = new Handler(Looper.getMainLooper());
-
     private String mUrl = "";
 
+    private String mSearchEngine;
     String lastQuery = "";
 
     State mState = State.SHOWING_SEARCH;
@@ -118,16 +113,8 @@ public class MainFragment extends BaseFragment {
                 Log.i(TAG, "Can't convert " + stateName + " to state enum");
             }
         }
-        if (mState == State.SHOWING_SEARCH) {
-            searchBar.showSearchEditText();
-            mContentContainer.addView(webView);
-            mContentContainer.addView(mSearchWebView);
-        } else {
-            updateTitle();
-            searchBar.showTitleBar();
-            mContentContainer.addView(mSearchWebView);
-            mContentContainer.addView(webView);
-        }
+        mContentContainer.addView(webView);
+        mContentContainer.addView(mSearchWebView);
     }
 
     @Override
@@ -156,11 +143,28 @@ public class MainFragment extends BaseFragment {
     @Override
     public void onResume() {
         super.onResume();
-        final String query = mAutocompleteEditText.getQuery();
+//        final String query = mAutocompleteEditText.getQuery();
         if (mSearchWebView != null) {
             mSearchWebView.onResume();
-            if (query != null && !query.isEmpty()) {
-                mSearchWebView.onQueryChanged(query);
+//            if (query != null && !query.isEmpty()) {
+//                mSearchWebView.onQueryChanged(query);
+//            }
+        }
+        final Bundle arguments = getArguments();
+        final String url = arguments != null ? arguments.getString("URL", ""): null;
+
+        if (url != null && !url.isEmpty()) {
+            mState = State.SHOWING_BROWSER;
+            bus.post(new CliqzMessages.OpenLink(url));
+            arguments.clear();
+        } else {
+            final boolean reset = System.currentTimeMillis() - state.getTimestamp() >= Constants.HOME_RESET_DELAY;
+            mState = reset ? State.SHOWING_SEARCH : mState;
+            final String query = reset ? "" : state.getQuery();
+            if (mState == State.SHOWING_SEARCH) {
+                bus.post(new Messages.ShowSearch(query));
+            } else {
+                bus.post(new CliqzMessages.OpenLink(state.getUrl()));
             }
         }
     }
@@ -195,10 +199,6 @@ public class MainFragment extends BaseFragment {
             case R.id.menu_suggestions:
                 hideKeyboard();
                 delayedPostOnBus(new Messages.GoToSuggestions());
-                return true;
-            case R.id.menu_settings:
-                hideKeyboard();
-                delayedPostOnBus(new Messages.GoToSettings());
                 return true;
             default:
                 return false;
@@ -238,17 +238,20 @@ public class MainFragment extends BaseFragment {
             if (content != null && !content.isEmpty()) {
                 if (Patterns.WEB_URL.matcher(content).matches()) {
                     final String guessedUrl = URLUtil.guessUrl(content);
-                    bus.post(new CliqzMessages.OpenLink(guessedUrl));
                     if(mAutocompleteEditText.mIsAutocompleted) {
-                        telemetry.sendResultEnterSignal(true,
+                        telemetry.sendResultEnterSignal(false, true,
                                 mAutocompleteEditText.getQuery().length(), guessedUrl.length());
                     } else {
-                        telemetry.sendResultEnterSignal(false, guessedUrl.length(), -1);
+                        telemetry.sendResultEnterSignal(false, false, content.length(), -1);
                     }
+                    bus.post(new CliqzMessages.OpenLink(guessedUrl));
                 } else {
                     try {
-                        final String query = URLEncoder.encode(content, "UTF-8");
-                        bus.post(new CliqzMessages.OpenLink("https://www.google.com/search?q=" + query));
+                        final String query = URLEncoder.encode(content, "UTF-8").trim();
+                        telemetry.sendResultEnterSignal(true, false, query.length(), -1);
+                        setSearchEngine();
+                        String searchUrl = mSearchEngine + UrlUtils.QUERY_PLACE_HOLDER;
+                        bus.post(new CliqzMessages.OpenLink(UrlUtils.smartUrlFilter(query, true, searchUrl)));
                     } catch (UnsupportedEncodingException e) {
                         e.printStackTrace();
                         return false;
@@ -273,15 +276,6 @@ public class MainFragment extends BaseFragment {
         imm.hideSoftInputFromWindow(mAutocompleteEditText.getWindowToken(), 0);
     }
 
-    private void delayedPostOnBus(final Object event) {
-        handler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                bus.post(event);
-            }
-        }, KEYBOARD_ANIMATION_DELAY);
-    }
-
     @Subscribe
     public void updateProgress(BrowserEvents.UpdateProgress event) {
         mProgressBar.setProgress(event.progress);
@@ -290,6 +284,14 @@ public class MainFragment extends BaseFragment {
     @Subscribe
     public void updateTitle(Messages.UpdateTitle event) {
         updateTitle();
+    }
+
+    @Subscribe
+    public void updateUrl(BrowserEvents.UpdateUrl event) {
+        final String url = event.url;
+        if (url != null && !url.isEmpty() && !url.startsWith(Constants.CLIQZ_TRAMPOLINE)) {
+            state.setUrl(url);
+        }
     }
 
     @Subscribe
@@ -307,6 +309,11 @@ public class MainFragment extends BaseFragment {
                 .appendQueryParameter("q", lastQuery)
                 .build().toString();
         webView.loadUrl(url);
+    }
+
+    @Subscribe
+    public void notifyQuery(CliqzMessages.NotifyQuery event) {
+        bus.post(new Messages.ShowSearch(event.query));
     }
 
     @Subscribe
@@ -340,7 +347,51 @@ public class MainFragment extends BaseFragment {
     }
 
     void updateTitle() {
-        searchBar.setTitle(mLightningView.getTitle());
+        final String title = mLightningView.getTitle();
+        searchBar.setTitle(title);
+        state.setTitle(title);
+    }
+
+    private void setSearchEngine() {
+        switch (preferenceManager.getSearchChoice()) {
+            case 0:
+                mSearchEngine = preferenceManager.getSearchUrl();
+                if (!mSearchEngine.startsWith(Constants.HTTP)
+                        && !mSearchEngine.startsWith(Constants.HTTPS)) {
+                    mSearchEngine = Constants.GOOGLE_SEARCH;
+                }
+                break;
+            case 1:
+                mSearchEngine = Constants.GOOGLE_SEARCH;
+                break;
+            case 2:
+                mSearchEngine = Constants.ASK_SEARCH;
+                break;
+            case 3:
+                mSearchEngine = Constants.BING_SEARCH;
+                break;
+            case 4:
+                mSearchEngine = Constants.YAHOO_SEARCH;
+                break;
+            case 5:
+                mSearchEngine = Constants.STARTPAGE_SEARCH;
+                break;
+            case 6:
+                mSearchEngine = Constants.STARTPAGE_MOBILE_SEARCH;
+                break;
+            case 7:
+                mSearchEngine = Constants.DUCK_SEARCH;
+                break;
+            case 8:
+                mSearchEngine = Constants.DUCK_LITE_SEARCH;
+                break;
+            case 9:
+                mSearchEngine = Constants.BAIDU_SEARCH;
+                break;
+            case 10:
+                mSearchEngine = Constants.YANDEX_SEARCH;
+                break;
+        }
     }
 
 }

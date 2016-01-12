@@ -14,14 +14,22 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
+import com.cliqz.browser.main.CliqzBrowserState;
 import com.cliqz.browser.utils.LocationCache;
 import com.cliqz.browser.utils.Telemetry;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.Locale;
 
 import javax.inject.Inject;
 
 import acr.browser.lightning.BuildConfig;
 import acr.browser.lightning.app.BrowserApp;
+import acr.browser.lightning.constant.SearchEngines;
 import acr.browser.lightning.database.HistoryDatabase;
+import acr.browser.lightning.preference.PreferenceManager;
 
 /**
  * This class help us to create a standardized webview in which we can execute our javascript code.
@@ -43,7 +51,14 @@ public abstract class BaseWebView extends WebView {
     LocationCache locationCache;
 
     @Inject
+    PreferenceManager preferenceManager;
+
+    @Inject
     Telemetry telemetry;
+
+    @Inject
+    CliqzBrowserState state;
+
 
     public BaseWebView(Context context) {
         this(context, null);
@@ -138,6 +153,7 @@ public abstract class BaseWebView extends WebView {
 
     void extensionReady() {
         mJsReady = true;
+        setDefaultSearchEngine();
     }
 
     public boolean isExtesionReady() { return mJsReady; }
@@ -152,13 +168,16 @@ public abstract class BaseWebView extends WebView {
     public void onResume() {
         super.onResume();
         resumeTimers();
+        // When created we call this twice (one here and one in extensionReady()
+        // That should not be a problem
+        setDefaultSearchEngine();
     }
 
     /**
      * Evaluate JS in web context
      * @param js JS command
      */
-    protected final void executeJS(final String js) {
+     protected final void executeJS(final String js) {
         if (js != null && !js.isEmpty()) {
             post(new Runnable() {
                 @Override
@@ -170,6 +189,26 @@ public abstract class BaseWebView extends WebView {
                     }
                 }
             });
+        }
+    }
+
+    private void setDefaultSearchEngine() {
+        if (!mJsReady) {
+            return;
+        }
+
+        final int searchChoice = preferenceManager.getSearchChoice();
+        final SearchEngines[] engines = SearchEngines.values();
+        if (searchChoice > -1 && searchChoice < engines.length) {
+            final JSONObject param = new JSONObject();
+            final SearchEngines engine = engines[searchChoice];
+            try {
+                param.put("name", engine.getName());
+                param.put("url", engine.getSearchUrl());
+                executeJS(String.format(Locale.US, "setDefaultSearchEngine(%s)", param.toString()));
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
         }
     }
 }

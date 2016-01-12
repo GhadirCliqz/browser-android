@@ -3,8 +3,10 @@ package com.cliqz.browser.webview;
 import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.util.Log;
+import android.webkit.JavascriptInterface;
 import android.webkit.WebView;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.List;
@@ -32,17 +34,23 @@ class CliqzBridge extends Bridge {
             @Override
             public void execute(Bridge bridge, Object data, String callback) {
                 final String query = (data instanceof String) ? (String) data: null;
-                final WebView webView = bridge.getWebView();
-                final SearchWebView searchWebView = (webView instanceof SearchWebView) ?
-                        (SearchWebView) bridge.getWebView() : null;
-                if (searchWebView == null || callback == null || callback.isEmpty() || query == null) {
+                if (callback == null || callback.isEmpty() || query == null) {
                     Log.e(TAG, "Can't perform searchHistory without a query and/or a callback");
                     return; // Nothing to do without callback or data
                 }
 
-                final String result = searchWebView.searchHistory(query);
+                final List<HistoryItem> items =
+                        bridge.historyDatabase.findItemsContaining(query, 50);
+
                 final StringBuilder builder = new StringBuilder();
-                builder.append(callback).append("({results:").append(result).append(",query:\"")
+                builder.append(callback).append("({results: [");
+                String sep = "";
+                for (HistoryItem item: items) {
+                    builder.append(sep);
+                    item.toJsonString(builder);
+                    sep = ",";
+                }
+                builder.append("] ,query:\"")
                         .append(query).append("\"})");
                 bridge.executeJavascript(builder.toString());
             }
@@ -133,7 +141,8 @@ class CliqzBridge extends Bridge {
         notifyQuery(new IAction() {
             @Override
             public void execute(Bridge bridge, Object data, String callback) {
-                final String query = (data instanceof String) ? (String) data : null;
+                final JSONObject json = (data instanceof JSONObject) ? (JSONObject) data : null;
+                final String query = json != null ? json.optString("q", null): null;
                 if (query == null) {
                     Log.w(TAG, "No url to notify");
                     return;
@@ -147,6 +156,16 @@ class CliqzBridge extends Bridge {
             public void execute(Bridge bridge, Object data, String callback) {
                 final JSONObject signal = (data instanceof JSONObject) ? (JSONObject) data : null;
                 bridge.telemetry.saveSignal(signal);
+            }
+        }),
+
+        copyResult(new IAction() {
+            @Override
+            public void execute(Bridge bridge, Object data, String callback) {
+                final String copiedData = (data instanceof String) ? (String) data : null;
+                if(copiedData != null) {
+                    bridge.bus.post(new CliqzMessages.CopyData(copiedData));
+                }
             }
         }),
 

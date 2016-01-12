@@ -1,13 +1,16 @@
 /*
  * Copyright 2014 A.C.R. Development
  */
-package com.cliqz.browser.fragment;
+package com.cliqz.browser.settings;
 
 import android.app.Activity;
+import android.content.DialogInterface;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.CheckBoxPreference;
 import android.preference.Preference;
+import android.support.v7.app.AlertDialog;
+import android.widget.EditText;
 
 import acr.browser.lightning.R;
 import acr.browser.lightning.constant.Constants;
@@ -23,7 +26,7 @@ public class GeneralSettingsFragment extends BaseSettingsFragment {
     private Activity mActivity;
 
     private static final int API = Build.VERSION.SDK_INT;
-    // private Preference searchengine;
+    private Preference searchengine;
     private CheckBoxPreference cbAds, cbImages; // , cbDrawerTabs;
 
     @Override
@@ -40,14 +43,14 @@ public class GeneralSettingsFragment extends BaseSettingsFragment {
     private void initPrefs() {
         // mPreferenceManager storage
         // Preference importBrowserpref = findPreference(SETTINGS_BROWSER_IMPORT);
-        // searchengine = findPreference(SETTINGS_SEARCHENGINE);
+        searchengine = findPreference(SETTINGS_SEARCHENGINE);
 
         cbAds = (CheckBoxPreference) findPreference(SETTINGS_ADS);
         cbImages = (CheckBoxPreference) findPreference(SETTINGS_IMAGES);
         // cbDrawerTabs = (CheckBoxPreference) findPreference(SETTINGS_DRAWERTABS);
 
         // importBrowserpref.setOnPreferenceClickListener(this);
-        // searchengine.setOnPreferenceClickListener(this);
+        searchengine.setOnPreferenceClickListener(this);
         cbAds.setOnPreferenceChangeListener(this);
         cbImages.setOnPreferenceChangeListener(this);
         // cbDrawerTabs.setOnPreferenceChangeListener(this);
@@ -68,7 +71,7 @@ public class GeneralSettingsFragment extends BaseSettingsFragment {
         // cbDrawerTabs.setChecked(mPreferenceManager.getShowTabsInDrawer(true));
     }
 
-    /* private void searchDialog() {
+    private void searchDialog() {
         AlertDialog.Builder picker = new AlertDialog.Builder(mActivity);
         picker.setTitle(getResources().getString(R.string.title_search_engine));
         CharSequence[] chars = {getResources().getString(R.string.custom_url), "Google",
@@ -113,9 +116,9 @@ public class GeneralSettingsFragment extends BaseSettingsFragment {
                     }
                 });
         urlPicker.show();
-    } */
+    }
 
-    /* private void setSearchEngineSummary(int which) {
+    private void setSearchEngineSummary(int which) {
         switch (which) {
             case 0:
                 searchUrlPicker();
@@ -150,14 +153,14 @@ public class GeneralSettingsFragment extends BaseSettingsFragment {
             case 10:
                 searchengine.setSummary("Yandex");
         }
-    } */
+    }
 
     @Override
     public boolean onPreferenceClick(Preference preference) {
         switch (preference.getKey()) {
-//            case SETTINGS_SEARCHENGINE:
-//                searchDialog();
-//                return true;
+            case SETTINGS_SEARCHENGINE:
+                searchDialog();
+                return true;
 //            case SETTINGS_BROWSER_IMPORT:
 //                try {
 //                    mBookmarkManager.importBookmarksFromBrowser(getActivity());

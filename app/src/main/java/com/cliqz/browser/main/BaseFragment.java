@@ -1,7 +1,10 @@
 package com.cliqz.browser.main;
 
 import android.content.Context;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.support.annotation.MenuRes;
 import android.support.annotation.Nullable;
 import android.support.annotation.StyleRes;
@@ -12,6 +15,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
+import android.widget.FrameLayout;
 
 import acr.browser.lightning.R;
 
@@ -24,6 +28,9 @@ public abstract class BaseFragment extends FragmentWithBus {
     private ViewGroup mContentContainer;
     private Toolbar mToolbar;
     private View mCustomToolbarView;
+    private FrameLayout mStatusBar;
+    private final Handler handler = new Handler(Looper.getMainLooper());
+    private final static int KEYBOARD_ANIMATION_DELAY = 200;
 
     @Nullable
     @Override
@@ -38,6 +45,10 @@ public abstract class BaseFragment extends FragmentWithBus {
         }
 
         final View view = localInflater.inflate(R.layout.fragment_base, container, false);
+        mStatusBar = (FrameLayout) view.findViewById(R.id.statusbar);
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT) {
+            mStatusBar.setPadding(0, 0, 0, 0);
+        }
         mToolbar = (Toolbar) view.findViewById(R.id.toolbar);
         mContentContainer = (ViewGroup) view.findViewById(R.id.content_container);
         final View content = onCreateContentView(localInflater, mContentContainer, savedInstanceState);
@@ -60,6 +71,16 @@ public abstract class BaseFragment extends FragmentWithBus {
         });
         return view;
     }
+
+    void delayedPostOnBus(final Object event) {
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                bus.post(event);
+            }
+        }, KEYBOARD_ANIMATION_DELAY);
+    }
+
 
     /**
      * Should return the content view of the children (of this class) fragments

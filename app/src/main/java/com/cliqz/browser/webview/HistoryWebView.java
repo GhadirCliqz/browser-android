@@ -12,37 +12,31 @@ import android.webkit.WebViewClient;
  * @author Stefano Pacifici
  * @date 2015/12/08
  */
-public class FreshTabWebView extends BaseWebView {
+public class HistoryWebView extends BaseWebView {
 
-    private static final String FRESHTAB_URL = "file:///android_asset/search/freshtab.html";
+    private static final String FRESHTAB_URL = "file:///android_asset/search/history.html";
 
-    public FreshTabWebView(Context context) {
+    public HistoryWebView(Context context) {
         this(context, null);
     }
 
-    public FreshTabWebView(Context context, AttributeSet attrs) {
+    public HistoryWebView(Context context, AttributeSet attrs) {
         this(context, attrs, 0);
     }
 
-    public FreshTabWebView(Context context, AttributeSet attrs, int defStyleAttr) {
+    public HistoryWebView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
     }
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-    public FreshTabWebView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+    public HistoryWebView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
     }
 
     @Nullable
     @Override
     protected WebViewClient createWebViewClient() {
-        return new WebViewClient() {
-            @Override
-            public void onPageFinished(WebView view, String url) {
-                super.onPageFinished(view, url);
-                executeJS("initFreshtab()");
-            }
-        };
+        return new WebViewClient();
     }
 
     @Nullable

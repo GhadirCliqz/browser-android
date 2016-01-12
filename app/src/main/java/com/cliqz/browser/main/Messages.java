@@ -18,7 +18,17 @@ public final class Messages {
 
     public static class UpdateTitle {}
 
-    public static class GoToSearch {}
+    public static class GoToSearch {
+        public final String query;
+
+        public GoToSearch() {
+            this.query = null;
+        }
+
+        public GoToSearch(String query) {
+            this.query = query;
+        }
+    }
 
     public static class BackPressed {}
 
@@ -30,11 +40,15 @@ public final class Messages {
      */
     public static class ShowSearch {
         public final String query;
-
         public ShowSearch(String query) {
             this.query = query;
         }
     }
+
+    /**
+     * Force the app to show the home page
+     */
+    public static class ShowHomePage {}
 
     /**
      * This will make the app to transact to the Main fragment, the main fragment then will switch

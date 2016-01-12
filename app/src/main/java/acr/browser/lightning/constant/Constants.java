@@ -10,6 +10,8 @@ import acr.browser.lightning.BuildConfig;
 
 public final class Constants {
 
+    public static final long HOME_RESET_DELAY = 1800000; // milliseconds, 30 minutes
+
     private Constants() {
     }
 

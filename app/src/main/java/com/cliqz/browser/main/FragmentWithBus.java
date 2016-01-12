@@ -28,6 +28,12 @@ public abstract class FragmentWithBus extends Fragment {
     @Inject
     Timings timings;
 
+    @Inject
+    CliqzBrowserState state;
+
+    @Inject
+    PreferenceManager preferenceManager;
+    
     public FragmentWithBus() {
         super();
         BrowserApp.getAppComponent().inject(this);

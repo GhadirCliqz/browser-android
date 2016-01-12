@@ -48,4 +48,12 @@ public class CliqzMessages {
             this.url = url;
         }
     }
+
+    public static class CopyData {
+        public final String data;
+
+        public CopyData(String data) {
+            this.data = data;
+        }
+    }
 }

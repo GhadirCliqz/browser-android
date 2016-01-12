@@ -60,12 +60,14 @@ public class PreferenceManager {
         public static final String USE_PROXY_PORT = "useProxyPort";
         public static final String INITIAL_CHECK_FOR_TOR = "checkForTor";
         public static final String INITIAL_CHECK_FOR_I2P = "checkForI2P";
+        // CLIQZ
         public static final String ONBOARDING_COMPLETE = "onboardingComplete";
         public static final String SESSION_ID = "sessionId";
         public static final String TELEMETRY_SEQUENCE = "telemetrySequence";
         public static final String VERSION_CODE = "versionCode";
         public static final String TIME_OF_LAST_ENVIRONMENT_SIGNAL = "lastEnvironmentSignal";
         public static final String TELEMETRY_SIGNALS = "telemetrySignals";
+        public static final String BROWSER_STATE = "cliqzBrowserState";
     }
 
     private final SharedPreferences mPrefs;
@@ -288,6 +290,8 @@ public class PreferenceManager {
     public String getTelemetrySignals() {
         return mPrefs.getString(Name.TELEMETRY_SIGNALS, "");
     }
+
+    public String getBrowserState() { return mPrefs.getString(Name.BROWSER_STATE, "{}"); }
 
     private void putBoolean(String name, boolean value) {
         mPrefs.edit().putBoolean(name, value).apply();
@@ -519,5 +523,9 @@ public class PreferenceManager {
 
     public void setTelemetrySignals(String signals) {
         putString(Name.TELEMETRY_SIGNALS, signals);
+    }
+
+    public void setBrowserState(String state) {
+        putString(Name.BROWSER_STATE, state);
     }
 }

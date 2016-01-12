@@ -2,11 +2,10 @@ package acr.browser.lightning.app;
 
 import android.content.Context;
 
-import com.cliqz.browser.fragment.BaseSettingsFragment;
+import com.cliqz.browser.settings.BaseSettingsFragment;
 import com.cliqz.browser.main.FragmentWithBus;
 import com.cliqz.browser.webview.BaseWebView;
 import com.cliqz.browser.webview.Bridge;
-import com.cliqz.browser.webview.SearchWebView;
 import com.cliqz.browser.webview.TabsManagerView;
 import com.cliqz.browser.widget.AutocompleteEditText;
 import com.squareup.otto.Bus;
