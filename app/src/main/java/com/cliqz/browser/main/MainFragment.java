@@ -196,9 +196,9 @@ public class MainFragment extends BaseFragment {
     @Override
     protected boolean onMenuItemClick(MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.menu_suggestions:
+            case R.id.menu_settings:
                 hideKeyboard();
-                delayedPostOnBus(new Messages.GoToSuggestions());
+                delayedPostOnBus(new Messages.GoToSettings());
                 return true;
             default:
                 return false;
