@@ -15,7 +15,7 @@
             android:title="@string/block" />
      <Preference
         android:key="search"
-        android:title="@string/search" />
+        android:title="@string/complementary_search_engine" />
     <!-- <Preference
         android:key="import_browser_bookmark"
         android:title="@string/importbookmarks"

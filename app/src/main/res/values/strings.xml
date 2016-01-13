@@ -236,4 +236,5 @@
     <string name="recommendations">Recommendations</string>
     <string name="history">History</string>
     <string name="default_page_title">Untitled</string>
+    <string name="complementary_search_engine">Complementary search engine</string>
 </resources>

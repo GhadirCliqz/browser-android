@@ -589,46 +589,7 @@ public abstract class BrowserActivity extends ThemableBrowserActivity
         }
         setFullscreen(mPreferences.getHideStatusBarEnabled(), false);
 
-        switch (mPreferences.getSearchChoice()) {
-            case 0:
-                mSearchText = mPreferences.getSearchUrl();
-                if (!mSearchText.startsWith(Constants.HTTP)
-                        && !mSearchText.startsWith(Constants.HTTPS)) {
-                    mSearchText = Constants.GOOGLE_SEARCH;
-                }
-                break;
-            case 1:
-                mSearchText = Constants.GOOGLE_SEARCH;
-                break;
-            case 2:
-                mSearchText = Constants.ASK_SEARCH;
-                break;
-            case 3:
-                mSearchText = Constants.BING_SEARCH;
-                break;
-            case 4:
-                mSearchText = Constants.YAHOO_SEARCH;
-                break;
-            case 5:
-                mSearchText = Constants.STARTPAGE_SEARCH;
-                break;
-            case 6:
-                mSearchText = Constants.STARTPAGE_MOBILE_SEARCH;
-                break;
-            case 7:
-                mSearchText = Constants.DUCK_SEARCH;
-                break;
-            case 8:
-                mSearchText = Constants.DUCK_LITE_SEARCH;
-                break;
-            case 9:
-                mSearchText = Constants.BAIDU_SEARCH;
-                break;
-            case 10:
-                mSearchText = Constants.YANDEX_SEARCH;
-                break;
-        }
-
+        mSearchText = mPreferences.getSearchChoice().engineUrl;
         updateCookiePreference();
         mProxyUtils.updateProxySettings(this);
     }

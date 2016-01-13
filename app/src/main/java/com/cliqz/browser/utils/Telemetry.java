@@ -539,12 +539,7 @@ public class Telemetry {
     }
 
     private String getDefaultSearchEngine() {
-        String[] searchEngines = {mPreferenceManager.getSearchUrl(), "Google",
-                "Ask", "Bing", "Yahoo", "StartPage", "StartPage (Mobile)",
-                "DuckDuckGo (Privacy)", "DuckDuckGo Lite (Privacy)", "Baidu (Chinese)",
-                "Yandex (Russian)"};
-        int searchChoice = mPreferenceManager.getSearchChoice();
-        return searchEngines[searchChoice];
+        return mPreferenceManager.getSearchChoice().engineName;
     }
 
     private String getNetworkState() {

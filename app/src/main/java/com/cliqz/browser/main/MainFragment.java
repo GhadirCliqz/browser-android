@@ -353,45 +353,7 @@ public class MainFragment extends BaseFragment {
     }
 
     private void setSearchEngine() {
-        switch (preferenceManager.getSearchChoice()) {
-            case 0:
-                mSearchEngine = preferenceManager.getSearchUrl();
-                if (!mSearchEngine.startsWith(Constants.HTTP)
-                        && !mSearchEngine.startsWith(Constants.HTTPS)) {
-                    mSearchEngine = Constants.GOOGLE_SEARCH;
-                }
-                break;
-            case 1:
-                mSearchEngine = Constants.GOOGLE_SEARCH;
-                break;
-            case 2:
-                mSearchEngine = Constants.ASK_SEARCH;
-                break;
-            case 3:
-                mSearchEngine = Constants.BING_SEARCH;
-                break;
-            case 4:
-                mSearchEngine = Constants.YAHOO_SEARCH;
-                break;
-            case 5:
-                mSearchEngine = Constants.STARTPAGE_SEARCH;
-                break;
-            case 6:
-                mSearchEngine = Constants.STARTPAGE_MOBILE_SEARCH;
-                break;
-            case 7:
-                mSearchEngine = Constants.DUCK_SEARCH;
-                break;
-            case 8:
-                mSearchEngine = Constants.DUCK_LITE_SEARCH;
-                break;
-            case 9:
-                mSearchEngine = Constants.BAIDU_SEARCH;
-                break;
-            case 10:
-                mSearchEngine = Constants.YANDEX_SEARCH;
-                break;
-        }
+        mSearchEngine = preferenceManager.getSearchChoice().engineUrl;
     }
 
 }
