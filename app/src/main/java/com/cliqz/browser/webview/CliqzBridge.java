@@ -155,7 +155,7 @@ class CliqzBridge extends Bridge {
             @Override
             public void execute(Bridge bridge, Object data, String callback) {
                 final JSONObject signal = (data instanceof JSONObject) ? (JSONObject) data : null;
-                bridge.telemetry.saveSignal(signal);
+                bridge.telemetry.saveExtSignal(signal);
             }
         }),
 

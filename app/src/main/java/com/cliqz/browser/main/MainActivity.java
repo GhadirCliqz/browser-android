@@ -35,7 +35,6 @@ import acr.browser.lightning.R;
 import acr.browser.lightning.activity.SettingsActivity;
 import acr.browser.lightning.app.BrowserApp;
 import acr.browser.lightning.preference.PreferenceManager;
-import acr.browser.lightning.utils.Utils;
 
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 
@@ -343,18 +342,20 @@ public class MainActivity extends AppCompatActivity {
 
     //returns screen that is visible
     private String getCurrentVisibleFragmentName() {
-        String context = "";
+        String name = "";
         if (mMainFragment != null && mMainFragment.isVisible()) {
             if (((MainFragment)mMainFragment).mState == MainFragment.State.SHOWING_BROWSER) {
-                context = "web";
+                name = "web";
             } else {
-                context = "cards";
+                name = "cards";
             }
         } else if (mHistoryFragment != null && mHistoryFragment.isVisible()) {
-            context = "past";
+            name = "past";
         } else if (mFreshTabFragment != null && mFreshTabFragment.isVisible()) {
-            context = "future";
+            name = "future";
+        } else {
+            name = "web";
         }
-        return context;
+        return name;
     }
 }
