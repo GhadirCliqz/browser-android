@@ -195,6 +195,7 @@ public class MainFragment extends BaseFragment {
 
     @Override
     protected boolean onMenuItemClick(MenuItem item) {
+        /* This code was removed because settings are now in the "PAST"
         switch (item.getItemId()) {
             case R.id.menu_settings:
                 hideKeyboard();
@@ -203,6 +204,8 @@ public class MainFragment extends BaseFragment {
             default:
                 return false;
         }
+        */
+        return false;
     }
 
     @Override

@@ -1,5 +1,6 @@
 package com.cliqz.browser.main;
 
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
@@ -66,7 +67,13 @@ public class HistoryFragment extends BaseFragment {
 
     @Override
     protected boolean onMenuItemClick(MenuItem item) {
-        return false;
+        switch (item.getItemId()) {
+            case R.id.menu_settings:
+                delayedPostOnBus(new Messages.GoToSettings());
+                return true;
+            default:
+                return false;
+        }
     }
 
     @Override
