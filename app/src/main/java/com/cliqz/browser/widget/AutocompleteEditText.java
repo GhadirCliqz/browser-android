@@ -28,6 +28,8 @@ import acr.browser.lightning.app.BrowserApp;
  */
 public class AutocompleteEditText extends EditText {
 
+    private static final String TAG = AutocompleteEditText.class.getSimpleName();
+    
     @Inject
     Telemetry mTelemetry;
 
@@ -98,8 +100,11 @@ public class AutocompleteEditText extends EditText {
                 @Override
                 public void run() {
                     final int tl = currentText.length();
-                    if (selectionBegin < tl || selectionEnd < tl) {
+                    // TODO: Check this, sometimes the next instruction crash
+                    try {
                         setSelection(selectionBegin, selectionEnd);
+                    } catch (IndexOutOfBoundsException e) {
+                        Log.i(TAG, "Can't select part of the url bar", e);
                     }
                 }
             });
