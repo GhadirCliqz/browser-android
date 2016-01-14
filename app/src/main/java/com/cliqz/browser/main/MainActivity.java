@@ -193,7 +193,6 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        bus.unregister(this);
         String context = getCurrentVisibleFragmentName();
         if(!context.isEmpty()) {
             telemetry.sendClosingSignals(Telemetry.Action.KILL, context);
