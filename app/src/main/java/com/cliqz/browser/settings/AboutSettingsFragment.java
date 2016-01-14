@@ -6,20 +6,22 @@ package com.cliqz.browser.settings;
 import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.preference.Preference;
 import android.preference.PreferenceFragment;
+import android.text.Html;
 
 import acr.browser.lightning.BuildConfig;
 import acr.browser.lightning.R;
 
 public class AboutSettingsFragment extends PreferenceFragment {
 
-    private Activity mActivity;
-
     private int mCounter = 1;
 
     private static final String SETTINGS_VERSION = "pref_version";
+    private static final String CONTACT = "pref_contact";
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -27,11 +29,12 @@ public class AboutSettingsFragment extends PreferenceFragment {
         // Load the preferences from an XML resource
         addPreferencesFromResource(R.xml.preference_about);
 
-        mActivity = getActivity();
-
         Preference version = findPreference(SETTINGS_VERSION);
         version.setSummary(getVersion());
         version.setOnPreferenceClickListener(versionClickListener);
+
+        Preference contact = findPreference(CONTACT);
+        contact.setOnPreferenceClickListener(contactClickListener);
     }
 
     private String getVersion() {
@@ -57,4 +60,25 @@ public class AboutSettingsFragment extends PreferenceFragment {
                 }
             };
 
+    private final Preference.OnPreferenceClickListener contactClickListener =
+            new Preference.OnPreferenceClickListener() {
+                @Override
+                public boolean onPreferenceClick(Preference preference) {
+                    final Uri to = Uri.parse(getString(R.string.mail_to_feedback_at_cliqz_com));
+                    final Intent intent = new Intent(Intent.ACTION_SENDTO, to);
+                    intent.putExtra(Intent.EXTRA_TEXT, new StringBuilder()
+                                    .append("\n")
+                                    .append("Feedback für CLIQZ for Android (")
+                                    .append(BuildConfig.VERSION_NAME)
+                                    .append("), auf ")
+                                    .append(Build.MODEL)
+                                    .append(" (")
+                                    .append(Build.VERSION.SDK_INT)
+                                    .append(")")
+                                    .toString()
+                    );
+                    startActivity(Intent.createChooser(intent, getString(R.string.contact_cliqz)));
+                    return true;
+                }
+            };
 }
