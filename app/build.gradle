@@ -31,12 +31,14 @@ android {
             minifyEnabled false
             shrinkResources false
             proguardFiles 'proguard-project.txt'
+            buildConfigField 'String', 'TELEMETRY_CHANNEL', '"MA02"'
         }
 
         release {
             minifyEnabled false
             shrinkResources true
             proguardFiles 'proguard-project.txt'
+            buildConfigField 'String', 'TELEMETRY_CHANNEL', '"MA00"'
         }
     }
     lintOptions {

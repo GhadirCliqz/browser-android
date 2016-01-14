@@ -1,6 +1,7 @@
 package com.cliqz.browser.main;
 
 import android.content.Context;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -8,6 +9,7 @@ import android.util.Log;
 import android.util.Patterns;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
@@ -16,6 +18,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.webkit.URLUtil;
 import android.webkit.WebView;
 import android.widget.FrameLayout;
+import android.widget.TextView;
 
 import com.cliqz.browser.webview.CliqzMessages;
 import com.cliqz.browser.webview.SearchWebView;
@@ -29,6 +32,7 @@ import java.net.URLEncoder;
 import acr.browser.lightning.R;
 import acr.browser.lightning.bus.BrowserEvents;
 import acr.browser.lightning.constant.Constants;
+import acr.browser.lightning.utils.ThemeUtils;
 import acr.browser.lightning.utils.UrlUtils;
 import acr.browser.lightning.view.AnimatedProgressBar;
 import acr.browser.lightning.view.LightningView;
@@ -46,6 +50,10 @@ public class MainFragment extends BaseFragment {
     private static final String TAG = MainFragment.class.getSimpleName();
     private static final String STATE_KEY = TAG + ".STATE";
     private static final String NAVIGATION_STATE_KEY = TAG + ".NAVIGATION_STATE";
+    private static final int CLEAR = 0;
+    private static final int RELOAD = 1;
+    private static final int STOP = 2;
+    private int currentIcon;
 
     enum State {
         SHOWING_SEARCH,
@@ -76,6 +84,9 @@ public class MainFragment extends BaseFragment {
 
     @Bind(R.id.search_edit_text)
     AutocompleteEditText mAutocompleteEditText;
+
+    @Bind(R.id.title_bar)
+    TextView titleBar;
 
     @Override
     protected View onCreateContentView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -115,6 +126,7 @@ public class MainFragment extends BaseFragment {
         }
         mContentContainer.addView(webView);
         mContentContainer.addView(mSearchWebView);
+        titleBar.setOnTouchListener(onTouchListener);
     }
 
     @Override
@@ -279,6 +291,13 @@ public class MainFragment extends BaseFragment {
     @Subscribe
     public void updateProgress(BrowserEvents.UpdateProgress event) {
         mProgressBar.setProgress(event.progress);
+        if(!mLightningView.getUrl().contains(Constants.CLIQZ_TRAMPOLINE)) {
+            if(event.progress == 100) {
+                switchIcon(RELOAD);
+            } else {
+                switchIcon(STOP);
+            }
+        }
     }
 
     @Subscribe
@@ -355,5 +374,49 @@ public class MainFragment extends BaseFragment {
     private void setSearchEngine() {
         mSearchEngine = preferenceManager.getSearchChoice().engineUrl;
     }
+
+    private void switchIcon(int type) {
+        currentIcon = type;
+        Drawable icon;
+        switch(type) {
+            case CLEAR:
+                icon = ThemeUtils.getLightThemedDrawable(getContext(), R.drawable.ic_action_delete);
+                break;
+            case RELOAD:
+                icon = ThemeUtils.getLightThemedDrawable(getContext(), R.drawable.ic_action_refresh);
+                break;
+            case STOP:
+                icon = ThemeUtils.getLightThemedDrawable(getContext(), R.drawable.ic_action_delete);
+                break;
+            default:
+                icon = ThemeUtils.getLightThemedDrawable(getContext(), R.drawable.ic_action_delete);
+        }
+        titleBar.setCompoundDrawablesWithIntrinsicBounds(null, null, icon, null);
+
+    }
+
+    private View.OnTouchListener onTouchListener = new View.OnTouchListener() {
+        @Override
+        public boolean onTouch(View view, MotionEvent event) {
+            if (event.getAction() == MotionEvent.ACTION_UP) {
+                int width = getContext().getResources().getDrawable(R.drawable.ic_action_delete).getIntrinsicWidth();
+                if (event.getX() > (view.getWidth()-view.getPaddingRight()) - width) {
+                    switch(currentIcon) {
+                        case CLEAR:
+                            mAutocompleteEditText.setText("");
+                            break;
+                        case STOP:
+                            mLightningView.getWebView().stopLoading();
+                            break;
+                        case RELOAD:
+                            mLightningView.getWebView().reload();
+                            break;
+                    }
+                    return true;
+                }
+            }
+            return false;
+        }
+    };
 
 }

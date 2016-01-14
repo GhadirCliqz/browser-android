@@ -55,7 +55,6 @@ public class Telemetry {
     
     private static class Key {
 
-        private static final String SOURCE = "MA00";
         private static final String ALPHA_NUMERIC_SPACE = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
         private static final String NUMERIC_SPACE = "0123456789";
         private static final String SESSION = "session";
@@ -110,6 +109,7 @@ public class Telemetry {
         private static final String ANDROID = "cliqz_android";
         private static final String APP_STATE_CHANGE = "app_state_change";
         private static final String STATE = "state";
+        private static final String ONBOARDING_VERSION = "1.0";
     }
 
     public static class Action {
@@ -242,7 +242,7 @@ public class Telemetry {
         signal.put(Key.ACTION, Action.SHOW);
         signal.put(Key.ACTION_TARGET, page);
         signal.put(Key.PRODUCT, Key.ANDROID);
-        signal.put(Key.VERSION, BuildConfig.VERSION_NAME);
+        signal.put(Key.VERSION, Key.ONBOARDING_VERSION);
         saveSignal(signal);
     }
 
@@ -560,7 +560,7 @@ public class Telemetry {
         String randomAlphaNumericString = generateRandomString(18, Key.ALPHA_NUMERIC_SPACE);
         String randomNumericString = generateRandomString(6, Key.NUMERIC_SPACE);
         String days = Long.toString(getUnixTimeStamp() / 86400000);
-        return randomAlphaNumericString + randomNumericString + "|" + days + "|" + Key.SOURCE;
+        return randomAlphaNumericString + randomNumericString + "|" + days + "|" + BuildConfig.TELEMETRY_CHANNEL;
     }
 
     //Returns a random string of length 'length' using characters from the given 'space'
