@@ -64,4 +64,8 @@ public final class Constants {
     public static final String EXTERNAL_STORAGE = Environment.getExternalStorageDirectory().toString();
 
     public static final String TABS_SCREENSHOT_FOLDER_NAME = "tabs";
+
+    public static final String TELEMETRY_FILE_NAME = "telemetry.dat";
+
+    public static final String TELEMETRY_LOG_PREFIX = "telemetry_";
 }

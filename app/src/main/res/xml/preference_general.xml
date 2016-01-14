@@ -5,10 +5,10 @@
             android:defaultValue="true"
             android:key="cb_drawertabs"
             android:title="@string/tabs_in_drawer" /> -->
-        <CheckBoxPreference
+     <!--   <CheckBoxPreference
             android:defaultValue="false"
             android:key="cb_ads"
-            android:title="@string/block_ads" />
+            android:title="@string/block_ads" /> -->
         <CheckBoxPreference
             android:defaultValue="false"
             android:key="cb_images"

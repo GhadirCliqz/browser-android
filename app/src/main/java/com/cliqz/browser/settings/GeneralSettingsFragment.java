@@ -46,13 +46,13 @@ public class GeneralSettingsFragment extends BaseSettingsFragment {
         // Preference importBrowserpref = findPreference(SETTINGS_BROWSER_IMPORT);
         searchengine = findPreference(SETTINGS_SEARCHENGINE);
 
-        cbAds = (CheckBoxPreference) findPreference(SETTINGS_ADS);
+        //cbAds = (CheckBoxPreference) findPreference(SETTINGS_ADS);
         cbImages = (CheckBoxPreference) findPreference(SETTINGS_IMAGES);
         // cbDrawerTabs = (CheckBoxPreference) findPreference(SETTINGS_DRAWERTABS);
 
         // importBrowserpref.setOnPreferenceClickListener(this);
         searchengine.setOnPreferenceClickListener(this);
-        cbAds.setOnPreferenceChangeListener(this);
+        //cbAds.setOnPreferenceChangeListener(this);
         cbImages.setOnPreferenceChangeListener(this);
         // cbDrawerTabs.setOnPreferenceChangeListener(this);
 
@@ -65,10 +65,10 @@ public class GeneralSettingsFragment extends BaseSettingsFragment {
         int flashNum = mPreferenceManager.getFlashSupport();
         boolean imagesBool = mPreferenceManager.getBlockImagesEnabled();
 
-        cbAds.setEnabled(Constants.FULL_VERSION);
+//        cbAds.setEnabled(Constants.FULL_VERSION);
 
         cbImages.setChecked(imagesBool);
-        cbAds.setChecked(Constants.FULL_VERSION && mPreferenceManager.getAdBlockEnabled());
+        //cbAds.setChecked(Constants.FULL_VERSION && mPreferenceManager.getAdBlockEnabled());
         // cbDrawerTabs.setChecked(mPreferenceManager.getShowTabsInDrawer(true));
     }
 
@@ -145,10 +145,10 @@ public class GeneralSettingsFragment extends BaseSettingsFragment {
     public boolean onPreferenceChange(Preference preference, Object newValue) {
         // switch preferences
         switch (preference.getKey()) {
-            case SETTINGS_ADS:
-                mPreferenceManager.setAdBlockEnabled((Boolean) newValue);
-                cbAds.setChecked((Boolean) newValue);
-                return true;
+//            case SETTINGS_ADS:
+//                mPreferenceManager.setAdBlockEnabled((Boolean) newValue);
+//                cbAds.setChecked((Boolean) newValue);
+//                return true;
             case SETTINGS_IMAGES:
                 mPreferenceManager.setBlockImagesEnabled((Boolean) newValue);
                 cbImages.setChecked((Boolean) newValue);
