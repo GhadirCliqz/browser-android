@@ -60,6 +60,7 @@ public class MainActivityTest {
         Thread.sleep(10000);
     }
 
+    /*
     @Test
     public void testLayerChange() {
         onView(withId(R.id.menu_history)).perform(click());
@@ -74,6 +75,6 @@ public class MainActivityTest {
         Thread.sleep(5000);
         onWebView(withClassName(Matchers.containsString("FreshTabWebView"))).check(webContent(hasElementWithId("startingpoint")));
     }
-
+    */
 
 }
