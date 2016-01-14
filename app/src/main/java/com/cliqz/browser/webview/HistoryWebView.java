@@ -50,4 +50,8 @@ public class HistoryWebView extends BaseWebView {
     protected String getExtensionUrl() {
         return FRESHTAB_URL;
     }
+
+    public void fourceUpdateHistory() {
+        executeJS("osBridge.searchHistory(\"\", \"showHistory\")");
+    }
 }
