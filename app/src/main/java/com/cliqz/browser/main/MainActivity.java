@@ -5,6 +5,7 @@ import android.content.ClipboardManager;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.Color;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcelable;
@@ -34,6 +35,7 @@ import acr.browser.lightning.BuildConfig;
 import acr.browser.lightning.R;
 import acr.browser.lightning.activity.SettingsActivity;
 import acr.browser.lightning.app.BrowserApp;
+import acr.browser.lightning.bus.BrowserEvents;
 import acr.browser.lightning.preference.PreferenceManager;
 
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
@@ -87,7 +89,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         BrowserApp.getAppComponent().inject(this);
-        bus.register(this);
 
         // Restore state
         if (savedInstanceState != null) {
@@ -109,8 +110,9 @@ public class MainActivity extends AppCompatActivity {
         mHistoryFragment = new HistoryFragment();
         mMainFragment = new MainFragment();
 
-        final Intent intent = getIntent();
-        final String url = (intent != null) && (intent.getAction() == Intent.ACTION_VIEW) ?
+        // Ignore intent if we are being recreated
+        final Intent intent = savedInstanceState == null ? getIntent() : null;
+        final String url = (intent != null) && (Intent.ACTION_VIEW.equals(intent.getAction())) ?
                 intent.getDataString() : null;
         if (url != null && Patterns.WEB_URL.matcher(url).matches()) {
             setIntent(null);
@@ -158,6 +160,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        bus.register(this);
         final String name = getCurrentVisibleFragmentName();
         timings.setAppStartTime();
         if(!name.isEmpty()) {
@@ -169,6 +172,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onPause() {
         super.onPause();
+        bus.unregister(this);
         String context = getCurrentVisibleFragmentName();
         timings.setAppStopTime();
         if(!context.isEmpty()) {
@@ -199,6 +203,19 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onBackPressed() {
         bus.post(new Messages.BackPressed());
+    }
+
+    @Subscribe
+    public void createWindow(BrowserEvents.CreateWindow event) {
+//        final Intent intent = new Intent(getBaseContext(), MainActivity.class);
+//        intent.setAction(Intent.ACTION_VIEW);
+//        intent.setData(Uri.parse(event.url));
+//        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK
+//                | Intent.FLAG_ACTIVITY_NEW_DOCUMENT
+//                | Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
+//        startActivity(intent);
+        // TODO: Temporary workaround, we want to open a new activity!
+        bus.post(new CliqzMessages.OpenLink(event.url));
     }
 
     @Subscribe

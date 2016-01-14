@@ -7,6 +7,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import acr.browser.lightning.constant.Constants;
+import acr.browser.lightning.constant.SearchEngines;
 import acr.browser.lightning.download.DownloadHandler;
 
 @Singleton
@@ -29,7 +30,8 @@ public class PreferenceManager {
         public static final String POPUPS = "newwindows";
         public static final String RESTORE_LOST_TABS = "restoreclosed";
         public static final String SAVE_PASSWORDS = "passwords";
-        public static final String SEARCH = "search";
+        // The name was changed to support new String format (instead of int)
+        public static final String SEARCH = "searchCliqz";
         public static final String SEARCH_URL = "searchurl";
         public static final String TEXT_REFLOW = "textreflow";
         public static final String TEXT_SIZE = "textsize";
@@ -203,8 +205,9 @@ public class PreferenceManager {
         return mPrefs.getBoolean(Name.SAVE_PASSWORDS, true);
     }
 
-    public int getSearchChoice() {
-        return mPrefs.getInt(Name.SEARCH, 1);
+    public SearchEngines getSearchChoice() {
+        final SearchEngines engine = SearchEngines.safeValueOf(mPrefs.getString(Name.SEARCH, ""));
+        return engine;
     }
 
     public String getSearchUrl() {
@@ -441,8 +444,8 @@ public class PreferenceManager {
         putBoolean(Name.SAVE_PASSWORDS, enable);
     }
 
-    public void setSearchChoice(int choice) {
-        putInt(Name.SEARCH, choice);
+    public void setSearchChoice(SearchEngines choice) {
+        putString(Name.SEARCH, choice.name());
     }
 
     public void setSearchUrl(String url) {

@@ -55,82 +55,10 @@ public class StartPage {
      */
     public static String getHomepage(Activity activity) {
         StringBuilder homepageBuilder = new StringBuilder(StartPage.HEAD);
-        String icon;
-        String searchUrl;
         final PreferenceManager preferenceManager = BrowserApp.getAppComponent().getPreferenceManager();
-        switch (preferenceManager.getSearchChoice()) {
-            case 0:
-                // CUSTOM SEARCH
-                icon = "file:///android_asset/lightning.png";
-                searchUrl = preferenceManager.getSearchUrl();
-                break;
-            case 1:
-                // GOOGLE_SEARCH;
-                icon = "file:///android_asset/google.png";
-                // "https://www.google.com/images/srpr/logo11w.png";
-                searchUrl = Constants.GOOGLE_SEARCH;
-                break;
-            case 2:
-                // ANDROID SEARCH;
-                icon = "file:///android_asset/ask.png";
-                searchUrl = Constants.ASK_SEARCH;
-                break;
-            case 3:
-                // BING_SEARCH;
-                icon = "file:///android_asset/bing.png";
-                // "http://upload.wikimedia.org/wikipedia/commons/thumb/b/b1/Bing_logo_%282013%29.svg/500px-Bing_logo_%282013%29.svg.png";
-                searchUrl = Constants.BING_SEARCH;
-                break;
-            case 4:
-                // YAHOO_SEARCH;
-                icon = "file:///android_asset/yahoo.png";
-                // "http://upload.wikimedia.org/wikipedia/commons/thumb/2/24/Yahoo%21_logo.svg/799px-Yahoo%21_logo.svg.png";
-                searchUrl = Constants.YAHOO_SEARCH;
-                break;
-            case 5:
-                // STARTPAGE_SEARCH;
-                icon = "file:///android_asset/startpage.png";
-                // "https://startpage.com/graphics/startp_logo.gif";
-                searchUrl = Constants.STARTPAGE_SEARCH;
-                break;
-            case 6:
-                // STARTPAGE_MOBILE
-                icon = "file:///android_asset/startpage.png";
-                // "https://startpage.com/graphics/startp_logo.gif";
-                searchUrl = Constants.STARTPAGE_MOBILE_SEARCH;
-                break;
-            case 7:
-                // DUCK_SEARCH;
-                icon = "file:///android_asset/duckduckgo.png";
-                // "https://duckduckgo.com/assets/logo_homepage.normal.v101.png";
-                searchUrl = Constants.DUCK_SEARCH;
-                break;
-            case 8:
-                // DUCK_LITE_SEARCH;
-                icon = "file:///android_asset/duckduckgo.png";
-                // "https://duckduckgo.com/assets/logo_homepage.normal.v101.png";
-                searchUrl = Constants.DUCK_LITE_SEARCH;
-                break;
-            case 9:
-                // BAIDU_SEARCH;
-                icon = "file:///android_asset/baidu.png";
-                // "http://www.baidu.com/img/bdlogo.gif";
-                searchUrl = Constants.BAIDU_SEARCH;
-                break;
-            case 10:
-                // YANDEX_SEARCH;
-                icon = "file:///android_asset/yandex.png";
-                // "http://upload.wikimedia.org/wikipedia/commons/thumb/9/91/Yandex.svg/600px-Yandex.svg.png";
-                searchUrl = Constants.YANDEX_SEARCH;
-                break;
-            default:
-                // DEFAULT GOOGLE_SEARCH;
-                icon = "file:///android_asset/google.png";
-                searchUrl = Constants.GOOGLE_SEARCH;
-                break;
-
-        }
-
+        final SearchEngines engine = preferenceManager.getSearchChoice();
+        final String icon = engine.engineIconPath;
+        final String searchUrl = engine.engineUrl;
         homepageBuilder.append(icon);
         homepageBuilder.append(StartPage.MIDDLE);
         homepageBuilder.append(searchUrl);

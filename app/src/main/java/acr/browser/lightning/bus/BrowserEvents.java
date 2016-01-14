@@ -137,10 +137,10 @@ public final class BrowserEvents {
      * Request the browser to create a new window
      */
     public static class CreateWindow {
-        public final Message resultMsg;
+        public final String url;
 
-        public CreateWindow(final Message resultMsg) {
-            this.resultMsg = resultMsg;
+        public CreateWindow(final String url) {
+            this.url = url;
         }
     }
 

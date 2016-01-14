@@ -5,57 +5,32 @@ package acr.browser.lightning.constant;
  * @date 2016/01/11
  */
 public enum SearchEngines {
+    google("Google", Constants.GOOGLE_SEARCH, "file:///android_asset/google.png"),
+    // ask("Ask", Constants.ASK_SEARCH, "file:///android_asset/ask.png"),
+    bing("Bing", Constants.BING_SEARCH, "file:///android_asset/bing.png"),
+    yahoo("Yahoo", Constants.YAHOO_SEARCH, "file:///android_asset/yahoo.png"),
+    // startpage("Startpage", Constants.STARTPAGE_SEARCH, "file:///android_asset/startpage.png"),
+    // startpageMobile("Startpage Mobile", Constants.STARTPAGE_MOBILE_SEARCH, "file:///android_asset/startpage.png"),
+    duckDuckGo("DuckDuckGo", Constants.DUCK_SEARCH, "file:///android_asset/duckduckgo.png");
+    // duckDuckGoLite("DuckDuckGoLite", Constants.DUCK_LITE_SEARCH, "file:///android_asset/duckduckgo.png"),
+    // baidu("Baidu", Constants.BAIDU_SEARCH, "file:///android_asset/baidu.png"),
+    // yandex("Yandex", Constants.YANDEX_SEARCH, "file:///android_asset/yandex.png");
 
-    custom(new SearchEngine() {
-        @Override
-        public String getName() {
-            return "Custom";
+    public static SearchEngines safeValueOf(String value) {
+        try {
+            return SearchEngines.valueOf(value);
+        } catch (IllegalArgumentException e) {
+            return google;
         }
-
-        @Override
-        public String getSearchUrl() {
-            return null;
-        }
-    }),
-
-    google("Google", Constants.GOOGLE_SEARCH),
-    ask("Ask", Constants.ASK_SEARCH),
-    bing("Bing", Constants.BING_SEARCH),
-    yahoo("Yahoo", Constants.YAHOO_SEARCH),
-    startpage("Startpage", Constants.STARTPAGE_SEARCH),
-    startpageMobile("Startpage Mobile", Constants.STARTPAGE_MOBILE_SEARCH),
-    duckDuckGo("DuckDuckGo", Constants.DUCK_SEARCH),
-    duckDuckGoLite("DuckDuckGoLite", Constants.DUCK_LITE_SEARCH),
-    baidu("Baidu", Constants.BAIDU_SEARCH),
-    yandex("Yandex", Constants.YANDEX_SEARCH);
-
-    interface SearchEngine {
-        String getName();
-        String getSearchUrl();
     }
+    public final String engineName;
+    public final String engineUrl;
+    public final String engineIconPath;
 
-    private final SearchEngine engine;
-
-    SearchEngines(SearchEngine engine) {
-        this.engine = engine;
+    SearchEngines(String name, String url, String path) {
+        engineName = name;
+        engineUrl = url;
+        engineIconPath = path;
     }
-
-    SearchEngines(final String name, final String url) {
-        this.engine = new SearchEngine() {
-            @Override
-            public String getName() {
-                return name;
-            }
-
-            @Override
-            public String getSearchUrl() {
-                return url;
-            }
-        };
-    }
-
-    public String getName() { return engine.getName(); }
-
-    public String getSearchUrl() { return engine.getSearchUrl(); }
 
 }
