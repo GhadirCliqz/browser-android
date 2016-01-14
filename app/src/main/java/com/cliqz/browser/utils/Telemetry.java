@@ -16,8 +16,19 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -36,7 +47,7 @@ public class Telemetry {
     @Inject
     public Telemetry(Context context) {
         this.context = context;
-        signal = new HashMap<>();
+        file = new File(context.getFilesDir(), Constants.TELEMETRY_FILE_NAME);
         batteryLevel = -1;
         context.registerReceiver(mBatteryInfoReceiver, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
         context.registerReceiver(mNetworkChangeReceiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
@@ -66,7 +77,7 @@ public class Telemetry {
         private static final String MEMORY = "memory";
         private static final String TIME_USED = "time_used";
         private static final String LENGTH = "key_length";
-        private static final String PAGE = "page";
+        private static final String ACTION_TARGET = "action_target";
         private static final String DISPLAY_TIME = "display_time";
         private static final String DURATION = "duration";
         private static final String ACTIVITY = "activity";
@@ -95,6 +106,10 @@ public class Telemetry {
         private static final String POSITION_TYPE = "position_type";
         private static final String INBAR_URL = "inbar_url";
         private static final String INBAR_QUERY = "inbar_query";
+        private static final String PRODUCT = "product";
+        private static final String ANDROID = "cliqz_android";
+        private static final String APP_STATE_CHANGE = "app_state_change";
+        private static final String STATE = "state";
     }
 
     public static class Action {
@@ -117,7 +132,8 @@ public class Telemetry {
         public static final String RESULT_ENTER = "result_enter";
     }
 
-    private static final int BATCH_SIZE = 25;
+    private static final int BATCH_SIZE = 10;
+    private File file;
 
     @Inject
     PreferenceManager mPreferenceManager;
@@ -128,12 +144,12 @@ public class Telemetry {
     @Inject
     Timings timings;
 
-    private HashMap<String, Object> signal;
+    private final ExecutorService executorService = Executors.newSingleThreadExecutor();
+
     private String currentNetwork, currentLayer;
     private Context context;
     private int batteryLevel, forwardStep, backStep, urlLength;
 
-    public boolean hasPageScrolled;
     public boolean backPressed;
     public boolean showingCards;
 
@@ -142,10 +158,10 @@ public class Telemetry {
      * @param action type of the signal: App install or App update
      */
     public void sendLifeCycleSignal(String action) {
-        signal.clear();
+        HashMap<String, Object> signal = new HashMap<>();
         signal.put(Key.TYPE, Key.ACTIVITY);
         signal.put(Key.ACTION, action);
-        saveSignal();
+        saveSignal(signal);
     }
 
     /**
@@ -155,9 +171,9 @@ public class Telemetry {
      */
     //TODO No startup time
     private void sendAppUsageSignal(String action, String context) {
-        signal.clear();
-        signal.put(Key.TYPE, Key.ACTIVITY);
-        signal.put(Key.ACTION, action);
+        HashMap<String, Object> signal = new HashMap<>(); ;
+        signal.put(Key.TYPE, Key.APP_STATE_CHANGE);
+        signal.put(Key.STATE, action);
         signal.put(Key.NETWORK, getNetworkState());
         signal.put(Key.BATTERY, batteryLevel);
         signal.put(Key.MEMORY, getMemoryUsage());
@@ -165,7 +181,7 @@ public class Telemetry {
         if(action.equals(Action.CLOSE) || action.equals(Action.KILL)) {
             signal.put(Key.TIME_USED, timings.getAppUsageTime());
         }
-        saveSignal();
+        saveSignal(signal);
     }
 
     /**
@@ -173,21 +189,21 @@ public class Telemetry {
      * @param context The screen which is visible when the signal is sent. (Web or Cards)
      */
     public void sendURLBarFocusSignal(String context) {
-        signal.clear();
+        HashMap<String, Object> signal = new HashMap<>(); ;
         signal.put(Key.TYPE, Key.ACTIVITY);
         signal.put(Key.ACTION, Action.URLBAR_FOCUS);
         signal.put(Key.CONTEXT, context);
-        saveSignal();
+        saveSignal(signal);
     }
 
     /**
      * Send a telemetry signal when the url bar looses focus
      */
     public void sendURLBarBlurSignal() {
-        signal.clear();
+        HashMap<String, Object> signal = new HashMap<>(); ;
         signal.put(Key.TYPE, Key.ACTIVITY);
         signal.put(Key.ACTION, Action.URLBAR_BLUR);
-        saveSignal();
+        saveSignal(signal);
     }
 
     /**
@@ -197,11 +213,11 @@ public class Telemetry {
      * @param length Length of the query in the search bar
      */
     public void sendTypingSignal(String action, int length) {
-        signal.clear();
+        HashMap<String, Object> signal = new HashMap<>(); ;
         signal.put(Key.TYPE, Key.ACTIVITY);
         signal.put(Key.ACTION, action);
         signal.put(Key.LENGTH, length);
-        saveSignal();
+        saveSignal(signal);
     }
 
     /**
@@ -209,11 +225,11 @@ public class Telemetry {
      * @param length Length of the text pasted in the search bar
      */
     public void sendPasteSignal(int length) {
-        signal.clear();
+        HashMap<String, Object> signal = new HashMap<>(); ;
         signal.put(Key.TYPE, Key.ACTIVITY);
         signal.put(Key.ACTION, Action.PASTE);
         signal.put(Key.LENGTH, length);
-        saveSignal();
+        saveSignal(signal);
     }
 
     /**
@@ -221,11 +237,13 @@ public class Telemetry {
      * @param page Position/Page number of the onboarding-screen which is shown
      */
     public void sendOnBoardingShowSignal(int page) {
-        signal.clear();
+        HashMap<String, Object> signal = new HashMap<>(); ;
         signal.put(Key.TYPE, Key.ONBOARDING);
         signal.put(Key.ACTION, Action.SHOW);
-        signal.put(Key.PAGE, page);
-        saveSignal();
+        signal.put(Key.ACTION_TARGET, page);
+        signal.put(Key.PRODUCT, Key.ANDROID);
+        signal.put(Key.VERSION, BuildConfig.VERSION_NAME);
+        saveSignal(signal);
     }
 
     /**
@@ -234,12 +252,14 @@ public class Telemetry {
      * @param time Duration for which the onboarding page was shown
      */
     public void sendOnBoardingHideSignal(int page, long time) {
-        signal.clear();
+        HashMap<String, Object> signal = new HashMap<>(); ;
         signal.put(Key.TYPE, Key.ONBOARDING);
         signal.put(Key.ACTION, Action.HIDE);
-        signal.put(Key.PAGE, page);
+        signal.put(Key.ACTION_TARGET, page);
         signal.put(Key.DISPLAY_TIME,time);
-        saveSignal();
+        signal.put(Key.PRODUCT, Key.ANDROID);
+        signal.put(Key.VERSION, BuildConfig.VERSION_NAME);
+        saveSignal(signal);
     }
 
     /**
@@ -251,7 +271,7 @@ public class Telemetry {
             timings.setLayerStartTime();
             currentLayer = newLayer;
         } else {
-            signal.clear();
+            HashMap<String, Object> signal = new HashMap<>(); ;
             signal.put(Key.TYPE, Key.ACTIVITY);
             signal.put(Key.ACTION, Action.LAYER_CHANGE);
             signal.put(Key.CURRENT_LAYER, currentLayer);
@@ -259,7 +279,7 @@ public class Telemetry {
             signal.put(Key.DISPLAY_TIME, timings.getLayerDisplayTime());
             timings.setLayerStartTime();
             currentLayer = newLayer;
-            saveSignal();
+            saveSignal(signal);
         }
     }
 
@@ -276,7 +296,7 @@ public class Telemetry {
             return;
         }
         timings.setLastEnvSingalTime();
-        signal.clear();
+        HashMap<String, Object> signal = new HashMap<>(); ;
         signal.put(Key.TYPE, Key.ENVIRONMENT);
         signal.put(Key.DEVICE, Build.MODEL);
         signal.put(Key.LANGUAGE, getLanguage());
@@ -289,20 +309,19 @@ public class Telemetry {
             days = (getUnixTimeStamp() - firstItemTime) / oneDay;
         }
         signal.put(Key.HISTORY_DAYS, days);
-        saveSignal();
+        saveSignal(signal);
     }
 
     //Send a telemetry signal of the network state, when the app closes and when the network changes
     private void sendNetworkStatus() {
         long duration = timings.getNetworkUsageTime();
-        signal.clear();
-        signal.put(Key.TYPE, Key.ACTIVITY);
-        signal.put(Key.ACTION, Action.NETWORK_STATUS);
+        HashMap<String, Object> signal = new HashMap<>(); ;
+        signal.put(Key.TYPE, Action.NETWORK_STATUS);
         signal.put(Key.NETWORK, currentNetwork);
         signal.put(Key.DURATION, duration);
         timings.setNetworkStartTime();
         currentNetwork = getNetworkState();
-        saveSignal();
+        saveSignal(signal);
     }
 
     /**
@@ -320,7 +339,7 @@ public class Telemetry {
      * Send telemetry signal when the app closes/goes to background
      * @param context the layer which is visible
      */
-    public void sendClosingSignals(String context, String closeOrKill) {
+    public void sendClosingSignals(String closeOrKill, String context) {
         currentLayer = "";
         sendNetworkStatus();
         sendAppUsageSignal(closeOrKill, context);
@@ -331,7 +350,7 @@ public class Telemetry {
      * @param urlLength length of the url of the new page
      */
     public void sendNavigationSignal(int urlLength) {
-        signal.clear();
+        HashMap<String, Object> signal = new HashMap<>(); ;
         signal.put(Key.TYPE, Key.NAVIGATION);
         signal.put(Key.ACTION, Action.LOCATION_CHANGE);
         signal.put(Key.STEP, forwardStep);
@@ -341,7 +360,7 @@ public class Telemetry {
         timings.setPageStartTime();
         this.urlLength =urlLength;
         resetBackNavigationVariables(urlLength);
-        saveSignal();
+        saveSignal(signal);
     }
 
     /**
@@ -351,7 +370,7 @@ public class Telemetry {
      * @param urlLength Length of the url/query in the url bar
      */
     public void sendBackPressedSignal(String currentContext, String nextContext, int urlLength) {
-        signal.clear();
+        HashMap<String, Object> signal = new HashMap<>(); ;
         signal.put(Key.TYPE, Key.NAVIGATION);
         signal.put(Key.ACTION, Action.BACK);
         signal.put(Key.STEP, this.backStep);
@@ -362,7 +381,7 @@ public class Telemetry {
         backStep++;
         timings.setPageStartTime();
         this.urlLength = urlLength;
-        saveSignal();
+        saveSignal(signal);
     }
 
     /**
@@ -373,7 +392,7 @@ public class Telemetry {
      * @param autoCompleteLength Length of the entire url if it is autcompleted, -1 if not autocompleted
      */
     public void sendResultEnterSignal(boolean isQuery, boolean isAutocompleted, int queryLength, int autoCompleteLength) {
-        signal.clear();
+        HashMap<String, Object> signal = new HashMap<>(); ;
         final String[] positionType = new String[1];
         final boolean innerLink;
         if(isQuery) {
@@ -399,11 +418,12 @@ public class Telemetry {
         signal.put(Key.URLBAR_TIME, timings.getUrlBarTime());
         signal.put(Key.POSITION_TYPE, positionType);
         signal.put(Key.INNER_LINK, innerLink);
+        signal.put(Key.VERSION, BuildConfig.VERSION_NAME);
         if(isAutocompleted) {
             signal.put(Key.AUTOCOMPLETED, "url");
             signal.put(Key.AUTOCOMPLETED_LENGTH, autoCompleteLength);
         }
-        saveSignal();
+        saveSignal(signal);
     }
 
     /**
@@ -427,76 +447,103 @@ public class Telemetry {
         this.urlLength = urlLength;
     }
 
-    private void saveSignal() {
-        addIdentifiers();
-        JSONObject jsonObject = new JSONObject(signal);
-        String savedSignals = mPreferenceManager.getTelemetrySignals();
-        if(savedSignals!=null && !savedSignals.isEmpty()) {
-            try {
-                JSONArray jsonArray = new JSONArray(savedSignals);
-                jsonArray.put(jsonObject);
-                if(getNetworkState().equals("Disconnected")) {
-                    mPreferenceManager.setTelemetrySignals(jsonArray.toString());
-                } else {
-                    int totalSignals = jsonArray.length();
-                    if(totalSignals < BATCH_SIZE) {
-                        mPreferenceManager.setTelemetrySignals(jsonArray.toString());
-                    } else {
-                        sendSignal(jsonArray);
-                    }
+    protected synchronized void saveSignal(HashMap<String, Object> signal) {
+        addIdentifiers(signal);
+        try {
+            if(file.exists()) {
+                FileInputStream fileInputStream = new FileInputStream(file);
+                ObjectInputStream objectInputStream = new ObjectInputStream(fileInputStream);
+                ArrayList< HashMap<String, Object> > signalList =
+                        (ArrayList<HashMap<String, Object>>) objectInputStream.readObject();
+                objectInputStream.close();
+                fileInputStream.close();
+                signalList.add(signal);
+                FileOutputStream fileOutputStream = new FileOutputStream(file);
+                ObjectOutputStream objectOutputStream = new ObjectOutputStream(fileOutputStream);
+                objectOutputStream.writeObject(signalList);
+                objectOutputStream.close();
+                fileOutputStream.close();
+                if(signalList.size() > BATCH_SIZE && !getNetworkState().equals("Disconnected")) {
+                    File newFile = new File(context.getFilesDir(),
+                            Constants.TELEMETRY_LOG_PREFIX+Long.toString(getUnixTimeStamp())+".dat");
+                    file.renameTo(newFile);
+                    HttpHandler httpHandler = new HttpHandler(mPreferenceManager, context);
+                    executorService.execute(httpHandler);
                 }
-            } catch (JSONException e) {
-                Log.e(Constants.TAG, "JSONException in Telemetry", e);
+            } else {
+                file.createNewFile();
+                ArrayList<HashMap<String, Object>> signalList = new ArrayList<>();
+                signalList.add(signal);
+                FileOutputStream fileOutputStream = new FileOutputStream(file);
+                ObjectOutputStream objectOutputStream = new ObjectOutputStream(fileOutputStream);
+                objectOutputStream.writeObject(signalList);
+                objectOutputStream.close();
+                fileOutputStream.close();
             }
-        } else {
-            JSONArray jsonArray = new JSONArray().put(jsonObject);
-            mPreferenceManager.setTelemetrySignals(jsonArray.toString());
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
         }
-
     }
 
     /**
      * Posts the telemetry signal sent by the extension, to the logger
-     * @param signal Telemetry signal by the extension
+     * @param extSignal Telemetry signal by the extension
      */
-    public void saveSignal(JSONObject signal) {
-        int telemetrySequence = mPreferenceManager.getTelemetrySequence();
+    public void saveExtSignal(JSONObject extSignal) {
         try {
-            signal.put(Key.SESSION, mPreferenceManager.getSessionId());
-            signal.put(Key.TIME_STAMP, getUnixTimeStamp());
-            signal.put(Key.TELEMETRY_SEQUENCE, telemetrySequence);
-            mPreferenceManager.setTelemetrySequence(telemetrySequence);
-            String savedSignals = mPreferenceManager.getTelemetrySignals();
-            if(savedSignals != null && !savedSignals.isEmpty()) {
-                JSONArray jsonArray = new JSONArray(savedSignals);
-                jsonArray.put(signal);
-                if(getNetworkState().equals("Disconnected")) {
-                    mPreferenceManager.setTelemetrySignals(jsonArray.toString());
-                } else {
-                    int totalSignals = jsonArray.length();
-                    if(totalSignals < BATCH_SIZE) {
-                        mPreferenceManager.setTelemetrySignals(jsonArray.toString());
-                    } else {
-                        sendSignal(jsonArray);
-                    }
-                }
-            } else {
-                JSONArray jsonArray = new JSONArray().put(signal);
-                mPreferenceManager.setTelemetrySignals(jsonArray.toString());
+            HashMap<String, Object> signal = toMap(extSignal);
+            if(!signal.isEmpty()) {
+                saveSignal(signal);
             }
         } catch (JSONException e) {
-            Log.e(Constants.TAG, "JSONException in Telemetry", e);
+            Log.e(Constants.TAG, "JSONException in telemetry", e);
         }
-
     }
 
-    private void sendSignal(JSONArray jsonArray) {
-        mPreferenceManager.setTelemetrySignals("");
-        new HttpHandler(mPreferenceManager).execute(jsonArray.toString());
+    //Helper function to convert a JSONObject to HashMap
+    private HashMap<String, Object> toMap(JSONObject object) throws JSONException {
+        HashMap<String, Object> map = new HashMap<>();
+        Iterator<String> keysItr = object.keys();
+        while(keysItr.hasNext()) {
+            String key = keysItr.next();
+            Object value = object.get(key);
+            if(value.equals(null)) {
+                value = value.toString();
+            }
+            if(value instanceof JSONArray) {
+                value = toList((JSONArray) value);
+            }
+            else if(value instanceof JSONObject) {
+                value = toMap((JSONObject) value);
+            }
+            map.put(key, value);
+        }
+        return map;
+    }
+
+    //Helper function to convert a JSONArray to a list
+    private List<Object> toList(JSONArray array) throws JSONException {
+        List<Object> list = new ArrayList<>();
+        for(int i = 0; i < array.length(); i++) {
+            Object value = array.get(i);
+            if(value.equals(null)) {
+                value = value.toString();
+            }
+            if(value instanceof JSONArray) {
+                value = toList((JSONArray) value);
+            }
+            else if(value instanceof JSONObject) {
+                value = toMap((JSONObject) value);
+            }
+            list.add(value);
+        }
+        return list;
     }
 
     //adds session id. timestamp, sequence number to the signals
-    private void addIdentifiers() {
+    private void addIdentifiers(HashMap<String, Object> signal) {
         int telemetrySequence = mPreferenceManager.getTelemetrySequence();
         signal.put(Key.SESSION, mPreferenceManager.getSessionId());
         signal.put(Key.TIME_STAMP, getUnixTimeStamp());
