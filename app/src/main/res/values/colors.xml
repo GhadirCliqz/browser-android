@@ -34,5 +34,6 @@
     <color name="icon_dark_theme">#FFFFFFFF</color>
 
     <color name="error_red">#F44336</color>
+    <color name="onboarding_background">#5DB0EA</color>
 
 </resources>

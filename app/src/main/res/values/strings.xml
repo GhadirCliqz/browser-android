@@ -237,4 +237,9 @@
     <string name="history">History</string>
     <string name="default_page_title">Untitled</string>
     <string name="complementary_search_engine">Complementary search engine</string>
+    <string name="done_with_esclamation_mark">Done!</string>
+    <string name="onboarding_text_2">Type your query.\n\nGet an instant result.\n\nSwipe to see the next one.</string>
+    <string name="onboarding_text_3">When you share your location with CLIQZ, you can search for places around you (Google Maps).</string>
+    <string name="start_now_bang">Start now!</string>
+    <string name="next">Next</string>
 </resources>

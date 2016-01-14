@@ -97,7 +97,10 @@ public class AutocompleteEditText extends EditText {
             post(new Runnable() {
                 @Override
                 public void run() {
-                    setSelection(selectionBegin, selectionEnd);
+                    final int tl = currentText.length();
+                    if (selectionBegin < tl || selectionEnd < tl) {
+                        setSelection(selectionBegin, selectionEnd);
+                    }
                 }
             });
         }

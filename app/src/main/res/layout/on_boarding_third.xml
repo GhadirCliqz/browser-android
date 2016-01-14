@@ -8,7 +8,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:adjustViewBounds="false"
-        android:src="@drawable/onboarding2"
+        android:src="@drawable/onboarding3"
         android:baselineAlignBottom="false"
         android:scaleType="fitCenter"
         android:layout_alignParentStart="true"/>
@@ -33,7 +33,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:textColor="@color/white"
-                android:text="@string/onboarding_text_2"
+                android:text="@string/onboarding_text_3"
                 android:textSize="18sp"
                 style="@style/TextAppearance.AppCompat.Large.Inverse"/>
             <Button
@@ -41,8 +41,8 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentBottom="true"
                 android:layout_centerHorizontal="true"
-                android:onClick="nextScreen"
-                android:text="@string/next" />
+                android:onClick="showHomeScreen"
+                android:text="@string/start_now_bang" />
         </RelativeLayout>
     </LinearLayout>
 </RelativeLayout>

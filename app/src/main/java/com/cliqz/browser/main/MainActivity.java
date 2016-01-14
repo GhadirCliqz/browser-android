@@ -29,6 +29,8 @@ import com.cliqz.browser.widget.MainViewContainer;
 import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
 
+import java.util.ArrayList;
+
 import javax.inject.Inject;
 
 import acr.browser.lightning.BuildConfig;
@@ -290,22 +292,35 @@ public class MainActivity extends AppCompatActivity {
 
     private class PagerAdapter extends FragmentPagerAdapter {
 
+        private final int[] onBoardingLayouts = new int[] {
+                R.layout.on_boarding_first,
+                R.layout.on_boarding_second,
+                R.layout.on_boarding_third
+        };
+
+        private ArrayList<Fragment> onBoardingFragments = new ArrayList<>(onBoardingLayouts.length);
+
         public PagerAdapter(FragmentManager fragmentManager) {
             super(fragmentManager);
+            for (int layout: onBoardingLayouts) {
+                final int finalLayout = layout;
+                onBoardingFragments.add(new OnBoardingFragment() {
+                    @Override
+                    protected int getLayout() {
+                        return finalLayout;
+                    }
+                });
+            }
         }
 
         @Override
         public int getCount() {
-            return 2;
+            return onBoardingFragments.size();
         }
 
         @Override
         public Fragment getItem(int pos) {
-            if(pos == 0) {
-                return new FirstOnBoardingFragment();
-            } else {
-                return new SecondOnBoardingFragment();
-            }
+            return onBoardingFragments.get(pos);
         }
     }
 
@@ -329,7 +344,8 @@ public class MainActivity extends AppCompatActivity {
     };
 
     public void nextScreen(View view) {
-        pager.setCurrentItem(1);
+        final int page = pager.getCurrentItem() + 1;
+        pager.setCurrentItem(page);
     }
 
     public void showHomeScreen(View view) {
