@@ -9,6 +9,7 @@
     <FrameLayout
         android:id="@+id/menu_history"
         android:layout_width="48dp"
+        android:layout_centerVertical="true"
         android:layout_height="48dp"
         android:background="?attr/actionBarItemBackground">
 
@@ -23,6 +24,8 @@
         android:id="@+id/search_bar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginRight="10dp"
+        android:layout_marginEnd="10dp"
         android:layout_centerVertical="true"
         android:layout_toRightOf="@+id/menu_history"/>
 

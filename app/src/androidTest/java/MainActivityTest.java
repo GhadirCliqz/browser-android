@@ -13,7 +13,6 @@ import org.junit.runner.RunWith;
 import acr.browser.lightning.R;
 
 import static android.support.test.espresso.Espresso.onView;
-import static android.support.test.espresso.Espresso.pressBack;
 import static android.support.test.espresso.action.ViewActions.click;
 import static android.support.test.espresso.action.ViewActions.swipeLeft;
 import static android.support.test.espresso.action.ViewActions.swipeRight;
@@ -60,6 +59,7 @@ public class MainActivityTest {
         Thread.sleep(10000);
     }
 
+    /*
     @Test
     public void testLayerChange() {
         onView(withId(R.id.menu_history)).perform(click());
@@ -74,6 +74,6 @@ public class MainActivityTest {
         Thread.sleep(5000);
         onWebView(withClassName(Matchers.containsString("FreshTabWebView"))).check(webContent(hasElementWithId("startingpoint")));
     }
-
+    */
 
 }

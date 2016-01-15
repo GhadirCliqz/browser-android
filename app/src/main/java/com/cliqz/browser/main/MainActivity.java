@@ -3,6 +3,7 @@ package com.cliqz.browser.main;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.graphics.Color;
 import android.os.Build;
@@ -28,14 +29,16 @@ import com.cliqz.browser.widget.MainViewContainer;
 import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
 
+import java.util.ArrayList;
+
 import javax.inject.Inject;
 
 import acr.browser.lightning.BuildConfig;
 import acr.browser.lightning.R;
 import acr.browser.lightning.activity.SettingsActivity;
 import acr.browser.lightning.app.BrowserApp;
+import acr.browser.lightning.bus.BrowserEvents;
 import acr.browser.lightning.preference.PreferenceManager;
-import acr.browser.lightning.utils.Utils;
 
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 
@@ -88,7 +91,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         BrowserApp.getAppComponent().inject(this);
-        bus.register(this);
 
         // Restore state
         if (savedInstanceState != null) {
@@ -110,8 +112,9 @@ public class MainActivity extends AppCompatActivity {
         mHistoryFragment = new HistoryFragment();
         mMainFragment = new MainFragment();
 
-        final Intent intent = getIntent();
-        final String url = (intent != null) && (intent.getAction() == Intent.ACTION_VIEW) ?
+        // Ignore intent if we are being recreated
+        final Intent intent = savedInstanceState == null ? getIntent() : null;
+        final String url = (intent != null) && (Intent.ACTION_VIEW.equals(intent.getAction())) ?
                 intent.getDataString() : null;
         if (url != null && Patterns.WEB_URL.matcher(url).matches()) {
             setIntent(null);
@@ -121,6 +124,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         if(!preferenceManager.getOnBoardingComplete()) {
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
             createAppShortcutOnHomeScreen();
             setContentView(R.layout.activity_on_boarding);
             pager = (ViewPager) findViewById(R.id.viewpager);
@@ -159,6 +163,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        bus.register(this);
         final String name = getCurrentVisibleFragmentName();
         timings.setAppStartTime();
         if(!name.isEmpty()) {
@@ -170,6 +175,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onPause() {
         super.onPause();
+        bus.unregister(this);
         String context = getCurrentVisibleFragmentName();
         timings.setAppStopTime();
         if(!context.isEmpty()) {
@@ -190,7 +196,6 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        bus.unregister(this);
         String context = getCurrentVisibleFragmentName();
         if(!context.isEmpty()) {
             telemetry.sendClosingSignals(Telemetry.Action.KILL, context);
@@ -200,6 +205,19 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onBackPressed() {
         bus.post(new Messages.BackPressed());
+    }
+
+    @Subscribe
+    public void createWindow(BrowserEvents.CreateWindow event) {
+//        final Intent intent = new Intent(getBaseContext(), MainActivity.class);
+//        intent.setAction(Intent.ACTION_VIEW);
+//        intent.setData(Uri.parse(event.url));
+//        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK
+//                | Intent.FLAG_ACTIVITY_NEW_DOCUMENT
+//                | Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
+//        startActivity(intent);
+        // TODO: Temporary workaround, we want to open a new activity!
+        bus.post(new CliqzMessages.OpenLink(event.url));
     }
 
     @Subscribe
@@ -273,22 +291,34 @@ public class MainActivity extends AppCompatActivity {
 
     private class PagerAdapter extends FragmentPagerAdapter {
 
+        private final int[] onBoardingLayouts = new int[] {
+                R.layout.on_boarding_first,
+                R.layout.on_boarding_second,
+                R.layout.on_boarding_third
+        };
+        private ArrayList<Fragment> onBoardingFragments = new ArrayList<>(onBoardingLayouts.length);
+
         public PagerAdapter(FragmentManager fragmentManager) {
             super(fragmentManager);
+            for (int layout: onBoardingLayouts) {
+                final int finalLayout = layout;
+                onBoardingFragments.add(new OnBoardingFragment() {
+                    @Override
+                    protected int getLayout() {
+                        return finalLayout;
+                    }
+                });
+            }
         }
 
         @Override
         public int getCount() {
-            return 2;
+            return onBoardingFragments.size();
         }
 
         @Override
         public Fragment getItem(int pos) {
-            if(pos == 0) {
-                return new FirstOnBoardingFragment();
-            } else {
-                return new SecondOnBoardingFragment();
-            }
+            return onBoardingFragments.get(pos);
         }
     }
 
@@ -300,7 +330,7 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onPageSelected(int position) {
             long curTime = System.currentTimeMillis();
-            telemetry.sendOnBoardingHideSignal(position^1, curTime-startTime);
+            telemetry.sendOnBoardingHideSignal(curTime-startTime);
             startTime = curTime;
             telemetry.sendOnBoardingShowSignal(position);
         }
@@ -312,14 +342,16 @@ public class MainActivity extends AppCompatActivity {
     };
 
     public void nextScreen(View view) {
-        pager.setCurrentItem(1);
+        final int page = pager.getCurrentItem() + 1;
+        pager.setCurrentItem(page);
     }
 
     public void showHomeScreen(View view) {
         ((ViewGroup)(view.getParent())).removeAllViews();
         preferenceManager.setOnBoardingComplete(true);
         long curTime = System.currentTimeMillis();
-        telemetry.sendOnBoardingHideSignal(1, curTime - startTime);
+        telemetry.sendOnBoardingHideSignal(curTime - startTime);
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_FULL_USER);
         setupContentView();
     }
 
@@ -343,18 +375,20 @@ public class MainActivity extends AppCompatActivity {
 
     //returns screen that is visible
     private String getCurrentVisibleFragmentName() {
-        String context = "";
+        String name = "";
         if (mMainFragment != null && mMainFragment.isVisible()) {
             if (((MainFragment)mMainFragment).mState == MainFragment.State.SHOWING_BROWSER) {
-                context = "web";
+                name = "web";
             } else {
-                context = "cards";
+                name = "cards";
             }
         } else if (mHistoryFragment != null && mHistoryFragment.isVisible()) {
-            context = "past";
+            name = "past";
         } else if (mFreshTabFragment != null && mFreshTabFragment.isVisible()) {
-            context = "future";
+            name = "future";
+        } else {
+            name = "web";
         }
-        return context;
+        return name;
     }
 }

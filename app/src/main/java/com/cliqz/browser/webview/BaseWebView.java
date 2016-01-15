@@ -197,18 +197,14 @@ public abstract class BaseWebView extends WebView {
             return;
         }
 
-        final int searchChoice = preferenceManager.getSearchChoice();
-        final SearchEngines[] engines = SearchEngines.values();
-        if (searchChoice > -1 && searchChoice < engines.length) {
-            final JSONObject param = new JSONObject();
-            final SearchEngines engine = engines[searchChoice];
-            try {
-                param.put("name", engine.getName());
-                param.put("url", engine.getSearchUrl());
-                executeJS(String.format(Locale.US, "setDefaultSearchEngine(%s)", param.toString()));
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
+        final JSONObject param = new JSONObject();
+        final SearchEngines engine = preferenceManager.getSearchChoice();
+        try {
+            param.put("name", engine.engineName);
+            param.put("url", engine.engineUrl);
+            executeJS(String.format(Locale.US, "setDefaultSearchEngine(%s)", param.toString()));
+        } catch (JSONException e) {
+            e.printStackTrace();
         }
     }
 }

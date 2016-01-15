@@ -158,8 +158,12 @@ class LightningChromeClient extends WebChromeClient {
     @Override
     public boolean onCreateWindow(WebView view, boolean isDialog, boolean isUserGesture,
                                   Message resultMsg) {
-        eventBus.post(new BrowserEvents.CreateWindow(resultMsg));
-        return true;
+        final WebView.HitTestResult result = view.getHitTestResult();
+        final String url = result != null ? result.getExtra() : null;
+        if (url != null) {
+            eventBus.post(new BrowserEvents.CreateWindow(url));
+        }
+        return false;
     }
 
     @Override

@@ -6,11 +6,11 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.AttributeSet;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.inputmethod.EditorInfo;
-import android.view.inputmethod.InputConnection;
 import android.widget.EditText;
 import android.widget.TextView;
+
+import com.cliqz.browser.utils.Telemetry;
 
 import com.cliqz.browser.utils.Telemetry;
 
@@ -28,6 +28,8 @@ import acr.browser.lightning.app.BrowserApp;
  */
 public class AutocompleteEditText extends EditText {
 
+    private static final String TAG = AutocompleteEditText.class.getSimpleName();
+    
     @Inject
     Telemetry mTelemetry;
 
@@ -97,7 +99,13 @@ public class AutocompleteEditText extends EditText {
             post(new Runnable() {
                 @Override
                 public void run() {
-                    setSelection(selectionBegin, selectionEnd);
+                    final int tl = currentText.length();
+                    // TODO: Check this, sometimes the next instruction crash
+                    try {
+                        setSelection(selectionBegin, selectionEnd);
+                    } catch (IndexOutOfBoundsException e) {
+                        Log.i(TAG, "Can't select part of the url bar", e);
+                    }
                 }
             });
         }

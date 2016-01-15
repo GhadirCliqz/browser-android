@@ -101,7 +101,7 @@ public class Timings {
     }
 
     public long getNetworkUsageTime() {
-        return getCurrentTime() - mNetworkStartTime;
+        return (getCurrentTime() - mNetworkStartTime)/1000;
     }
 
     public long getTimeSinceLastEnvSignal() {

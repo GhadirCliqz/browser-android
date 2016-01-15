@@ -14,6 +14,7 @@ import android.widget.EditText;
 
 import acr.browser.lightning.R;
 import acr.browser.lightning.constant.Constants;
+import acr.browser.lightning.constant.SearchEngines;
 
 public class GeneralSettingsFragment extends BaseSettingsFragment {
 
@@ -45,13 +46,13 @@ public class GeneralSettingsFragment extends BaseSettingsFragment {
         // Preference importBrowserpref = findPreference(SETTINGS_BROWSER_IMPORT);
         searchengine = findPreference(SETTINGS_SEARCHENGINE);
 
-        cbAds = (CheckBoxPreference) findPreference(SETTINGS_ADS);
+        //cbAds = (CheckBoxPreference) findPreference(SETTINGS_ADS);
         cbImages = (CheckBoxPreference) findPreference(SETTINGS_IMAGES);
         // cbDrawerTabs = (CheckBoxPreference) findPreference(SETTINGS_DRAWERTABS);
 
         // importBrowserpref.setOnPreferenceClickListener(this);
         searchengine.setOnPreferenceClickListener(this);
-        cbAds.setOnPreferenceChangeListener(this);
+        //cbAds.setOnPreferenceChangeListener(this);
         cbImages.setOnPreferenceChangeListener(this);
         // cbDrawerTabs.setOnPreferenceChangeListener(this);
 
@@ -64,37 +65,37 @@ public class GeneralSettingsFragment extends BaseSettingsFragment {
         int flashNum = mPreferenceManager.getFlashSupport();
         boolean imagesBool = mPreferenceManager.getBlockImagesEnabled();
 
-        cbAds.setEnabled(Constants.FULL_VERSION);
+//        cbAds.setEnabled(Constants.FULL_VERSION);
 
         cbImages.setChecked(imagesBool);
-        cbAds.setChecked(Constants.FULL_VERSION && mPreferenceManager.getAdBlockEnabled());
+        //cbAds.setChecked(Constants.FULL_VERSION && mPreferenceManager.getAdBlockEnabled());
         // cbDrawerTabs.setChecked(mPreferenceManager.getShowTabsInDrawer(true));
     }
 
     private void searchDialog() {
-        AlertDialog.Builder picker = new AlertDialog.Builder(mActivity);
-        picker.setTitle(getResources().getString(R.string.title_search_engine));
-        CharSequence[] chars = {getResources().getString(R.string.custom_url), "Google",
-                "Ask", "Bing", "Yahoo", "StartPage", "StartPage (Mobile)",
-                "DuckDuckGo (Privacy)", "DuckDuckGo Lite (Privacy)", "Baidu (Chinese)",
-                "Yandex (Russian)"};
+        final AlertDialog.Builder picker = new AlertDialog.Builder(mActivity);
+        picker.setTitle(R.string.complementary_search_engine);
+        final SearchEngines[] engines = SearchEngines.values();
+        final String[] engineNames = new String[engines.length];
+        final SearchEngines selectedEngine = mPreferenceManager.getSearchChoice();
+        int n = 0;
+        for (int i = 0; i < engineNames.length; i++) {
+            final SearchEngines engine = engines[i];
+            engineNames[i] = engine.engineName;
+            if (engine == selectedEngine) {
+                n = i;
+            }
+        }
 
-        int n = mPreferenceManager.getSearchChoice();
-
-        picker.setSingleChoiceItems(chars, n, new DialogInterface.OnClickListener() {
+        picker.setSingleChoiceItems(engineNames, n, new DialogInterface.OnClickListener() {
 
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                mPreferenceManager.setSearchChoice(which);
-                setSearchEngineSummary(which);
+                mPreferenceManager.setSearchChoice(engines[which]);
+                setSearchEngineSummary(engines[which]);
             }
         });
-        picker.setNeutralButton(getResources().getString(R.string.action_ok),
-                new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                    }
-                });
+        picker.setNeutralButton(getResources().getString(R.string.action_ok), null);
         picker.show();
     }
 
@@ -118,41 +119,8 @@ public class GeneralSettingsFragment extends BaseSettingsFragment {
         urlPicker.show();
     }
 
-    private void setSearchEngineSummary(int which) {
-        switch (which) {
-            case 0:
-                searchUrlPicker();
-                break;
-            case 1:
-                searchengine.setSummary("Google");
-                break;
-            case 2:
-                searchengine.setSummary("Ask");
-                break;
-            case 3:
-                searchengine.setSummary("Bing");
-                break;
-            case 4:
-                searchengine.setSummary("Yahoo");
-                break;
-            case 5:
-                searchengine.setSummary("StartPage");
-                break;
-            case 6:
-                searchengine.setSummary("StartPage (Mobile)");
-                break;
-            case 7:
-                searchengine.setSummary("DuckDuckGo");
-                break;
-            case 8:
-                searchengine.setSummary("DuckDuckGo Lite");
-                break;
-            case 9:
-                searchengine.setSummary("Baidu");
-                break;
-            case 10:
-                searchengine.setSummary("Yandex");
-        }
+    private void setSearchEngineSummary(SearchEngines which) {
+        searchengine.setSummary(which.engineName);
     }
 
     @Override
@@ -177,10 +145,10 @@ public class GeneralSettingsFragment extends BaseSettingsFragment {
     public boolean onPreferenceChange(Preference preference, Object newValue) {
         // switch preferences
         switch (preference.getKey()) {
-            case SETTINGS_ADS:
-                mPreferenceManager.setAdBlockEnabled((Boolean) newValue);
-                cbAds.setChecked((Boolean) newValue);
-                return true;
+//            case SETTINGS_ADS:
+//                mPreferenceManager.setAdBlockEnabled((Boolean) newValue);
+//                cbAds.setChecked((Boolean) newValue);
+//                return true;
             case SETTINGS_IMAGES:
                 mPreferenceManager.setBlockImagesEnabled((Boolean) newValue);
                 cbImages.setChecked((Boolean) newValue);
