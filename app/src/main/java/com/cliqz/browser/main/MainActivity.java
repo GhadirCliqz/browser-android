@@ -3,9 +3,9 @@ package com.cliqz.browser.main;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.graphics.Color;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcelable;
@@ -124,6 +124,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         if(!preferenceManager.getOnBoardingComplete()) {
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
             createAppShortcutOnHomeScreen();
             setContentView(R.layout.activity_on_boarding);
             pager = (ViewPager) findViewById(R.id.viewpager);
@@ -295,7 +296,6 @@ public class MainActivity extends AppCompatActivity {
                 R.layout.on_boarding_second,
                 R.layout.on_boarding_third
         };
-
         private ArrayList<Fragment> onBoardingFragments = new ArrayList<>(onBoardingLayouts.length);
 
         public PagerAdapter(FragmentManager fragmentManager) {
@@ -330,7 +330,7 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onPageSelected(int position) {
             long curTime = System.currentTimeMillis();
-            telemetry.sendOnBoardingHideSignal(position^1, curTime-startTime);
+            telemetry.sendOnBoardingHideSignal(curTime-startTime);
             startTime = curTime;
             telemetry.sendOnBoardingShowSignal(position);
         }
@@ -350,7 +350,8 @@ public class MainActivity extends AppCompatActivity {
         ((ViewGroup)(view.getParent())).removeAllViews();
         preferenceManager.setOnBoardingComplete(true);
         long curTime = System.currentTimeMillis();
-        telemetry.sendOnBoardingHideSignal(1, curTime - startTime);
+        telemetry.sendOnBoardingHideSignal(curTime - startTime);
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_FULL_USER);
         setupContentView();
     }
 

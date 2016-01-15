@@ -10,20 +10,13 @@ import android.net.NetworkInfo;
 import android.os.BatteryManager;
 import android.os.Build;
 import android.os.Debug;
-import android.util.Log;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
@@ -132,7 +125,7 @@ public class Telemetry {
         public static final String RESULT_ENTER = "result_enter";
     }
 
-    private static final int BATCH_SIZE = 10;
+    private static final int BATCH_SIZE = 50;
     private File file;
     private JSONArray mSignalCache = new JSONArray();
 
@@ -150,7 +143,7 @@ public class Telemetry {
 
     private String currentNetwork, currentLayer;
     private Context context;
-    private int batteryLevel, forwardStep, backStep, urlLength;
+    private int batteryLevel, forwardStep, backStep, urlLength, previousPage;
 
     public boolean backPressed;
     public boolean showingCards;
@@ -262,14 +255,15 @@ public class Telemetry {
 
     /**
      * Send a signal for showing an onboarding page
-     * @param page Position/Page number of the onboarding-screen which is shown
+     * @param currentPage Position/Page number of the onboarding-screen which is shown
      */
-    public void sendOnBoardingShowSignal(int page) {
+    public void sendOnBoardingShowSignal(int currentPage) {
+        previousPage = currentPage;
         JSONObject signal = new JSONObject(); ;
         try {
             signal.put(Key.TYPE, Key.ONBOARDING);
             signal.put(Key.ACTION, Action.SHOW);
-            signal.put(Key.ACTION_TARGET, page);
+            signal.put(Key.ACTION_TARGET, currentPage);
             signal.put(Key.PRODUCT, Key.ANDROID);
             signal.put(Key.VERSION, Key.ONBOARDING_VERSION);
         } catch (JSONException e) {
@@ -280,15 +274,14 @@ public class Telemetry {
 
     /**
      * Send a signal for hiding/closing an onboarding page
-     * @param page Position/Page number of the onboarding-screen which is hidden
      * @param time Duration for which the onboarding page was shown
      */
-    public void sendOnBoardingHideSignal(int page, long time) {
+    public void sendOnBoardingHideSignal(long time) {
         JSONObject signal = new JSONObject(); ;
         try {
             signal.put(Key.TYPE, Key.ONBOARDING);
             signal.put(Key.ACTION, Action.HIDE);
-            signal.put(Key.ACTION_TARGET, page);
+            signal.put(Key.ACTION_TARGET, previousPage);
             signal.put(Key.DISPLAY_TIME,time);
             signal.put(Key.PRODUCT, Key.ANDROID);
             signal.put(Key.VERSION, BuildConfig.VERSION_NAME);
