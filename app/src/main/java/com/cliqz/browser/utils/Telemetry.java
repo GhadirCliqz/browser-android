@@ -15,7 +15,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -27,7 +26,6 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import acr.browser.lightning.BuildConfig;
-import acr.browser.lightning.constant.Constants;
 import acr.browser.lightning.database.HistoryDatabase;
 import acr.browser.lightning.preference.PreferenceManager;
 
@@ -40,7 +38,6 @@ public class Telemetry {
     @Inject
     public Telemetry(Context context) {
         this.context = context;
-        file = new File(context.getFilesDir(), Constants.TELEMETRY_FILE_NAME);
         batteryLevel = -1;
         context.registerReceiver(mBatteryInfoReceiver, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
         context.registerReceiver(mNetworkChangeReceiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
@@ -126,7 +123,6 @@ public class Telemetry {
     }
 
     private static final int BATCH_SIZE = 50;
-    private File file;
     private JSONArray mSignalCache = new JSONArray();
 
 
