@@ -1,6 +1,7 @@
 package com.cliqz.browser.widget;
 
 import android.content.Context;
+import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
@@ -9,6 +10,7 @@ import android.widget.FrameLayout;
 import android.widget.TextView;
 
 import acr.browser.lightning.R;
+import acr.browser.lightning.utils.ThemeUtils;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 
@@ -41,6 +43,8 @@ public class SearchBar extends FrameLayout {
     private void init() {
         inflate(getContext(), R.layout.search_bar_widget, this);
         ButterKnife.bind(this);
+        final Drawable icon = ThemeUtils.getLightThemedDrawable(getContext(), R.drawable.ic_action_delete);
+        searchEditText.setCompoundDrawablesWithIntrinsicBounds(null, null, icon, null);
         searchEditText.setOnTouchListener(onTouchListener);
     }
 
