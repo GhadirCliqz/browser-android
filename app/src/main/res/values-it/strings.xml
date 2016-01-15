@@ -212,4 +212,5 @@
     <string name="clear_web_storage_exit">Clear web storage on exit</string>
     <string name="message_web_storage_cleared">Web Storage Cleared</string>
     <string name="complementary_search_engine">Motore di ricerca complementare</string>
+    <string name="go">Vai</string>
 </resources>
