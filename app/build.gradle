@@ -12,17 +12,17 @@ android {
         }
     }
     compileSdkVersion 23
-    buildToolsVersion "23.0.1"
+    buildToolsVersion "23.0.2"
     defaultConfig {
-        minSdkVersion 14
+        minSdkVersion 21
         targetSdkVersion 23
-        versionName "0.3.2"
+        versionName "0.3.3"
 
         buildConfigField 'String', 'LIGHTNING_VERSION_NAME', '"4.2.3.1"'
         buildConfigField "boolean", "FULL_VERSION", "true"
 
         applicationId "com.cliqz.browser"
-        versionCode 18
+        versionCode 19
 
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
