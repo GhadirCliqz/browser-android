@@ -10,6 +10,7 @@ import android.net.NetworkInfo;
 import android.os.BatteryManager;
 import android.os.Build;
 import android.os.Debug;
+import android.util.Log;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -441,20 +442,20 @@ public class Telemetry {
      * @param autoCompleteLength Length of the entire url if it is autcompleted, -1 if not autocompleted
      */
     public void sendResultEnterSignal(boolean isQuery, boolean isAutocompleted, int queryLength, int autoCompleteLength) {
-        JSONObject signal = new JSONObject(); ;
-        final String[] positionType = new String[1];
+        JSONObject signal = new JSONObject();
         final boolean innerLink;
-        if(isQuery) {
-            positionType[0] = Key.INBAR_QUERY;
-        } else {
-            positionType[0] = Key.INBAR_URL;
-        }
         if(isAutocompleted) {
             innerLink = true;
         } else {
             innerLink = false;
         }
         try {
+            JSONArray positionType = new JSONArray();
+            if(isQuery) {
+                positionType.put(Key.INBAR_QUERY);
+            } else {
+                positionType.put(Key.INBAR_URL);
+            }
             signal.put(Key.TYPE, Key.ACTIVITY);
             signal.put(Key.ACTION, Action.RESULT_ENTER);
             signal.put(Key.CURRENT_POSITION, -1);
