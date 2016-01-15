@@ -261,16 +261,10 @@ public class MainFragment extends BaseFragment {
                     }
                     bus.post(new CliqzMessages.OpenLink(guessedUrl));
                 } else {
-                    try {
-                        final String query = URLEncoder.encode(content, "UTF-8").trim();
-                        telemetry.sendResultEnterSignal(true, false, query.length(), -1);
-                        setSearchEngine();
-                        String searchUrl = mSearchEngine + UrlUtils.QUERY_PLACE_HOLDER;
-                        bus.post(new CliqzMessages.OpenLink(UrlUtils.smartUrlFilter(query, true, searchUrl)));
-                    } catch (UnsupportedEncodingException e) {
-                        e.printStackTrace();
-                        return false;
-                    }
+                    telemetry.sendResultEnterSignal(true, false, content.length(), -1);
+                    setSearchEngine();
+                    String searchUrl = mSearchEngine + UrlUtils.QUERY_PLACE_HOLDER;
+                    bus.post(new CliqzMessages.OpenLink(UrlUtils.smartUrlFilter(content, true, searchUrl)));
                 }
                 return true;
             }
