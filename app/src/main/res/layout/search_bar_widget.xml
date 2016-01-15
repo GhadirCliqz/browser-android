@@ -11,7 +11,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_centerVertical="true"
-        android:background="?attr/searchBackground"
+        android:background="#3175b7"
+        android:drawableRight="@drawable/ic_action_delete"
         android:focusable="true"
         android:focusableInTouchMode="true"
         android:gravity="left|center_vertical"
@@ -22,7 +23,7 @@
         android:paddingStart="8dp"
         android:selectAllOnFocus="true"
         android:singleLine="true"
-        android:textColor="@color/gray_dark"
+        android:textColor="@android:color/white"
         android:textColorHint="@color/hint_text"
         android:textCursorDrawable="@null"/>
 
@@ -36,8 +37,8 @@
         android:paddingStart="8dp"
         android:singleLine="true"
         android:text="@string/default_page_title"
-        android:textColor="@android:color/black"
+        android:textColor="@android:color/white"
         android:visibility="gone"
-        android:background="@android:drawable/editbox_background"/>
+        android:background="#3175b7"/>
 
 </FrameLayout>

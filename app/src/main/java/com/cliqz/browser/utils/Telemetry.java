@@ -139,7 +139,7 @@ public class Telemetry {
 
     private String currentNetwork, currentLayer;
     private Context context;
-    private int batteryLevel, forwardStep, backStep, urlLength;
+    private int batteryLevel, forwardStep, backStep, urlLength, previousPage;
 
     public boolean backPressed;
     public boolean showingCards;
@@ -251,14 +251,15 @@ public class Telemetry {
 
     /**
      * Send a signal for showing an onboarding page
-     * @param page Position/Page number of the onboarding-screen which is shown
+     * @param currentPage Position/Page number of the onboarding-screen which is shown
      */
-    public void sendOnBoardingShowSignal(int page) {
+    public void sendOnBoardingShowSignal(int currentPage) {
+        previousPage = currentPage;
         JSONObject signal = new JSONObject(); ;
         try {
             signal.put(Key.TYPE, Key.ONBOARDING);
             signal.put(Key.ACTION, Action.SHOW);
-            signal.put(Key.ACTION_TARGET, page);
+            signal.put(Key.ACTION_TARGET, currentPage);
             signal.put(Key.PRODUCT, Key.ANDROID);
             signal.put(Key.VERSION, Key.ONBOARDING_VERSION);
         } catch (JSONException e) {
@@ -269,15 +270,14 @@ public class Telemetry {
 
     /**
      * Send a signal for hiding/closing an onboarding page
-     * @param page Position/Page number of the onboarding-screen which is hidden
      * @param time Duration for which the onboarding page was shown
      */
-    public void sendOnBoardingHideSignal(int page, long time) {
+    public void sendOnBoardingHideSignal(long time) {
         JSONObject signal = new JSONObject(); ;
         try {
             signal.put(Key.TYPE, Key.ONBOARDING);
             signal.put(Key.ACTION, Action.HIDE);
-            signal.put(Key.ACTION_TARGET, page);
+            signal.put(Key.ACTION_TARGET, previousPage);
             signal.put(Key.DISPLAY_TIME,time);
             signal.put(Key.PRODUCT, Key.ANDROID);
             signal.put(Key.VERSION, BuildConfig.VERSION_NAME);
