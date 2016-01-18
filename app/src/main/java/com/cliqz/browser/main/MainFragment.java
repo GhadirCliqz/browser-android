@@ -248,7 +248,7 @@ public class MainFragment extends BaseFragment {
     @OnEditorAction(R.id.search_edit_text)
     boolean onEditorAction(int actionId) {
         // Navigate to autocomplete url or search otherwise
-        if (actionId == EditorInfo.IME_ACTION_GO) {
+        if ((actionId & EditorInfo.IME_MASK_ACTION) == EditorInfo.IME_ACTION_UNSPECIFIED) {
             final String content = mAutocompleteEditText.getText().toString();
             if (content != null && !content.isEmpty()) {
                 if (Patterns.WEB_URL.matcher(content).matches()) {
