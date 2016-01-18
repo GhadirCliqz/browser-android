@@ -19,6 +19,9 @@ public class HistoryItem implements Comparable<HistoryItem> {
     @NonNull
     private String mFolder = "";
 
+    @NonNull
+    private String mId = "";
+
     @Nullable
     private Bitmap mBitmap = null;
 
@@ -119,6 +122,10 @@ public class HistoryItem implements Comparable<HistoryItem> {
     // setting name
     public void setUrl(String url) {
         this.mUrl = (url == null) ? "" : url;
+    }
+
+    public void setId(String id) {
+        this.mId = id;
     }
 
     // getting phone number

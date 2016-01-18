@@ -5,6 +5,8 @@ import android.support.annotation.NonNull;
 import android.util.Log;
 import android.webkit.WebView;
 
+import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.List;
@@ -51,6 +53,27 @@ class CliqzBridge extends Bridge {
                 builder.append("] ,query:\"")
                         .append(query).append("\"})");
                 bridge.executeJavascript(builder.toString());
+            }
+        }),
+
+        /**
+         * Delete history with the passed List of ids.
+         */
+        removeHistory(new IAction() {
+            @Override
+            public void execute(Bridge bridge, Object data, String callback) {
+                final JSONArray ids = (data instanceof JSONArray) ? (JSONArray) data : null;
+                if(ids == null) {
+                    Log.e(TAG, "Can't delete without an ID");
+                } else {
+                    for(int i = 0; i < ids.length(); i++) {
+                        try {
+                            bridge.historyDatabase.deleteHistoryItem(ids.getInt(i));
+                        } catch (JSONException e) {
+                            Log.e(TAG, "JSONException while reading ids in removeHistory", e);
+                        }
+                    }
+                }
             }
         }),
 

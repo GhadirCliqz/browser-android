@@ -111,6 +111,11 @@ public class HistoryDatabase extends SQLiteOpenHelper {
         mDatabase.delete(TABLE_HISTORY, KEY_URL + " = ?", new String[]{url});
     }
 
+    public synchronized void deleteHistoryItem(int id) {
+        openIfNecessary();
+        int res = mDatabase.delete(TABLE_HISTORY, KEY_ID + " = ?", new String[]{Integer.toString(id)});
+    }
+
     public synchronized void visitHistoryItem(@NonNull String url, @Nullable String title) {
         openIfNecessary();
         Cursor q = mDatabase.query(false, TABLE_HISTORY, new String[]{KEY_URL, KEY_COUNT_VISITED},
@@ -145,6 +150,7 @@ public class HistoryDatabase extends SQLiteOpenHelper {
         if (cursor.moveToFirst()) {
             do {
                 final HistoryItem item = new HistoryItem();
+                item.setId(cursor.getString(0));
                 item.setUrl(cursor.getString(1));
                 item.setTitle(cursor.getString(2));
                 item.setTimestamp(cursor.getLong(3));
@@ -199,6 +205,7 @@ public class HistoryDatabase extends SQLiteOpenHelper {
         if (cursor.moveToFirst()) {
             do {
                 HistoryItem item = new HistoryItem();
+                item.setId(cursor.getString(0));
                 item.setUrl(cursor.getString(1));
                 item.setTitle(cursor.getString(2));
                 item.setTimestamp(cursor.getLong(3));
@@ -222,6 +229,7 @@ public class HistoryDatabase extends SQLiteOpenHelper {
         if (cursor.moveToFirst()) {
             do {
                 HistoryItem item = new HistoryItem();
+                item.setId(cursor.getString(0));
                 item.setUrl(cursor.getString(1));
                 item.setTitle(cursor.getString(2));
                 item.setTimestamp(cursor.getLong(3));
@@ -245,6 +253,7 @@ public class HistoryDatabase extends SQLiteOpenHelper {
         if (cursor.moveToFirst()) {
             do {
                 HistoryItem item = new HistoryItem();
+                item.setId(cursor.getString(0));
                 item.setUrl(cursor.getString(1));
                 item.setTitle(cursor.getString(2));
                 item.setTimestamp(cursor.getLong(3));
@@ -275,6 +284,7 @@ public class HistoryDatabase extends SQLiteOpenHelper {
 
         if(cursor.moveToFirst()) {
             firstHistoryItem = new HistoryItem();
+            firstHistoryItem.setId(cursor.getString(0));
             firstHistoryItem.setUrl(cursor.getString(1));
             firstHistoryItem.setTitle(cursor.getString(2));
             firstHistoryItem.setTimestamp(cursor.getLong(3));
