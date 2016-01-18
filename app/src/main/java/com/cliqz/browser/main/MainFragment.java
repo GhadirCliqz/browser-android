@@ -155,15 +155,22 @@ public class MainFragment extends BaseFragment {
     @Override
     public void onResume() {
         super.onResume();
-//        final String query = mAutocompleteEditText.getQuery();
         if (mSearchWebView != null) {
             mSearchWebView.onResume();
-//            if (query != null && !query.isEmpty()) {
-//                mSearchWebView.onQueryChanged(query);
-//            }
         }
+
+        // This code may look confused. It's relevant when we receive a new intent to open a new
+        // url.
         final Bundle arguments = getArguments();
-        final String url = arguments != null ? arguments.getString("URL", ""): null;
+        final String url;
+        if (arguments != null) {
+            url = arguments.getString("URL", "");
+            // We need to remove the key, otherwise the url get reloaded for each resume
+            arguments.remove("URL");
+            setArguments(arguments);
+        } else {
+            url = null;
+        }
 
         if (url != null && !url.isEmpty()) {
             mState = State.SHOWING_BROWSER;
@@ -175,8 +182,6 @@ public class MainFragment extends BaseFragment {
             final String query = reset ? "" : state.getQuery();
             if (mState == State.SHOWING_SEARCH) {
                 bus.post(new Messages.ShowSearch(query));
-            } else {
-                bus.post(new CliqzMessages.OpenLink(state.getUrl()));
             }
         }
     }
@@ -324,7 +329,7 @@ public class MainFragment extends BaseFragment {
                 .appendQueryParameter("url", eventUrl)
                 .appendQueryParameter("q", lastQuery)
                 .build().toString();
-        webView.loadUrl(url);
+        mLightningView.loadUrl(eventUrl);
     }
 
     @Subscribe
