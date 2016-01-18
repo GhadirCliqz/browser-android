@@ -167,7 +167,6 @@ public class MainFragment extends BaseFragment {
             url = arguments.getString("URL", "");
             // We need to remove the key, otherwise the url get reloaded for each resume
             arguments.remove("URL");
-            setArguments(arguments);
         } else {
             url = null;
         }
@@ -182,6 +181,8 @@ public class MainFragment extends BaseFragment {
             final String query = reset ? "" : state.getQuery();
             if (mState == State.SHOWING_SEARCH) {
                 bus.post(new Messages.ShowSearch(query));
+            } else {
+                mLightningView.getWebView().bringToFront();
             }
         }
     }

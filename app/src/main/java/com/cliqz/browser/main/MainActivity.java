@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.graphics.Color;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcelable;
@@ -208,16 +209,24 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Subscribe
+    public void openLinkInNewTab(BrowserEvents.OpenUrlInNewTab event) {
+        createNewTabWithUrl(event.url);
+    }
+
+    @Subscribe
     public void createWindow(BrowserEvents.CreateWindow event) {
-//        final Intent intent = new Intent(getBaseContext(), MainActivity.class);
-//        intent.setAction(Intent.ACTION_VIEW);
-//        intent.setData(Uri.parse(event.url));
-//        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK
-//                | Intent.FLAG_ACTIVITY_NEW_DOCUMENT
-//                | Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
-//        startActivity(intent);
-        // TODO: Temporary workaround, we want to open a new activity!
-        bus.post(new CliqzMessages.OpenLink(event.url));
+        createNewTabWithUrl(event.url);
+//        // TODO: Temporary workaround, we want to open a new activity!
+//        bus.post(new CliqzMessages.OpenLink(event.url));
+    }
+
+    private void createNewTabWithUrl(String url) {
+        final Intent intent = new Intent(getBaseContext(), MainActivity.class);
+        intent.setAction(Intent.ACTION_VIEW);
+        intent.setData(Uri.parse(url));
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK
+                | Intent.FLAG_ACTIVITY_NEW_DOCUMENT);
+        startActivity(intent);
     }
 
     @Subscribe
