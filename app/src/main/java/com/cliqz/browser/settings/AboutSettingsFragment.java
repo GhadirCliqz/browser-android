@@ -64,7 +64,9 @@ public class AboutSettingsFragment extends PreferenceFragment {
             new Preference.OnPreferenceClickListener() {
                 @Override
                 public boolean onPreferenceClick(Preference preference) {
-                    final Uri to = Uri.parse(getString(R.string.mail_to_feedback_at_cliqz_com));
+                    final Uri to = Uri.parse(String.format("mailto:%s?subject=%s",
+                            getString(R.string.feedback_at_cliqz_dot_com),
+                            Uri.encode(getString(R.string.feedback_mail_subject))));
                     final Intent intent = new Intent(Intent.ACTION_SENDTO, to);
                     intent.putExtra(Intent.EXTRA_TEXT, new StringBuilder()
                                     .append("\n")

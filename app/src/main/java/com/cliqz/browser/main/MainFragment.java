@@ -155,15 +155,21 @@ public class MainFragment extends BaseFragment {
     @Override
     public void onResume() {
         super.onResume();
-//        final String query = mAutocompleteEditText.getQuery();
         if (mSearchWebView != null) {
             mSearchWebView.onResume();
-//            if (query != null && !query.isEmpty()) {
-//                mSearchWebView.onQueryChanged(query);
-//            }
         }
+
+        // This code may look confused. It's relevant when we receive a new intent to open a new
+        // url.
         final Bundle arguments = getArguments();
-        final String url = arguments != null ? arguments.getString("URL", ""): null;
+        final String url;
+        if (arguments != null) {
+            url = arguments.getString("URL", "");
+            // We need to remove the key, otherwise the url get reloaded for each resume
+            arguments.remove("URL");
+        } else {
+            url = null;
+        }
 
         if (url != null && !url.isEmpty()) {
             mState = State.SHOWING_BROWSER;
@@ -176,7 +182,7 @@ public class MainFragment extends BaseFragment {
             if (mState == State.SHOWING_SEARCH) {
                 bus.post(new Messages.ShowSearch(query));
             } else {
-                bus.post(new CliqzMessages.OpenLink(state.getUrl()));
+                mLightningView.getWebView().bringToFront();
             }
         }
     }
@@ -248,7 +254,7 @@ public class MainFragment extends BaseFragment {
     @OnEditorAction(R.id.search_edit_text)
     boolean onEditorAction(int actionId) {
         // Navigate to autocomplete url or search otherwise
-        if (actionId == EditorInfo.IME_ACTION_GO) {
+        if ((actionId & EditorInfo.IME_MASK_ACTION) == EditorInfo.IME_ACTION_UNSPECIFIED) {
             final String content = mAutocompleteEditText.getText().toString();
             if (content != null && !content.isEmpty()) {
                 if (Patterns.WEB_URL.matcher(content).matches()) {
@@ -261,16 +267,10 @@ public class MainFragment extends BaseFragment {
                     }
                     bus.post(new CliqzMessages.OpenLink(guessedUrl));
                 } else {
-                    try {
-                        final String query = URLEncoder.encode(content, "UTF-8").trim();
-                        telemetry.sendResultEnterSignal(true, false, query.length(), -1);
-                        setSearchEngine();
-                        String searchUrl = mSearchEngine + UrlUtils.QUERY_PLACE_HOLDER;
-                        bus.post(new CliqzMessages.OpenLink(UrlUtils.smartUrlFilter(query, true, searchUrl)));
-                    } catch (UnsupportedEncodingException e) {
-                        e.printStackTrace();
-                        return false;
-                    }
+                    telemetry.sendResultEnterSignal(true, false, content.length(), -1);
+                    setSearchEngine();
+                    String searchUrl = mSearchEngine + UrlUtils.QUERY_PLACE_HOLDER;
+                    bus.post(new CliqzMessages.OpenLink(UrlUtils.smartUrlFilter(content, true, searchUrl)));
                 }
                 return true;
             }
@@ -330,7 +330,7 @@ public class MainFragment extends BaseFragment {
                 .appendQueryParameter("url", eventUrl)
                 .appendQueryParameter("q", lastQuery)
                 .build().toString();
-        webView.loadUrl(url);
+        mLightningView.loadUrl(eventUrl);
     }
 
     @Subscribe

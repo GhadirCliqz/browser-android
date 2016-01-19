@@ -7,6 +7,7 @@ import com.squareup.otto.Bus;
 import javax.inject.Singleton;
 
 import acr.browser.lightning.database.BookmarkManager;
+import acr.browser.lightning.preference.PreferenceManager;
 import dagger.Module;
 import dagger.Provides;
 
@@ -37,5 +38,11 @@ public class AppModule {
     @Provides
     public Bus provideBus() {
         return bus;
+    }
+
+    @Provides
+    @Singleton
+    public PreferenceManager providePreferenceManager() {
+        return new PreferenceManager(app);
     }
 }

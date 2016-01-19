@@ -76,8 +76,7 @@ public class PreferenceManager {
 
     private static final String PREFERENCES = "settings";
 
-    @Inject
-    PreferenceManager(final Context context) {
+    public PreferenceManager(final Context context) {
         mPrefs = context.getSharedPreferences(PREFERENCES, 0);
     }
 

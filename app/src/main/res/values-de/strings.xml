@@ -221,4 +221,14 @@
     <string name="onboarding_text_3">Wenn du Standortdaten aktivierst, kannst du nach Orten​ in deiner Umgebung suchen (Google Maps).</string>
     <string name="start_now_bang">Jetzt loslegen!</string>
     <string name="next">Weiter</string>
+    <string name="contact_cliqz">Feedback geben</string>
+    <string name="go">Los</string>
+    <string name="about_version_format">%1$s basierend auf Lightning %2$s</string>
+    <string name="action_refresh">Seite neu laden</string>
+    <string name="default_page_title">Ohne Titel</string>
+    <string name="enable_orbot">Orbot aktivieren</string>
+    <string name="history">Verlauf</string>
+    <string name="recommendations">Vorschläge</string>
+    <string name="search_with_cliqz">Mit CLIQZ suchen</string>
+    <string name="settings_adblock">Ad Block Einstellungen</string>
 </resources>

@@ -151,7 +151,7 @@
         <item>Manual</item>
     </string-array>
     <string name="manual_proxy">Manual proxy</string>
-    <string name="host">Host:</string>
+    <string name="host" translatable="false">Host:</string>
     <string name="port">Port:</string>
     <string name="use_tor_prompt">It looks like you have Orbot installed. Do you want to use Tor?</string>
     <string name="use_i2p_prompt">It looks like you have I2P installed. Do you want to use I2P?</string>
@@ -211,10 +211,10 @@
         <string name="dark_theme">Dark Theme</string>
         <string name="tabs">Tabs</string>
     <string name="enable_orbot">Enable Orbot</string>
-    <string name="cliqz_app_name">CLIQZ Browser</string>
+    <string name="cliqz_app_name" translatable="false">CLIQZ Browser</string>
     <string name="contact_cliqz">Contact CLIQZ</string>
-    <string name="feedback_at_cliqz_dot_com">feedback@cliqz.com</string>
-    <string name="feedback_mail_subject">CLIQZ Browser for Android</string>
+    <string name="feedback_at_cliqz_dot_com" translatable="false">feedback@cliqz.com</string>
+    <string name="feedback_mail_subject" translatable="false">[ANDROID] CLIQZ Browser </string>
     <string name="about_version_format">%1$s based on Lightning %2$s</string>
     <string name="theme">App Theme</string>
     <string name="light_theme">Light Theme</string>
@@ -227,11 +227,10 @@
     <string name="clear_web_storage">Clear Web Storage</string>
     <string name="clear_web_storage_exit">Clear web storage on exit</string>
     <string name="message_web_storage_cleared">Web Storage Cleared</string>
-    <string name="hosts_source">Hosts File Ad Blocking Source</string>
+    <string name="hosts_source" translatable="false">Hosts File Ad Blocking Source</string>
     <string name="settings_adblock">Ad Block Settings</string>
     <string name="tabs_in_drawer">Show tabs in Navigation Drawer</string>
-    <string name="mail_to_feedback_at_cliqz.com">mailto:feedback@cliqz.com?subject=[ANDROID]+</string>
-    <string name="search_with_cliqz">Search with Cliqz</string>
+    <string name="search_with_cliqz">Search with CLIQZ</string>
     <string name="action_refresh">Reload current page</string>
     <string name="recommendations">Recommendations</string>
     <string name="history">History</string>
@@ -242,4 +241,5 @@
     <string name="onboarding_text_3">When you share your location with CLIQZ, you can search for places around you (Google Maps).</string>
     <string name="start_now_bang">Start now!</string>
     <string name="next">Next</string>
+    <string name="go">Go</string>
 </resources>

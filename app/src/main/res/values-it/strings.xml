@@ -141,7 +141,6 @@
         <item>Manuale</item>
     </string-array>
     <string name="manual_proxy">Proxy manuale</string>
-    <string name="host">Host:</string>
     <string name="port">Porta:</string>
     <string name="use_tor_prompt">Sembra che tu abbia Orbot installato. Vorresti usare Tor?</string>
     <string name="use_i2p_prompt">Sembra che tu abbia I2P installato. Vorresti usare I2P?</string>
@@ -212,4 +211,29 @@
     <string name="clear_web_storage_exit">Clear web storage on exit</string>
     <string name="message_web_storage_cleared">Web Storage Cleared</string>
     <string name="complementary_search_engine">Motore di ricerca complementare</string>
+    <string name="go">Vai</string>
+    <string name="about_version_format">%1$s basato su Lightning %2$s</string>
+    <string name="action_refresh">Ricarica la pagina </string>
+    <string name="contact_cliqz">Contatta CLIQZ</string>
+    <string name="default_page_title">Nessun Titolo</string>
+    <string name="done_with_esclamation_mark">Fatto!</string>
+    <string name="enable_orbot">Abilita Orbot</string>
+    <string name="history">Cronologia</string>
+    <string name="message_certificate_date_invalid">la data del certificato non é valida</string>
+    <string name="message_certificate_domain_mismatch">Il dominio del certificato non é lo stesso del sito</string>
+    <string name="message_certificate_expired">il certificato é scaduto</string>
+    <string name="message_certificate_invalid">certificato non valido</string>
+    <string name="message_certificate_not_yet_valid">il certificato non é ancora valido</string>
+    <string name="message_certificate_untrusted">il certificato non é affidabile</string>
+    <string name="message_insecure_connection">La connection al sito non é sicura:\n%1$s\nProcedere comunque?</string>
+    <string name="next">Successivo</string>
+    <string name="onboarding_text_2">Digita i termini da ricercare.\n\nOttieni immediatamente un risultato.\n\nFai swipe per vedere il risultato successivo.</string>
+    <string name="onboarding_text_3">Quando condividi con CLIQZ la tua posizione, cerchiamo per te i punti di interesse nei dintorni.</string>
+    <string name="problem_download">URL non valido, impossibile scaricare il file</string>
+    <string name="problem_location_download">Impossibile scaricare nella cartella specificata</string>
+    <string name="recommendations">Pagine raccomandate</string>
+    <string name="search_with_cliqz">Cerca con CLIQZ</string>
+    <string name="settings_adblock">Preferenze di Ad Block</string>
+    <string name="start_now_bang">Comincia ora!</string>
+    <string name="tabs_in_drawer">Visualizza i tab nel cassetto laterale</string>
 </resources>
