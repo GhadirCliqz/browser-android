@@ -23,8 +23,7 @@ android {
 
         applicationId "com.cliqz.browser"
         versionCode 20
-
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner "com.cliqz.browser.test.CustomTestRunner"
     }
     buildTypes {
         debug {
