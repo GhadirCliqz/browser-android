@@ -126,7 +126,6 @@ public class MainActivity extends AppCompatActivity {
 
         if(!preferenceManager.getOnBoardingComplete()) {
             setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-            createAppShortcutOnHomeScreen();
             setContentView(R.layout.activity_on_boarding);
             pager = (ViewPager) findViewById(R.id.viewpager);
             pager.setAdapter(new PagerAdapter(getSupportFragmentManager()));
@@ -361,6 +360,7 @@ public class MainActivity extends AppCompatActivity {
         long curTime = System.currentTimeMillis();
         telemetry.sendOnBoardingHideSignal(curTime - startTime);
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_FULL_USER);
+        createAppShortcutOnHomeScreen();
         setupContentView();
     }
 
