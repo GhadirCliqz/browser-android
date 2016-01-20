@@ -123,13 +123,11 @@ class LightningWebClient extends WebViewClient {
             mEventBus.post(new BrowserEvents.UpdateUrl(url,true));
             view.postInvalidate();
         }
-        if (view.getTitle() == null || view.getTitle().isEmpty()
-                || view.getTitle().contains(Constants.CLIQZ_TRAMPOLINE)) {
-            mLightningView.mTitle.setTitle(mActivity.getString(R.string.untitled));
-        } else {
+        if (view.getTitle() != null && !view.getTitle().isEmpty()
+                && !view.getTitle().contains(Constants.CLIQZ_TRAMPOLINE)) {
             mLightningView.mTitle.setTitle(view.getTitle());
+            mEventBus.post(new Messages.UpdateTitle());
         }
-        mEventBus.post(new Messages.UpdateTitle());
         if (Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT &&
                 mLightningView.getInvertePage()) {
             view.evaluateJavascript(Constants.JAVASCRIPT_INVERT_PAGE, null);
