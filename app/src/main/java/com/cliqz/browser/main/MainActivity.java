@@ -13,6 +13,7 @@ import android.os.Parcelable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Patterns;
@@ -232,9 +233,16 @@ public class MainActivity extends AppCompatActivity {
     public void goToHistory(Messages.GoToHistory event) {
         telemetry.resetBackNavigationVariables(-1);
         final FragmentManager fm = getSupportFragmentManager();
-        fm.beginTransaction()
-                .setCustomAnimations(R.anim.enter_slide_down, R.anim.exit_slide_down, R.anim.enter_slide_up, R.anim.exit_slide_up)
-                .replace(CONTENT_VIEW_ID, mHistoryFragment, HISTORY_FRAGMENT_TAG)
+        final FragmentTransaction transaction = fm.beginTransaction();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            transaction.
+                    setCustomAnimations(R.anim.enter_slide_down, R.anim.exit_slide_down,
+                            R.anim.enter_slide_up, R.anim.exit_slide_up);
+        } else {
+            transaction.setCustomAnimations(R.anim.fade_in, R.anim.fade_out,
+                    R.anim.fade_in, R.anim.fade_out);
+        }
+        transaction.replace(CONTENT_VIEW_ID, mHistoryFragment, HISTORY_FRAGMENT_TAG)
                 .addToBackStack(null)
                 .commit();
     }
@@ -243,9 +251,16 @@ public class MainActivity extends AppCompatActivity {
     public void goToSuggestions(Messages.GoToSuggestions event) {
         telemetry.resetBackNavigationVariables(-1);
         final FragmentManager fm = getSupportFragmentManager();
-        fm.beginTransaction()
-                .setCustomAnimations(R.anim.enter_slide_up, R.anim.exit_slide_up, R.anim.enter_slide_down, R.anim.exit_slide_down)
-                .replace(CONTENT_VIEW_ID, mFreshTabFragment, SUGGESTIONS_FRAGMENT_TAG)
+        final FragmentTransaction transaction = fm.beginTransaction();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            transaction.
+                    setCustomAnimations(R.anim.enter_slide_down, R.anim.exit_slide_down,
+                            R.anim.enter_slide_up, R.anim.exit_slide_up);
+        } else {
+            transaction.setCustomAnimations(R.anim.fade_in, R.anim.fade_out,
+                    R.anim.fade_in, R.anim.fade_out);
+        }
+        transaction.replace(CONTENT_VIEW_ID, mFreshTabFragment, SUGGESTIONS_FRAGMENT_TAG)
                 .addToBackStack(null)
                 .commit();
     }
