@@ -23,7 +23,7 @@ import javax.inject.Singleton;
 public class LocationCache implements LocationListener {
 
     private static final String TAG = LocationCache.class.getSimpleName();
-    private static final long TWO_MINUTES = 120000l;
+    private static final long FIFTEEN_MINUTES = 900_000l;
     private static final float FORTY_METERS = 40.0f;
 
     private final LocationManager locationManager;
@@ -41,7 +41,7 @@ public class LocationCache implements LocationListener {
         if (PermissionsManager.hasPermission(context, Manifest.permission.ACCESS_FINE_LOCATION)) {
             try {
                 locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,
-                        TWO_MINUTES, FORTY_METERS, this);
+                        FIFTEEN_MINUTES, FORTY_METERS, this);
                 mLastLocation = getLastLocation();
             } catch (SecurityException e) {
                 Log.e(TAG, "Check permissions");
@@ -72,8 +72,8 @@ public class LocationCache implements LocationListener {
     private boolean isBetterThan(@NonNull Location location, @NonNull Location oldLocation) {
         // Check whether the new location fix is newer or older
         long timeDelta = location.getTime() - oldLocation.getTime();
-        final boolean isSignificantlyNewer = timeDelta > TWO_MINUTES;
-        final boolean isSignificantlyOlder = timeDelta < -TWO_MINUTES;
+        final boolean isSignificantlyNewer = timeDelta > FIFTEEN_MINUTES;
+        final boolean isSignificantlyOlder = timeDelta < -FIFTEEN_MINUTES;
         final boolean isNewer = timeDelta > 0;
 
         // If it's been more than two minutes since the current location, use the new location
