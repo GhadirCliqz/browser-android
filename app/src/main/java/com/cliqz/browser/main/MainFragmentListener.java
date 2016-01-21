@@ -60,7 +60,9 @@ class MainFragmentListener implements View.OnFocusChangeListener, TextWatcher {
         fragment.showSearch(null);
 
         final String q = s.toString();
-        if (fragment.mSearchWebView != null) {
+        final boolean shouldSend = ((start + count) != before) ||
+                !q.equalsIgnoreCase(fragment.lastQuery);
+        if (fragment.mSearchWebView != null && shouldSend) {
             fragment.lastQuery = q;
             fragment.mSearchWebView.onQueryChanged(q);
         }
