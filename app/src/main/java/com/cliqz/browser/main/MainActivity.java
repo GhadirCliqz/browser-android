@@ -61,8 +61,8 @@ public class MainActivity extends AppCompatActivity {
 
     private static final String SAVED_STATE = TAG + ".SAVED_STATE";
 
+    public MainFragment mMainFragment;
     private FreshTabFragment mFreshTabFragment;
-    private MainFragment mMainFragment;
     private HistoryFragment mHistoryFragment;
 
     @Inject

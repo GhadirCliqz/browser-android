@@ -4,6 +4,7 @@ import android.support.test.espresso.web.webdriver.Locator;
 import android.support.test.rule.ActivityTestRule;
 import android.support.test.runner.AndroidJUnit4;
 import android.test.suitebuilder.annotation.LargeTest;
+import android.webkit.WebView;
 
 import com.cliqz.browser.main.MainActivity;
 
@@ -41,16 +42,17 @@ public class MainActivityTest {
     public ActivityTestRule<MainActivity> mActivityRule = new ActivityTestRule<MainActivity>(MainActivity.class);
 
     @Test
-    public void testEnter() throws InterruptedException {
+    public void testEnter() throws Throwable {
+        final WebView webView = mActivityRule.getActivity().mMainFragment.mLightningView.getWebView();
         onView(withId(R.id.search_edit_text)).perform(typeText("yahoo.com"), pressImeActionButton());
         Thread.sleep(5000);
         onView(withId(R.id.title_bar)).perform(click());
-        onView(withId(R.id.search_edit_text)).check(matches(withText(containsString("yahoo.com"))));
+        CliqzAssertions.assertWebViewUrlContains(webView, "yahoo.com");
         onView(withId(R.id.search_edit_text)).perform(typeTextIntoFocusedView("pippo"), pressImeActionButton());
         Thread.sleep(5000);
         onView(withId(R.id.title_bar)).perform(click());
-        onView(withId(R.id.search_edit_text)).check(matches(withText(containsString("google"))));
-        onView(withId(R.id.search_edit_text)).check(matches(withText(containsString("pippo"))));
+        CliqzAssertions.assertWebViewUrlContains(webView, "pippo");
+        CliqzAssertions.assertWebViewUrlContains(webView, "google");
     }
 
     @Test

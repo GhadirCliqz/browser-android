@@ -68,7 +68,7 @@ public class MainFragment extends BaseFragment {
     State mState = State.SHOWING_SEARCH;
 
     SearchWebView mSearchWebView = null;
-    LightningView mLightningView = null;
+    public LightningView mLightningView = null;
 
     @Bind(R.id.local_container)
     FrameLayout mContentContainer;
