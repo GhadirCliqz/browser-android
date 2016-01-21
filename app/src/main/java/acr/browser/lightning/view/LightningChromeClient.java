@@ -101,10 +101,8 @@ class LightningChromeClient extends WebChromeClient {
     public void onReceivedTitle(WebView view, String title) {
         if (title != null && !title.isEmpty() && !title.contains(Constants.CLIQZ_TRAMPOLINE)) {
             mLightningView.mTitle.setTitle(title);
-        } else {
-            mLightningView.mTitle.setTitle(mActivity.getString(R.string.untitled));
+            eventBus.post(new Messages.UpdateTitle());
         }
-        eventBus.post(new Messages.UpdateTitle());
         eventBus.post(new BrowserEvents.TabsChanged());
         final String url = view != null ? view.getUrl() : null;
         if (url != null && !url.startsWith("cliqz://") && !mLightningView.mIsIncognitoTab) {

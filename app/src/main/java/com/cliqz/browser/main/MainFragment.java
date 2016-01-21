@@ -330,7 +330,8 @@ public class MainFragment extends BaseFragment {
                 .appendQueryParameter("url", eventUrl)
                 .appendQueryParameter("q", lastQuery)
                 .build().toString();
-        mLightningView.loadUrl(eventUrl);
+        mLightningView.loadUrl(url);
+        searchBar.setTitle(eventUrl);
     }
 
     @Subscribe
