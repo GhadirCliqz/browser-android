@@ -318,9 +318,9 @@ public abstract class BrowserActivity extends ThemableBrowserActivity
 
         // CLIQZ - BEGIN
         mCliqzSearch = new SearchWebView(this);
-        mSearchContainer = new LightningView(this, "", isIncognito(), "SEARCH_CONTAINER", mCliqzSearch, mHistoryDatabase);
+        mSearchContainer = null; // new LightningView(this, "", isIncognito(), "SEARCH_CONTAINER", mCliqzSearch, mHistoryDatabase);
         mTabsManagerView = new TabsManagerView(this);
-        mOpenTabsContainer = new LightningView(this, "", isIncognito(), "OPEN_TABS_CONTAINER", mTabsManagerView, mHistoryDatabase);
+        mOpenTabsContainer = null; // new LightningView(this, "", isIncognito(), "OPEN_TABS_CONTAINER", mTabsManagerView, mHistoryDatabase);
         PermissionsManager.getInstance()
                 .requestPermissionsIfNecessaryForResult(this,
                         new String[]{Manifest.permission.ACCESS_FINE_LOCATION},

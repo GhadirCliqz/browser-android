@@ -312,7 +312,8 @@ public class MainActivity extends AppCompatActivity {
         clipboard.setPrimaryClip(clip);
     }
 
-    private class PagerAdapter extends FragmentPagerAdapter {
+    // Must be public, otherwise the system can't re-create the fragment if the app has been killed
+    public class PagerAdapter extends FragmentPagerAdapter {
 
         private final int[] onBoardingLayouts = new int[] {
                 R.layout.on_boarding_first,
