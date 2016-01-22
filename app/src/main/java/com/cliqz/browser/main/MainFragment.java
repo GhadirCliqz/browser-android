@@ -378,6 +378,12 @@ public class MainFragment extends BaseFragment {
         showKeyBoard();
     }
 
+    @Subscribe
+    public void showCustomView(BrowserEvents.ShowCustomView event) {
+        final CustomViewHelper helper = new CustomViewHelper(getContext(), event.view, event.callback);
+        helper.show();
+    }
+
     void updateTitle() {
         final String title = mLightningView.getTitle();
         searchBar.setTitle(title);
