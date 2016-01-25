@@ -119,9 +119,6 @@ public class SearchWebView extends BaseWebView {
             return;
         }
 
-        if (query.equals(mLastQuery)) {
-            return;
-        }
         performSearch(query);
     }
 
