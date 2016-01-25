@@ -26,9 +26,6 @@ import com.cliqz.browser.widget.AutocompleteEditText;
 import com.cliqz.browser.widget.SearchBar;
 import com.squareup.otto.Subscribe;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-
 import acr.browser.lightning.R;
 import acr.browser.lightning.bus.BrowserEvents;
 import acr.browser.lightning.constant.Constants;
@@ -376,12 +373,6 @@ public class MainFragment extends BaseFragment {
         }
         mState = State.SHOWING_SEARCH;
         showKeyBoard();
-    }
-
-    @Subscribe
-    public void showCustomView(BrowserEvents.ShowCustomView event) {
-        final CustomViewHelper helper = new CustomViewHelper(getContext(), event.view, event.callback);
-        helper.show();
     }
 
     void updateTitle() {
