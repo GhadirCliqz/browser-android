@@ -2175,7 +2175,7 @@ public abstract class BrowserActivity extends ThemableBrowserActivity
 
         @Subscribe
         public void autocomplete(CliqzMessages.Autocomplete event) {
-            mSearch.getAutocompleteService().improveAutocomplete(event.completion);
+//            mSearch.getAutocompleteService().improveAutocomplete(event.completion);
         }
 
         @Subscribe

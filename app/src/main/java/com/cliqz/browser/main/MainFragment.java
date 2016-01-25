@@ -375,6 +375,11 @@ public class MainFragment extends BaseFragment {
         showKeyBoard();
     }
 
+    @Subscribe
+    public void autocomplete(CliqzMessages.Autocomplete event) {
+        mAutocompleteEditText.setAutocompleteText(event.completion);
+    }
+
     void updateTitle() {
         final String title = mLightningView.getTitle();
         searchBar.setTitle(title);
