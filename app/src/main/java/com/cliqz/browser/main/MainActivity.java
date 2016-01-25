@@ -57,6 +57,7 @@ public class MainActivity extends AppCompatActivity {
     private static final String HISTORY_FRAGMENT_TAG = "history_fragment";
     private static final String SUGGESTIONS_FRAGMENT_TAG = "suggestions_fragment";
     static final String SEARCH_FRAGMENT_TAG = "search_fragment";
+    private static final String CUSTOM_VIEW_FRAGMENT_TAG = "custom_view_fragment";
 
     private static final int CONTENT_VIEW_ID = R.id.main_activity_content;
 
@@ -230,6 +231,12 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Subscribe
+    public void showCustomView(BrowserEvents.ShowCustomView event) {
+        final CustomViewFragment fragment = CustomViewFragment.create(event.view, event.callback);
+        fragment.show(getSupportFragmentManager(), CUSTOM_VIEW_FRAGMENT_TAG);
+    }
+
+    @Subscribe
     public void goToHistory(Messages.GoToHistory event) {
         telemetry.resetBackNavigationVariables(-1);
         final FragmentManager fm = getSupportFragmentManager();
@@ -312,7 +319,8 @@ public class MainActivity extends AppCompatActivity {
         clipboard.setPrimaryClip(clip);
     }
 
-    private class PagerAdapter extends FragmentPagerAdapter {
+    // Must be public, otherwise the system can't re-create the fragment if the app has been killed
+    public class PagerAdapter extends FragmentPagerAdapter {
 
         private final int[] onBoardingLayouts = new int[] {
                 R.layout.on_boarding_first,

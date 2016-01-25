@@ -26,9 +26,6 @@ import com.cliqz.browser.widget.AutocompleteEditText;
 import com.cliqz.browser.widget.SearchBar;
 import com.squareup.otto.Subscribe;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-
 import acr.browser.lightning.R;
 import acr.browser.lightning.bus.BrowserEvents;
 import acr.browser.lightning.constant.Constants;
@@ -99,7 +96,7 @@ public class MainFragment extends BaseFragment {
         ButterKnife.bind(this, view);
         if (mSearchWebView == null || mLightningView == null) {
             mSearchWebView = new SearchWebView(view.getContext());
-            mLightningView = new LightningView(getActivity(), mUrl, false, "1");
+            mLightningView = new LightningView(getActivity()/*, mUrl */, false, "1");
             mSearchWebView.setLayoutParams(
                     new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
         } else {
@@ -158,6 +155,9 @@ public class MainFragment extends BaseFragment {
         if (mSearchWebView != null) {
             mSearchWebView.onResume();
         }
+        if (mLightningView != null) {
+            mLightningView.onResume();
+        }
 
         // This code may look confused. It's relevant when we receive a new intent to open a new
         // url.
@@ -183,6 +183,9 @@ public class MainFragment extends BaseFragment {
                 bus.post(new Messages.ShowSearch(query));
             } else {
                 mLightningView.getWebView().bringToFront();
+                searchBar.showTitleBar();
+                searchBar.setTitle(mLightningView.getTitle());
+                switchIcon(RELOAD);
             }
         }
     }
@@ -192,6 +195,9 @@ public class MainFragment extends BaseFragment {
         super.onPause();
         if (mSearchWebView != null) {
             mSearchWebView.onPause();
+        }
+        if (mLightningView != null) {
+            mLightningView.onPause();
         }
     }
 
@@ -367,6 +373,11 @@ public class MainFragment extends BaseFragment {
         }
         mState = State.SHOWING_SEARCH;
         showKeyBoard();
+    }
+
+    @Subscribe
+    public void autocomplete(CliqzMessages.Autocomplete event) {
+        mAutocompleteEditText.setAutocompleteText(event.completion);
     }
 
     void updateTitle() {
