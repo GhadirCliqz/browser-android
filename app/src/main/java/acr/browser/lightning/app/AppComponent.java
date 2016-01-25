@@ -2,8 +2,8 @@ package acr.browser.lightning.app;
 
 import android.content.Context;
 
-import com.cliqz.browser.settings.BaseSettingsFragment;
 import com.cliqz.browser.main.FragmentWithBus;
+import com.cliqz.browser.settings.BaseSettingsFragment;
 import com.cliqz.browser.webview.BaseWebView;
 import com.cliqz.browser.webview.Bridge;
 import com.cliqz.browser.webview.TabsManagerView;
@@ -84,4 +84,6 @@ public interface AppComponent {
     void inject(FragmentWithBus baseFragment);
 
     void inject(Bridge bridge);
+
+    void inject(com.cliqz.browser.main.OnBoardingActivity onBoardingActivity);
 }

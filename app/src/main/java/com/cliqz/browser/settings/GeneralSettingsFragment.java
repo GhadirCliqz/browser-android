@@ -5,6 +5,7 @@ package com.cliqz.browser.settings;
 
 import android.app.Activity;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.CheckBoxPreference;
@@ -12,8 +13,10 @@ import android.preference.Preference;
 import android.support.v7.app.AlertDialog;
 import android.widget.EditText;
 
+import com.cliqz.browser.main.MainActivity;
+import com.cliqz.browser.main.OnBoardingActivity;
+
 import acr.browser.lightning.R;
-import acr.browser.lightning.constant.Constants;
 import acr.browser.lightning.constant.SearchEngines;
 
 public class GeneralSettingsFragment extends BaseSettingsFragment {
@@ -21,13 +24,14 @@ public class GeneralSettingsFragment extends BaseSettingsFragment {
     private static final String SETTINGS_ADS = "cb_ads";
     private static final String SETTINGS_IMAGES = "cb_images";
     private static final String SETTINGS_SEARCHENGINE = "search";
+    private static final String SETTINGS_SHOWTOUR = "onboarding";
     // private static final String SETTINGS_DRAWERTABS = "cb_drawertabs";
     // private static final String SETTINGS_BROWSER_IMPORT = "import_browser_bookmark";
 
     private Activity mActivity;
 
     private static final int API = Build.VERSION.SDK_INT;
-    private Preference searchengine;
+    private Preference searchengine, showTour;
     private CheckBoxPreference cbAds, cbImages; // , cbDrawerTabs;
 
     @Override
@@ -45,13 +49,14 @@ public class GeneralSettingsFragment extends BaseSettingsFragment {
         // mPreferenceManager storage
         // Preference importBrowserpref = findPreference(SETTINGS_BROWSER_IMPORT);
         searchengine = findPreference(SETTINGS_SEARCHENGINE);
-
+        showTour = findPreference(SETTINGS_SHOWTOUR);
         //cbAds = (CheckBoxPreference) findPreference(SETTINGS_ADS);
         cbImages = (CheckBoxPreference) findPreference(SETTINGS_IMAGES);
         // cbDrawerTabs = (CheckBoxPreference) findPreference(SETTINGS_DRAWERTABS);
 
         // importBrowserpref.setOnPreferenceClickListener(this);
         searchengine.setOnPreferenceClickListener(this);
+        showTour.setOnPreferenceClickListener(this);
         //cbAds.setOnPreferenceChangeListener(this);
         cbImages.setOnPreferenceChangeListener(this);
         // cbDrawerTabs.setOnPreferenceChangeListener(this);
@@ -128,6 +133,10 @@ public class GeneralSettingsFragment extends BaseSettingsFragment {
         switch (preference.getKey()) {
             case SETTINGS_SEARCHENGINE:
                 searchDialog();
+                return true;
+            case SETTINGS_SHOWTOUR:
+                Intent intent = new Intent(getActivity(), OnBoardingActivity.class);
+                startActivity(intent);
                 return true;
 //            case SETTINGS_BROWSER_IMPORT:
 //                try {
