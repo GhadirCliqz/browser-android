@@ -57,6 +57,7 @@ public class MainActivity extends AppCompatActivity {
     private static final String HISTORY_FRAGMENT_TAG = "history_fragment";
     private static final String SUGGESTIONS_FRAGMENT_TAG = "suggestions_fragment";
     static final String SEARCH_FRAGMENT_TAG = "search_fragment";
+    private static final String CUSTOM_VIEW_FRAGMENT_TAG = "custom_view_fragment";
 
     private static final int CONTENT_VIEW_ID = R.id.main_activity_content;
 
@@ -227,6 +228,12 @@ public class MainActivity extends AppCompatActivity {
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK
                 | Intent.FLAG_ACTIVITY_NEW_DOCUMENT);
         startActivity(intent);
+    }
+
+    @Subscribe
+    public void showCustomView(BrowserEvents.ShowCustomView event) {
+        final CustomViewFragment fragment = CustomViewFragment.create(event.view, event.callback);
+        fragment.show(getSupportFragmentManager(), CUSTOM_VIEW_FRAGMENT_TAG);
     }
 
     @Subscribe

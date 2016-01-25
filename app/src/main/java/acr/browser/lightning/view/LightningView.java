@@ -88,7 +88,7 @@ public class LightningView implements ILightningTab {
     private static float mMaxFling;
     private static final int API = android.os.Build.VERSION.SDK_INT;
     private static final int SCROLL_UP_THRESHOLD = Utils.dpToPx(10);
-    private final boolean mIsCustomWebView;
+    // private final boolean mIsCustomWebView;
     private String mAntiPhishingSrc;
     private final String mId;
     private final AdBlock mAdBlock;
@@ -123,18 +123,12 @@ public class LightningView implements ILightningTab {
     @Inject
     Telemetry telemetry;
 
-    public LightningView(Activity activity, String url, boolean isIncognito, String uniqueId) {
-        this(activity, url, isIncognito, uniqueId, null, null);
-    }
-
     @SuppressLint("NewApi")
-    public LightningView(final Activity activity, String url, boolean isIncognito, String uniqueId, final WebView overrideWebView, final HistoryDatabase database) {
+    public LightningView(final Activity activity, boolean isIncognito, String uniqueId) {
         BrowserApp.getAppComponent().inject(this);
         mActivity = activity;
         mId = uniqueId;
-        mUrl = url;
-        mIsCustomWebView = overrideWebView != null;
-        mWebView = overrideWebView != null ? overrideWebView : new WebView(activity);
+        mWebView = /* overrideWebView != null ? overrideWebView : */new WebView(activity);
         mIsIncognitoTab = isIncognito;
         Boolean useDarkTheme = mPreferences.getUseTheme() != 0 || isIncognito;
         mTitle = new LightningViewTitle(activity, useDarkTheme);
@@ -158,28 +152,17 @@ public class LightningView implements ILightningTab {
 
         mWebView.setScrollbarFadingEnabled(true);
 
-        if (overrideWebView == null) {
-            mWebView.setSaveEnabled(true);
-            mWebView.setNetworkAvailable(true);
-            mWebView.setWebChromeClient(new LightningChromeClient(activity, this));
-            mWebView.setWebViewClient(new LightningWebClient(activity, this));
-            mWebView.setDownloadListener(new LightningDownloadListener(activity));
-            mGestureDetector = new GestureDetector(activity, new CustomGestureListener());
-            mWebView.setOnTouchListener(new TouchListener());
-            mDefaultUserAgent = mWebView.getSettings().getUserAgentString();
-            initializeSettings(mWebView.getSettings(), activity, url);
-            initializePreferences(mWebView.getSettings(), activity);
-
-            if (url != null) {
-                if (!url.trim().isEmpty()) {
-                    mWebView.loadUrl(url, mRequestHeaders);
-                } else {
-                    // don't load anything, the user is looking for a blank tab
-                }
-            } else {
-                loadHomepage();
-            }
-        }
+        mWebView.setSaveEnabled(true);
+        mWebView.setNetworkAvailable(true);
+        mWebView.setWebChromeClient(new LightningChromeClient(activity, this));
+        mWebView.setWebViewClient(new LightningWebClient(activity, this));
+        mWebView.setDownloadListener(new LightningDownloadListener(activity));
+        mGestureDetector = new GestureDetector(activity, new CustomGestureListener());
+        mWebView.setOnTouchListener(new TouchListener());
+        mDefaultUserAgent = mWebView.getSettings().getUserAgentString();
+        initializeSettings(mWebView.getSettings(), activity);
+        mUrl = "about:blank";
+        mWebView.loadUrl(mUrl);
     }
 
     public void loadHomepage() {
@@ -359,7 +342,7 @@ public class LightningView implements ILightningTab {
      * @param context  the Context which was used to construct the WebView.
      */
     @SuppressLint("NewApi")
-    private void initializeSettings(WebSettings settings, Context context, String url) {
+    private void initializeSettings(WebSettings settings, Context context) {
         if (API < Build.VERSION_CODES.JELLY_BEAN_MR2) {
             //noinspection deprecation
             settings.setAppCacheMaxSize(Long.MAX_VALUE);
@@ -394,7 +377,7 @@ public class LightningView implements ILightningTab {
         settings.setAllowContentAccess(true);
         settings.setAllowFileAccess(true);
         settings.setDefaultTextEncodingName("utf-8");
-        setAccessFromUrl(url, settings);
+        // setAccessFromUrl(url, settings);
         if (API >= Build.VERSION_CODES.JELLY_BEAN) {
             settings.setAllowFileAccessFromFileURLs(false);
             settings.setAllowUniversalAccessFromFileURLs(false);
@@ -405,55 +388,6 @@ public class LightningView implements ILightningTab {
         if (API < Build.VERSION_CODES.KITKAT) {
             //noinspection deprecation
             settings.setDatabasePath(context.getDir("databases", 0).getPath());
-        }
-    }
-
-    @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
-    private void setAccessFromUrl(final String url, final WebSettings settings) {
-        final boolean allowAllAccess = url == null || url.startsWith("file");
-        if (API > 16) {
-            settings.setAllowFileAccessFromFileURLs(allowAllAccess);
-            settings.setAllowUniversalAccessFromFileURLs(allowAllAccess);
-        }
-        if (allowAllAccess) {
-            mWebView.addJavascriptInterface(new JsBridge(), "cliqzBridge");
-        }
-
-    }
-
-    public class JsBridge {
-
-        private String historyToJSON(final List<HistoryItem> items) {
-            // Don't allow history access to web sites
-            if (mWebView == null) {
-                return "[]";
-            }
-            if (mUrl != null && !mUrl.startsWith("file:")) {
-                return "[]";
-            }
-            final StringBuilder sb = new StringBuilder(items.size() * 100);
-            sb.append("[");
-            String sep = "";
-            for (final HistoryItem item : items) {
-                sb.append(sep);
-                item.toJsonString(sb);
-                sep = ",";
-            }
-            sb.append("]");
-            return sb.toString();
-        }
-
-        @JavascriptInterface
-        public String getTopSites() {
-            if (mHistoryDatabase != null) {
-                final List<HistoryItem> items = mHistoryDatabase.getTopSites(20);
-                try {
-                    return historyToJSON(items);
-                } catch (Exception e) {
-                    Log.e(Constants.TAG, "Cannot serialize History", e);
-                }
-            }
-            return "[]";
         }
     }
 
@@ -505,13 +439,17 @@ public class LightningView implements ILightningTab {
     }
 
     public synchronized void onPause() {
-        if (mWebView != null)
+        if (mWebView != null) {
             mWebView.onPause();
+        }
     }
 
     public synchronized void onResume() {
-        if (mWebView != null)
+        if (mWebView != null) {
+            Log.w(LightningView.class.getSimpleName(), "Resuming");
+            initializePreferences(mWebView.getSettings(), mActivity);
             mWebView.onResume();
+        }
     }
 
     public synchronized void freeMemory() {
@@ -681,11 +619,6 @@ public class LightningView implements ILightningTab {
 
     public synchronized void goBack() {
         if (mWebView != null) {
-            final WebBackForwardList list = mWebView.copyBackForwardList();
-            if (list.getSize() > 1) {
-                final WebHistoryItem lastItem = list.getItemAtIndex(list.getCurrentIndex() - 1);
-                setAccessFromUrl(lastItem.getUrl(), mWebView.getSettings());
-            }
             mWebView.goBack();
         }
     }
@@ -800,15 +733,15 @@ public class LightningView implements ILightningTab {
             return;
         }
 
-        if (mWebView != null && !mIsCustomWebView) {
+        // if (mWebView != null && !mIsCustomWebView) {
             mUrl = url;
             mWebView.loadUrl(url, mRequestHeaders);
 
-            if (API > 16) {
+            /* if (API > 16) {
                 final WebSettings settings = mWebView.getSettings();
                 setAccessFromUrl(url, settings);
-            }
-        }
+            } */
+        // }
     }
 
     public synchronized void invalidate() {

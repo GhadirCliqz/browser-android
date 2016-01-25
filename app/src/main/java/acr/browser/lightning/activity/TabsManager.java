@@ -152,7 +152,7 @@ public class TabsManager {
                                              final boolean isIncognito) {
         String uniqueId = Integer.toString(uniqueID);
         uniqueID++;
-        final LightningView tab = new LightningView(activity, url, isIncognito, uniqueId);
+        final LightningView tab = new LightningView(activity, /* url, */ isIncognito, uniqueId);
         mWebViewList.add(tab);
         return tab;
     }

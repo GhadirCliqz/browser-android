@@ -35,7 +35,7 @@ public class AutocompleteEditText extends EditText {
 
     private final ArrayList<TextWatcher> mListeners = new ArrayList<>();
     private boolean mIsAutocompleting;
-    private AutocompleteService mAutocompleteService;
+    // private AutocompleteService mAutocompleteService;
 
     public boolean mIsAutocompleted;
 
@@ -54,7 +54,7 @@ public class AutocompleteEditText extends EditText {
         setImeOptions(imeOptions);
         mIsAutocompleting = false;
         mIsAutocompleted = false;
-        mAutocompleteService = AutocompleteService.createInstance(context);
+        // mAutocompleteService = AutocompleteService.createInstance(context);
         BrowserApp.getAppComponent().inject(this);
     }
 
@@ -88,7 +88,7 @@ public class AutocompleteEditText extends EditText {
         return super.onKeyPreIme(keyCode, event);
     }*/
 
-    private void setAutocompleteText(CharSequence text) {
+    public void setAutocompleteText(CharSequence text) {
         mIsAutocompleting = true;
         mIsAutocompleted = true;
         final CharSequence currentText = getText();
@@ -112,9 +112,9 @@ public class AutocompleteEditText extends EditText {
         mIsAutocompleting = false;
     }
 
-    public AutocompleteService getAutocompleteService() {
-        return mAutocompleteService;
-    }
+//    public AutocompleteService getAutocompleteService() {
+//        return mAutocompleteService;
+//    }
 
     private class DefaultTextWatcher implements TextWatcher {
 
@@ -157,12 +157,12 @@ public class AutocompleteEditText extends EditText {
                 watcher.afterTextChanged(s);
             }
 
-            if (!mDeleting) {
-                final String autocompletion = mAutocompleteService.autocomplete(s.toString());
-                if (autocompletion != null) {
-                    setAutocompleteText(autocompletion);
-                }
-            }
+//            if (!mDeleting) {
+//                final String autocompletion = mAutocompleteService.autocomplete(s.toString());
+//                if (autocompletion != null) {
+//                    setAutocompleteText(autocompletion);
+//                }
+//            }
             mDeleting = false;
         }
     }
