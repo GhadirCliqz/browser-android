@@ -40,8 +40,6 @@ public class AutocompleteEditText extends EditText {
     // private AutocompleteService mAutocompleteService;
 
     public boolean mIsAutocompleted;
-    private int mSelectionStart;
-    private int mSelectionEnd;
 
     public AutocompleteEditText(Context context) {
         this(context, null);
@@ -101,10 +99,8 @@ public class AutocompleteEditText extends EditText {
         final CharSequence currentText = getText();
         if (text.toString().startsWith(currentText.toString())) {
             setTextKeepState(text);
-            mSelectionStart = currentText.length();
-            mSelectionEnd = text.length();
-            final int selectionBegin = mSelectionStart;
-            final int selectionEnd = mSelectionEnd;
+            final int selectionBegin = currentText.length();
+            final int selectionEnd = text.length();
             post(new Runnable() {
                 @Override
                 public void run() {

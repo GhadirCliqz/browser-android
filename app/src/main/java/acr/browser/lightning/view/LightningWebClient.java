@@ -152,7 +152,7 @@ class LightningWebClient extends WebViewClient {
         mLightningView.mTitle.setFavicon(null);
         if (mLightningView.isShown()) {
             mEventBus.post(new BrowserEvents.UpdateUrl(url, false));
-            mEventBus.post(new BrowserEvents.ShowActionBar());
+            mEventBus.post(new BrowserEvents.ShowToolBar());
         }
         mEventBus.post(new BrowserEvents.TabsChanged());
     }

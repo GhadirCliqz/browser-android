@@ -10,9 +10,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcelable;
-import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
@@ -30,8 +28,6 @@ import com.cliqz.browser.webview.CliqzMessages;
 import com.cliqz.browser.widget.MainViewContainer;
 import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
-
-import java.util.ArrayList;
 
 import javax.inject.Inject;
 

@@ -25,10 +25,10 @@ import acr.browser.lightning.R;
  */
 public abstract class BaseFragment extends FragmentWithBus {
 
-    private ViewGroup mContentContainer;
+    protected ViewGroup mContentContainer;
     private Toolbar mToolbar;
     private View mCustomToolbarView;
-    private FrameLayout mStatusBar;
+    protected FrameLayout mStatusBar;
     private final Handler handler = new Handler(Looper.getMainLooper());
     private final static int KEYBOARD_ANIMATION_DELAY = 200;
 

@@ -99,13 +99,13 @@ public final class BrowserEvents {
     /**
      * Notify the browser to show the Action Bar
      */
-    public static class ShowActionBar {
+    public static class ShowToolBar {
     }
 
     /**
      * Notify the browser to hide the Action Bar
      */
-    public static class HideActionBar {
+    public static class HideToolBar {
     }
 
     /**

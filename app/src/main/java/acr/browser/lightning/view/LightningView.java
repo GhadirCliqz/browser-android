@@ -5,7 +5,6 @@
 package acr.browser.lightning.view;
 
 import android.annotation.SuppressLint;
-import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
 import android.database.sqlite.SQLiteException;
@@ -31,9 +30,6 @@ import android.view.View.OnTouchListener;
 import android.view.ViewConfiguration;
 import android.view.ViewParent;
 import android.webkit.CookieManager;
-import android.webkit.JavascriptInterface;
-import android.webkit.WebBackForwardList;
-import android.webkit.WebHistoryItem;
 import android.webkit.WebSettings;
 import android.webkit.WebSettings.LayoutAlgorithm;
 import android.webkit.WebSettings.PluginState;
@@ -47,7 +43,6 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
-import java.util.List;
 import java.util.Map;
 
 import javax.inject.Inject;
@@ -59,7 +54,6 @@ import acr.browser.lightning.constant.Constants;
 import acr.browser.lightning.constant.HistoryPage;
 import acr.browser.lightning.constant.StartPage;
 import acr.browser.lightning.database.HistoryDatabase;
-import acr.browser.lightning.database.HistoryItem;
 import acr.browser.lightning.dialog.LightningDialogBuilder;
 import acr.browser.lightning.download.LightningDownloadListener;
 import acr.browser.lightning.preference.PreferenceManager;
@@ -790,9 +784,9 @@ public class LightningView implements ILightningTab {
             } else if (mAction == MotionEvent.ACTION_UP) {
                 final float distance = (mY - mLocation);
                 if (distance > SCROLL_UP_THRESHOLD && view.getScrollY() < SCROLL_UP_THRESHOLD) {
-                    mEventBus.post(new BrowserEvents.ShowActionBar());
+                    mEventBus.post(new BrowserEvents.ShowToolBar());
                 } else if (distance < -SCROLL_UP_THRESHOLD) {
-                    mEventBus.post(new BrowserEvents.HideActionBar());
+                    mEventBus.post(new BrowserEvents.HideToolBar());
                 }
                 mLocation = 0;
             }
@@ -807,9 +801,9 @@ public class LightningView implements ILightningTab {
         public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
             int power = (int) (velocityY * 100 / mMaxFling);
             if (power < -10) {
-                mEventBus.post(new BrowserEvents.HideActionBar());
+                mEventBus.post(new BrowserEvents.HideToolBar());
             } else if (power > 15) {
-                mEventBus.post(new BrowserEvents.ShowActionBar());
+                mEventBus.post(new BrowserEvents.ShowToolBar());
             }
             return super.onFling(e1, e2, velocityX, velocityY);
         }
