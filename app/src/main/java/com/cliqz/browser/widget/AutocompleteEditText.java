@@ -35,9 +35,13 @@ public class AutocompleteEditText extends EditText {
 
     private final ArrayList<TextWatcher> mListeners = new ArrayList<>();
     private boolean mIsAutocompleting;
+    private boolean mDeleting = false;
+
     // private AutocompleteService mAutocompleteService;
 
     public boolean mIsAutocompleted;
+    private int mSelectionStart;
+    private int mSelectionEnd;
 
     public AutocompleteEditText(Context context) {
         this(context, null);
@@ -89,13 +93,18 @@ public class AutocompleteEditText extends EditText {
     }*/
 
     public void setAutocompleteText(CharSequence text) {
+        if (mDeleting) {
+            return;
+        }
         mIsAutocompleting = true;
         mIsAutocompleted = true;
         final CharSequence currentText = getText();
         if (text.toString().startsWith(currentText.toString())) {
             setTextKeepState(text);
-            final int selectionBegin = currentText.length();
-            final int selectionEnd = text.length();
+            mSelectionStart = currentText.length();
+            mSelectionEnd = text.length();
+            final int selectionBegin = mSelectionStart;
+            final int selectionEnd = mSelectionEnd;
             post(new Runnable() {
                 @Override
                 public void run() {
@@ -118,14 +127,12 @@ public class AutocompleteEditText extends EditText {
 
     private class DefaultTextWatcher implements TextWatcher {
 
-        private boolean mDeleting = false;
-
         @Override
         public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-            mDeleting = after == 0;
             if (mIsAutocompleting) {
                 return;
             }
+            mDeleting = after < 1;
 
             for (TextWatcher watcher: mListeners) {
                 watcher.beforeTextChanged(s, start, count, after);
@@ -163,7 +170,6 @@ public class AutocompleteEditText extends EditText {
 //                    setAutocompleteText(autocompletion);
 //                }
 //            }
-            mDeleting = false;
         }
     }
 
