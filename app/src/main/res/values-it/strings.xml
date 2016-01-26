@@ -236,4 +236,6 @@
     <string name="settings_adblock">Preferenze di Ad Block</string>
     <string name="start_now_bang">Comincia ora!</string>
     <string name="tabs_in_drawer">Visualizza i tab nel cassetto laterale</string>
+    <string name="block_adult_content">Blocca Contenuti Espliciti</string>
+    <string name="show_onboarding_tour">Mostra Tour</string>
 </resources>

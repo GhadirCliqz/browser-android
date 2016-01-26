@@ -25,6 +25,7 @@ public class GeneralSettingsFragment extends BaseSettingsFragment {
     private static final String SETTINGS_IMAGES = "cb_images";
     private static final String SETTINGS_SEARCHENGINE = "search";
     private static final String SETTINGS_SHOWTOUR = "onboarding";
+    private static final String SETTINGS_ADULT_CONTENT = "cb_adult_content";
     // private static final String SETTINGS_DRAWERTABS = "cb_drawertabs";
     // private static final String SETTINGS_BROWSER_IMPORT = "import_browser_bookmark";
 
@@ -32,16 +33,14 @@ public class GeneralSettingsFragment extends BaseSettingsFragment {
 
     private static final int API = Build.VERSION.SDK_INT;
     private Preference searchengine, showTour;
-    private CheckBoxPreference cbAds, cbImages; // , cbDrawerTabs;
+    private CheckBoxPreference cbImages, cbAdultContent; // , cbDrawerTabs cbAds, ;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         // Load the preferences from an XML resource
         addPreferencesFromResource(R.xml.preference_general);
-
         mActivity = getActivity();
-
         initPrefs();
     }
 
@@ -52,6 +51,8 @@ public class GeneralSettingsFragment extends BaseSettingsFragment {
         showTour = findPreference(SETTINGS_SHOWTOUR);
         //cbAds = (CheckBoxPreference) findPreference(SETTINGS_ADS);
         cbImages = (CheckBoxPreference) findPreference(SETTINGS_IMAGES);
+        cbAdultContent = (CheckBoxPreference) findPreference(SETTINGS_ADULT_CONTENT);
+
         // cbDrawerTabs = (CheckBoxPreference) findPreference(SETTINGS_DRAWERTABS);
 
         // importBrowserpref.setOnPreferenceClickListener(this);
@@ -59,6 +60,7 @@ public class GeneralSettingsFragment extends BaseSettingsFragment {
         showTour.setOnPreferenceClickListener(this);
         //cbAds.setOnPreferenceChangeListener(this);
         cbImages.setOnPreferenceChangeListener(this);
+        cbAdultContent.setOnPreferenceChangeListener(this);
         // cbDrawerTabs.setOnPreferenceChangeListener(this);
 
         if (API >= 19) {
@@ -69,10 +71,12 @@ public class GeneralSettingsFragment extends BaseSettingsFragment {
 
         int flashNum = mPreferenceManager.getFlashSupport();
         boolean imagesBool = mPreferenceManager.getBlockImagesEnabled();
+        boolean adultBool = mPreferenceManager.getBlockAdultContent();
 
 //        cbAds.setEnabled(Constants.FULL_VERSION);
 
         cbImages.setChecked(imagesBool);
+        cbAdultContent.setChecked(adultBool);
         //cbAds.setChecked(Constants.FULL_VERSION && mPreferenceManager.getAdBlockEnabled());
         // cbDrawerTabs.setChecked(mPreferenceManager.getShowTabsInDrawer(true));
     }
@@ -161,6 +165,10 @@ public class GeneralSettingsFragment extends BaseSettingsFragment {
             case SETTINGS_IMAGES:
                 mPreferenceManager.setBlockImagesEnabled((Boolean) newValue);
                 cbImages.setChecked((Boolean) newValue);
+                return true;
+            case SETTINGS_ADULT_CONTENT:
+                mPreferenceManager.setBlockAdultContent((Boolean) newValue);
+                cbAdultContent.setChecked((Boolean) newValue);
                 return true;
 //            case  SETTINGS_DRAWERTABS:
 //                mPreferenceManager.setShowTabsInDrawer((Boolean) newValue);

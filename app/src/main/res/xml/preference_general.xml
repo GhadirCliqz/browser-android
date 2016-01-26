@@ -12,10 +12,14 @@
     <CheckBoxPreference
         android:defaultValue="false"
         android:key="cb_images"
-        android:title="@string/block" />
+        android:title="@string/block"/>
+    <CheckBoxPreference
+        android:defaultValue="true"
+        android:key="cb_adult_content"
+        android:title="@string/block_adult_content"/>
     <Preference
         android:key="search"
-        android:title="@string/complementary_search_engine" />
+        android:title="@string/complementary_search_engine"/>
     <Preference
         android:key="onboarding"
         android:title="@string/show_onboarding_tour" />

@@ -161,8 +161,8 @@ public class LightningView implements ILightningTab {
         mWebView.setOnTouchListener(new TouchListener());
         mDefaultUserAgent = mWebView.getSettings().getUserAgentString();
         initializeSettings(mWebView.getSettings(), activity);
-        mUrl = "about:blank";
-        mWebView.loadUrl(mUrl);
+//        mUrl = "about:blank";
+//        mWebView.loadUrl(mUrl);
     }
 
     public void loadHomepage() {
