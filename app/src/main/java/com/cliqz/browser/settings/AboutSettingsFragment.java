@@ -32,9 +32,6 @@ public class AboutSettingsFragment extends PreferenceFragment {
         Preference version = findPreference(SETTINGS_VERSION);
         version.setSummary(getVersion());
         version.setOnPreferenceClickListener(versionClickListener);
-
-        Preference contact = findPreference(CONTACT);
-        contact.setOnPreferenceClickListener(contactClickListener);
     }
 
     private String getVersion() {
@@ -57,30 +54,6 @@ public class AboutSettingsFragment extends PreferenceFragment {
                         mCounter = 0;
                         return true;
                     }
-                }
-            };
-
-    private final Preference.OnPreferenceClickListener contactClickListener =
-            new Preference.OnPreferenceClickListener() {
-                @Override
-                public boolean onPreferenceClick(Preference preference) {
-                    final Uri to = Uri.parse(String.format("mailto:%s?subject=%s",
-                            getString(R.string.feedback_at_cliqz_dot_com),
-                            Uri.encode(getString(R.string.feedback_mail_subject))));
-                    final Intent intent = new Intent(Intent.ACTION_SENDTO, to);
-                    intent.putExtra(Intent.EXTRA_TEXT, new StringBuilder()
-                                    .append("\n")
-                                    .append("Feedback für CLIQZ for Android (")
-                                    .append(BuildConfig.VERSION_NAME)
-                                    .append("), auf ")
-                                    .append(Build.MODEL)
-                                    .append(" (")
-                                    .append(Build.VERSION.SDK_INT)
-                                    .append(")")
-                                    .toString()
-                    );
-                    startActivity(Intent.createChooser(intent, getString(R.string.contact_cliqz)));
-                    return true;
                 }
             };
 }

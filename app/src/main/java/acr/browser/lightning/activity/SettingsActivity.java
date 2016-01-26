@@ -5,7 +5,9 @@ package acr.browser.lightning.activity;
 
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.preference.Preference;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
@@ -20,6 +22,7 @@ import com.anthonycr.grant.PermissionsManager;
 import java.util.ArrayList;
 import java.util.List;
 
+import acr.browser.lightning.BuildConfig;
 import acr.browser.lightning.R;
 
 public class SettingsActivity extends ThemableSettingsActivity {
@@ -81,6 +84,24 @@ public class SettingsActivity extends ThemableSettingsActivity {
             browserIntent.setAction(Intent.ACTION_VIEW);
             browserIntent.setData(Uri.parse("https://cliqz.com/legal"));
             startActivity(browserIntent);
+            finish();
+        } else if (info.id == R.id.feedback) {
+            final Uri to = Uri.parse(String.format("mailto:%s?subject=%s",
+                    getString(R.string.feedback_at_cliqz_dot_com),
+                    Uri.encode(getString(R.string.feedback_mail_subject))));
+            final Intent intent = new Intent(Intent.ACTION_SENDTO, to);
+            intent.putExtra(Intent.EXTRA_TEXT, new StringBuilder()
+                            .append("\n")
+                            .append("Feedback für CLIQZ for Android (")
+                            .append(BuildConfig.VERSION_NAME)
+                            .append("), auf ")
+                            .append(Build.MODEL)
+                            .append(" (")
+                            .append(Build.VERSION.SDK_INT)
+                            .append(")")
+                            .toString()
+            );
+            startActivity(Intent.createChooser(intent, getString(R.string.contact_cliqz)));
             finish();
         } else {
             super.onListItemClick(l, v, position, id);
