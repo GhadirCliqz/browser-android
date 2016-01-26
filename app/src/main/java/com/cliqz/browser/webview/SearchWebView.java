@@ -126,6 +126,7 @@ public class SearchWebView extends BaseWebView {
     void extensionReady() {
         super.extensionReady();
         final long t = System.currentTimeMillis() - state.getTimestamp();
+        initPreferences();
         if (shouldShowHomePage()) {
             showHomepage();
         } else if (mLastQuery != null && !mLastQuery.isEmpty()) {
@@ -158,9 +159,27 @@ public class SearchWebView extends BaseWebView {
     @Override
     public void onResume() {
         super.onResume();
-        if (isExtesionReady() && shouldShowHomePage()) {
-            showHomepage();
+        if (isExtesionReady()) {
+            // Apply settings here
+            initPreferences();
+            if (shouldShowHomePage()) {
+                showHomepage();
+            }
         }
+    }
+
+    private void initPreferences() {
+        final JSONObject preferences = new JSONObject();
+        try {
+            preferences.put("adultContentFilter",
+                    preferenceManager.getBlockAdultContent() ? "moderate" : "liberal");
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        final String call =
+                String.format(Locale.US, "CLIQZEnvironment.setClientPreferences(%s);",
+                        preferences.toString());
+        executeJS(call);
     }
 
     private boolean shouldShowHomePage() {

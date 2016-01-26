@@ -70,6 +70,7 @@ public class PreferenceManager {
         public static final String TIME_OF_LAST_ENVIRONMENT_SIGNAL = "lastEnvironmentSignal";
         public static final String TELEMETRY_SIGNALS = "telemetrySignals";
         public static final String BROWSER_STATE = "cliqzBrowserState";
+        public static final String BLOCK_ADULT_CONTENT = "blockAdultContent";
     }
 
     private final SharedPreferences mPrefs;
@@ -289,11 +290,9 @@ public class PreferenceManager {
         return mPrefs.getLong(Name.TIME_OF_LAST_ENVIRONMENT_SIGNAL, 0);
     }
 
-    public String getTelemetrySignals() {
-        return mPrefs.getString(Name.TELEMETRY_SIGNALS, "");
+    public boolean getBlockAdultContent() {
+        return mPrefs.getBoolean(Name.BLOCK_ADULT_CONTENT, true);
     }
-
-    public String getBrowserState() { return mPrefs.getString(Name.BROWSER_STATE, "{}"); }
 
     private void putBoolean(String name, boolean value) {
         mPrefs.edit().putBoolean(name, value).apply();
@@ -523,11 +522,7 @@ public class PreferenceManager {
         putLong(Name.TIME_OF_LAST_ENVIRONMENT_SIGNAL, time);
     }
 
-    public void setTelemetrySignals(String signals) {
-        putString(Name.TELEMETRY_SIGNALS, signals);
-    }
-
-    public void setBrowserState(String state) {
-        putString(Name.BROWSER_STATE, state);
+    public void setBlockAdultContent(boolean enable) {
+        putBoolean(Name.BLOCK_ADULT_CONTENT, enable);
     }
 }

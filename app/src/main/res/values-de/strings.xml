@@ -231,5 +231,6 @@
     <string name="recommendations">Vorschläge</string>
     <string name="search_with_cliqz">Mit CLIQZ suchen</string>
     <string name="settings_adblock">Ad Block Einstellungen</string>
-    <string name="show_onboarding_tour">Tour anzeigen</string>
+    <string name="block_adult_content">Nicht-jugendfreie Inhalte blockieren</string>
+    <string name="show_onboarding_tour">Einführungstour zeigen</string>
 </resources>

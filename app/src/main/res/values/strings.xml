@@ -243,5 +243,6 @@
     <string name="next">Next</string>
     <string name="go">Go</string>
     <string name="show_onboarding_tour">Show tour</string>
-    <string name="onboarding">OnBoarding</string>
+    <string name="onboarding" translatable="false">OnBoarding</string>
+    <string name="block_adult_content">Block Adult Content</string>
 </resources>
