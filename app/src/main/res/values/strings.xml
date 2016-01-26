@@ -242,4 +242,6 @@
     <string name="start_now_bang">Start now!</string>
     <string name="next">Next</string>
     <string name="go">Go</string>
+    <string name="show_onboarding_tour">Show tour</string>
+    <string name="onboarding">OnBoarding</string>
 </resources>

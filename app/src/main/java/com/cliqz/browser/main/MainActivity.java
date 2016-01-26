@@ -66,6 +66,8 @@ public class MainActivity extends AppCompatActivity {
     public MainFragment mMainFragment;
     private FreshTabFragment mFreshTabFragment;
     private HistoryFragment mHistoryFragment;
+    private OnBoardingAdapter onBoardingAdapter;
+    private ViewPager pager;
 
     @Inject
     Bus bus;
@@ -84,11 +86,6 @@ public class MainActivity extends AppCompatActivity {
 
     @Inject
     Timings timings;
-
-    private ViewPager pager;
-
-    // Used for telemetry
-    private long startTime;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -127,11 +124,14 @@ public class MainActivity extends AppCompatActivity {
         }
 
         if(!preferenceManager.getOnBoardingComplete()) {
+            preferenceManager.setSessionId(telemetry.generateSessionID());
+            preferenceManager.setVersionCode(BuildConfig.VERSION_CODE);
             setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
             setContentView(R.layout.activity_on_boarding);
+            onBoardingAdapter = new OnBoardingAdapter(getSupportFragmentManager(), telemetry);
             pager = (ViewPager) findViewById(R.id.viewpager);
-            pager.setAdapter(new PagerAdapter(getSupportFragmentManager()));
-            pager.addOnPageChangeListener(onPageChangeListener);
+            pager.setAdapter(onBoardingAdapter);
+            pager.addOnPageChangeListener(onBoardingAdapter.onPageChangeListener);
         } else {
             setupContentView();
         }
@@ -319,69 +319,16 @@ public class MainActivity extends AppCompatActivity {
         clipboard.setPrimaryClip(clip);
     }
 
-    // Must be public, otherwise the system can't re-create the fragment if the app has been killed
-    public class PagerAdapter extends FragmentPagerAdapter {
-
-        private final int[] onBoardingLayouts = new int[] {
-                R.layout.on_boarding_first,
-                R.layout.on_boarding_second,
-                R.layout.on_boarding_third
-        };
-        private ArrayList<Fragment> onBoardingFragments = new ArrayList<>(onBoardingLayouts.length);
-
-        public PagerAdapter(FragmentManager fragmentManager) {
-            super(fragmentManager);
-            for (int layout: onBoardingLayouts) {
-                final int finalLayout = layout;
-                onBoardingFragments.add(new OnBoardingFragment() {
-                    @Override
-                    protected int getLayout() {
-                        return finalLayout;
-                    }
-                });
-            }
-        }
-
-        @Override
-        public int getCount() {
-            return onBoardingFragments.size();
-        }
-
-        @Override
-        public Fragment getItem(int pos) {
-            return onBoardingFragments.get(pos);
-        }
-    }
-
-    ViewPager.OnPageChangeListener onPageChangeListener = new ViewPager.OnPageChangeListener() {
-        @Override
-        public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-        }
-
-        @Override
-        public void onPageSelected(int position) {
-            long curTime = System.currentTimeMillis();
-            telemetry.sendOnBoardingHideSignal(curTime-startTime);
-            startTime = curTime;
-            telemetry.sendOnBoardingShowSignal(position);
-        }
-
-        @Override
-        public void onPageScrollStateChanged(int state) {
-
-        }
-    };
-
     public void nextScreen(View view) {
         final int page = pager.getCurrentItem() + 1;
         pager.setCurrentItem(page);
     }
 
-    public void showHomeScreen(View view) {
+    public void onBoardingDone(View view) {
         ((ViewGroup)(view.getParent())).removeAllViews();
         preferenceManager.setOnBoardingComplete(true);
         long curTime = System.currentTimeMillis();
-        telemetry.sendOnBoardingHideSignal(curTime - startTime);
+        telemetry.sendOnBoardingHideSignal(curTime - onBoardingAdapter.startTime);
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_FULL_USER);
         createAppShortcutOnHomeScreen();
         setupContentView();
@@ -398,11 +345,7 @@ public class MainActivity extends AppCompatActivity {
         sendBroadcast(shortCutIntent);
 
         // Send telemetry "installed" signal
-        preferenceManager.setSessionId(telemetry.generateSessionID());
-        preferenceManager.setVersionCode(BuildConfig.VERSION_CODE);
-        startTime = System.currentTimeMillis();
         telemetry.sendLifeCycleSignal(Telemetry.Action.INSTALL);
-        telemetry.sendOnBoardingShowSignal(0);
     }
 
     //returns screen that is visible

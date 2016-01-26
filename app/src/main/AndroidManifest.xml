@@ -161,6 +161,13 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
+
+        <activity
+            android:name="com.cliqz.browser.main.OnBoardingActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.LightTheme"
+            android:label="@string/onboarding" >
+        </activity>
         <!-- activity
             android:name=".activity.IncognitoActivity"
             android:alwaysRetainTaskState="true"

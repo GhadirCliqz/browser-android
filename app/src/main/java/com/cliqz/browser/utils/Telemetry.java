@@ -256,7 +256,7 @@ public class Telemetry {
      */
     public void sendOnBoardingShowSignal(int currentPage) {
         previousPage = currentPage;
-        JSONObject signal = new JSONObject(); ;
+        JSONObject signal = new JSONObject();
         try {
             signal.put(Key.TYPE, Key.ONBOARDING);
             signal.put(Key.ACTION, Action.SHOW);
