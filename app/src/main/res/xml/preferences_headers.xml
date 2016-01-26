@@ -16,4 +16,7 @@
         android:fragment="com.cliqz.browser.settings.AboutSettingsFragment"
         android:title="@string/settings_about"
         android:summary="@string/settings_about_explain" />
+    <header
+        android:title="@string/imprint"
+        android:id="@+id/imprint" />
 </preference-headers>
