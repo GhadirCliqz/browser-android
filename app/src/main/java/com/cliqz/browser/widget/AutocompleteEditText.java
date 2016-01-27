@@ -127,12 +127,13 @@ public class AutocompleteEditText extends EditText {
 
     private class DefaultTextWatcher implements TextWatcher {
 
+        private String mBefore = "";
+
         @Override
         public void beforeTextChanged(CharSequence s, int start, int count, int after) {
             if (mIsAutocompleting) {
                 return;
             }
-            mDeleting = after < 1;
 
             for (TextWatcher watcher: mListeners) {
                 watcher.beforeTextChanged(s, start, count, after);
@@ -148,6 +149,10 @@ public class AutocompleteEditText extends EditText {
             for (TextWatcher watcher: mListeners) {
                 watcher.onTextChanged(s, start, before, count);
             }
+
+            final String str = s.toString();
+            mDeleting = mBefore.startsWith(str) && mBefore.length() >= str.length();
+            mBefore = str;
 
             if (mDeleting) {
                 mTelemetry.sendTypingSignal(Telemetry.Action.KEYSTROKE_DEL, s.length());
