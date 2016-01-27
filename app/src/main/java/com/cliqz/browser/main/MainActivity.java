@@ -1,5 +1,6 @@
 package com.cliqz.browser.main;
 
+import android.app.ActivityManager;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Intent;
@@ -28,6 +29,8 @@ import com.cliqz.browser.webview.CliqzMessages;
 import com.cliqz.browser.widget.MainViewContainer;
 import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
+
+import java.util.List;
 
 import javax.inject.Inject;
 
@@ -221,7 +224,7 @@ public class MainActivity extends AppCompatActivity {
         final Intent intent = new Intent(getBaseContext(), MainActivity.class);
         intent.setAction(Intent.ACTION_VIEW);
         intent.setData(Uri.parse(url));
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK
+        intent.addFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK
                 | Intent.FLAG_ACTIVITY_NEW_DOCUMENT);
         startActivity(intent);
     }
@@ -305,7 +308,12 @@ public class MainActivity extends AppCompatActivity {
 
     @Subscribe
     public void exit(Messages.Exit event) {
-        finish();
+        ActivityManager activityManager = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
+        List<ActivityManager.AppTask> cliqzTasks = activityManager.getAppTasks();
+        if(cliqzTasks.size() > 1) {
+            cliqzTasks.get(1).moveToFront();
+        }
+        finishAndRemoveTask();
     }
 
     @Subscribe

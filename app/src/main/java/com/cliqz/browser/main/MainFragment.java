@@ -1,6 +1,8 @@
 package com.cliqz.browser.main;
 
 import android.animation.Animator;
+import android.app.Activity;
+import android.app.ActivityManager;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
@@ -28,6 +30,8 @@ import com.cliqz.browser.webview.SearchWebView;
 import com.cliqz.browser.widget.AutocompleteEditText;
 import com.cliqz.browser.widget.SearchBar;
 import com.squareup.otto.Subscribe;
+
+import java.util.List;
 
 import acr.browser.lightning.R;
 import acr.browser.lightning.bus.BrowserEvents;
@@ -392,24 +396,26 @@ public class MainFragment extends BaseFragment {
             mStatusBar.animate().translationY(-height).setInterpolator(new AccelerateInterpolator()).start();
             mContentContainer.animate().translationY(-height).setInterpolator(new AccelerateInterpolator())
                     .setListener(new Animator.AnimatorListener() {
-                @Override
-                public void onAnimationStart(Animator animation) {
-                    int containerh = mContentContainer.getHeight();
-                    mContentContainer.setLayoutParams(new LinearLayout.LayoutParams(
-                            LayoutParams.MATCH_PARENT,containerh+height));
-                }
+                        @Override
+                        public void onAnimationStart(Animator animation) {
+                            int containerh = mContentContainer.getHeight();
+                            mContentContainer.setLayoutParams(new LinearLayout.LayoutParams(
+                                    LayoutParams.MATCH_PARENT, containerh + height));
+                        }
 
-                @Override
-                public void onAnimationCancel(Animator animation) {}
+                        @Override
+                        public void onAnimationCancel(Animator animation) {
+                        }
 
-                @Override
-                public void onAnimationRepeat(Animator animation) {}
+                        @Override
+                        public void onAnimationRepeat(Animator animation) {
+                        }
 
-                @Override
-                public void onAnimationEnd(Animator animation) {
-                     isAnimationInProgress = false;
-                }
-            }).start();
+                        @Override
+                        public void onAnimationEnd(Animator animation) {
+                            isAnimationInProgress = false;
+                        }
+                    }).start();
         }
     }
 
@@ -421,23 +427,26 @@ public class MainFragment extends BaseFragment {
             mStatusBar.animate().translationY(0).setInterpolator(new AccelerateInterpolator()).start();
             mContentContainer.animate().translationY(0).setInterpolator(new AccelerateInterpolator())
                     .setListener(new Animator.AnimatorListener() {
-                @Override
-                public void onAnimationStart(Animator animation) {}
+                        @Override
+                        public void onAnimationStart(Animator animation) {
+                        }
 
-                @Override
-                public void onAnimationCancel(Animator animation) {}
+                        @Override
+                        public void onAnimationCancel(Animator animation) {
+                        }
 
-                @Override
-                public void onAnimationRepeat(Animator animation) {}
+                        @Override
+                        public void onAnimationRepeat(Animator animation) {
+                        }
 
-                @Override
-                public void onAnimationEnd(Animator animation) {
-                    int containerh = mContentContainer.getHeight();
-                    mContentContainer.setLayoutParams(new LinearLayout.LayoutParams(
-                            LayoutParams.MATCH_PARENT, containerh-height));
-                    isAnimationInProgress = false;
-                }
-            }).start();
+                        @Override
+                        public void onAnimationEnd(Animator animation) {
+                            int containerh = mContentContainer.getHeight();
+                            mContentContainer.setLayoutParams(new LinearLayout.LayoutParams(
+                                    LayoutParams.MATCH_PARENT, containerh - height));
+                            isAnimationInProgress = false;
+                        }
+                    }).start();
         }
     }
 
@@ -445,6 +454,7 @@ public class MainFragment extends BaseFragment {
         final String title = mLightningView.getTitle();
         searchBar.setTitle(title);
         state.setTitle(title);
+        getActivity().setTaskDescription(new ActivityManager.TaskDescription(mLightningView.getTitle()));
     }
 
     private void setSearchEngine() {
