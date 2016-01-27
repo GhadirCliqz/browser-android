@@ -233,4 +233,5 @@
     <string name="settings_adblock">Ad Block Einstellungen</string>
     <string name="block_adult_content">Nicht-jugendfreie Inhalte blockieren</string>
     <string name="show_onboarding_tour">Einführungstour zeigen</string>
+    <string name="imprint">Impressum</string>
 </resources>

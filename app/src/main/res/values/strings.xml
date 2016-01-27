@@ -245,4 +245,5 @@
     <string name="show_onboarding_tour">Show tour</string>
     <string name="onboarding" translatable="false">OnBoarding</string>
     <string name="block_adult_content">Block Adult Content</string>
+    <string name="imprint">Imprint</string>
 </resources>

@@ -3,24 +3,41 @@
  */
 package acr.browser.lightning.activity;
 
+import android.content.Intent;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.preference.Preference;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
+import android.widget.ListView;
+import com.cliqz.browser.main.MainActivity;
 
 import com.anthonycr.grant.PermissionsManager;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import acr.browser.lightning.BuildConfig;
 import acr.browser.lightning.R;
 
 public class SettingsActivity extends ThemableSettingsActivity {
 
-    private static final List<String> fragments = new ArrayList<>();
+    private static class HeaderInfo {
+        final String name;
+        final long id;
+
+        HeaderInfo(String name, long id) {
+            this.name = name;
+            this.id = id;
+        }
+    }
+
+    private static final List<HeaderInfo> fragments = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,13 +62,50 @@ public class SettingsActivity extends ThemableSettingsActivity {
         loadHeadersFromResource(R.xml.preferences_headers, target);
         fragments.clear();
         for (Header header : target) {
-            fragments.add(header.fragment);
+            fragments.add(new HeaderInfo(header.fragment, header.id));
         }
     }
 
     @Override
     protected boolean isValidFragment(String fragmentName) {
-        return fragments.contains(fragmentName);
+        for (HeaderInfo info: fragments) {
+            if (fragmentName.equals(info.name)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @Override
+    protected void onListItemClick(ListView l, View v, int position, long id) {
+        final HeaderInfo info = fragments.get(position);
+        if (info.id == R.id.imprint) {
+            final Intent browserIntent = new Intent(this, MainActivity.class);
+            browserIntent.setAction(Intent.ACTION_VIEW);
+            browserIntent.setData(Uri.parse("https://cliqz.com/legal"));
+            startActivity(browserIntent);
+            finish();
+        } else if (info.id == R.id.feedback) {
+            final Uri to = Uri.parse(String.format("mailto:%s?subject=%s",
+                    getString(R.string.feedback_at_cliqz_dot_com),
+                    Uri.encode(getString(R.string.feedback_mail_subject))));
+            final Intent intent = new Intent(Intent.ACTION_SENDTO, to);
+            intent.putExtra(Intent.EXTRA_TEXT, new StringBuilder()
+                            .append("\n")
+                            .append("Feedback für CLIQZ for Android (")
+                            .append(BuildConfig.VERSION_NAME)
+                            .append("), auf ")
+                            .append(Build.MODEL)
+                            .append(" (")
+                            .append(Build.VERSION.SDK_INT)
+                            .append(")")
+                            .toString()
+            );
+            startActivity(Intent.createChooser(intent, getString(R.string.contact_cliqz)));
+            finish();
+        } else {
+            super.onListItemClick(l, v, position, id);
+        }
     }
 
     @Override
