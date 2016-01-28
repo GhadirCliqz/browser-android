@@ -15,6 +15,7 @@ import org.json.JSONObject;
 import java.util.List;
 import java.util.Locale;
 
+import acr.browser.lightning.BuildConfig;
 import acr.browser.lightning.app.BrowserApp;
 import acr.browser.lightning.constant.Constants;
 import acr.browser.lightning.database.HistoryItem;
@@ -28,7 +29,7 @@ public class SearchWebView extends BaseWebView {
     private static final boolean DO_PROFILE_QUERY = false;
     // app_debug includes single JS files, app includes minified JS
     private static final String CLIQZ_URL = "file:///android_asset/search/index.html";
-
+    private static final String CLIQZ_MANIFEST_URL = "file:///android_asset/search/search.json";
     private String mLastQuery;
     private boolean mProfilingRunning = false;
 
@@ -39,12 +40,12 @@ public class SearchWebView extends BaseWebView {
 
     @Nullable
     @Override
-    protected WebViewClient createWebViewClient() {
-        return new WebViewClient() {
+    protected AWVClient createClient() {
+        return new AWVClient() {
             @Override
-            public boolean shouldOverrideUrlLoading(final WebView wv, final String url) {
+            public boolean shouldOverrideUrlLoading(final AbstractionWebView wv, final String url) {
                 Log.d(TAG, "New url: " + url);
-                return true;
+                return (url == null) || (!url.startsWith("file:///android_asset/search"));
             }
         };
     }
@@ -58,7 +59,11 @@ public class SearchWebView extends BaseWebView {
     @Nullable
     @Override
     protected String getExtensionUrl() {
-        return CLIQZ_URL;
+        if ("xwalk".equals(BuildConfig.FLAVOR)) {
+            return CLIQZ_MANIFEST_URL;
+        } else {
+            return CLIQZ_URL;
+        }
     }
 
 

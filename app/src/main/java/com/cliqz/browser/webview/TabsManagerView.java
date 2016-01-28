@@ -2,6 +2,7 @@ package com.cliqz.browser.webview;
 
 import android.content.Context;
 import android.os.Build;
+import android.support.annotation.Nullable;
 import android.util.Log;
 import android.view.View;
 import android.webkit.ConsoleMessage;
@@ -30,7 +31,7 @@ import acr.browser.lightning.view.LightningView;
 /**
  * Created by Ravjit on 12/10/15.
  */
-public class TabsManagerView extends WebView implements ILightningTab {
+public class TabsManagerView extends BaseWebView implements ILightningTab {
 
     private static final String TAG = TabsManagerView.class.getSimpleName();
     private static final String KEY_ID = "id";
@@ -39,7 +40,6 @@ public class TabsManagerView extends WebView implements ILightningTab {
     private static final String KEY_LIST = "list";
 
     private final File directory;
-    private final TabsManagerBridge bridge;
 
     @Inject
     Bus mTabManagerBus;
@@ -51,8 +51,6 @@ public class TabsManagerView extends WebView implements ILightningTab {
         super(context);
         directory = context.getDir(Constants.TABS_SCREENSHOT_FOLDER_NAME,Context.MODE_PRIVATE);
         directory.mkdirs();
-        bridge = new TabsManagerBridge(this);
-        setup();
         BrowserApp.getAppComponent().inject(this);
     }
 
@@ -64,35 +62,31 @@ public class TabsManagerView extends WebView implements ILightningTab {
         }
     };
 
-    public void setup() {
+
+    @Override
+    protected void setup() {
+        super.setup();
         setLayerType(View.LAYER_TYPE_HARDWARE, null);
-        setWebViewClient(mWebViewClient);
+        setClient(null);
+        super.loadApp(Constants.OPEN_TABS);
+    }
 
-        //Web view settings
-        WebSettings webSettings = getSettings();
-        webSettings.setJavaScriptEnabled(true);
-        webSettings.setDomStorageEnabled(true);
+    @Nullable
+    @Override
+    protected AWVClient createClient() {
+        return null;
+    }
 
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-            webSettings.setAllowUniversalAccessFromFileURLs(true);
-        }
+    @Nullable
+    @Override
+    protected Bridge createBridge() {
+        return new TabsManagerBridge(this);
+    }
 
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT && BuildConfig.DEBUG) {
-            WebView.setWebContentsDebuggingEnabled(true);
-        }
-
-        setWebChromeClient(new WebChromeClient() {
-
-            public boolean onConsoleMessage(ConsoleMessage cm) {
-                Log.d(TAG, cm.message() + " -- From line "
-                        + cm.lineNumber() + " of "
-                        + cm.sourceId());
-                return true;
-            }
-        });
-
-        addJavascriptInterface(bridge, "tabmanager");
-        super.loadUrl(Constants.OPEN_TABS);
+    @Nullable
+    @Override
+    protected String getExtensionUrl() {
+        return null;
     }
 
     // returns JSON encoded String details of the open tabs
@@ -117,14 +111,14 @@ public class TabsManagerView extends WebView implements ILightningTab {
     }
 
     public void updateTabmanagerView() {
-        bridge.executeJavascript("updateView()");
+        //bridge.executeJavascript("updateView()");
     }
 
     public void showTabManager() {
-        bridge.executeJavascript("showTabManager()");
+        // bridge.executeJavascript("showTabManager()");
     }
 
     public void backPressed() {
-        bridge.executeJavascript("onBackPressed()");
+        // bridge.executeJavascript("onBackPressed()");
     }
 }

@@ -83,7 +83,7 @@ class CliqzBridge extends Bridge {
         isReady(new IAction() {
             @Override
             public void execute(Bridge bridge, Object data, String callback) {
-                ((BaseWebView) bridge.getWebView()).extensionReady();
+                bridge.getWebView().extensionReady();
                 bridge.executeJavascript(String.format(Locale.US,  "%s(-1)", callback));
             }
         }),
@@ -108,7 +108,7 @@ class CliqzBridge extends Bridge {
             @Override
             public void execute(final Bridge bridge, Object data, String callback) {
                 final JSONObject params = (data instanceof JSONObject) ? (JSONObject) data : null;
-                final WebView webView = bridge.getWebView();
+                final BaseWebView webView = bridge.getWebView();
                 final String dataPar = params != null ? params.optString("data") : null;
                 final String typePar = params != null ? params.optString("type") : null;
                 if (dataPar == null || typePar == null) {

@@ -17,28 +17,16 @@ public class FreshTabWebView extends BaseWebView {
     private static final String FRESHTAB_URL = "file:///android_asset/search/freshtab.html";
 
     public FreshTabWebView(Context context) {
-        this(context, null);
+        super(context);
     }
 
-    public FreshTabWebView(Context context, AttributeSet attrs) {
-        this(context, attrs, 0);
-    }
-
-    public FreshTabWebView(Context context, AttributeSet attrs, int defStyleAttr) {
-        super(context, attrs, defStyleAttr);
-    }
-
-    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-    public FreshTabWebView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
-        super(context, attrs, defStyleAttr, defStyleRes);
-    }
 
     @Nullable
     @Override
-    protected WebViewClient createWebViewClient() {
-        return new WebViewClient() {
+    protected AWVClient createClient() {
+        return new AWVClient() {
             @Override
-            public void onPageFinished(WebView view, String url) {
+            public void onPageFinished(AbstractionWebView view, String url) {
                 super.onPageFinished(view, url);
                 executeJS("initFreshtab()");
             }

@@ -8,6 +8,8 @@ import android.util.AttributeSet;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
+import acr.browser.lightning.BuildConfig;
+
 /**
  * @author Stefano Pacifici
  * @date 2015/12/08
@@ -15,28 +17,16 @@ import android.webkit.WebViewClient;
 public class HistoryWebView extends BaseWebView {
 
     private static final String FRESHTAB_URL = "file:///android_asset/search/history.html";
+    private static final String FRESHTAB_MANIFEST_URL = "file:///android_asset/search/history.json";
 
     public HistoryWebView(Context context) {
-        this(context, null);
-    }
-
-    public HistoryWebView(Context context, AttributeSet attrs) {
-        this(context, attrs, 0);
-    }
-
-    public HistoryWebView(Context context, AttributeSet attrs, int defStyleAttr) {
-        super(context, attrs, defStyleAttr);
-    }
-
-    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-    public HistoryWebView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
-        super(context, attrs, defStyleAttr, defStyleRes);
+        super(context);
     }
 
     @Nullable
     @Override
-    protected WebViewClient createWebViewClient() {
-        return new WebViewClient();
+    protected AWVClient createClient() {
+        return null;
     }
 
     @Nullable
@@ -48,7 +38,11 @@ public class HistoryWebView extends BaseWebView {
     @Nullable
     @Override
     protected String getExtensionUrl() {
-        return FRESHTAB_URL;
+        if ("xwalk".equals(BuildConfig.FLAVOR)) {
+            return FRESHTAB_MANIFEST_URL;
+        } else {
+            return FRESHTAB_URL;
+        }
     }
 
     public void fourceUpdateHistory() {
