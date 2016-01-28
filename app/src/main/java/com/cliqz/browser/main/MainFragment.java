@@ -6,6 +6,7 @@ import android.app.ActivityManager;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.util.Log;
@@ -454,7 +455,9 @@ public class MainFragment extends BaseFragment {
         final String title = mLightningView.getTitle();
         searchBar.setTitle(title);
         state.setTitle(title);
-        getActivity().setTaskDescription(new ActivityManager.TaskDescription(mLightningView.getTitle()));
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            getActivity().setTaskDescription(new ActivityManager.TaskDescription(title));
+        }
     }
 
     private void setSearchEngine() {

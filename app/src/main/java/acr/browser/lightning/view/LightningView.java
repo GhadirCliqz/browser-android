@@ -766,22 +766,25 @@ public class LightningView implements ILightningTab {
         float mLocation;
         float mY;
         int mAction;
+        boolean isMultiTouch = false;
 
         @SuppressLint("ClickableViewAccessibility")
         @Override
-        public boolean onTouch(View view, MotionEvent arg1) {
+        public boolean onTouch(View view, MotionEvent motionEvent) {
             if (view == null)
                 return false;
 
             if (!view.hasFocus()) {
                 view.requestFocus();
             }
-            mAction = arg1.getAction();
-            mY = arg1.getY();
+            mAction = motionEvent.getAction() & MotionEvent.ACTION_MASK;
+            mY = motionEvent.getY();
             if (mAction == MotionEvent.ACTION_DOWN) {
                 mLocation = mY;
                 clicked = true;
-            } else if (mAction == MotionEvent.ACTION_UP) {
+            } else if (mAction == MotionEvent.ACTION_POINTER_DOWN) {
+                isMultiTouch = true;
+            } else if (mAction == MotionEvent.ACTION_UP && !isMultiTouch) {
                 final float distance = (mY - mLocation);
                 if (distance > SCROLL_UP_THRESHOLD && view.getScrollY() < SCROLL_UP_THRESHOLD) {
                     mEventBus.post(new BrowserEvents.ShowToolBar());
@@ -789,8 +792,9 @@ public class LightningView implements ILightningTab {
                     mEventBus.post(new BrowserEvents.HideToolBar());
                 }
                 mLocation = 0;
+                isMultiTouch = false;
             }
-            mGestureDetector.onTouchEvent(arg1);
+            mGestureDetector.onTouchEvent(motionEvent);
             return false;
         }
     }
