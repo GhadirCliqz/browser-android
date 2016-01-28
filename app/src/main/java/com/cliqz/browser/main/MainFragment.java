@@ -95,7 +95,8 @@ public class MainFragment extends BaseFragment {
         super.onViewCreated(view, savedInstanceState);
         ButterKnife.bind(this, view);
         if (mSearchWebView == null || mLightningView == null) {
-            mSearchWebView = new SearchWebView(view.getContext());
+            // Must use activity due to Crosswalk webview
+            mSearchWebView = new SearchWebView(getActivity());
             mLightningView = new LightningView(getActivity()/*, mUrl */, false, "1");
             mSearchWebView.setLayoutParams(
                     new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));

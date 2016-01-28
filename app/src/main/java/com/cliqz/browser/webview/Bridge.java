@@ -4,8 +4,6 @@ import android.os.Build;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.util.Log;
-import android.webkit.JavascriptInterface;
-import android.webkit.WebView;
 
 import com.cliqz.browser.utils.Telemetry;
 import com.squareup.otto.Bus;
@@ -27,7 +25,7 @@ public abstract class Bridge {
     private static final String TAG = Bridge.class.getSimpleName();
 
     private final Handler handler;
-    private final WebView webView;
+    private final BaseWebView webView;
 
     @Inject
     Telemetry telemetry;
@@ -38,7 +36,7 @@ public abstract class Bridge {
     @Inject
     HistoryDatabase historyDatabase;
 
-    protected Bridge(@NonNull WebView webView) {
+    protected Bridge(@NonNull BaseWebView webView) {
         this.webView = webView;
         this.handler = new Handler(webView.getContext().getMainLooper());
         BrowserApp.getAppComponent().inject(this);
@@ -52,12 +50,11 @@ public abstract class Bridge {
 
     protected abstract boolean checkCapabilities();
 
-    WebView getWebView() {
+    BaseWebView getWebView() {
         return webView;
     }
 
-    @JavascriptInterface
-    public void postMessage(String message) {
+    public final void postMessage(String message) {
         if (!checkCapabilities()) {
             Log.w(TAG, "Not enough capabilities to execute");
             return;
@@ -79,7 +76,7 @@ public abstract class Bridge {
         }
     }
 
-    protected void executeJavascript(final String javascript) {
+    void executeJavascript(final String javascript) {
         if (javascript != null || !javascript.isEmpty()) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
                 webView.evaluateJavascript(javascript, null);

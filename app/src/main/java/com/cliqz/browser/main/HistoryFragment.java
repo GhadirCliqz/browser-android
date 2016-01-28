@@ -31,7 +31,8 @@ public class HistoryFragment extends BaseFragment {
     protected View onCreateContentView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         if (mHistoryWebView == null) {
             mJustCreated = true;
-            mHistoryWebView = new HistoryWebView(inflater.getContext());
+            // Must use activity due to Crosswalk webview
+            mHistoryWebView = new HistoryWebView(getActivity());
             mHistoryWebView.setLayoutParams(
                     new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
         } else {

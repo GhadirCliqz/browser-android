@@ -46,7 +46,7 @@ public abstract class BaseFragment extends FragmentWithBus {
 
         final View view = localInflater.inflate(R.layout.fragment_base, container, false);
         mStatusBar = (FrameLayout) view.findViewById(R.id.statusbar);
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
             mStatusBar.setPadding(0, 0, 0, 0);
         }
         mToolbar = (Toolbar) view.findViewById(R.id.toolbar);

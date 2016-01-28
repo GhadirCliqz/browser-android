@@ -38,7 +38,7 @@ import acr.browser.lightning.preference.PreferenceManager;
  * @author Stefano Pacifici
  * @date 2015/12/08
  */
-public abstract class BaseWebView extends WebView {
+public abstract class BaseWebView extends AbstractionWebView {
     private static final String TAG = BaseWebView.class.getSimpleName();
 
     private boolean mSuperSetupCalled = false;
@@ -61,22 +61,7 @@ public abstract class BaseWebView extends WebView {
 
 
     public BaseWebView(Context context) {
-        this(context, null);
-    }
-
-    public BaseWebView(Context context, AttributeSet attrs) {
-        this(context, attrs, 0);
-    }
-
-    public BaseWebView(Context context, AttributeSet attrs, int defStyleAttr) {
-        super(context, attrs, defStyleAttr);
-        setup();
-        checkSuperSetupCalled();
-    }
-
-    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-    public BaseWebView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
-        super(context, attrs, defStyleAttr, defStyleRes);
+        super(context);
         setup();
         checkSuperSetupCalled();
     }
@@ -86,64 +71,30 @@ public abstract class BaseWebView extends WebView {
             throw new RuntimeException("BaseWebView setup method should be called by children");
     }
 
+    @Override
     protected  void setup() {
         BrowserApp.getAppComponent().inject(this);
         // Make extra sure web performance is nice on scrolling. Can this actually be harmful?
-        setLayerType(View.LAYER_TYPE_HARDWARE, null);
+        super.setup();
 
-        final WebViewClient webViewClient = createWebViewClient();
-        if (webViewClient != null) {
-            setWebViewClient(createWebViewClient());
-        }
-
-        // Web view settings
-        WebSettings webSettings = getSettings();
-        webSettings.setAllowFileAccess(true);
-        webSettings.setJavaScriptEnabled(true);
-        webSettings.setDomStorageEnabled(true);
-        webSettings.setGeolocationEnabled(true);
-        webSettings.setGeolocationDatabasePath(getContext().getCacheDir().getAbsolutePath());
-
-        if (Build.VERSION.SDK_INT >= 16) {
-            // Otherwise we can't do XHR
-            webSettings.setAllowFileAccessFromFileURLs(true);
-            webSettings.setAllowUniversalAccessFromFileURLs(true);
-        }
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT && BuildConfig.DEBUG) {
-            WebView.setWebContentsDebuggingEnabled(true);
-        }
-
-
-        setWebChromeClient(new WebChromeClient() {
-
-            public void onGeolocationPermissionsShowPrompt(String origin, GeolocationPermissions.Callback callback) {
-                callback.invoke(origin, true, false);
-            }
-
-            public boolean onConsoleMessage(ConsoleMessage cm) {
-                Log.d(TAG, cm.message() + " -- From line "
-                        + cm.lineNumber() + " of "
-                        + cm.sourceId());
-                return true;
-            }
-        });
+        final AWVClient client = createClient();
+        setClient(client);
 
         // Callbacks from JS to Java
         final Bridge bridge = createBridge();
         if (bridge != null) {
-            addJavascriptInterface(bridge, "jsBridge");
+            addBridge(bridge, "jsBridge");
         }
 
         final String extensionUrl = getExtensionUrl();
         if (extensionUrl != null) {
-            loadUrl(extensionUrl);
+            loadApp(extensionUrl);
         }
         mSuperSetupCalled = true;
     }
 
     @Nullable
-    protected abstract WebViewClient createWebViewClient();
+    protected abstract AWVClient createClient();
 
     @Nullable
     protected abstract Bridge createBridge();
@@ -171,25 +122,6 @@ public abstract class BaseWebView extends WebView {
         // When created we call this twice (one here and one in extensionReady()
         // That should not be a problem
         setDefaultSearchEngine();
-    }
-
-    /**
-     * Evaluate JS in web context
-     * @param js JS command
-     */
-     protected final void executeJS(final String js) {
-        if (js != null && !js.isEmpty()) {
-            post(new Runnable() {
-                @Override
-                public void run() {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-                        evaluateJavascript(js, null);
-                    } else {
-                        loadUrl("javascript:" + js);
-                    }
-                }
-            });
-        }
     }
 
     private void setDefaultSearchEngine() {
