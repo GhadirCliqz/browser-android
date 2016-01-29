@@ -1,8 +1,12 @@
 package com.cliqz.browser.main;
 
+import android.animation.Animator;
+import android.app.Activity;
+import android.app.ActivityManager;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.util.Log;
@@ -13,11 +17,13 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
+import android.view.animation.AccelerateInterpolator;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.webkit.URLUtil;
 import android.webkit.WebView;
 import android.widget.FrameLayout;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.cliqz.browser.webview.CliqzMessages;
@@ -25,6 +31,8 @@ import com.cliqz.browser.webview.SearchWebView;
 import com.cliqz.browser.widget.AutocompleteEditText;
 import com.cliqz.browser.widget.SearchBar;
 import com.squareup.otto.Subscribe;
+
+import java.util.List;
 
 import acr.browser.lightning.R;
 import acr.browser.lightning.bus.BrowserEvents;
@@ -51,6 +59,7 @@ public class MainFragment extends BaseFragment {
     private static final int RELOAD = 1;
     private static final int STOP = 2;
     private int currentIcon;
+    private boolean isAnimationInProgress = false;
 
     enum State {
         SHOWING_SEARCH,
@@ -68,7 +77,7 @@ public class MainFragment extends BaseFragment {
     public LightningView mLightningView = null;
 
     @Bind(R.id.local_container)
-    FrameLayout mContentContainer;
+    FrameLayout mLocalContainer;
 
     @Bind(R.id.progress_view)
     AnimatedProgressBar mProgressBar;
@@ -122,8 +131,8 @@ public class MainFragment extends BaseFragment {
                 Log.i(TAG, "Can't convert " + stateName + " to state enum");
             }
         }
-        mContentContainer.addView(webView);
-        mContentContainer.addView(mSearchWebView);
+        mLocalContainer.addView(webView);
+        mLocalContainer.addView(mSearchWebView);
         titleBar.setOnTouchListener(onTouchListener);
     }
 
@@ -381,10 +390,75 @@ public class MainFragment extends BaseFragment {
         mAutocompleteEditText.setAutocompleteText(event.completion);
     }
 
+    @Subscribe
+    public synchronized void hideToolBar(BrowserEvents.HideToolBar event) {
+        if(mStatusBar.getTranslationY() >= 0.0f && !isAnimationInProgress) {
+            isAnimationInProgress = true;
+            final int height = mStatusBar.getHeight();
+            mStatusBar.animate().translationY(-height).setInterpolator(new AccelerateInterpolator()).start();
+            mContentContainer.animate().translationY(-height).setInterpolator(new AccelerateInterpolator())
+                    .setListener(new Animator.AnimatorListener() {
+                        @Override
+                        public void onAnimationStart(Animator animation) {
+                            int containerh = mContentContainer.getHeight();
+                            mContentContainer.setLayoutParams(new LinearLayout.LayoutParams(
+                                    LayoutParams.MATCH_PARENT, containerh + height));
+                        }
+
+                        @Override
+                        public void onAnimationCancel(Animator animation) {
+                        }
+
+                        @Override
+                        public void onAnimationRepeat(Animator animation) {
+                        }
+
+                        @Override
+                        public void onAnimationEnd(Animator animation) {
+                            isAnimationInProgress = false;
+                        }
+                    }).start();
+        }
+    }
+
+    @Subscribe
+    public void showToolBar(BrowserEvents.ShowToolBar event) {
+        if(mStatusBar.getTranslationY() < 0.0f && !isAnimationInProgress) {
+            isAnimationInProgress = true;
+            final int height = mStatusBar.getHeight();
+            mStatusBar.animate().translationY(0).setInterpolator(new AccelerateInterpolator()).start();
+            mContentContainer.animate().translationY(0).setInterpolator(new AccelerateInterpolator())
+                    .setListener(new Animator.AnimatorListener() {
+                        @Override
+                        public void onAnimationStart(Animator animation) {
+                        }
+
+                        @Override
+                        public void onAnimationCancel(Animator animation) {
+                        }
+
+                        @Override
+                        public void onAnimationRepeat(Animator animation) {
+                        }
+
+                        @Override
+                        public void onAnimationEnd(Animator animation) {
+                            int containerh = mContentContainer.getHeight();
+                            mContentContainer.setLayoutParams(new LinearLayout.LayoutParams(
+                                    LayoutParams.MATCH_PARENT, containerh - height));
+                            isAnimationInProgress = false;
+                        }
+                    }).start();
+        }
+    }
+
     void updateTitle() {
         final String title = mLightningView.getTitle();
         searchBar.setTitle(title);
         state.setTitle(title);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            getActivity().setTaskDescription(new ActivityManager.TaskDescription(title));
+        }
     }
 
     private void setSearchEngine() {
