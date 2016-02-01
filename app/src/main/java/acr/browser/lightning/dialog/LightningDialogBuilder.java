@@ -49,7 +49,7 @@ public class LightningDialogBuilder {
 
     @Inject
     public LightningDialogBuilder() {
-        BrowserApp.getAppComponent().inject(this);
+        //BrowserApp.getAppComponent().inject(this);
     }
 
     /**

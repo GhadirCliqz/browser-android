@@ -27,17 +27,18 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import acr.browser.lightning.BuildConfig;
+import acr.browser.lightning.app.BrowserApp;
+import acr.browser.lightning.constant.Constants;
 import acr.browser.lightning.database.HistoryDatabase;
 import acr.browser.lightning.preference.PreferenceManager;
 
 /**
  * Created by Ravjit on 17/11/15.
  */
-@Singleton
 public class Telemetry {
 
-    @Inject
     public Telemetry(Context context) {
+        BrowserApp.getAppComponent().inject(this);
         this.context = context;
         batteryLevel = -1;
         context.registerReceiver(mBatteryInfoReceiver, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));

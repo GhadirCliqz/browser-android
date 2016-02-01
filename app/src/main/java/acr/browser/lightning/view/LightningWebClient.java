@@ -26,6 +26,7 @@ import android.webkit.WebViewClient;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 
+import com.cliqz.browser.main.MainActivity;
 import com.cliqz.browser.main.Messages;
 import com.squareup.otto.Bus;
 
@@ -66,7 +67,7 @@ class LightningWebClient extends WebViewClient {
         mLightningView = lightningView;
         mAdBlock = AdBlock.getInstance(activity);
         mAdBlock.updatePreference();
-        mEventBus = BrowserApp.getAppComponent().getBus();
+        mEventBus = lightningView.mEventBus;
         mIntentUtils = new IntentUtils(activity);
         mWebView = lightningView.getWebView();
     }

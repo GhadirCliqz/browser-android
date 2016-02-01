@@ -35,7 +35,7 @@ public class SearchWebView extends BaseWebView {
 
     public SearchWebView(Context context) {
         super(context);
-        BrowserApp.getAppComponent().inject(this);
+        bridge.setWebView(this);
     }
 
     @Nullable
@@ -48,12 +48,6 @@ public class SearchWebView extends BaseWebView {
                 return (url == null) || (!url.startsWith("file:///android_asset/search"));
             }
         };
-    }
-
-    @Nullable
-    @Override
-    protected Bridge createBridge() {
-        return new CliqzBridge(this);
     }
 
     @Nullable

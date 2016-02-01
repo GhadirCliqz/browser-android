@@ -35,12 +35,6 @@ public class FreshTabWebView extends BaseWebView {
 
     @Nullable
     @Override
-    protected Bridge createBridge() {
-        return new CliqzBridge(this);
-    }
-
-    @Nullable
-    @Override
     protected String getExtensionUrl() {
         return FRESHTAB_URL;
     }

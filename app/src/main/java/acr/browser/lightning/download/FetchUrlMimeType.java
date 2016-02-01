@@ -12,6 +12,7 @@ import android.os.Looper;
 import android.webkit.MimeTypeMap;
 import android.webkit.URLUtil;
 
+import com.cliqz.browser.main.MainActivity;
 import com.squareup.otto.Bus;
 
 import java.io.IOException;
@@ -19,7 +20,6 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 
 import acr.browser.lightning.R;
-import acr.browser.lightning.app.BrowserApp;
 import acr.browser.lightning.bus.BrowserEvents;
 
 /**
@@ -32,7 +32,7 @@ import acr.browser.lightning.bus.BrowserEvents;
  */
 class FetchUrlMimeType extends Thread {
 
-    private final Context mContext;
+    private final Activity mActivity;
 
     private final DownloadManager.Request mRequest;
 
@@ -42,9 +42,9 @@ class FetchUrlMimeType extends Thread {
 
     private final String mUserAgent;
 
-    public FetchUrlMimeType(Context context, DownloadManager.Request request, String uri,
+    public FetchUrlMimeType(Activity activity, DownloadManager.Request request, String uri,
                             String cookies, String userAgent) {
-        mContext = context;
+        mActivity = activity;
         mRequest = request;
         mUri = uri;
         mCookies = cookies;
@@ -55,7 +55,7 @@ class FetchUrlMimeType extends Thread {
     public void run() {
         // User agent is likely to be null, though the AndroidHttpClient
         // seems ok with that.
-        final Bus eventBus = BrowserApp.getAppComponent().getBus();
+        final Bus eventBus = ((MainActivity)mActivity).mActivityComponent.getBus();
         String mimeType = null;
         String contentDisposition = null;
         HttpURLConnection connection = null;
@@ -107,7 +107,7 @@ class FetchUrlMimeType extends Thread {
         }
 
         // Start the download
-        DownloadManager manager = (DownloadManager) mContext
+        DownloadManager manager = (DownloadManager) mActivity
                 .getSystemService(Context.DOWNLOAD_SERVICE);
         manager.enqueue(mRequest);
         Handler handler = new Handler(Looper.getMainLooper());
@@ -115,7 +115,7 @@ class FetchUrlMimeType extends Thread {
         handler.post(new Runnable() {
             @Override
             public void run() {
-                eventBus.post(new BrowserEvents.ShowSnackBarMessage(mContext.getString(R.string.download_pending) + ' ' + file));
+                eventBus.post(new BrowserEvents.ShowSnackBarMessage(mActivity.getString(R.string.download_pending) + ' ' + file));
             }
         });
     }

@@ -21,18 +21,13 @@ public class HistoryWebView extends BaseWebView {
 
     public HistoryWebView(Context context) {
         super(context);
+        bridge.setWebView(this);
     }
 
     @Nullable
     @Override
     protected AWVClient createClient() {
         return null;
-    }
-
-    @Nullable
-    @Override
-    protected Bridge createBridge() {
-        return new CliqzBridge(this);
     }
 
     @Nullable
