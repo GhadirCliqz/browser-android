@@ -1,5 +1,6 @@
 package com.cliqz.browser.webview;
 
+import android.app.Activity;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
@@ -16,6 +17,10 @@ import java.util.ArrayList;
  * @date 2015/11/13
  */
 class TabsManagerBridge extends Bridge {
+
+    public TabsManagerBridge(Activity activity) {
+        super(activity);
+    }
 
     private static final String TAG = TabsManagerBridge.class.getSimpleName();
 
@@ -93,9 +98,6 @@ class TabsManagerBridge extends Bridge {
         }
     }
 
-    TabsManagerBridge(TabsManagerView tabsManagerView) {
-        super(tabsManagerView);
-    }
 
     @Override
     protected IAction safeValueOf(@NonNull String name) {

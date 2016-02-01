@@ -3,6 +3,7 @@ package com.cliqz.browser.webview;
 import android.app.Activity;
 import android.os.Build;
 import android.os.Handler;
+import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
@@ -27,7 +28,7 @@ public abstract class Bridge {
     private static final String TAG = Bridge.class.getSimpleName();
 
     private final Handler handler;
-    private final BaseWebView webView;
+    private BaseWebView webView;
 
     @Inject
     Telemetry telemetry;
@@ -38,18 +39,18 @@ public abstract class Bridge {
     @Inject
     HistoryDatabase historyDatabase;
 
-    protected Bridge(@NonNull BaseWebView webView) {
-        this.webView = webView;
-        this.handler = new Handler(webView.getContext().getMainLooper());
-//        Activity activity = (Activity) webView.getContext();
-  //      ((MainActivity)activity).mActivityComponent.inject(this);
-        MainActivity.activityComponent.inject(this);
+    protected Bridge(Activity activity) {
+        this.handler = new Handler(Looper.getMainLooper());
+        ((MainActivity)activity).mActivityComponent.inject(this);
     }
 
     interface IAction {
         void execute(Bridge bridge, Object data, String callback);
     }
 
+    public void setWebView(BaseWebView baseWebView) {
+        this.webView = baseWebView;
+    }
     protected abstract  IAction safeValueOf(@NonNull String name);
 
     protected abstract boolean checkCapabilities();

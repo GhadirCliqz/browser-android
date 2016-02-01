@@ -260,12 +260,6 @@ public class MainFragment extends BaseFragment {
         delayedPostOnBus(new Messages.GoToHistory());
     }
 
-    @OnClick(R.id.open_tabs)
-    void tabManagerClicked() {
-        Intent intent = new Intent(getActivity(), MainActivity.class);
-        startActivity(intent);
-    }
-
     @OnClick(R.id.title_bar)
     void titleClicked() {
         searchBar.showSearchEditText();

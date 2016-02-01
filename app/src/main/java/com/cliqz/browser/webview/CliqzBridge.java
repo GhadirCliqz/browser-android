@@ -1,9 +1,13 @@
 package com.cliqz.browser.webview;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.util.Log;
 import android.webkit.WebView;
+
+import com.cliqz.browser.utils.Telemetry;
+import com.squareup.otto.Bus;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -12,6 +16,8 @@ import org.json.JSONObject;
 import java.util.List;
 import java.util.Locale;
 
+import javax.inject.Inject;
+
 import acr.browser.lightning.database.HistoryDatabase;
 import acr.browser.lightning.database.HistoryItem;
 
@@ -19,9 +25,13 @@ import acr.browser.lightning.database.HistoryItem;
  * @author Stefano Pacifici
  * @date 2015/11/09
  */
-class CliqzBridge extends Bridge {
+public class CliqzBridge extends Bridge {
 
     private static final String TAG = CliqzBridge.class.getSimpleName();
+
+    public CliqzBridge(Activity activity) {
+        super(activity);
+    }
 
     private enum Action implements IAction {
 
@@ -207,10 +217,6 @@ class CliqzBridge extends Bridge {
         public void execute(Bridge bridge, Object data, String callback) {
             action.execute(bridge, data, callback);
         }
-    }
-
-    CliqzBridge(BaseWebView baseWebView) {
-        super(baseWebView);
     }
 
     @Override

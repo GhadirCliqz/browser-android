@@ -4,6 +4,7 @@ import com.cliqz.browser.di.annotations.PerActivity;
 import com.cliqz.browser.di.modules.ActivityModule;
 import com.cliqz.browser.main.FragmentWithBus;
 import com.cliqz.browser.main.MainActivity;
+import com.cliqz.browser.webview.BaseWebView;
 import com.cliqz.browser.webview.Bridge;
 import com.squareup.otto.Bus;
 
@@ -24,6 +25,8 @@ public interface ActivityComponent {
     void inject(FragmentWithBus fragmentWithBus);
 
     void inject(Bridge bridge);
+
+    void inject(BaseWebView searchWebView);
 
     Bus getBus();
 

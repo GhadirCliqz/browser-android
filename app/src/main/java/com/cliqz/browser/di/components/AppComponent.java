@@ -82,7 +82,6 @@ public interface AppComponent {
 
     void inject(ThemableBrowserActivity activity);
 
-    void inject(BaseWebView searchWebView);
 
     //void inject(TabsManagerView tabsManagerView);
 

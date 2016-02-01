@@ -79,12 +79,6 @@ public class TabsManagerView extends BaseWebView implements ILightningTab {
 
     @Nullable
     @Override
-    protected Bridge createBridge() {
-        return new TabsManagerBridge(this);
-    }
-
-    @Nullable
-    @Override
     protected String getExtensionUrl() {
         return null;
     }

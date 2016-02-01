@@ -1,6 +1,7 @@
 package com.cliqz.browser.webview;
 
 import android.annotation.TargetApi;
+import android.app.Activity;
 import android.content.Context;
 import android.os.Build;
 import android.support.annotation.Nullable;
@@ -15,6 +16,7 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
 import com.cliqz.browser.main.CliqzBrowserState;
+import com.cliqz.browser.main.MainActivity;
 import com.cliqz.browser.utils.LocationCache;
 import com.cliqz.browser.utils.Telemetry;
 
@@ -59,9 +61,14 @@ public abstract class BaseWebView extends AbstractionWebView {
     @Inject
     CliqzBrowserState state;
 
+    @Inject
+    CliqzBridge bridge;
+
+    Context context;
 
     public BaseWebView(Context context) {
         super(context);
+        this.context = context;
         setup();
         checkSuperSetupCalled();
     }
@@ -73,7 +80,7 @@ public abstract class BaseWebView extends AbstractionWebView {
 
     @Override
     protected  void setup() {
-        BrowserApp.getAppComponent().inject(this);
+        ((MainActivity)context).mActivityComponent.inject(this);
         // Make extra sure web performance is nice on scrolling. Can this actually be harmful?
         super.setup();
 
@@ -81,7 +88,6 @@ public abstract class BaseWebView extends AbstractionWebView {
         setClient(client);
 
         // Callbacks from JS to Java
-        final Bridge bridge = createBridge();
         if (bridge != null) {
             addBridge(bridge, "jsBridge");
         }
@@ -95,9 +101,6 @@ public abstract class BaseWebView extends AbstractionWebView {
 
     @Nullable
     protected abstract AWVClient createClient();
-
-    @Nullable
-    protected abstract Bridge createBridge();
 
     @Nullable
     protected abstract String getExtensionUrl();

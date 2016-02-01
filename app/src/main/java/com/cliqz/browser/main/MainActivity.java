@@ -15,7 +15,6 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.util.Patterns;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,7 +23,6 @@ import android.view.Window;
 import android.view.WindowManager;
 
 import com.cliqz.browser.di.components.ActivityComponent;
-import com.cliqz.browser.di.components.AppComponent;
 import com.cliqz.browser.di.components.DaggerActivityComponent;
 import com.cliqz.browser.di.modules.ActivityModule;
 import com.cliqz.browser.utils.LocationCache;
@@ -58,7 +56,6 @@ public class MainActivity extends AppCompatActivity {
 
     private final static String TAG = MainActivity.class.getSimpleName();
 
-    public static ActivityComponent activityComponent;
     public ActivityComponent mActivityComponent;
 
     private static final String HISTORY_FRAGMENT_TAG = "history_fragment";
@@ -99,10 +96,9 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         mActivityComponent = DaggerActivityComponent.builder()
                 .appComponent(BrowserApp.getAppComponent())
-                .activityModule(new ActivityModule())
+                .activityModule(new ActivityModule(this))
                 .build();
         mActivityComponent.inject(this);
-        activityComponent = mActivityComponent;
         bus.register(this);
 
         // Restore state
@@ -178,7 +174,6 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        activityComponent = mActivityComponent;
         final String name = getCurrentVisibleFragmentName();
         timings.setAppStartTime();
         if(!name.isEmpty()) {
@@ -210,6 +205,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        bus.unregister(this);
         String context = getCurrentVisibleFragmentName();
         if(!context.isEmpty()) {
             telemetry.sendClosingSignals(Telemetry.Action.KILL, context);
