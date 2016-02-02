@@ -1,8 +1,9 @@
 package com.cliqz.browser.main;
 
 import android.animation.Animator;
-import android.app.Activity;
 import android.app.ActivityManager;
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
@@ -23,19 +24,22 @@ import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.webkit.URLUtil;
 import android.webkit.WebView;
+import android.widget.AdapterView;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
+import android.widget.ListPopupWindow;
 import android.widget.TextView;
 
 import com.cliqz.browser.webview.CliqzMessages;
 import com.cliqz.browser.webview.SearchWebView;
 import com.cliqz.browser.widget.AutocompleteEditText;
+import com.cliqz.browser.widget.OverFlowMenuAdapter;
 import com.cliqz.browser.widget.SearchBar;
 import com.squareup.otto.Subscribe;
 
-import java.util.List;
-
+import acr.browser.lightning.BuildConfig;
 import acr.browser.lightning.R;
+import acr.browser.lightning.activity.SettingsActivity;
 import acr.browser.lightning.bus.BrowserEvents;
 import acr.browser.lightning.constant.Constants;
 import acr.browser.lightning.utils.ThemeUtils;
@@ -94,6 +98,11 @@ public class MainFragment extends BaseFragment {
 
     @Bind(R.id.title_bar)
     TextView titleBar;
+
+    @Bind(R.id.overflow_menu)
+    View overflowMenuButton;
+
+    private ListPopupWindow overFlowMenu;
 
     @Override
     protected View onCreateContentView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -268,6 +277,50 @@ public class MainFragment extends BaseFragment {
         showKeyBoard();
     }
 
+    @OnClick(R.id.overflow_menu)
+    void menuClicked() {
+        overFlowMenu = new ListPopupWindow(getContext());
+        OverFlowMenuAdapter overFlowMenuAdapter = new OverFlowMenuAdapter(getActivity());
+        overFlowMenu.setAnchorView(overflowMenuButton);
+        overFlowMenu.setAdapter(overFlowMenuAdapter);
+        overFlowMenu.setWidth(800);
+        overFlowMenu.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                final String tag = view.getTag().toString();
+                if (tag.equals(getString(R.string.action_copy))) {
+                    if (mLightningView.getWebView() != null) {
+                        ClipboardManager clipboard = (ClipboardManager) getContext()
+                                .getSystemService(Context.CLIPBOARD_SERVICE);
+                        ClipData clip = ClipData.newPlainText("link", mLightningView.getUrl());
+                        clipboard.setPrimaryClip(clip);
+                    }
+                } else if (tag.equals(getString(R.string.settings))) {
+                    startActivity(new Intent(getContext(), SettingsActivity.class));
+                } else if (tag.equals(getString(R.string.contact_cliqz))) {
+                    final Uri to = Uri.parse(String.format("mailto:%s?subject=%s",
+                            getString(R.string.feedback_at_cliqz_dot_com),
+                            Uri.encode(getString(R.string.feedback_mail_subject))));
+                    final Intent intent = new Intent(Intent.ACTION_SENDTO, to);
+                    intent.putExtra(Intent.EXTRA_TEXT, new StringBuilder()
+                                    .append("\n")
+                                    .append("Feedback für CLIQZ for Android (")
+                                    .append(BuildConfig.VERSION_NAME)
+                                    .append("), auf ")
+                                    .append(Build.MODEL)
+                                    .append(" (")
+                                    .append(Build.VERSION.SDK_INT)
+                                    .append(")")
+                                    .toString()
+                    );
+                    startActivity(Intent.createChooser(intent, getString(R.string.contact_cliqz)));
+                }
+                overFlowMenu.dismiss();
+            }
+        });
+        overFlowMenu.show();
+    }
+
     @OnEditorAction(R.id.search_edit_text)
     boolean onEditorAction(int actionId) {
         // Navigate to autocomplete url or search otherwise
@@ -389,6 +442,22 @@ public class MainFragment extends BaseFragment {
     @Subscribe
     public void autocomplete(CliqzMessages.Autocomplete event) {
         mAutocompleteEditText.setAutocompleteText(event.completion);
+    }
+
+
+    @Subscribe
+    public void reloadPage(Messages.ReloadPage event) {
+        mLightningView.getWebView().reload();
+        overFlowMenu.dismiss();
+    }
+
+    @Subscribe
+    public void shareLink(Messages.ShareLink event) {
+        Intent intent = new Intent(Intent.ACTION_SEND);
+        intent.setType("text/plain");
+        intent.putExtra(Intent.EXTRA_TEXT, mLightningView.getUrl());
+        startActivity(Intent.createChooser(intent, getString(R.string.share_link)));
+        overFlowMenu.dismiss();
     }
 
     @Subscribe

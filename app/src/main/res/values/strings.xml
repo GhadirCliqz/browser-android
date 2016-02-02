@@ -250,4 +250,5 @@
     <string name="enable_human_web">Enable Human Web</string>
     <string name="humanweb" translatable="false">Human Web</string>
     <string name="about_humanweb_url">https://cliqz.com/en/whycliqz/human-web</string>
+    <string name="share_link">Share using</string>
 </resources>

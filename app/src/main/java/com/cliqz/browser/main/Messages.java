@@ -61,4 +61,8 @@ public final class Messages {
             this.url = url;
         }
     }
+
+    public static class ReloadPage {}
+
+    public static class ShareLink {}
 }

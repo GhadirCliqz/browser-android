@@ -32,4 +32,10 @@
         <item>@string/dark_theme</item>
         <item>@string/black_theme</item>
     </string-array>
+
+    <string-array name="overflow_menu">
+        <item>@string/action_copy</item>
+        <item>@string/settings</item>
+        <item>@string/contact_cliqz</item>
+    </string-array>
 </resources>
