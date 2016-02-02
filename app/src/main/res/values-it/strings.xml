@@ -239,4 +239,7 @@
     <string name="block_adult_content">Blocca Contenuti Espliciti</string>
     <string name="show_onboarding_tour">Mostra Tour</string>
     <string name="imprint">Informazioni legali</string>
+    <string name="about_humanweb_url">https://cliqz.com/en/whycliqz/human-web</string>
+    <string name="what_is_humanweb">Cos\'é Human Web</string>
+    <string name="enable_human_web">Abilita Human Web</string>
 </resources>

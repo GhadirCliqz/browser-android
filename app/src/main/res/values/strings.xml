@@ -246,4 +246,8 @@
     <string name="onboarding" translatable="false">OnBoarding</string>
     <string name="block_adult_content">Block Adult Content</string>
     <string name="imprint">Imprint</string>
+    <string name="what_is_humanweb">What is Human Web?</string>
+    <string name="enable_human_web">Enable Human Web</string>
+    <string name="humanweb" translatable="false">Human Web</string>
+    <string name="about_humanweb_url">https://cliqz.com/en/whycliqz/human-web</string>
 </resources>
