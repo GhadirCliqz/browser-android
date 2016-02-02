@@ -71,6 +71,7 @@ public class PreferenceManager {
         public static final String TELEMETRY_SIGNALS = "telemetrySignals";
         public static final String BROWSER_STATE = "cliqzBrowserState";
         public static final String BLOCK_ADULT_CONTENT = "blockAdultContent";
+        public static final String HUMAN_WEB = "humanweb";
     }
 
     private final SharedPreferences mPrefs;
@@ -292,6 +293,10 @@ public class PreferenceManager {
 
     public boolean getBlockAdultContent() {
         return mPrefs.getBoolean(Name.BLOCK_ADULT_CONTENT, true);
+    }
+
+    public boolean getHumanWebEnabled() {
+        return mPrefs.getBoolean(Name.HUMAN_WEB, true);
     }
 
     private void putBoolean(String name, boolean value) {
@@ -524,5 +529,9 @@ public class PreferenceManager {
 
     public void setBlockAdultContent(boolean enable) {
         putBoolean(Name.BLOCK_ADULT_CONTENT, enable);
+    }
+
+    public void setHumanWebEnabled(boolean enable) {
+        putBoolean(Name.HUMAN_WEB, enable);
     }
 }

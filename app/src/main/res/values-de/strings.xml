@@ -234,4 +234,7 @@
     <string name="block_adult_content">Nicht-jugendfreie Inhalte blockieren</string>
     <string name="show_onboarding_tour">Einführungstour zeigen</string>
     <string name="imprint">Impressum</string>
+    <string name="about_humanweb_url">https://cliqz.com/whycliqz/human-web</string>
+    <string name="what_is_humanweb">Was ist Human Web?</string>
+    <string name="enable_human_web">Erlauben Human Web</string>
 </resources>
