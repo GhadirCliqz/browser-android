@@ -1,6 +1,7 @@
 package com.cliqz.browser.mock;
 
-import acr.browser.lightning.app.AppModule;
+import com.cliqz.browser.di.modules.AppModule;
+
 import acr.browser.lightning.app.BrowserApp;
 
 /**

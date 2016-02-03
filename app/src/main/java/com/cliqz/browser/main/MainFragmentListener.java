@@ -70,6 +70,8 @@ class MainFragmentListener implements View.OnFocusChangeListener, TextWatcher {
 
     @Override
     public void afterTextChanged(Editable s) {
-        fragment.timings.setLastTypedTime();
+        if (fragment.timings != null) {
+            fragment.timings.setLastTypedTime();
+        }
     }
 }
