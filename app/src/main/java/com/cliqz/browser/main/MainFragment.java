@@ -24,7 +24,6 @@ import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.webkit.URLUtil;
 import android.webkit.WebView;
-import android.widget.AdapterView;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.ListPopupWindow;
@@ -33,13 +32,12 @@ import android.widget.TextView;
 import com.cliqz.browser.webview.CliqzMessages;
 import com.cliqz.browser.webview.SearchWebView;
 import com.cliqz.browser.widget.AutocompleteEditText;
-import com.cliqz.browser.widget.OverFlowMenuAdapter;
+import com.cliqz.browser.widget.OverFlowMenu;
 import com.cliqz.browser.widget.SearchBar;
 import com.squareup.otto.Subscribe;
 
 import acr.browser.lightning.BuildConfig;
 import acr.browser.lightning.R;
-import acr.browser.lightning.activity.SettingsActivity;
 import acr.browser.lightning.bus.BrowserEvents;
 import acr.browser.lightning.constant.Constants;
 import acr.browser.lightning.utils.ThemeUtils;
@@ -66,7 +64,7 @@ public class MainFragment extends BaseFragment {
     private int currentIcon;
     private boolean isAnimationInProgress = false;
 
-    enum State {
+    public enum State {
         SHOWING_SEARCH,
         SHOWING_BROWSER,
     }
@@ -76,7 +74,7 @@ public class MainFragment extends BaseFragment {
     private String mSearchEngine;
     String lastQuery = "";
 
-    State mState = State.SHOWING_SEARCH;
+    public State mState = State.SHOWING_SEARCH;
 
     SearchWebView mSearchWebView = null;
     public LightningView mLightningView = null;
@@ -101,8 +99,6 @@ public class MainFragment extends BaseFragment {
 
     @Bind(R.id.overflow_menu)
     View overflowMenuButton;
-
-    private ListPopupWindow overFlowMenu;
 
     @Override
     protected View onCreateContentView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -279,45 +275,8 @@ public class MainFragment extends BaseFragment {
 
     @OnClick(R.id.overflow_menu)
     void menuClicked() {
-        overFlowMenu = new ListPopupWindow(getContext());
-        OverFlowMenuAdapter overFlowMenuAdapter = new OverFlowMenuAdapter(getActivity());
+        OverFlowMenu overFlowMenu = new OverFlowMenu(getActivity(), mState);
         overFlowMenu.setAnchorView(overflowMenuButton);
-        overFlowMenu.setAdapter(overFlowMenuAdapter);
-        overFlowMenu.setWidth(800);
-        overFlowMenu.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                final String tag = view.getTag().toString();
-                if (tag.equals(getString(R.string.action_copy))) {
-                    if (mLightningView.getWebView() != null) {
-                        ClipboardManager clipboard = (ClipboardManager) getContext()
-                                .getSystemService(Context.CLIPBOARD_SERVICE);
-                        ClipData clip = ClipData.newPlainText("link", mLightningView.getUrl());
-                        clipboard.setPrimaryClip(clip);
-                    }
-                } else if (tag.equals(getString(R.string.settings))) {
-                    startActivity(new Intent(getContext(), SettingsActivity.class));
-                } else if (tag.equals(getString(R.string.contact_cliqz))) {
-                    final Uri to = Uri.parse(String.format("mailto:%s?subject=%s",
-                            getString(R.string.feedback_at_cliqz_dot_com),
-                            Uri.encode(getString(R.string.feedback_mail_subject))));
-                    final Intent intent = new Intent(Intent.ACTION_SENDTO, to);
-                    intent.putExtra(Intent.EXTRA_TEXT, new StringBuilder()
-                                    .append("\n")
-                                    .append("Feedback für CLIQZ for Android (")
-                                    .append(BuildConfig.VERSION_NAME)
-                                    .append("), auf ")
-                                    .append(Build.MODEL)
-                                    .append(" (")
-                                    .append(Build.VERSION.SDK_INT)
-                                    .append(")")
-                                    .toString()
-                    );
-                    startActivity(Intent.createChooser(intent, getString(R.string.contact_cliqz)));
-                }
-                overFlowMenu.dismiss();
-            }
-        });
         overFlowMenu.show();
     }
 
@@ -329,7 +288,7 @@ public class MainFragment extends BaseFragment {
             if (content != null && !content.isEmpty()) {
                 if (Patterns.WEB_URL.matcher(content).matches()) {
                     final String guessedUrl = URLUtil.guessUrl(content);
-                    if(mAutocompleteEditText.mIsAutocompleted) {
+                    if (mAutocompleteEditText.mIsAutocompleted) {
                         telemetry.sendResultEnterSignal(false, true,
                                 mAutocompleteEditText.getQuery().length(), guessedUrl.length());
                     } else {
@@ -364,8 +323,8 @@ public class MainFragment extends BaseFragment {
     @Subscribe
     public void updateProgress(BrowserEvents.UpdateProgress event) {
         mProgressBar.setProgress(event.progress);
-        if(!mLightningView.getUrl().contains(Constants.CLIQZ_TRAMPOLINE)) {
-            if(event.progress == 100) {
+        if (!mLightningView.getUrl().contains(Constants.CLIQZ_TRAMPOLINE)) {
+            if (event.progress == 100) {
                 switchIcon(RELOAD);
             } else {
                 switchIcon(STOP);
@@ -425,7 +384,7 @@ public class MainFragment extends BaseFragment {
             bus.post(new Messages.Exit());
         }
     }
-    
+
     @Subscribe
     public void showSearch(Messages.ShowSearch event) {
         searchBar.showSearchEditText();
@@ -448,7 +407,6 @@ public class MainFragment extends BaseFragment {
     @Subscribe
     public void reloadPage(Messages.ReloadPage event) {
         mLightningView.getWebView().reload();
-        overFlowMenu.dismiss();
     }
 
     @Subscribe
@@ -457,12 +415,41 @@ public class MainFragment extends BaseFragment {
         intent.setType("text/plain");
         intent.putExtra(Intent.EXTRA_TEXT, mLightningView.getUrl());
         startActivity(Intent.createChooser(intent, getString(R.string.share_link)));
-        overFlowMenu.dismiss();
+    }
+
+    @Subscribe
+    public void contactCliqz(Messages.ContactCliqz event) {
+        final Uri to = Uri.parse(String.format("mailto:%s?subject=%s",
+                getString(R.string.feedback_at_cliqz_dot_com),
+                Uri.encode(getString(R.string.feedback_mail_subject))));
+        final Intent intent = new Intent(Intent.ACTION_SENDTO, to);
+        intent.putExtra(Intent.EXTRA_TEXT, new StringBuilder()
+                        .append("\n")
+                        .append("Feedback für CLIQZ for Android (")
+                        .append(BuildConfig.VERSION_NAME)
+                        .append("), auf ")
+                        .append(Build.MODEL)
+                        .append(" (")
+                        .append(Build.VERSION.SDK_INT)
+                        .append(")")
+                        .toString()
+        );
+        startActivity(Intent.createChooser(intent, getString(R.string.contact_cliqz)));
+    }
+
+    @Subscribe
+    public void copyUrl(Messages.CopyUrl event) {
+        if (mLightningView.getWebView() != null) {
+            final ClipboardManager clipboard = (ClipboardManager) getContext()
+                    .getSystemService(Context.CLIPBOARD_SERVICE);
+            final ClipData clip = ClipData.newPlainText("link", mLightningView.getUrl());
+            clipboard.setPrimaryClip(clip);
+        }
     }
 
     @Subscribe
     public synchronized void hideToolBar(BrowserEvents.HideToolBar event) {
-        if(mStatusBar.getTranslationY() >= 0.0f && !isAnimationInProgress) {
+        if (mStatusBar.getTranslationY() >= 0.0f && !isAnimationInProgress) {
             isAnimationInProgress = true;
             final int height = mStatusBar.getHeight();
             mStatusBar.animate().translationY(-height).setInterpolator(new AccelerateInterpolator()).start();
@@ -493,7 +480,7 @@ public class MainFragment extends BaseFragment {
 
     @Subscribe
     public void showToolBar(BrowserEvents.ShowToolBar event) {
-        if(mStatusBar.getTranslationY() < 0.0f && !isAnimationInProgress) {
+        if (mStatusBar.getTranslationY() < 0.0f && !isAnimationInProgress) {
             isAnimationInProgress = true;
             final int height = mStatusBar.getHeight();
             mStatusBar.animate().translationY(0).setInterpolator(new AccelerateInterpolator()).start();
@@ -538,7 +525,7 @@ public class MainFragment extends BaseFragment {
     private void switchIcon(int type) {
         currentIcon = type;
         Drawable icon;
-        switch(type) {
+        switch (type) {
             case CLEAR:
                 icon = ThemeUtils.getLightThemedDrawable(getContext(), R.drawable.ic_action_delete);
                 break;
@@ -560,8 +547,8 @@ public class MainFragment extends BaseFragment {
         public boolean onTouch(View view, MotionEvent event) {
             if (event.getAction() == MotionEvent.ACTION_UP) {
                 int width = getContext().getResources().getDrawable(R.drawable.ic_action_delete).getIntrinsicWidth();
-                if (event.getX() > (view.getWidth()-view.getPaddingRight()) - width) {
-                    switch(currentIcon) {
+                if (event.getX() > (view.getWidth() - view.getPaddingRight()) - width) {
+                    switch (currentIcon) {
                         case CLEAR:
                             mAutocompleteEditText.setText("");
                             break;

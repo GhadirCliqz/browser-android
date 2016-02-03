@@ -65,4 +65,8 @@ public final class Messages {
     public static class ReloadPage {}
 
     public static class ShareLink {}
+
+    public static class ContactCliqz {}
+
+    public static class CopyUrl {}
 }

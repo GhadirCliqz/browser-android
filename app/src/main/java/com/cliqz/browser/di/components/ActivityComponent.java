@@ -6,7 +6,7 @@ import com.cliqz.browser.main.FragmentWithBus;
 import com.cliqz.browser.main.MainActivity;
 import com.cliqz.browser.webview.BaseWebView;
 import com.cliqz.browser.webview.Bridge;
-import com.cliqz.browser.widget.OverFlowMenuAdapter;
+import com.cliqz.browser.widget.OverFlowMenu;
 import com.squareup.otto.Bus;
 
 import acr.browser.lightning.view.LightningView;
@@ -29,7 +29,7 @@ public interface ActivityComponent {
 
     void inject(BaseWebView searchWebView);
 
-    void inject(OverFlowMenuAdapter overFlowMenuAdapter);
+    void inject(OverFlowMenu overFlowMenu);
 
     Bus getBus();
 
