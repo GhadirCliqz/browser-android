@@ -70,8 +70,8 @@ public class MainFragment extends BaseFragment {
     }
 
     private String mUrl = "";
-
     private String mSearchEngine;
+    private boolean isStartPage = false;
     String lastQuery = "";
 
     public State mState = State.SHOWING_SEARCH;
@@ -189,6 +189,7 @@ public class MainFragment extends BaseFragment {
 
         if (url != null && !url.isEmpty()) {
             mState = State.SHOWING_BROWSER;
+            isStartPage = true;
             bus.post(new CliqzMessages.OpenLink(url));
             arguments.clear();
         } else {
@@ -354,11 +355,17 @@ public class MainFragment extends BaseFragment {
         webView.bringToFront();
         mState = State.SHOWING_BROWSER;
         telemetry.resetNavigationVariables(eventUrl.length());
-        final String url = Uri.parse(Constants.CLIQZ_TRAMPOLINE)
-                .buildUpon()
-                .appendQueryParameter("url", eventUrl)
-                .appendQueryParameter("q", lastQuery)
-                .build().toString();
+        final String url;
+        if (isStartPage) {
+            url = eventUrl;
+            isStartPage = false;
+        } else {
+            url = Uri.parse(Constants.CLIQZ_TRAMPOLINE)
+                    .buildUpon()
+                    .appendQueryParameter("url", eventUrl)
+                    .appendQueryParameter("q", lastQuery)
+                    .build().toString();
+        }
         mLightningView.loadUrl(url);
         searchBar.setTitle(eventUrl);
     }
