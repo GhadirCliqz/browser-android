@@ -1,8 +1,9 @@
 package com.cliqz.browser.mock;
 
+import com.cliqz.browser.di.modules.AppModule;
+
 import javax.inject.Singleton;
 
-import acr.browser.lightning.app.AppModule;
 import acr.browser.lightning.preference.PreferenceManager;
 import dagger.Module;
 import dagger.Provides;
@@ -11,7 +12,7 @@ import dagger.Provides;
  * Created by Ravjit on 19/01/16.
  */
 @Module
-public class MockAppModule extends AppModule{
+public class MockAppModule extends AppModule {
 
     private final MockBrowserApp app;
 
