@@ -102,7 +102,6 @@ public class SettingsActivity extends ThemableSettingsActivity {
                             .toString()
             );
             startActivity(Intent.createChooser(intent, getString(R.string.contact_cliqz)));
-            finish();
         } else {
             super.onListItemClick(l, v, position, id);
         }

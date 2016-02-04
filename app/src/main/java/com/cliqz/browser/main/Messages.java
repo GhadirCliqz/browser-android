@@ -61,4 +61,12 @@ public final class Messages {
             this.url = url;
         }
     }
+
+    public static class ReloadPage {}
+
+    public static class ShareLink {}
+
+    public static class ContactCliqz {}
+
+    public static class CopyUrl {}
 }
