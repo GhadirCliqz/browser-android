@@ -91,30 +91,30 @@ public class AutocompleteEditText extends EditText {
     }*/
 
     public void setAutocompleteText(CharSequence text) {
-        if (mDeleting) {
-            return;
-        }
-        mIsAutocompleting = true;
-        mIsAutocompleted = true;
-        final CharSequence currentText = getText();
-        if (text.toString().startsWith(currentText.toString())) {
-            setTextKeepState(text);
-            final int selectionBegin = currentText.length();
-            final int selectionEnd = text.length();
-            post(new Runnable() {
-                @Override
-                public void run() {
-                    final int tl = currentText.length();
-                    // TODO: Check this, sometimes the next instruction crash
+        final String autocompletion = text.toString();
+        // Ensure autocompletion happens on UI Thread
+        post(new Runnable() {
+            @Override
+            public void run() {
+                if (mDeleting) {
+                    return;
+                }
+                final String currentText = getText().toString();
+                mIsAutocompleting = true;
+                if (autocompletion.startsWith(currentText)) {
+                    mIsAutocompleted = true;
+                    final int selectionBegin = currentText.length();
+                    final int selectionEnd = autocompletion.length();
                     try {
+                        setTextKeepState(autocompletion);
                         setSelection(selectionBegin, selectionEnd);
                     } catch (IndexOutOfBoundsException e) {
                         Log.i(TAG, "Can't select part of the url bar", e);
                     }
                 }
-            });
-        }
-        mIsAutocompleting = false;
+                mIsAutocompleting = false;
+            }
+        });
     }
 
 //    public AutocompleteService getAutocompleteService() {

@@ -67,14 +67,14 @@ android {
             versionCode baseVersionCode
             versionName baseVersionName+"xw"
             minSdkVersion 14
-            /* splits {
+            splits {
                 abi {
                     enable true
                     reset()
                     include 'armeabi-v7a'
                     universalApk false
                 }
-            } */
+            }
         }
     }
 }
