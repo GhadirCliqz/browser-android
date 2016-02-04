@@ -317,12 +317,16 @@ public class MainActivity extends AppCompatActivity {
 
     @Subscribe
     public void exit(Messages.Exit event) {
-        ActivityManager activityManager = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
-        List<ActivityManager.AppTask> cliqzTasks = activityManager.getAppTasks();
-        if(cliqzTasks.size() > 1) {
-            cliqzTasks.get(1).moveToFront();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            ActivityManager activityManager = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
+            List<ActivityManager.AppTask> cliqzTasks = activityManager.getAppTasks();
+            if (cliqzTasks.size() > 1) {
+                cliqzTasks.get(1).moveToFront();
+            }
+            finishAndRemoveTask();
+        } else {
+            finish();
         }
-        finishAndRemoveTask();
     }
 
     @Subscribe
