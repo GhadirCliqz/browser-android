@@ -411,9 +411,15 @@ public class MainFragment extends BaseFragment {
 
     @Subscribe
     public void shareLink(Messages.ShareLink event) {
-        Intent intent = new Intent(Intent.ACTION_SEND);
+        final String footer = getString(R.string.shared_using);
+        final Intent intent = new Intent(Intent.ACTION_SEND);
         intent.setType("text/plain");
-        intent.putExtra(Intent.EXTRA_TEXT, mLightningView.getUrl());
+        intent.putExtra(Intent.EXTRA_TEXT, new StringBuilder()
+                        .append(mLightningView.getUrl())
+                        .append("\n")
+                        .append(footer)
+                        .toString()
+        );
         startActivity(Intent.createChooser(intent, getString(R.string.share_link)));
     }
 
