@@ -19,8 +19,8 @@ public class OnBoardingAdapter extends FragmentPagerAdapter {
     private final int[] onBoardingLayouts = new int[] {
             R.layout.on_boarding_first,
             R.layout.on_boarding_second,
-            R.layout.on_boarding_third
     };
+
     private ArrayList<Fragment> onBoardingFragments = new ArrayList<>(onBoardingLayouts.length);
     private Telemetry telemetry;
     public long startTime;
