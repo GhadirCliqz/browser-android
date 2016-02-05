@@ -1,9 +1,12 @@
 package com.cliqz.browser.main;
 
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 
 import com.cliqz.browser.utils.Telemetry;
 
@@ -27,6 +30,12 @@ public class OnBoardingActivity extends AppCompatActivity{
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         BrowserApp.getAppComponent().inject(this);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            final Window window = getWindow();
+            window.setFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS,
+                    WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+        }
+
         setContentView(R.layout.activity_on_boarding);
         viewPager = (ViewPager) findViewById(R.id.viewpager);
         onBoardingAdapter = new OnBoardingAdapter(getSupportFragmentManager(), telemetry);
