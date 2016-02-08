@@ -197,6 +197,7 @@ public class MainFragment extends BaseFragment {
             mState = reset ? State.SHOWING_SEARCH : mState;
             final String query = reset ? "" : state.getQuery();
             if (mState == State.SHOWING_SEARCH) {
+                showToolBar(null);
                 bus.post(new Messages.ShowSearch(query));
             } else {
                 mLightningView.getWebView().bringToFront();
@@ -491,6 +492,9 @@ public class MainFragment extends BaseFragment {
         }
     }
 
+    /**
+     * @param event Marker for bus. Can be null if function is called directly.
+     */
     @Subscribe
     public void showToolBar(BrowserEvents.ShowToolBar event) {
         if (mStatusBar.getTranslationY() < 0.0f && !isAnimationInProgress) {
