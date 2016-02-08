@@ -8,9 +8,6 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
-import android.widget.TextView;
-
-import com.cliqz.browser.utils.Telemetry;
 
 import com.cliqz.browser.utils.Telemetry;
 
@@ -39,7 +36,9 @@ public class AutocompleteEditText extends EditText {
 
     // private AutocompleteService mAutocompleteService;
 
-    public boolean mIsAutocompleted;
+    private boolean mIsAutocompleted;
+    private boolean mIsTyping = false;
+    private AutocompleteRunnable autocompleteRunnable = null;
 
     public AutocompleteEditText(Context context) {
         this(context, null);
@@ -58,6 +57,10 @@ public class AutocompleteEditText extends EditText {
         mIsAutocompleted = false;
         // mAutocompleteService = AutocompleteService.createInstance(context);
         BrowserApp.getAppComponent().inject(this);
+    }
+
+    public boolean isAutocompleted() {
+        return mIsAutocompleted;
     }
 
     @Override
@@ -92,29 +95,11 @@ public class AutocompleteEditText extends EditText {
 
     public void setAutocompleteText(CharSequence text) {
         final String autocompletion = text.toString();
-        // Ensure autocompletion happens on UI Thread
-        post(new Runnable() {
-            @Override
-            public void run() {
-                if (mDeleting) {
-                    return;
-                }
-                final String currentText = getText().toString();
-                mIsAutocompleting = true;
-                if (autocompletion.startsWith(currentText)) {
-                    mIsAutocompleted = true;
-                    final int selectionBegin = currentText.length();
-                    final int selectionEnd = autocompletion.length();
-                    try {
-                        setTextKeepState(autocompletion);
-                        setSelection(selectionBegin, selectionEnd);
-                    } catch (IndexOutOfBoundsException e) {
-                        Log.i(TAG, "Can't select part of the url bar", e);
-                    }
-                }
-                mIsAutocompleting = false;
-            }
-        });
+        if (autocompleteRunnable != null) {
+            autocompleteRunnable.cancel();
+        }
+        autocompleteRunnable = new AutocompleteRunnable(autocompletion);
+        postDelayed(autocompleteRunnable, 200);
     }
 
 //    public AutocompleteService getAutocompleteService() {
@@ -130,6 +115,11 @@ public class AutocompleteEditText extends EditText {
             if (mIsAutocompleting) {
                 return;
             }
+            if (autocompleteRunnable != null) {
+                autocompleteRunnable.cancel();
+            }
+
+            mIsTyping = true;
 
             for (TextWatcher watcher: mListeners) {
                 watcher.beforeTextChanged(s, start, count, after);
@@ -141,7 +131,6 @@ public class AutocompleteEditText extends EditText {
             if (mIsAutocompleting) {
                 return;
             }
-
             for (TextWatcher watcher: mListeners) {
                 watcher.onTextChanged(s, start, before, count);
             }
@@ -164,6 +153,7 @@ public class AutocompleteEditText extends EditText {
             for (TextWatcher watcher: mListeners) {
                 watcher.afterTextChanged(s);
             }
+            mIsTyping = false;
 
 //            if (!mDeleting) {
 //                final String autocompletion = mAutocompleteService.autocomplete(s.toString());
@@ -184,5 +174,41 @@ public class AutocompleteEditText extends EditText {
                 break;
         }
         return super.onTextContextMenuItem(id);
+    }
+
+    private class AutocompleteRunnable implements Runnable {
+
+        private boolean mCancelled = false;
+
+        private final String completion;
+
+        AutocompleteRunnable(String completion) {
+            this.completion = completion;
+        }
+
+        public void cancel() {
+            mCancelled = true;
+        }
+
+        @Override
+        public void run() {
+            if (mDeleting || mIsTyping || mCancelled) {
+                return;
+            }
+            final String currentText = getText().toString();
+            mIsAutocompleting = true;
+            if (completion.startsWith(currentText)) {
+                mIsAutocompleted = true;
+                final int selectionBegin = currentText.length();
+                final int selectionEnd = completion.length();
+                try {
+                    setTextKeepState(completion);
+                    setSelection(selectionBegin, selectionEnd);
+                } catch (IndexOutOfBoundsException e) {
+                    Log.i(TAG, "Can't select part of the url bar", e);
+                }
+            }
+            mIsAutocompleting = false;
+        }
     }
 }

@@ -288,7 +288,7 @@ public class MainFragment extends BaseFragment {
             if (content != null && !content.isEmpty()) {
                 if (Patterns.WEB_URL.matcher(content).matches()) {
                     final String guessedUrl = URLUtil.guessUrl(content);
-                    if (mAutocompleteEditText.mIsAutocompleted) {
+                    if (mAutocompleteEditText.isAutocompleted()) {
                         telemetry.sendResultEnterSignal(false, true,
                                 mAutocompleteEditText.getQuery().length(), guessedUrl.length());
                     } else {
