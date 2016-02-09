@@ -23,7 +23,7 @@ class LightningViewTitle {
             DEFAULT_ICON = ThemeUtils.getThemedBitmap(context, R.drawable.ic_webpage, darkTheme);
         }
         mFavicon = DEFAULT_ICON;
-        mTitle = context.getString(R.string.action_new_tab);
+        mTitle = "";
     }
 
     public void setFavicon(Bitmap favicon) {
