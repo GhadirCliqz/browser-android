@@ -6,8 +6,6 @@ import android.os.Build;
 import android.os.Debug;
 import android.support.annotation.Nullable;
 import android.util.Log;
-import android.webkit.WebView;
-import android.webkit.WebViewClient;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -16,7 +14,6 @@ import java.util.List;
 import java.util.Locale;
 
 import acr.browser.lightning.BuildConfig;
-import acr.browser.lightning.app.BrowserApp;
 import acr.browser.lightning.constant.Constants;
 import acr.browser.lightning.database.HistoryItem;
 
@@ -32,6 +29,7 @@ public class SearchWebView extends BaseWebView {
     private static final String CLIQZ_MANIFEST_URL = "file:///android_asset/search/search.json";
     private String mLastQuery;
     private boolean mProfilingRunning = false;
+    private boolean mSearchWithLocation = false;
 
     public SearchWebView(Context context) {
         super(context);
@@ -125,7 +123,7 @@ public class SearchWebView extends BaseWebView {
     void extensionReady() {
         super.extensionReady();
         final long t = System.currentTimeMillis() - state.getTimestamp();
-        initPreferences();
+        initExtensionPreferences();
         if (shouldShowHomePage()) {
             showHomepage();
         } else if (mLastQuery != null && !mLastQuery.isEmpty()) {
@@ -138,7 +136,7 @@ public class SearchWebView extends BaseWebView {
         final String lowerQuery = query.toLowerCase();
         state.setQuery(lowerQuery);
         final Location location = locationCache.getLastLocation();
-        final boolean hasLocation = location != null;
+        final boolean hasLocation = mSearchWithLocation && location != null;
         final double lat = hasLocation ? location.getLatitude() : 0.0;
         final double lon = hasLocation ? location.getLongitude() : 0.0;
         if (hasLocation) {
@@ -158,9 +156,10 @@ public class SearchWebView extends BaseWebView {
     @Override
     public void onResume() {
         super.onResume();
+        initPreferences();
         if (isExtesionReady()) {
             // Apply settings here
-            initPreferences();
+            initExtensionPreferences();
             if (shouldShowHomePage()) {
                 showHomepage();
             }
@@ -168,6 +167,10 @@ public class SearchWebView extends BaseWebView {
     }
 
     private void initPreferences() {
+        mSearchWithLocation = preferenceManager.getLocationEnabled();
+    }
+
+    private void initExtensionPreferences() {
         final JSONObject preferences = new JSONObject();
         try {
             preferences.put("adultContentFilter",
