@@ -347,22 +347,9 @@ public class MainActivity extends AppCompatActivity {
         long curTime = System.currentTimeMillis();
         telemetry.sendOnBoardingHideSignal(curTime - onBoardingAdapter.startTime);
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_FULL_USER);
-        createAppShortcutOnHomeScreen();
-        setupContentView();
-    }
-
-    private void createAppShortcutOnHomeScreen() {
-        // Create the shortcut on the home screen
-        Intent shortCutIntent = new Intent("com.android.launcher.action.INSTALL_SHORTCUT");
-        shortCutIntent.putExtra("duplicate", false);
-        shortCutIntent.putExtra(Intent.EXTRA_SHORTCUT_NAME, getString(R.string.cliqz_app_name));
-        Parcelable icon = Intent.ShortcutIconResource.fromContext(getApplicationContext(), R.mipmap.ic_launcher);
-        shortCutIntent.putExtra(Intent.EXTRA_SHORTCUT_ICON_RESOURCE, icon);
-        shortCutIntent.putExtra(Intent.EXTRA_SHORTCUT_INTENT, new Intent(getApplicationContext(), MainActivity.class));
-        sendBroadcast(shortCutIntent);
-
         // Send telemetry "installed" signal
         telemetry.sendLifeCycleSignal(Telemetry.Action.INSTALL);
+        setupContentView();
     }
 
     //returns screen that is visible
