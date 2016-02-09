@@ -70,8 +70,8 @@ public class MainFragment extends BaseFragment {
     }
 
     private String mUrl = "";
-
     private String mSearchEngine;
+    private boolean isStartPage = false;
     String lastQuery = "";
 
     public State mState = State.SHOWING_SEARCH;
@@ -189,6 +189,7 @@ public class MainFragment extends BaseFragment {
 
         if (url != null && !url.isEmpty()) {
             mState = State.SHOWING_BROWSER;
+            isStartPage = true;
             bus.post(new CliqzMessages.OpenLink(url));
             arguments.clear();
         } else {
@@ -196,6 +197,7 @@ public class MainFragment extends BaseFragment {
             mState = reset ? State.SHOWING_SEARCH : mState;
             final String query = reset ? "" : state.getQuery();
             if (mState == State.SHOWING_SEARCH) {
+                showToolBar(null);
                 bus.post(new Messages.ShowSearch(query));
             } else {
                 mLightningView.getWebView().bringToFront();
@@ -354,11 +356,17 @@ public class MainFragment extends BaseFragment {
         webView.bringToFront();
         mState = State.SHOWING_BROWSER;
         telemetry.resetNavigationVariables(eventUrl.length());
-        final String url = Uri.parse(Constants.CLIQZ_TRAMPOLINE)
-                .buildUpon()
-                .appendQueryParameter("url", eventUrl)
-                .appendQueryParameter("q", lastQuery)
-                .build().toString();
+        final String url;
+        if (isStartPage) {
+            url = eventUrl;
+            isStartPage = false;
+        } else {
+            url = Uri.parse(Constants.CLIQZ_TRAMPOLINE)
+                    .buildUpon()
+                    .appendQueryParameter("url", eventUrl)
+                    .appendQueryParameter("q", lastQuery)
+                    .build().toString();
+        }
         mLightningView.loadUrl(url);
         searchBar.setTitle(eventUrl);
     }
@@ -411,9 +419,15 @@ public class MainFragment extends BaseFragment {
 
     @Subscribe
     public void shareLink(Messages.ShareLink event) {
-        Intent intent = new Intent(Intent.ACTION_SEND);
+        final String footer = getString(R.string.shared_using);
+        final Intent intent = new Intent(Intent.ACTION_SEND);
         intent.setType("text/plain");
-        intent.putExtra(Intent.EXTRA_TEXT, mLightningView.getUrl());
+        intent.putExtra(Intent.EXTRA_TEXT, new StringBuilder()
+                        .append(mLightningView.getUrl())
+                        .append("\n")
+                        .append(footer)
+                        .toString()
+        );
         startActivity(Intent.createChooser(intent, getString(R.string.share_link)));
     }
 
@@ -478,6 +492,9 @@ public class MainFragment extends BaseFragment {
         }
     }
 
+    /**
+     * @param event Marker for bus. Can be null if function is called directly.
+     */
     @Subscribe
     public void showToolBar(BrowserEvents.ShowToolBar event) {
         if (mStatusBar.getTranslationY() < 0.0f && !isAnimationInProgress) {
