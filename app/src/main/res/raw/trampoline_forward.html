@@ -5,6 +5,10 @@
     <script>
         "use strict";
 
+        /*
+         * The trampoline helps us to build a coherent navigation experience, it's loaded in the
+         * "browser" WebView and works like a place holder for the "search" WebView.
+         */
         function redirect() {
             if (history.state == null) {
                 var queryStr = window.location.search.substring(1).split('+').join(' ');
@@ -14,10 +18,16 @@
                         acc[kv[0]] = decodeURIComponent(kv[1]);
                         return acc;
                     }, {});
-                console.log(query);
                 history.pushState(query, "page", "goto.html");
                 // Workaround
-                setTimeout(function() { window.location.href = query.url}, 0);
+                setTimeout(function() {
+                    window.location.href = query.url
+                }, 0);
+            } else if (Boolean(history.state.r)) {
+                // This is used only for the "New Tab" functionality
+                var oReq = new XMLHttpRequest();
+                oReq.open("GET", "cliqz://trampoline/close.html");
+                oReq.send();
             } else {
                 var query = history.state.q;
                 var oReq = new XMLHttpRequest();

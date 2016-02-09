@@ -71,7 +71,6 @@ public class MainFragment extends BaseFragment {
 
     private String mUrl = "";
     private String mSearchEngine;
-    private boolean isStartPage = false;
     String lastQuery = "";
 
     public State mState = State.SHOWING_SEARCH;
@@ -122,7 +121,6 @@ public class MainFragment extends BaseFragment {
         }
 
         MainFragmentListener.create(this);
-        mLightningView.resumeTimers();
         final WebView webView = mLightningView.getWebView();
         webView.setId(R.id.right_drawer_list);
         if (savedInstanceState != null) {
@@ -173,6 +171,7 @@ public class MainFragment extends BaseFragment {
         }
         if (mLightningView != null) {
             mLightningView.onResume();
+            mLightningView.resumeTimers();
         }
 
         // This code may look confused. It's relevant when we receive a new intent to open a new
@@ -189,8 +188,7 @@ public class MainFragment extends BaseFragment {
 
         if (url != null && !url.isEmpty()) {
             mState = State.SHOWING_BROWSER;
-            isStartPage = true;
-            bus.post(new CliqzMessages.OpenLink(url));
+            bus.post(new CliqzMessages.OpenLink(url, true));
             arguments.clear();
         } else {
             final boolean reset = System.currentTimeMillis() - state.getTimestamp() >= Constants.HOME_RESET_DELAY;
@@ -356,17 +354,13 @@ public class MainFragment extends BaseFragment {
         webView.bringToFront();
         mState = State.SHOWING_BROWSER;
         telemetry.resetNavigationVariables(eventUrl.length());
-        final String url;
-        if (isStartPage) {
-            url = eventUrl;
-            isStartPage = false;
-        } else {
-            url = Uri.parse(Constants.CLIQZ_TRAMPOLINE)
-                    .buildUpon()
-                    .appendQueryParameter("url", eventUrl)
-                    .appendQueryParameter("q", lastQuery)
-                    .build().toString();
+        final Uri.Builder builder = Uri.parse(Constants.CLIQZ_TRAMPOLINE).buildUpon();
+        builder.appendQueryParameter("url", eventUrl)
+                .appendQueryParameter("q", lastQuery);
+        if (event.reset) {
+            builder.appendQueryParameter("r", "true");
         }
+        final String url = builder.build().toString();
         mLightningView.loadUrl(url);
         searchBar.setTitle(eventUrl);
     }

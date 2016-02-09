@@ -949,7 +949,7 @@ public abstract class BrowserActivity extends ThemableBrowserActivity
         mIsNewIntent = false;
         LightningView startingTab = mTabsManager.newTab(this, url, isIncognito());
         if (mIdGenerator == 0) {
-            startingTab.resumeTimers();
+            // startingTab.resumeTimers();
         }
         mIdGenerator++;
 
@@ -1164,7 +1164,7 @@ public abstract class BrowserActivity extends ThemableBrowserActivity
             mSearchAdapter.refreshBookmarks();
         }
         if (currentTab != null) {
-            currentTab.resumeTimers();
+            //currentTab.resumeTimers();
             currentTab.onResume();
         }
         initializePreferences();
