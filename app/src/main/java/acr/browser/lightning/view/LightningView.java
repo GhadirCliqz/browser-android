@@ -535,13 +535,13 @@ public class LightningView implements ILightningTab {
 
     public synchronized void pauseTimers() {
         if (mWebView != null) {
-            mWebView.pauseTimers();
+            mWebView.onPause();
         }
     }
 
     public synchronized void resumeTimers() {
         if (mWebView != null) {
-            mWebView.resumeTimers();
+            mWebView.onResume();
         }
     }
 

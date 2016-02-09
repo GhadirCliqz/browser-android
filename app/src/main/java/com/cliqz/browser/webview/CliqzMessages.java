@@ -39,13 +39,22 @@ public class CliqzMessages {
 
     /**
      * More generic message than open search result! Used by the FreshTab to open suggested article
-     * or history element and by the search to open result pages.
+     * or history element and by the search to open result pages. The reset flag is used when
+     * opening a new tab in a new Task, it avoids the search screen to appear when back is pressed:
+     * by navigating back to the trampoline, it will send an "Exit" message
+     * ({@link com.cliqz.browser.main.Messages.Exit}).
      */
     public static final class OpenLink {
         public final String url;
+        public final boolean reset;
+
+        public OpenLink(String url, boolean reset) {
+            this.url = url;
+            this.reset = reset;
+        }
 
         public OpenLink(String url) {
-            this.url = url;
+            this(url, false);
         }
     }
 

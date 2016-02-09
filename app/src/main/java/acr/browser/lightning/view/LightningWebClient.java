@@ -54,6 +54,7 @@ class LightningWebClient extends WebViewClient {
     private static final String CLIQZ_TRAMPOLINE_AUTHORITY = "trampoline";
     private static final String CLIQZ_TRAMPOLINE_FORWARD = "/goto.html";
     private static final String CLIQZ_TRAMPOLINE_SEARCH = "/search.html";
+    private static final String CLIQZ_TRAMPOLINE_CLOSE = "/close.html";
 
     private final Activity mActivity;
     private final LightningView mLightningView;
@@ -92,14 +93,14 @@ class LightningWebClient extends WebViewClient {
 
         final String path = uri.getPath();
         if (CLIQZ_TRAMPOLINE_AUTHORITY.equals(uri.getAuthority())) {
-            if (CLIQZ_TRAMPOLINE_FORWARD.equals(uri.getPath())) {
+            if (CLIQZ_TRAMPOLINE_FORWARD.equals(path)) {
                 final Resources resources = view.getResources();
                 final WebResourceResponse response =
                         new WebResourceResponse("text/html", "UTF-8",
                                 resources.openRawResource(R.raw.trampoline_forward));
                 return response;
             }
-            if (CLIQZ_TRAMPOLINE_SEARCH.equals(uri.getPath())) {
+            if (CLIQZ_TRAMPOLINE_SEARCH.equals(path)) {
                 final String query = uri.getQueryParameter("q");
                 mLightningView.telemetry.sendBackPressedSignal("web", "cards", query.length());
                 view.post(new Runnable() {
@@ -112,6 +113,14 @@ class LightningWebClient extends WebViewClient {
                         new WebResourceResponse("test/plain", "UTF-8",
                                 new ByteArrayInputStream("OK".getBytes()));
                 return response;
+            }
+            if (CLIQZ_TRAMPOLINE_CLOSE.equals(path)) {
+                view.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        mEventBus.post(new Messages.Exit());
+                    }
+                });
             }
         }
         return null;
