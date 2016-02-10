@@ -275,7 +275,9 @@ public class MainFragment extends BaseFragment {
 
     @OnClick(R.id.overflow_menu)
     void menuClicked() {
-        OverFlowMenu overFlowMenu = new OverFlowMenu(getActivity(), mState);
+        final OverFlowMenu overFlowMenu = new OverFlowMenu(getActivity());
+        overFlowMenu.setBrowserState(mState);
+        overFlowMenu.setCanGoForward(mLightningView.canGoForward());
         overFlowMenu.setAnchorView(overflowMenuButton);
         overFlowMenu.show();
     }
@@ -345,14 +347,17 @@ public class MainFragment extends BaseFragment {
         }
     }
 
-    @Subscribe
-    public void openLink(CliqzMessages.OpenLink event) {
+    private void bringWebViewToFront() {
         final WebView webView = mLightningView.getWebView();
-        final String eventUrl = event.url;
-        // final String eventQuery = lastQuery;
         searchBar.showTitleBar();
         webView.bringToFront();
         mState = State.SHOWING_BROWSER;
+    }
+
+    @Subscribe
+    public void openLink(CliqzMessages.OpenLink event) {
+        final String eventUrl = event.url;
+        // final String eventQuery = lastQuery;
         telemetry.resetNavigationVariables(eventUrl.length());
         final Uri.Builder builder = Uri.parse(Constants.CLIQZ_TRAMPOLINE).buildUpon();
         builder.appendQueryParameter("url", eventUrl)
@@ -363,6 +368,7 @@ public class MainFragment extends BaseFragment {
         final String url = builder.build().toString();
         mLightningView.loadUrl(url);
         searchBar.setTitle(eventUrl);
+        bringWebViewToFront();
     }
 
     @Subscribe
@@ -372,18 +378,27 @@ public class MainFragment extends BaseFragment {
 
     @Subscribe
     public void onBackPressed(Messages.BackPressed event) {
+        // We can go back if:
+        // 1. the webview can go back
         if (mLightningView.canGoBack()) {
             telemetry.backPressed = true;
             telemetry.showingCards = mState == State.SHOWING_SEARCH ? true : false;
             mLightningView.goBack();
             if (mState == State.SHOWING_SEARCH) {
-                final WebView webView = mLightningView.getWebView();
-                searchBar.showTitleBar();
-                webView.bringToFront();
-                mState = State.SHOWING_BROWSER;
+                bringWebViewToFront();
             }
         } else {
             bus.post(new Messages.Exit());
+        }
+    }
+
+    @Subscribe
+    public void onGoForward(Messages.GoForward event) {
+        if (mLightningView.canGoForward()) {
+            mLightningView.goForward();
+            if (mState == State.SHOWING_SEARCH) {
+                bringWebViewToFront();
+            }
         }
     }
 

@@ -69,4 +69,6 @@ public final class Messages {
     public static class ContactCliqz {}
 
     public static class CopyUrl {}
+
+    public static class GoForward {}
 }

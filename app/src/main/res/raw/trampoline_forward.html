@@ -10,33 +10,44 @@
          * "browser" WebView and works like a place holder for the "search" WebView.
          */
         function redirect() {
-            if (history.state == null) {
-                var queryStr = window.location.search.substring(1).split('+').join(' ');
-                var query = queryStr.split('&')
-                    .reduce(function(acc, par) {
-                        var kv = par.split('=');
-                        acc[kv[0]] = decodeURIComponent(kv[1]);
-                        return acc;
-                    }, {});
-                history.pushState(query, "page", "goto.html");
-                // Workaround
-                setTimeout(function() {
-                    window.location.href = query.url
-                }, 0);
-            } else if (Boolean(history.state.r)) {
-                // This is used only for the "New Tab" functionality
-                var oReq = new XMLHttpRequest();
-                oReq.open("GET", "cliqz://trampoline/close.html");
-                oReq.send();
-            } else {
-                var query = history.state.q;
-                var oReq = new XMLHttpRequest();
-                oReq.addEventListener("load", function() {
-                    history.back();
-                });
-                oReq.open("GET", "cliqz://trampoline/search.html?q=" + encodeURIComponent(query));
-                oReq.send();
-            }
+          var state = {}
+          if (history.state == null) {
+            var queryStr = window.location.search.substring(1).split('+').join(' ');
+            state = queryStr.split('&')
+                .reduce(function(acc, par) {
+                    var kv = par.split('=');
+                    acc[kv[0]] = decodeURIComponent(kv[1]);
+                    return acc;
+                }, {});
+            state.status = 'create';
+          } else {
+            state = Object.assign({}, history.state);
+          }
+
+          switch (state.status) {
+            case 'create':
+              state.status = 'search';
+              history.replaceState(state, 'trampoline', 'goto.html');
+              setTimeout(function() {
+                window.location.href = state.url;
+              }, 0);
+              break;
+            case 'search':
+              if (Boolean(state.r)) {
+                var oreq = new XMLHttpRequest();
+                oreq.open('GET', 'cliqz://trampoline/close.html');
+                oreq.send();
+                return;
+              }
+
+              var query = state.q;
+              var oreq = new XMLHttpRequest();
+              oreq.open("GET", "cliqz://trampoline/search.html?q=" + encodeURIComponent(query));
+              oreq.send();
+              break;
+            default:
+              console.log("Default case hitted")
+          }
         }
     </script>
 </head>

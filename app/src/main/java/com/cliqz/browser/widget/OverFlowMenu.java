@@ -17,6 +17,7 @@ import android.widget.TextView;
 import com.cliqz.browser.main.MainActivity;
 import com.cliqz.browser.main.MainFragment;
 import com.cliqz.browser.main.Messages;
+import com.cliqz.browser.webview.CliqzMessages;
 import com.squareup.otto.Bus;
 
 import javax.inject.Inject;
@@ -34,8 +35,10 @@ import static android.view.View.MeasureSpec.makeMeasureSpec;
 public class OverFlowMenu extends ListPopupWindow{
 
     private static final String HEADER = "header";
-    private Context context;
-    private MainFragment.State state;
+    private final Context context;
+    private final OverFlowMenuAdapter overFlowMenuAdapter;
+    private MainFragment.State mState = MainFragment.State.SHOWING_SEARCH;
+    private boolean mCanGoForward = false;
 
     @Inject
     Bus bus;
@@ -46,12 +49,14 @@ public class OverFlowMenu extends ListPopupWindow{
     @Bind(R.id.action_refresh)
     ImageView actionRefreshButton;
 
-    public OverFlowMenu(Context context, MainFragment.State state) {
+    @Bind(R.id.action_forward)
+    ImageView actionForwardButton;
+
+    public OverFlowMenu(Context context) {
         super(context);
         this.context = context;
         ((MainActivity)context).mActivityComponent.inject(this);
-        this.state = state;
-        OverFlowMenuAdapter overFlowMenuAdapter = new OverFlowMenuAdapter();
+        overFlowMenuAdapter = new OverFlowMenuAdapter();
         this.setAdapter(overFlowMenuAdapter);
         this.setOnItemClickListener(itemClickListener);
     }
@@ -69,6 +74,24 @@ public class OverFlowMenu extends ListPopupWindow{
                 makeMeasureSpec(maxHeight, View.MeasureSpec.AT_MOST));
         final int measuredWidth = view.getMeasuredWidth();
         this.setWidth(measuredWidth);
+    }
+
+    public MainFragment.State getBrowserState() {
+        return mState;
+    }
+
+    public void setBrowserState(MainFragment.State mState) {
+        this.mState = mState;
+        overFlowMenuAdapter.notifyDataSetChanged();
+    }
+
+    public boolean canGoForward() {
+        return mCanGoForward;
+    }
+
+    public void setCanGoForward(boolean value) {
+        this.mCanGoForward = value;
+        overFlowMenuAdapter.notifyDataSetChanged();
     }
 
     private class OverFlowMenuAdapter extends BaseAdapter {
@@ -111,11 +134,7 @@ public class OverFlowMenu extends ListPopupWindow{
 
         @Override
         public boolean isEnabled(int position) {
-            if(position == 1 && state.equals(MainFragment.State.SHOWING_SEARCH)) {
-                return false;
-            } else {
-                return true;
-            }
+            return position != 1 || mState.equals(MainFragment.State.SHOWING_BROWSER);
         }
 
         @Override
@@ -127,13 +146,12 @@ public class OverFlowMenu extends ListPopupWindow{
                     view = inflater.inflate(R.layout.overflow_menu_header, parent, false);
                     OverFlowMenu.this.setWidth(view);
                     ButterKnife.bind(OverFlowMenu.this, view);
-                    if(state.equals(MainFragment.State.SHOWING_SEARCH)) {
-                        actionRefreshButton.setEnabled(false);
-                        actionShareButton.setEnabled(false);
-                        actionRefreshButton.getDrawable().setColorFilter(ContextCompat.getColor(context, R.color.hint_text),
-                                PorterDuff.Mode.SRC_ATOP);
-                        actionShareButton.getDrawable().setColorFilter(ContextCompat.getColor(context, R.color.hint_text),
-                                PorterDuff.Mode.SRC_ATOP);
+                    if(mState.equals(MainFragment.State.SHOWING_SEARCH)) {
+                        setButtonDisabled(actionRefreshButton);
+                        setButtonDisabled(actionShareButton);
+                    }
+                    if (!mCanGoForward) {
+                        setButtonDisabled(actionForwardButton);
                     }
                 } else {
                     view = inflater.inflate(android.R.layout.simple_list_item_1, parent, false);
@@ -146,13 +164,18 @@ public class OverFlowMenu extends ListPopupWindow{
                 TextView option = (TextView) view.findViewById(android.R.id.text1);
                 option.setText(menuItems[position-1]);
                 view.setTag(menuItems[position-1]);
-                if(position == 1 && state.equals(MainFragment.State.SHOWING_SEARCH)) {
+                if(position == 1 && mState.equals(MainFragment.State.SHOWING_SEARCH)) {
                     option.setTextColor(ContextCompat.getColor(context, R.color.hint_text));
                 }
             }
             return view;
         }
 
+        private void setButtonDisabled(final ImageView view) {
+            view.setEnabled(false);
+            final int color = ContextCompat.getColor(context, R.color.hint_text);
+            view.getDrawable().setColorFilter(color, PorterDuff.Mode.SRC_ATOP);
+        }
     }
 
     private AdapterView.OnItemClickListener itemClickListener = new AdapterView.OnItemClickListener() {
@@ -160,7 +183,7 @@ public class OverFlowMenu extends ListPopupWindow{
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
             final String tag = view.getTag().toString();
             if (tag.equals(context.getString(R.string.action_copy)) &&
-                    state.equals(MainFragment.State.SHOWING_BROWSER)) {
+                    mState.equals(MainFragment.State.SHOWING_BROWSER)) {
                 bus.post(new Messages.CopyUrl());
                 OverFlowMenu.this.dismiss();
             } else if (tag.equals(context.getString(R.string.settings))) {
@@ -175,7 +198,8 @@ public class OverFlowMenu extends ListPopupWindow{
 
     @OnClick(R.id.action_forward)
     void onForwardClicked() {
-        //TODO Trampoline changes required
+        bus.post(new Messages.GoForward());
+        this.dismiss();
     }
 
     @OnClick(R.id.action_refresh)
