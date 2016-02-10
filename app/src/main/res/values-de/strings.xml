@@ -239,4 +239,6 @@
     <string name="enable_human_web">Erlauben Human Web</string>
     <string name="share_link">Teilen über</string>
     <string name="shared_using">Geteilt mit CLIQZ für Android</string>
+    <string name="gps_permission">Für bessere Suchergebnisse aktivieren Sie bitte GPS</string>
+    <string name="dont_show_again">Nicht mehr zeigen</string>
 </resources>
