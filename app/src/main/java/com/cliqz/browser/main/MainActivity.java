@@ -1,8 +1,10 @@
 package com.cliqz.browser.main;
 
 import android.app.ActivityManager;
+import android.app.AlertDialog;
 import android.content.ClipData;
 import android.content.ClipboardManager;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
@@ -11,16 +13,20 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcelable;
+import android.provider.Settings;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Patterns;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 
 import com.cliqz.browser.di.components.ActivityComponent;
 import com.cliqz.browser.di.components.DaggerActivityComponent;
@@ -180,6 +186,45 @@ public class MainActivity extends AppCompatActivity {
             telemetry.sendStartingSignals(name);
         }
         locationCache.start();
+        if(!locationCache.isGPSEnabled()
+                && !preferenceManager.getNeverAskGPSPermission()
+                && preferenceManager.getOnBoardingComplete()
+                && preferenceManager.getLocationEnabled()) {
+            showGPSPermissionDialog();
+        }
+    }
+
+    private void showGPSPermissionDialog() {
+        LayoutInflater inflater = LayoutInflater.from(this);
+        View dialogLayout = inflater.inflate(R.layout.dialog_gps_permission, null);
+        CheckBox dontShowAgain = (CheckBox) dialogLayout.findViewById(R.id.skip);
+        final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        final String action = Settings.ACTION_LOCATION_SOURCE_SETTINGS;
+        final String message = getResources().getString(R.string.gps_permission);
+        builder.setView(dialogLayout);
+        builder.setMessage(message)
+                .setPositiveButton("OK",
+                        new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                startActivity(new Intent(action));
+                                dialog.dismiss();
+                            }
+                        })
+                .setNegativeButton("Cancel",
+                        new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.cancel();
+                            }
+                        });
+        builder.create().show();
+        dontShowAgain.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                preferenceManager.setNeverAskGPSPermission(isChecked);
+            }
+        });
     }
 
     @Override
@@ -347,22 +392,9 @@ public class MainActivity extends AppCompatActivity {
         long curTime = System.currentTimeMillis();
         telemetry.sendOnBoardingHideSignal(curTime - onBoardingAdapter.startTime);
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_FULL_USER);
-        createAppShortcutOnHomeScreen();
-        setupContentView();
-    }
-
-    private void createAppShortcutOnHomeScreen() {
-        // Create the shortcut on the home screen
-        Intent shortCutIntent = new Intent("com.android.launcher.action.INSTALL_SHORTCUT");
-        shortCutIntent.putExtra("duplicate", false);
-        shortCutIntent.putExtra(Intent.EXTRA_SHORTCUT_NAME, getString(R.string.cliqz_app_name));
-        Parcelable icon = Intent.ShortcutIconResource.fromContext(getApplicationContext(), R.mipmap.ic_launcher);
-        shortCutIntent.putExtra(Intent.EXTRA_SHORTCUT_ICON_RESOURCE, icon);
-        shortCutIntent.putExtra(Intent.EXTRA_SHORTCUT_INTENT, new Intent(getApplicationContext(), MainActivity.class));
-        sendBroadcast(shortCutIntent);
-
         // Send telemetry "installed" signal
         telemetry.sendLifeCycleSignal(Telemetry.Action.INSTALL);
+        setupContentView();
     }
 
     //returns screen that is visible

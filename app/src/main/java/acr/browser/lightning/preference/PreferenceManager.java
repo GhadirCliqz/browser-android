@@ -72,6 +72,7 @@ public class PreferenceManager {
         public static final String BROWSER_STATE = "cliqzBrowserState";
         public static final String BLOCK_ADULT_CONTENT = "blockAdultContent";
         public static final String HUMAN_WEB = "humanweb";
+        public static final String NEVER_ASK_GPS_PERMISSION = "gpsPermission";
     }
 
     private final SharedPreferences mPrefs;
@@ -297,6 +298,10 @@ public class PreferenceManager {
 
     public boolean getHumanWebEnabled() {
         return mPrefs.getBoolean(Name.HUMAN_WEB, true);
+    }
+
+    public boolean getNeverAskGPSPermission() {
+        return mPrefs.getBoolean(Name.NEVER_ASK_GPS_PERMISSION, false);
     }
 
     private void putBoolean(String name, boolean value) {
@@ -533,5 +538,9 @@ public class PreferenceManager {
 
     public void setHumanWebEnabled(boolean enable) {
         putBoolean(Name.HUMAN_WEB, enable);
+    }
+
+    public void setNeverAskGPSPermission(boolean neverAskGPSPermission) {
+        putBoolean(Name.NEVER_ASK_GPS_PERMISSION, neverAskGPSPermission);
     }
 }

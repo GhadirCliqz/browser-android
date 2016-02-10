@@ -2,6 +2,7 @@ package com.cliqz.browser.utils;
 
 import android.Manifest;
 import android.content.Context;
+import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -38,9 +39,12 @@ public class LocationCache implements LocationListener {
     }
 
     public void start() {
+        final Criteria criteria = new Criteria();
+        criteria.setAccuracy(Criteria.ACCURACY_FINE);
+        final String provider = locationManager.getBestProvider(criteria, false);
         if (PermissionsManager.hasPermission(context, Manifest.permission.ACCESS_FINE_LOCATION)) {
             try {
-                locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,
+                locationManager.requestLocationUpdates(provider,
                         FIFTEEN_MINUTES, FORTY_METERS, this);
                 mLastLocation = getLastLocation();
             } catch (SecurityException e) {
@@ -55,6 +59,10 @@ public class LocationCache implements LocationListener {
         } catch (SecurityException e) {
             // Nothing to do here we, we don't care about this
         }
+    }
+
+    public boolean isGPSEnabled() {
+        return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
     }
 
     @Nullable
