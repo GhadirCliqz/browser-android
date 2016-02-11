@@ -149,9 +149,14 @@ public class OverFlowMenu extends ListPopupWindow{
                     if(mState.equals(MainFragment.State.SHOWING_SEARCH)) {
                         setButtonDisabled(actionRefreshButton);
                         setButtonDisabled(actionShareButton);
+                    } else {
+                        setButtonEnabled(actionRefreshButton);
+                        setButtonEnabled(actionShareButton);
                     }
                     if (!mCanGoForward) {
                         setButtonDisabled(actionForwardButton);
+                    } else {
+                        setButtonEnabled(actionForwardButton);
                     }
                 } else {
                     view = inflater.inflate(android.R.layout.simple_list_item_1, parent, false);
@@ -176,6 +181,13 @@ public class OverFlowMenu extends ListPopupWindow{
             final int color = ContextCompat.getColor(context, R.color.hint_text);
             view.getDrawable().setColorFilter(color, PorterDuff.Mode.SRC_ATOP);
         }
+
+        private void setButtonEnabled(final ImageView view) {
+            view.setEnabled(true);
+            final int color = ContextCompat.getColor(context, R.color.black);
+            view.getDrawable().setColorFilter(color, PorterDuff.Mode.SRC_ATOP);
+        }
+
     }
 
     private AdapterView.OnItemClickListener itemClickListener = new AdapterView.OnItemClickListener() {

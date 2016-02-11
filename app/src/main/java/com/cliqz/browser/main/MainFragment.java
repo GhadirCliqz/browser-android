@@ -63,6 +63,7 @@ public class MainFragment extends BaseFragment {
     private static final int STOP = 2;
     private int currentIcon;
     private boolean isAnimationInProgress = false;
+    private OverFlowMenu mOverFlowMenu = null;
 
     public enum State {
         SHOWING_SEARCH,
@@ -275,11 +276,11 @@ public class MainFragment extends BaseFragment {
 
     @OnClick(R.id.overflow_menu)
     void menuClicked() {
-        final OverFlowMenu overFlowMenu = new OverFlowMenu(getActivity());
-        overFlowMenu.setBrowserState(mState);
-        overFlowMenu.setCanGoForward(mLightningView.canGoForward());
-        overFlowMenu.setAnchorView(overflowMenuButton);
-        overFlowMenu.show();
+        mOverFlowMenu = new OverFlowMenu(getActivity());
+        mOverFlowMenu.setBrowserState(mState);
+        mOverFlowMenu.setCanGoForward(mLightningView.canGoForward());
+        mOverFlowMenu.setAnchorView(overflowMenuButton);
+        mOverFlowMenu.show();
     }
 
     @OnEditorAction(R.id.search_edit_text)
@@ -380,7 +381,10 @@ public class MainFragment extends BaseFragment {
     public void onBackPressed(Messages.BackPressed event) {
         // We can go back if:
         // 1. the webview can go back
-        if (mLightningView.canGoBack()) {
+        if (mOverFlowMenu != null && mOverFlowMenu.isShowing()) {
+            mOverFlowMenu.dismiss();
+            mOverFlowMenu = null;
+        } else if (mLightningView.canGoBack()) {
             telemetry.backPressed = true;
             telemetry.showingCards = mState == State.SHOWING_SEARCH ? true : false;
             mLightningView.goBack();

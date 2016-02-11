@@ -4,7 +4,7 @@ apply plugin: 'com.getkeepsafe.dexcount'
 
 
 android.metaClass.baseVersionCode = 23
-android.metaClass.baseVersionName = "0.4.2"
+android.metaClass.baseVersionName = "0.5.0"
 
 android {
     signingConfigs {

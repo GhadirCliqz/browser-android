@@ -305,6 +305,7 @@ public class MainActivity extends AppCompatActivity {
         telemetry.resetBackNavigationVariables(-1);
         final FragmentManager fm = getSupportFragmentManager();
         final FragmentTransaction transaction = fm.beginTransaction();
+/*
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             transaction.
                     setCustomAnimations(R.anim.enter_slide_down, R.anim.exit_slide_down,
@@ -313,6 +314,7 @@ public class MainActivity extends AppCompatActivity {
             transaction.setCustomAnimations(R.anim.fade_in, R.anim.fade_out,
                     R.anim.fade_in, R.anim.fade_out);
         }
+*/
         transaction.replace(CONTENT_VIEW_ID, mHistoryFragment, HISTORY_FRAGMENT_TAG)
                 .addToBackStack(null)
                 .commit();
@@ -323,6 +325,7 @@ public class MainActivity extends AppCompatActivity {
         telemetry.resetBackNavigationVariables(-1);
         final FragmentManager fm = getSupportFragmentManager();
         final FragmentTransaction transaction = fm.beginTransaction();
+/*
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             transaction.
                     setCustomAnimations(R.anim.enter_slide_down, R.anim.exit_slide_down,
@@ -331,6 +334,7 @@ public class MainActivity extends AppCompatActivity {
             transaction.setCustomAnimations(R.anim.fade_in, R.anim.fade_out,
                     R.anim.fade_in, R.anim.fade_out);
         }
+*/
         transaction.replace(CONTENT_VIEW_ID, mFreshTabFragment, SUGGESTIONS_FRAGMENT_TAG)
                 .addToBackStack(null)
                 .commit();

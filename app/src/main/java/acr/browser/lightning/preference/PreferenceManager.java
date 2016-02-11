@@ -164,7 +164,7 @@ public class PreferenceManager {
     }
 
     public boolean getLocationEnabled() {
-        return mPrefs.getBoolean(Name.LOCATION, false);
+        return mPrefs.getBoolean(Name.LOCATION, true);
     }
 
     public String getMemoryUrl() {
