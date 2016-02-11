@@ -1,5 +1,6 @@
 package com.cliqz.browser.main;
 
+import android.Manifest;
 import android.app.ActivityManager;
 import android.app.AlertDialog;
 import android.content.ClipData;
@@ -7,12 +8,12 @@ import android.content.ClipboardManager;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Parcelable;
 import android.provider.Settings;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
@@ -68,6 +69,7 @@ public class MainActivity extends AppCompatActivity {
     private static final String SUGGESTIONS_FRAGMENT_TAG = "suggestions_fragment";
     static final String SEARCH_FRAGMENT_TAG = "search_fragment";
     private static final String CUSTOM_VIEW_FRAGMENT_TAG = "custom_view_fragment";
+    private static final String LOCATION_PERMISSION = Manifest.permission.ACCESS_FINE_LOCATION;
 
     private static final int CONTENT_VIEW_ID = R.id.main_activity_content;
 
@@ -184,6 +186,15 @@ public class MainActivity extends AppCompatActivity {
         timings.setAppStartTime();
         if(!name.isEmpty()) {
             telemetry.sendStartingSignals(name);
+        }
+        //Ask for "Dangerous Permissions" on runtime
+        if(Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP_MR1) {
+            if(preferenceManager.getLocationEnabled() &&
+                    checkSelfPermission(LOCATION_PERMISSION) != PackageManager.PERMISSION_GRANTED) {
+                final String[] permissions = {LOCATION_PERMISSION}; //Array of permissions needed
+                final int requestCode = 1; //Used to identify the request in the callback onRequestPermissionsResult(Not used)
+                requestPermissions(permissions, requestCode);
+            }
         }
         locationCache.start();
         if(!locationCache.isGPSEnabled()
