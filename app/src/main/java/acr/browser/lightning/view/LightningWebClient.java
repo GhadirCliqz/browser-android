@@ -361,6 +361,15 @@ class LightningWebClient extends WebViewClient {
                 }
                 return true;
             }
+        } else if (Uri.parse(url).getScheme().equals("market")) {
+            try {
+                final Intent intent = new Intent(Intent.ACTION_VIEW);
+                intent.setData(Uri.parse(url));
+                mActivity.startActivity(intent);
+                return true;
+            } catch (ActivityNotFoundException e) {
+                Log.e(Constants.TAG, "ActivityNotFoundException");
+            }
         }
         // CLIQZ! We do not want to open external app from our browser, so we return false here
         // boolean startActivityForUrl = mIntentUtils.startActivityForUrl(view, url);

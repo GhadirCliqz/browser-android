@@ -41,12 +41,15 @@ public class LocationCache implements LocationListener {
     public void start() {
         final Criteria criteria = new Criteria();
         criteria.setAccuracy(Criteria.ACCURACY_FINE);
-        final String provider = locationManager.getBestProvider(criteria, false);
+        final String provider = locationManager.getBestProvider(criteria, true);
         if (PermissionsManager.hasPermission(context, Manifest.permission.ACCESS_FINE_LOCATION)) {
             try {
                 locationManager.requestLocationUpdates(provider,
                         FIFTEEN_MINUTES, FORTY_METERS, this);
                 mLastLocation = getLastLocation();
+                if(mLastLocation == null) {
+                    mLastLocation = locationManager.getLastKnownLocation(provider);
+                }
             } catch (SecurityException e) {
                 Log.e(TAG, "Check permissions");
             }
