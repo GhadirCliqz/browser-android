@@ -28,6 +28,7 @@ import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.ListPopupWindow;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.cliqz.browser.webview.CliqzMessages;
 import com.cliqz.browser.webview.SearchWebView;
@@ -472,6 +473,17 @@ public class MainFragment extends BaseFragment {
             final ClipData clip = ClipData.newPlainText("link", mLightningView.getUrl());
             clipboard.setPrimaryClip(clip);
         }
+    }
+
+
+    @Subscribe
+    public void copyData(CliqzMessages.CopyData event) {
+        final String message = getResources().getString(R.string.message_text_copied);
+        final ClipboardManager clipboard = (ClipboardManager) getContext()
+                .getSystemService(Context.CLIPBOARD_SERVICE);
+        final ClipData clip = ClipData.newPlainText("result", event.data);
+        clipboard.setPrimaryClip(clip);
+        Toast.makeText(getContext(), message, Toast.LENGTH_SHORT).show();
     }
 
     @Subscribe
