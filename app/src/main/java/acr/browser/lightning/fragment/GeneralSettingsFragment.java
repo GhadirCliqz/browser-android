@@ -23,7 +23,6 @@ import acr.browser.lightning.R;
 import acr.browser.lightning.constant.Constants;
 import acr.browser.lightning.constant.SearchEngines;
 import acr.browser.lightning.download.DownloadHandler;
-import acr.browser.lightning.utils.ProxyUtils;
 import acr.browser.lightning.utils.ThemeUtils;
 import acr.browser.lightning.utils.Utils;
 
@@ -219,10 +218,10 @@ public class GeneralSettingsFragment extends LightningPreferenceFragment impleme
     private void setProxyChoice(int choice) {
         switch (choice) {
             case Constants.PROXY_ORBOT:
-                choice = ProxyUtils.getInstance().setProxyChoice(choice, mActivity);
+                // choice = ProxyUtils.getInstance().setProxyChoice(choice, mActivity);
                 break;
             case Constants.PROXY_I2P:
-                choice = ProxyUtils.getInstance().setProxyChoice(choice, mActivity);
+                // choice = ProxyUtils.getInstance().setProxyChoice(choice, mActivity);
                 break;
             case Constants.PROXY_MANUAL:
                 manualProxyPicker();

@@ -26,7 +26,6 @@ import android.webkit.WebViewClient;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 
-import com.cliqz.browser.main.MainActivity;
 import com.cliqz.browser.main.Messages;
 import com.squareup.otto.Bus;
 
@@ -36,12 +35,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import acr.browser.lightning.R;
-import acr.browser.lightning.app.BrowserApp;
 import acr.browser.lightning.bus.BrowserEvents;
 import acr.browser.lightning.constant.Constants;
-import acr.browser.lightning.utils.AdBlock;
-import acr.browser.lightning.utils.IntentUtils;
-import acr.browser.lightning.utils.ProxyUtils;
 import acr.browser.lightning.utils.Utils;
 
 /**
@@ -58,35 +53,38 @@ class LightningWebClient extends WebViewClient {
 
     private final Activity mActivity;
     private final LightningView mLightningView;
-    private final AdBlock mAdBlock;
     private final Bus mEventBus;
-    private final IntentUtils mIntentUtils;
-    private final WebView mWebView;
+//    private final IntentUtils mIntentUtils;
+//    private final WebView mWebView;
 
     LightningWebClient(Activity activity, LightningView lightningView) {
         mActivity = activity;
         mLightningView = lightningView;
-        mAdBlock = AdBlock.getInstance(activity);
-        mAdBlock.updatePreference();
         mEventBus = lightningView.mEventBus;
-        mIntentUtils = new IntentUtils(activity);
-        mWebView = lightningView.getWebView();
+//        mIntentUtils = new IntentUtils(activity);
+//        mWebView = lightningView.getWebView();
     }
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     @Override
     public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
-        final WebResourceResponse cliqzResponse = handleCliqzUrl(view, request.getUrl());
-        return cliqzResponse != null ? cliqzResponse : super.shouldInterceptRequest(view, request);
+        final WebResourceResponse response = handleUrl(view, request.getUrl());
+        return response != null ? response : super.shouldInterceptRequest(view, request);
     }
 
     @Override
     public WebResourceResponse shouldInterceptRequest(WebView view, String url) {
-        final WebResourceResponse cliqzResponse = handleCliqzUrl(view, Uri.parse(url));
-        return cliqzResponse != null ? cliqzResponse : super.shouldInterceptRequest(view, url);
+        final WebResourceResponse response = handleUrl(view, Uri.parse(url));
+        return response != null ? response : super.shouldInterceptRequest(view, url);
     }
 
-    private WebResourceResponse handleCliqzUrl(WebView view, Uri uri) {
+    private WebResourceResponse handleUrl(WebView view, Uri uri) {
+        // Check if this is ad
+        if (mLightningView.mAdBlock.isAd(uri)) {
+            return new WebResourceResponse("text/html", "UTF-8",
+                    new ByteArrayInputStream("".getBytes()));
+        }
+
         if (!CLIQZ_SCHEME.equals(uri.getScheme())) {
             return null;
         }
@@ -323,7 +321,7 @@ class LightningWebClient extends WebViewClient {
     @Override
     public boolean shouldOverrideUrlLoading(WebView view, String url) {
         // Check if configured proxy is available
-        if (!ProxyUtils.getInstance().isProxyReady(view.getContext())) {
+        if (!mLightningView.isProxyReady()) {
             // User has been notified
             return true;
         }

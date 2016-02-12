@@ -3,7 +3,6 @@ package acr.browser.lightning.database;
 import android.app.Activity;
 import android.content.Context;
 import android.os.Environment;
-import android.provider.Browser;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
@@ -36,7 +35,6 @@ import java.util.concurrent.Executors;
 import javax.inject.Singleton;
 
 import acr.browser.lightning.R;
-import acr.browser.lightning.app.BrowserApp;
 import acr.browser.lightning.constant.Constants;
 import acr.browser.lightning.utils.Utils;
 

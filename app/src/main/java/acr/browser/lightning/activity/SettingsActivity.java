@@ -7,7 +7,6 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.preference.Preference;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
@@ -15,9 +14,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.ListView;
-import com.cliqz.browser.main.MainActivity;
 
 import com.anthonycr.grant.PermissionsManager;
+import com.cliqz.browser.main.MainActivity;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -1,7 +1,6 @@
 package acr.browser.lightning.bus;
 
 import android.net.Uri;
-import android.os.Message;
 import android.support.annotation.StringRes;
 import android.view.View;
 import android.webkit.ValueCallback;

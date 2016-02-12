@@ -9,6 +9,7 @@ import javax.inject.Inject;
 import acr.browser.lightning.app.BrowserApp;
 import acr.browser.lightning.database.BookmarkManager;
 import acr.browser.lightning.preference.PreferenceManager;
+import acr.browser.lightning.utils.ProxyUtils;
 
 /**
  * @author Stefano Pacifici
@@ -22,6 +23,9 @@ public abstract class BaseSettingsFragment extends PreferenceFragment
 
     @Inject
     BookmarkManager mBookmarkManager;
+
+    @Inject
+    ProxyUtils mProxyUtils;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {

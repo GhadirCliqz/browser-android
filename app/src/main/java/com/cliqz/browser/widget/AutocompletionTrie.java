@@ -1,7 +1,6 @@
 package com.cliqz.browser.widget;
 
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  * A trie (not a tree) implementation tha store String prefixes and an integer (reference) as value.

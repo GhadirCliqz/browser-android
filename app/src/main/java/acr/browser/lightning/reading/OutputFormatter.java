@@ -2,14 +2,13 @@ package acr.browser.lightning.reading;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Element;
+import org.jsoup.nodes.Node;
+import org.jsoup.nodes.TextNode;
 import org.jsoup.select.Elements;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Pattern;
-
-import org.jsoup.nodes.Node;
-import org.jsoup.nodes.TextNode;
 
 /**
  * @author goose | jim

@@ -4,10 +4,6 @@ import android.app.Activity;
 import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.util.Log;
-import android.webkit.WebView;
-
-import com.cliqz.browser.utils.Telemetry;
-import com.squareup.otto.Bus;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -15,8 +11,6 @@ import org.json.JSONObject;
 
 import java.util.List;
 import java.util.Locale;
-
-import javax.inject.Inject;
 
 import acr.browser.lightning.database.HistoryDatabase;
 import acr.browser.lightning.database.HistoryItem;

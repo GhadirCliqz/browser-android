@@ -3,18 +3,18 @@
  */
 package acr.browser.lightning.constant;
 
+import android.content.Context;
+
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
 
-import android.content.Context;
-
-import acr.browser.lightning.app.BrowserApp;
-import acr.browser.lightning.database.HistoryItem;
 import acr.browser.lightning.R;
+import acr.browser.lightning.app.BrowserApp;
 import acr.browser.lightning.database.HistoryDatabase;
+import acr.browser.lightning.database.HistoryItem;
 import acr.browser.lightning.utils.Utils;
 
 public class HistoryPage {
