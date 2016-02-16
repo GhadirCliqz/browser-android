@@ -325,6 +325,19 @@ public class MainFragment extends BaseFragment {
         imm.hideSoftInputFromWindow(mAutocompleteEditText.getWindowToken(), 0);
     }
 
+    private void shareText(String text) {
+        final String footer = getString(R.string.shared_using);
+        final Intent intent = new Intent(Intent.ACTION_SEND);
+        intent.setType("text/plain");
+        intent.putExtra(Intent.EXTRA_TEXT, new StringBuilder()
+                        .append(text)
+                        .append("\n")
+                        .append(footer)
+                        .toString()
+        );
+        startActivity(Intent.createChooser(intent, getString(R.string.share_link)));
+    }
+
     @Subscribe
     public void updateProgress(BrowserEvents.UpdateProgress event) {
         mProgressBar.setProgress(event.progress);
@@ -434,16 +447,22 @@ public class MainFragment extends BaseFragment {
 
     @Subscribe
     public void shareLink(Messages.ShareLink event) {
-        final String footer = getString(R.string.shared_using);
-        final Intent intent = new Intent(Intent.ACTION_SEND);
-        intent.setType("text/plain");
-        intent.putExtra(Intent.EXTRA_TEXT, new StringBuilder()
-                        .append(mLightningView.getUrl())
-                        .append("\n")
-                        .append(footer)
-                        .toString()
-        );
-        startActivity(Intent.createChooser(intent, getString(R.string.share_link)));
+        if(mState == State.SHOWING_SEARCH) {
+            mSearchWebView.requestCardUrl();
+        } else {
+            final String url = mLightningView.getUrl();
+            shareText(url);
+        }
+    }
+
+    @Subscribe
+    public void shareCard(Messages.ShareCard event) {
+        final String url = event.url;
+        if(url.equals("-1")) {
+            Toast.makeText(getContext(), "This card is not shareable", Toast.LENGTH_SHORT).show();
+        } else {
+            shareText(url);
+        }
     }
 
     @Subscribe

@@ -71,4 +71,12 @@ public final class Messages {
     public static class CopyUrl {}
 
     public static class GoForward {}
+
+    public static class ShareCard {
+        public final String url;
+
+        public ShareCard(String url) {
+            this.url = url;
+        }
+    }
 }

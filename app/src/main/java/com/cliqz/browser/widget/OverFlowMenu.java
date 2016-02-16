@@ -148,10 +148,10 @@ public class OverFlowMenu extends ListPopupWindow{
                     ButterKnife.bind(OverFlowMenu.this, view);
                     if(mState.equals(MainFragment.State.SHOWING_SEARCH)) {
                         setButtonDisabled(actionRefreshButton);
-                        setButtonDisabled(actionShareButton);
+                        //setButtonDisabled(actionShareButton);
                     } else {
                         setButtonEnabled(actionRefreshButton);
-                        setButtonEnabled(actionShareButton);
+                        //setButtonEnabled(actionShareButton);
                     }
                     if (!mCanGoForward) {
                         setButtonDisabled(actionForwardButton);

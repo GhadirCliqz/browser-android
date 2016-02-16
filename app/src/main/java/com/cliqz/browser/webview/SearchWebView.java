@@ -211,4 +211,8 @@ public class SearchWebView extends BaseWebView {
             e.printStackTrace();
         }
     }
+
+    public void requestCardUrl() {
+        executeJS("getCardUrl()");
+    }
 }
