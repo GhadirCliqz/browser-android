@@ -385,13 +385,6 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    @Subscribe
-    public void copyData(CliqzMessages.CopyData event) {
-        ClipboardManager clipboard = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
-        ClipData clip = ClipData.newPlainText("label", event.data);
-        clipboard.setPrimaryClip(clip);
-    }
-
     public void nextScreen(View view) {
         final int page = pager.getCurrentItem() + 1;
         pager.setCurrentItem(page);

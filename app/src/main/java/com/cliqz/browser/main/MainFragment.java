@@ -11,6 +11,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.util.Patterns;
 import android.view.LayoutInflater;
@@ -27,6 +28,7 @@ import android.webkit.WebView;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.cliqz.browser.webview.CliqzMessages;
 import com.cliqz.browser.webview.SearchWebView;
@@ -57,9 +59,10 @@ public class MainFragment extends BaseFragment {
     private static final String TAG = MainFragment.class.getSimpleName();
     private static final String STATE_KEY = TAG + ".STATE";
     private static final String NAVIGATION_STATE_KEY = TAG + ".NAVIGATION_STATE";
-    private static final int CLEAR = 0;
-    private static final int RELOAD = 1;
-    private static final int STOP = 2;
+    private static final int ICON_STATE_CLEAR = 0;
+    //private static final int RELOAD = 1;
+    private static final int ICON_STATE_STOP = 2;
+    private static final int ICON_STATE_NONE = 3;
     private int currentIcon;
     private boolean isAnimationInProgress = false;
     private OverFlowMenu mOverFlowMenu = null;
@@ -201,7 +204,7 @@ public class MainFragment extends BaseFragment {
                 mLightningView.getWebView().bringToFront();
                 searchBar.showTitleBar();
                 searchBar.setTitle(mLightningView.getTitle());
-                switchIcon(RELOAD);
+                switchIcon(ICON_STATE_NONE);
             }
         }
     }
@@ -327,9 +330,9 @@ public class MainFragment extends BaseFragment {
         mProgressBar.setProgress(event.progress);
         if (!mLightningView.getUrl().contains(Constants.CLIQZ_TRAMPOLINE)) {
             if (event.progress == 100) {
-                switchIcon(RELOAD);
+                switchIcon(ICON_STATE_NONE);
             } else {
-                switchIcon(STOP);
+                switchIcon(ICON_STATE_STOP);
             }
         }
     }
@@ -473,6 +476,17 @@ public class MainFragment extends BaseFragment {
         }
     }
 
+
+    @Subscribe
+    public void copyData(CliqzMessages.CopyData event) {
+        final String message = getResources().getString(R.string.message_text_copied);
+        final ClipboardManager clipboard = (ClipboardManager) getContext()
+                .getSystemService(Context.CLIPBOARD_SERVICE);
+        final ClipData clip = ClipData.newPlainText("result", event.data);
+        clipboard.setPrimaryClip(clip);
+        Toast.makeText(getContext(), message, Toast.LENGTH_SHORT).show();
+    }
+
     @Subscribe
     public synchronized void hideToolBar(BrowserEvents.HideToolBar event) {
         if (mStatusBar.getTranslationY() >= 0.0f && !isAnimationInProgress) {
@@ -555,14 +569,20 @@ public class MainFragment extends BaseFragment {
         currentIcon = type;
         Drawable icon;
         switch (type) {
-            case CLEAR:
+            case ICON_STATE_CLEAR:
                 icon = ThemeUtils.getLightThemedDrawable(getContext(), R.drawable.ic_action_delete);
                 break;
-            case RELOAD:
-                icon = ThemeUtils.getLightThemedDrawable(getContext(), R.drawable.ic_action_refresh);
-                break;
-            case STOP:
+//            case RELOAD:
+//                icon = ThemeUtils.getLightThemedDrawable(getContext(), R.drawable.ic_action_refresh);
+//                break;
+            case ICON_STATE_STOP:
                 icon = ThemeUtils.getLightThemedDrawable(getContext(), R.drawable.ic_action_delete);
+                break;
+            case ICON_STATE_NONE:
+                icon = null;
+                final int height = ContextCompat.getDrawable(getContext(), R.drawable.ic_action_delete)
+                        .getIntrinsicHeight();
+                titleBar.setHeight(height);
                 break;
             default:
                 icon = ThemeUtils.getLightThemedDrawable(getContext(), R.drawable.ic_action_delete);
@@ -578,15 +598,16 @@ public class MainFragment extends BaseFragment {
                 int width = getContext().getResources().getDrawable(R.drawable.ic_action_delete).getIntrinsicWidth();
                 if (event.getX() > (view.getWidth() - view.getPaddingRight()) - width) {
                     switch (currentIcon) {
-                        case CLEAR:
+                        case ICON_STATE_CLEAR:
+                            searchBar.showSearchEditText();
                             mAutocompleteEditText.setText("");
                             break;
-                        case STOP:
+                        case ICON_STATE_STOP:
                             mLightningView.getWebView().stopLoading();
                             break;
-                        case RELOAD:
-                            mLightningView.getWebView().reload();
-                            break;
+//                        case RELOAD:
+//                            mLightningView.getWebView().reload();
+//                            break;
                     }
                     return true;
                 }
