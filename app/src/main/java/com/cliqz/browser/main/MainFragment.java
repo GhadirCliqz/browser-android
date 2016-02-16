@@ -405,13 +405,13 @@ public class MainFragment extends BaseFragment {
         if (mOverFlowMenu != null && mOverFlowMenu.isShowing()) {
             mOverFlowMenu.dismiss();
             mOverFlowMenu = null;
+        } else if (mState == State.SHOWING_SEARCH && mLightningView.canGoBack()) {
+            // In any case the trampoline will be current page predecessor
+            bringWebViewToFront();
         } else if (mLightningView.canGoBack()) {
             telemetry.backPressed = true;
             telemetry.showingCards = mState == State.SHOWING_SEARCH ? true : false;
             mLightningView.goBack();
-            if (mState == State.SHOWING_SEARCH) {
-                bringWebViewToFront();
-            }
         } else {
             bus.post(new Messages.Exit());
         }

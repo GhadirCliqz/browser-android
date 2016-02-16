@@ -1,14 +1,9 @@
 package com.cliqz.browser.main;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.io.Serializable;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-
-import acr.browser.lightning.preference.PreferenceManager;
 
 /**
  * This class keep the state of the app and help to dispatch it to the extension during init.

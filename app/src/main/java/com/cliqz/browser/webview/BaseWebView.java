@@ -1,19 +1,7 @@
 package com.cliqz.browser.webview;
 
-import android.annotation.TargetApi;
-import android.app.Activity;
 import android.content.Context;
-import android.os.Build;
 import android.support.annotation.Nullable;
-import android.util.AttributeSet;
-import android.util.Log;
-import android.view.View;
-import android.webkit.ConsoleMessage;
-import android.webkit.GeolocationPermissions;
-import android.webkit.WebChromeClient;
-import android.webkit.WebSettings;
-import android.webkit.WebView;
-import android.webkit.WebViewClient;
 
 import com.cliqz.browser.main.CliqzBrowserState;
 import com.cliqz.browser.main.MainActivity;
@@ -27,8 +15,6 @@ import java.util.Locale;
 
 import javax.inject.Inject;
 
-import acr.browser.lightning.BuildConfig;
-import acr.browser.lightning.app.BrowserApp;
 import acr.browser.lightning.constant.SearchEngines;
 import acr.browser.lightning.database.HistoryDatabase;
 import acr.browser.lightning.preference.PreferenceManager;

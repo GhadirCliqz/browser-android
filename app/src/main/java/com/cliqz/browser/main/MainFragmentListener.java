@@ -2,16 +2,7 @@ package com.cliqz.browser.main;
 
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
-import android.util.Patterns;
-import android.view.KeyEvent;
 import android.view.View;
-import android.widget.TextView;
-import android.webkit.URLUtil;
-import android.widget.EditText;
-
-import acr.browser.lightning.app.BrowserApp;
-import acr.browser.lightning.utils.UrlUtils;
 
 /**
  * @author Stefano Pacifici

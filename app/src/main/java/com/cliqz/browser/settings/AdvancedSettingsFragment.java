@@ -26,7 +26,6 @@ import java.util.List;
 
 import acr.browser.lightning.R;
 import acr.browser.lightning.constant.Constants;
-import acr.browser.lightning.utils.ProxyUtils;
 import acr.browser.lightning.utils.Utils;
 
 public class AdvancedSettingsFragment extends BaseSettingsFragment {
@@ -183,13 +182,12 @@ public class AdvancedSettingsFragment extends BaseSettingsFragment {
     }
 
     private void setProxyChoice(int choice) {
-        ProxyUtils utils = ProxyUtils.getInstance();
         switch (choice) {
             case Constants.PROXY_ORBOT:
-                choice = utils.setProxyChoice(choice, mActivity);
+                choice = mProxyUtils.setProxyChoice(choice, mActivity);
                 break;
             case Constants.PROXY_I2P:
-                choice = utils.setProxyChoice(choice, mActivity);
+                choice = mProxyUtils.setProxyChoice(choice, mActivity);
                 break;
             case Constants.PROXY_MANUAL:
                 manualProxyPicker();

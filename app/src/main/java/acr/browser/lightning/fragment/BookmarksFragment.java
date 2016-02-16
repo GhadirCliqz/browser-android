@@ -37,7 +37,6 @@ import javax.inject.Inject;
 import acr.browser.lightning.R;
 import acr.browser.lightning.activity.ReadingActivity;
 import acr.browser.lightning.activity.TabsManager;
-import acr.browser.lightning.app.BrowserApp;
 import acr.browser.lightning.async.AsyncExecutor;
 import acr.browser.lightning.async.ImageDownloadTask;
 import acr.browser.lightning.bus.BookmarkEvents;

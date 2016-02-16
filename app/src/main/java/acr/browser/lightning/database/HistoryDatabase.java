@@ -18,7 +18,6 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import acr.browser.lightning.R;
-import dagger.Provides;
 
 @Singleton
 public class HistoryDatabase extends SQLiteOpenHelper {

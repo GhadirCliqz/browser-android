@@ -30,7 +30,6 @@ import android.widget.CheckBox;
 import android.widget.CompoundButton;
 
 import com.cliqz.browser.di.components.ActivityComponent;
-import com.cliqz.browser.di.components.DaggerActivityComponent;
 import com.cliqz.browser.di.modules.ActivityModule;
 import com.cliqz.browser.utils.LocationCache;
 import com.cliqz.browser.utils.Telemetry;
@@ -104,10 +103,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mActivityComponent = DaggerActivityComponent.builder()
-                .appComponent(BrowserApp.getAppComponent())
-                .activityModule(new ActivityModule(this))
-                .build();
+        mActivityComponent = BrowserApp.getAppComponent().plus(new ActivityModule(this));
         mActivityComponent.inject(this);
         bus.register(this);
 

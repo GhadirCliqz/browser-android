@@ -16,7 +16,6 @@ import org.json.JSONObject;
 
 import javax.inject.Inject;
 
-import acr.browser.lightning.app.BrowserApp;
 import acr.browser.lightning.database.HistoryDatabase;
 
 /**

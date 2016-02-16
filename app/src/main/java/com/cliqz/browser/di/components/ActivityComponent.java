@@ -9,14 +9,15 @@ import com.cliqz.browser.webview.Bridge;
 import com.cliqz.browser.widget.OverFlowMenu;
 import com.squareup.otto.Bus;
 
+import acr.browser.lightning.utils.ProxyUtils;
 import acr.browser.lightning.view.LightningView;
-import dagger.Component;
+import dagger.Subcomponent;
 
 /**
  * Created by Ravjit on 30/12/15.
  */
 @PerActivity
-@Component(dependencies = {AppComponent.class}, modules = {ActivityModule.class})
+@Subcomponent(modules = {ActivityModule.class})
 public interface ActivityComponent {
 
     void inject(MainActivity mainActivity);
@@ -33,4 +34,5 @@ public interface ActivityComponent {
 
     Bus getBus();
 
+    void inject(ProxyUtils proxyUtils);
 }

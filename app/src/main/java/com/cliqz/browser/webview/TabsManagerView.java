@@ -1,13 +1,8 @@
 package com.cliqz.browser.webview;
 
 import android.content.Context;
-import android.os.Build;
 import android.support.annotation.Nullable;
-import android.util.Log;
 import android.view.View;
-import android.webkit.ConsoleMessage;
-import android.webkit.WebChromeClient;
-import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
@@ -21,9 +16,7 @@ import java.util.HashMap;
 
 import javax.inject.Inject;
 
-import acr.browser.lightning.BuildConfig;
 import acr.browser.lightning.activity.TabsManager;
-import acr.browser.lightning.app.BrowserApp;
 import acr.browser.lightning.constant.Constants;
 import acr.browser.lightning.view.ILightningTab;
 import acr.browser.lightning.view.LightningView;

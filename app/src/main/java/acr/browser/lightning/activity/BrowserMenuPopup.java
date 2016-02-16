@@ -11,8 +11,6 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 
-import com.squareup.otto.Bus;
-
 import javax.inject.Inject;
 
 import acr.browser.lightning.R;
