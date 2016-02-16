@@ -114,7 +114,8 @@ public class MainFragment extends BaseFragment {
         if (mSearchWebView == null || mLightningView == null) {
             // Must use activity due to Crosswalk webview
             mSearchWebView = new SearchWebView(getActivity());
-            mLightningView = new LightningView(getActivity()/*, mUrl */, false, "1");
+            mLightningView = new LightningView(getActivity()/*, mUrl */,
+                    ((MainActivity)getActivity()).isIncognito, "1");
             mSearchWebView.setLayoutParams(
                     new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
         } else {
@@ -253,7 +254,11 @@ public class MainFragment extends BaseFragment {
 
     @Override
     protected int getFragmentTheme() {
-        return R.style.Theme_Cliqz_Present;
+        if(((MainActivity)getActivity()).isIncognito) {
+            return R.style.Theme_Cliqz_Present_Incognito;
+        } else {
+            return R.style.Theme_Cliqz_Present;
+        }
     }
 
     @Nullable
@@ -282,6 +287,7 @@ public class MainFragment extends BaseFragment {
         mOverFlowMenu.setBrowserState(mState);
         mOverFlowMenu.setCanGoForward(mLightningView.canGoForward());
         mOverFlowMenu.setAnchorView(overflowMenuButton);
+        mOverFlowMenu.setIncognitoMode(((MainActivity) getActivity()).isIncognito);
         mOverFlowMenu.show();
     }
 

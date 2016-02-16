@@ -49,6 +49,7 @@ import acr.browser.lightning.R;
 import acr.browser.lightning.activity.SettingsActivity;
 import acr.browser.lightning.app.BrowserApp;
 import acr.browser.lightning.bus.BrowserEvents;
+import acr.browser.lightning.constant.Constants;
 import acr.browser.lightning.preference.PreferenceManager;
 
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
@@ -64,6 +65,7 @@ public class MainActivity extends AppCompatActivity {
     private final static String TAG = MainActivity.class.getSimpleName();
 
     public ActivityComponent mActivityComponent;
+    public Boolean isIncognito = false;
 
     private static final String HISTORY_FRAGMENT_TAG = "history_fragment";
     private static final String SUGGESTIONS_FRAGMENT_TAG = "suggestions_fragment";
@@ -131,8 +133,14 @@ public class MainActivity extends AppCompatActivity {
 
         // Ignore intent if we are being recreated
         final Intent intent = savedInstanceState == null ? getIntent() : null;
-        final String url = (intent != null) && (Intent.ACTION_VIEW.equals(intent.getAction())) ?
-                intent.getDataString() : null;
+        final String url;
+        if (intent != null && Intent.ACTION_VIEW.equals(intent.getAction())) {
+            url = intent.getDataString();
+            isIncognito = intent.getExtras().getBoolean(Constants.IS_INCOGNITO);
+        } else {
+            url = null;
+            isIncognito = false;
+        }
         if (url != null && Patterns.WEB_URL.matcher(url).matches()) {
             setIntent(null);
             final Bundle args = new Bundle();
@@ -275,20 +283,28 @@ public class MainActivity extends AppCompatActivity {
 
     @Subscribe
     public void openLinkInNewTab(BrowserEvents.OpenUrlInNewTab event) {
-        createNewTabWithUrl(event.url);
+        createTab(event.url, event.isIncognito);
     }
 
     @Subscribe
     public void createWindow(BrowserEvents.CreateWindow event) {
-        createNewTabWithUrl(event.url);
+        createTab(event.url, false);
 //        // TODO: Temporary workaround, we want to open a new activity!
 //        bus.post(new CliqzMessages.OpenLink(event.url));
     }
 
-    private void createNewTabWithUrl(String url) {
+    @Subscribe
+    public void createIncognitoTab(BrowserEvents.NewIncognitoTab event) {
+        createTab(null, true);
+    }
+
+    private void createTab(String url, boolean isIncognito) {
         final Intent intent = new Intent(getBaseContext(), MainActivity.class);
         intent.setAction(Intent.ACTION_VIEW);
-        intent.setData(Uri.parse(url));
+        if (url != null) {
+            intent.setData(Uri.parse(url));
+        }
+        intent.putExtra(Constants.IS_INCOGNITO, isIncognito);
         intent.addFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK
                 | Intent.FLAG_ACTIVITY_NEW_DOCUMENT);
         startActivity(intent);
