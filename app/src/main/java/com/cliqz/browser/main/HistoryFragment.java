@@ -1,6 +1,5 @@
 package com.cliqz.browser.main;
 
-import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.view.LayoutInflater;

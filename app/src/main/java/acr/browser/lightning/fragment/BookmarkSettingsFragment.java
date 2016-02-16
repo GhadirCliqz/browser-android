@@ -14,6 +14,9 @@ import android.preference.Preference;
 import android.preference.PreferenceFragment;
 import android.support.v7.app.AlertDialog;
 
+import com.anthonycr.grant.PermissionsManager;
+import com.anthonycr.grant.PermissionsResultAction;
+
 import java.io.File;
 import java.lang.ref.WeakReference;
 import java.util.Arrays;
@@ -27,8 +30,6 @@ import acr.browser.lightning.app.BrowserApp;
 import acr.browser.lightning.database.BookmarkLocalSync;
 import acr.browser.lightning.database.BookmarkManager;
 import acr.browser.lightning.database.HistoryItem;
-import com.anthonycr.grant.PermissionsManager;
-import com.anthonycr.grant.PermissionsResultAction;
 import acr.browser.lightning.utils.Utils;
 
 public class BookmarkSettingsFragment extends PreferenceFragment implements Preference.OnPreferenceClickListener {

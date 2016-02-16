@@ -3,13 +3,16 @@ package com.cliqz.browser.di.modules;
 import android.content.Context;
 
 import com.cliqz.browser.utils.Telemetry;
-import com.squareup.otto.Bus;
+
+import net.i2p.android.ui.I2PAndroidHelper;
 
 import javax.inject.Singleton;
 
 import acr.browser.lightning.app.BrowserApp;
 import acr.browser.lightning.database.BookmarkManager;
 import acr.browser.lightning.preference.PreferenceManager;
+import acr.browser.lightning.utils.AdBlock;
+import acr.browser.lightning.utils.ProxyUtils;
 import dagger.Module;
 import dagger.Provides;
 
@@ -19,11 +22,9 @@ import dagger.Provides;
 @Module
 public class AppModule {
     private final BrowserApp app;
-    private final Bus bus;
 
     public AppModule(BrowserApp app) {
         this.app = app;
-        this.bus = new Bus();
     }
 
     @Provides
@@ -47,5 +48,22 @@ public class AppModule {
     @Singleton
     public PreferenceManager providePreferenceManager() {
         return new PreferenceManager(app);
+    }
+
+    @Provides
+    @Singleton
+    public AdBlock provideAdBlock() {
+        return new AdBlock(app.getApplicationContext());
+    }
+
+    @Provides
+    public I2PAndroidHelper providesI2PAndroidHelper() {
+        return new I2PAndroidHelper(app.getApplicationContext());
+    }
+
+    @Provides
+    @Singleton
+    public ProxyUtils providesProxyUtils(PreferenceManager manager, I2PAndroidHelper helper) {
+        return new ProxyUtils(manager, helper);
     }
 }

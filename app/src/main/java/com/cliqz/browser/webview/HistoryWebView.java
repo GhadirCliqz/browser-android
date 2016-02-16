@@ -1,12 +1,7 @@
 package com.cliqz.browser.webview;
 
-import android.annotation.TargetApi;
 import android.content.Context;
-import android.os.Build;
 import android.support.annotation.Nullable;
-import android.util.AttributeSet;
-import android.webkit.WebView;
-import android.webkit.WebViewClient;
 
 import acr.browser.lightning.BuildConfig;
 

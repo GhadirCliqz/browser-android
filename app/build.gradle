@@ -1,7 +1,7 @@
 apply plugin: 'com.android.application'
 apply plugin: 'com.neenbedankt.android-apt'
 apply plugin: 'com.getkeepsafe.dexcount'
-
+apply from: 'adhosts.gradle'
 
 android.metaClass.baseVersionCode = 23
 android.metaClass.baseVersionName = "0.5.0"

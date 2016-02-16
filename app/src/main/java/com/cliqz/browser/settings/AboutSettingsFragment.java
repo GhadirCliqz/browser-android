@@ -3,15 +3,11 @@
  */
 package com.cliqz.browser.settings;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
 import android.preference.Preference;
 import android.preference.PreferenceFragment;
-import android.text.Html;
 
 import acr.browser.lightning.BuildConfig;
 import acr.browser.lightning.R;

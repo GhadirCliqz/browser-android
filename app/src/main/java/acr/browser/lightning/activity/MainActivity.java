@@ -8,6 +8,7 @@ import android.support.annotation.Nullable;
 import android.view.Menu;
 import android.webkit.CookieManager;
 import android.webkit.CookieSyncManager;
+
 import acr.browser.lightning.R;
 
 @SuppressWarnings("deprecation")

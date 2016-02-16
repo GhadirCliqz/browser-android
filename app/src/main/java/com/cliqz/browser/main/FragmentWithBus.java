@@ -1,7 +1,6 @@
 package com.cliqz.browser.main;
 
 import android.support.v4.app.Fragment;
-import android.util.Log;
 
 import com.cliqz.browser.utils.Telemetry;
 import com.cliqz.browser.utils.Timings;
@@ -9,7 +8,6 @@ import com.squareup.otto.Bus;
 
 import javax.inject.Inject;
 
-import acr.browser.lightning.app.BrowserApp;
 import acr.browser.lightning.preference.PreferenceManager;
 
 /**

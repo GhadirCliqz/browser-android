@@ -17,7 +17,6 @@ import android.widget.TextView;
 import com.cliqz.browser.main.MainActivity;
 import com.cliqz.browser.main.MainFragment;
 import com.cliqz.browser.main.Messages;
-import com.cliqz.browser.webview.CliqzMessages;
 import com.squareup.otto.Bus;
 
 import javax.inject.Inject;

@@ -280,7 +280,7 @@ public abstract class BrowserActivity extends ThemableBrowserActivity
         lp.height = LayoutParams.MATCH_PARENT;
         customView.setLayoutParams(lp);
 
-        mProxyUtils = ProxyUtils.getInstance();
+        // mProxyUtils = ProxyUtils.getInstance();
 
         // create the search EditText in the ToolBar
         mSearch = (AutocompleteEditText) customView.findViewById(R.id.search);

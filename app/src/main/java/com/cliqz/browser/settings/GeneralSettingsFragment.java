@@ -13,7 +13,6 @@ import android.preference.Preference;
 import android.support.v7.app.AlertDialog;
 import android.widget.EditText;
 
-import com.cliqz.browser.main.MainActivity;
 import com.cliqz.browser.main.OnBoardingActivity;
 
 import acr.browser.lightning.R;
@@ -33,7 +32,7 @@ public class GeneralSettingsFragment extends BaseSettingsFragment {
 
     private static final int API = Build.VERSION.SDK_INT;
     private Preference searchengine, showTour;
-    private CheckBoxPreference cbImages, cbAdultContent; // , cbDrawerTabs cbAds, ;
+    private CheckBoxPreference cbImages, cbAdultContent, cbAds; // , cbDrawerTabs, ;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -49,7 +48,7 @@ public class GeneralSettingsFragment extends BaseSettingsFragment {
         // Preference importBrowserpref = findPreference(SETTINGS_BROWSER_IMPORT);
         searchengine = findPreference(SETTINGS_SEARCHENGINE);
         showTour = findPreference(SETTINGS_SHOWTOUR);
-        //cbAds = (CheckBoxPreference) findPreference(SETTINGS_ADS);
+        cbAds = (CheckBoxPreference) findPreference(SETTINGS_ADS);
         cbImages = (CheckBoxPreference) findPreference(SETTINGS_IMAGES);
         cbAdultContent = (CheckBoxPreference) findPreference(SETTINGS_ADULT_CONTENT);
 
@@ -58,7 +57,7 @@ public class GeneralSettingsFragment extends BaseSettingsFragment {
         // importBrowserpref.setOnPreferenceClickListener(this);
         searchengine.setOnPreferenceClickListener(this);
         showTour.setOnPreferenceClickListener(this);
-        //cbAds.setOnPreferenceChangeListener(this);
+        cbAds.setOnPreferenceChangeListener(this);
         cbImages.setOnPreferenceChangeListener(this);
         cbAdultContent.setOnPreferenceChangeListener(this);
         // cbDrawerTabs.setOnPreferenceChangeListener(this);
@@ -73,11 +72,9 @@ public class GeneralSettingsFragment extends BaseSettingsFragment {
         boolean imagesBool = mPreferenceManager.getBlockImagesEnabled();
         boolean adultBool = mPreferenceManager.getBlockAdultContent();
 
-//        cbAds.setEnabled(Constants.FULL_VERSION);
-
         cbImages.setChecked(imagesBool);
         cbAdultContent.setChecked(adultBool);
-        //cbAds.setChecked(Constants.FULL_VERSION && mPreferenceManager.getAdBlockEnabled());
+        cbAds.setChecked(mPreferenceManager.getAdBlockEnabled());
         // cbDrawerTabs.setChecked(mPreferenceManager.getShowTabsInDrawer(true));
     }
 
@@ -158,10 +155,10 @@ public class GeneralSettingsFragment extends BaseSettingsFragment {
     public boolean onPreferenceChange(Preference preference, Object newValue) {
         // switch preferences
         switch (preference.getKey()) {
-//            case SETTINGS_ADS:
-//                mPreferenceManager.setAdBlockEnabled((Boolean) newValue);
-//                cbAds.setChecked((Boolean) newValue);
-//                return true;
+            case SETTINGS_ADS:
+                mPreferenceManager.setAdBlockEnabled((Boolean) newValue);
+                cbAds.setChecked((Boolean) newValue);
+                return true;
             case SETTINGS_IMAGES:
                 mPreferenceManager.setBlockImagesEnabled((Boolean) newValue);
                 cbImages.setChecked((Boolean) newValue);

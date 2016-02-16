@@ -11,10 +11,11 @@ import android.util.Log;
 import android.webkit.DownloadListener;
 import android.webkit.URLUtil;
 
-import acr.browser.lightning.R;
-import acr.browser.lightning.constant.Constants;
 import com.anthonycr.grant.PermissionsManager;
 import com.anthonycr.grant.PermissionsResultAction;
+
+import acr.browser.lightning.R;
+import acr.browser.lightning.constant.Constants;
 
 public class LightningDownloadListener implements DownloadListener {
 

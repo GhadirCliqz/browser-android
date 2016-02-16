@@ -3,7 +3,6 @@ package acr.browser.lightning.preference;
 import android.content.Context;
 import android.content.SharedPreferences;
 
-import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import acr.browser.lightning.constant.Constants;

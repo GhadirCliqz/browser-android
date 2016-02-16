@@ -9,8 +9,8 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 
-import acr.browser.lightning.app.BrowserApp;
 import acr.browser.lightning.R;
+import acr.browser.lightning.app.BrowserApp;
 import acr.browser.lightning.preference.PreferenceManager;
 import acr.browser.lightning.utils.Utils;
 

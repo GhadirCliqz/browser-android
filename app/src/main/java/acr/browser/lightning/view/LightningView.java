@@ -86,7 +86,6 @@ public class LightningView implements ILightningTab {
     // private final boolean mIsCustomWebView;
     private String mAntiPhishingSrc;
     private final String mId;
-    private final AdBlock mAdBlock;
     private String mUrl;
     // TODO fix so that mWebpageBitmap can be static - static changes the icon when switching from light to dark and then back to light
     private Bitmap mWebpageBitmap;
@@ -113,10 +112,16 @@ public class LightningView implements ILightningTab {
     LightningDialogBuilder mBookmarksDialogBuilder;
 
     @Inject
+    AdBlock mAdBlock;
+
+    @Inject
     HistoryDatabase mHistoryDatabase;
 
     @Inject
     Telemetry telemetry;
+
+    @Inject
+    ProxyUtils proxyUtils;
 
     @SuppressLint("NewApi")
     public LightningView(final Activity activity, boolean isIncognito, String uniqueId) {
@@ -127,7 +132,6 @@ public class LightningView implements ILightningTab {
         mIsIncognitoTab = isIncognito;
         Boolean useDarkTheme = mPreferences.getUseTheme() != 0 || isIncognito;
         mTitle = new LightningViewTitle(activity, useDarkTheme);
-        mAdBlock = AdBlock.getInstance(activity.getApplicationContext());
 
         mMaxFling = ViewConfiguration.get(activity).getScaledMaximumFlingVelocity();
 
@@ -214,7 +218,7 @@ public class LightningView implements ILightningTab {
         }
 
         settings.setDefaultTextEncodingName(mPreferences.getTextEncoding());
-        mAdBlock.updatePreference();
+        mAdBlock.setEnabled(mPreferences.getAdBlockEnabled());
         mHomepage = mPreferences.getHomepage();
         setColorMode(mPreferences.getRenderingMode());
 
@@ -559,8 +563,7 @@ public class LightningView implements ILightningTab {
 
     public synchronized void reload() {
         // Check if configured proxy is available
-        if (!ProxyUtils.getInstance().isProxyReady(mActivity.getApplicationContext())) {
-            // User has been notified
+        if (!isProxyReady()) {
             return;
         }
 
@@ -724,7 +727,7 @@ public class LightningView implements ILightningTab {
 
     public synchronized void loadUrl(String url) {
         // Check if configured proxy is available
-        if (!ProxyUtils.getInstance().isProxyReady(mActivity)) {
+        if (!isProxyReady()) {
             return;
         }
 
@@ -760,6 +763,19 @@ public class LightningView implements ILightningTab {
 
     public String getId() {
         return mId;
+    }
+
+    boolean isProxyReady() {
+        switch (proxyUtils.getProxyState()) {
+            case I2P_NOT_RUNNING:
+                mEventBus.post(new BrowserEvents.ShowSnackBarMessage(R.string.i2p_not_running));
+                return false;
+            case I2P_TUNNELS_NOT_READY:
+                mEventBus.post(new BrowserEvents.ShowSnackBarMessage(R.string.i2p_tunnels_not_ready));
+                return false;
+            default:
+                return true;
+        }
     }
 
     private class TouchListener implements OnTouchListener {
