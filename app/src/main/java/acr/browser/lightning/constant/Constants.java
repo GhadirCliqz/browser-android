@@ -37,6 +37,10 @@ public final class Constants {
     public static final String JAVASCRIPT_TEXT_REFLOW = "javascript:document.getElementsByTagName('body')[0].style.width=window.innerWidth+'px';";
     public static final String CLIQZ_TRAMPOLINE = "cliqz://trampoline/goto.html";
 
+    //Keys for arguments in intents/bundles
+    public static final String KEY_IS_INCOGNITO = "incognito";
+    public static final String KEY_URL = "url";
+
     public static final String LOAD_READING_URL = "ReadingUrl";
 
     public static final String SEPARATOR = "\\|\\$\\|SEPARATOR\\|\\$\\|";

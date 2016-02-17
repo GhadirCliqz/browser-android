@@ -66,13 +66,14 @@ public class MainFragment extends BaseFragment {
     private int currentIcon;
     private boolean isAnimationInProgress = false;
     private OverFlowMenu mOverFlowMenu = null;
+    private boolean isIncognito = false;
 
     public enum State {
         SHOWING_SEARCH,
         SHOWING_BROWSER,
     }
 
-    private String mUrl = "";
+    private String url = null;
     private String mSearchEngine;
     String lastQuery = "";
 
@@ -103,6 +104,22 @@ public class MainFragment extends BaseFragment {
     View overflowMenuButton;
 
     @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        final Bundle arguments = getArguments();
+        if (arguments != null) {
+            parseArguments(arguments);
+        }
+    }
+
+    private void parseArguments(Bundle arguments) {
+        isIncognito = arguments.getBoolean(Constants.KEY_IS_INCOGNITO, false);
+        url = arguments.getString(Constants.KEY_URL, null);
+        // We need to remove the key, otherwise the url get reloaded for each resume
+        arguments.remove(Constants.KEY_URL);
+    }
+
+    @Override
     protected View onCreateContentView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_search, container, false);
     }
@@ -114,7 +131,7 @@ public class MainFragment extends BaseFragment {
         if (mSearchWebView == null || mLightningView == null) {
             // Must use activity due to Crosswalk webview
             mSearchWebView = new SearchWebView(getActivity());
-            mLightningView = new LightningView(getActivity()/*, mUrl */, false, "1");
+            mLightningView = new LightningView(getActivity()/*, mUrl */, isIncognito, "1");
             mSearchWebView.setLayoutParams(
                     new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
         } else {
@@ -177,22 +194,10 @@ public class MainFragment extends BaseFragment {
             mLightningView.resumeTimers();
         }
 
-        // This code may look confused. It's relevant when we receive a new intent to open a new
-        // url.
-        final Bundle arguments = getArguments();
-        final String url;
-        if (arguments != null) {
-            url = arguments.getString("URL", "");
-            // We need to remove the key, otherwise the url get reloaded for each resume
-            arguments.remove("URL");
-        } else {
-            url = null;
-        }
-
         if (url != null && !url.isEmpty()) {
             mState = State.SHOWING_BROWSER;
             bus.post(new CliqzMessages.OpenLink(url, true));
-            arguments.clear();
+            url = null;
         } else {
             final boolean reset = System.currentTimeMillis() - state.getTimestamp() >= Constants.HOME_RESET_DELAY;
             mState = reset ? State.SHOWING_SEARCH : mState;
@@ -253,7 +258,11 @@ public class MainFragment extends BaseFragment {
 
     @Override
     protected int getFragmentTheme() {
-        return R.style.Theme_Cliqz_Present;
+        if(isIncognito) {
+            return R.style.Theme_Cliqz_Present_Incognito;
+        } else {
+            return R.style.Theme_Cliqz_Present;
+        }
     }
 
     @Nullable
@@ -282,6 +291,7 @@ public class MainFragment extends BaseFragment {
         mOverFlowMenu.setBrowserState(mState);
         mOverFlowMenu.setCanGoForward(mLightningView.canGoForward());
         mOverFlowMenu.setAnchorView(overflowMenuButton);
+        mOverFlowMenu.setIncognitoMode(isIncognito);
         mOverFlowMenu.show();
     }
 
@@ -323,6 +333,19 @@ public class MainFragment extends BaseFragment {
         InputMethodManager imm = (InputMethodManager) mAutocompleteEditText.getContext()
                 .getSystemService(Context.INPUT_METHOD_SERVICE);
         imm.hideSoftInputFromWindow(mAutocompleteEditText.getWindowToken(), 0);
+    }
+
+    private void shareText(String text) {
+        final String footer = getString(R.string.shared_using);
+        final Intent intent = new Intent(Intent.ACTION_SEND);
+        intent.setType("text/plain");
+        intent.putExtra(Intent.EXTRA_TEXT, new StringBuilder()
+                        .append(text)
+                        .append("\n")
+                        .append(footer)
+                        .toString()
+        );
+        startActivity(Intent.createChooser(intent, getString(R.string.share_link)));
     }
 
     @Subscribe
@@ -434,16 +457,22 @@ public class MainFragment extends BaseFragment {
 
     @Subscribe
     public void shareLink(Messages.ShareLink event) {
-        final String footer = getString(R.string.shared_using);
-        final Intent intent = new Intent(Intent.ACTION_SEND);
-        intent.setType("text/plain");
-        intent.putExtra(Intent.EXTRA_TEXT, new StringBuilder()
-                        .append(mLightningView.getUrl())
-                        .append("\n")
-                        .append(footer)
-                        .toString()
-        );
-        startActivity(Intent.createChooser(intent, getString(R.string.share_link)));
+        if(mState == State.SHOWING_SEARCH) {
+            mSearchWebView.requestCardUrl();
+        } else {
+            final String url = mLightningView.getUrl();
+            shareText(url);
+        }
+    }
+
+    @Subscribe
+    public void shareCard(Messages.ShareCard event) {
+        final String url = event.url;
+        if(url.equals("-1")) {
+            Toast.makeText(getContext(), getString(R.string.not_shareable), Toast.LENGTH_SHORT).show();
+        } else {
+            shareText(url);
+        }
     }
 
     @Subscribe

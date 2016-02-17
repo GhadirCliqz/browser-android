@@ -16,6 +16,7 @@ import android.widget.LinearLayout;
 
 import com.squareup.otto.Bus;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -273,35 +274,33 @@ public class LightningDialogBuilder {
     }
 
     public void showLongPressLinkDialog(final Context context, final String url) {
-        DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                switch (which) {
-                    case DialogInterface.BUTTON_POSITIVE:
-                        eventBus.post(new BrowserEvents.OpenUrlInNewTab(url));
-                        break;
-
-                    case DialogInterface.BUTTON_NEGATIVE:
-                        eventBus.post(new BrowserEvents.OpenUrlInCurrentTab(url));
-                        break;
-
-                    case DialogInterface.BUTTON_NEUTRAL:
-                        ClipboardManager clipboard = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
-                        ClipData clip = ClipData.newPlainText("label", url);
-                        clipboard.setPrimaryClip(clip);
-                        break;
-                }
-            }
+        final CharSequence[] mOptions = new CharSequence[] {
+                context.getString(R.string.action_copy),
+                context.getString(R.string.open_in_new_tab),
+                context.getString(R.string.open_in_incognito_tab)
         };
-
-        AlertDialog.Builder builder = new AlertDialog.Builder(context); // dialog
-        builder.setTitle(url)
-                .setCancelable(true)
-                .setMessage(R.string.dialog_link)
-                .setPositiveButton(R.string.action_new_tab, dialogClickListener)
-                .setNegativeButton(R.string.action_open, dialogClickListener)
-                .setNeutralButton(R.string.action_copy, dialogClickListener)
-                .show();
+        final AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(context);
+        dialogBuilder.setTitle(url)
+                .setItems(mOptions, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        switch (which) {
+                            case 0:
+                                final ClipboardManager clipboardManager = (ClipboardManager)
+                                        context.getSystemService(Context.CLIPBOARD_SERVICE);
+                                final ClipData clipData = ClipData.newPlainText("url", url);
+                                clipboardManager.setPrimaryClip(clipData);
+                                break;
+                            case 1:
+                                eventBus.post(new BrowserEvents.OpenUrlInNewTab(url, false));
+                                break;
+                            case 2:
+                                eventBus.post(new BrowserEvents.OpenUrlInNewTab(url, true));
+                                break;
+                        }
+                    }
+                });
+        dialogBuilder.show();
     }
 
 }

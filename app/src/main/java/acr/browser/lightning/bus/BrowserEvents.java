@@ -89,9 +89,16 @@ public final class BrowserEvents {
      */
     public final static class OpenUrlInNewTab {
         public final String url;
+        public final boolean isIncognito;
 
         public OpenUrlInNewTab(final String url) {
             this.url = url;
+            this.isIncognito = false;
+        }
+
+        public OpenUrlInNewTab(final String url, boolean isIncognito) {
+            this.url = url;
+            this.isIncognito = isIncognito;
         }
     }
 
@@ -210,4 +217,7 @@ public final class BrowserEvents {
             this.requestedOrientation = requestedOrientation;
         }
     }
+
+    public static class NewIncognitoTab {}
+
 }

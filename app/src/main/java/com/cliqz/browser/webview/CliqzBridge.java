@@ -4,6 +4,11 @@ import android.app.Activity;
 import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.util.Log;
+import android.webkit.WebView;
+
+import com.cliqz.browser.main.Messages;
+import com.cliqz.browser.utils.Telemetry;
+import com.squareup.otto.Bus;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -191,6 +196,18 @@ public class CliqzBridge extends Bridge {
                 if(copiedData != null) {
                     bridge.bus.post(new CliqzMessages.CopyData(copiedData));
                 }
+            }
+        }),
+
+        shareCard(new IAction() {
+            @Override
+            public void execute(Bridge bridge, Object data, String callback) {
+                final String cardLink = (data instanceof String) ? (String) data : null;
+                if (cardLink == null) {
+                    Log.w(TAG, "Expect either url or -1");
+                    return;
+                }
+                bridge.bus.post(new Messages.ShareCard(cardLink));
             }
         }),
 

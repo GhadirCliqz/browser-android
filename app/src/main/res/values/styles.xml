@@ -120,6 +120,10 @@
         <item name="colorPrimary">#F87140</item>
     </style>
 
+    <style name="Theme.Cliqz.Present.Incognito" parent="Theme.AppCompat.Light">
+        <item name="colorPrimary">#4F4F4F</item>
+    </style>
+
     <style name="Theme.Cliqz.Suggestions" parent="Theme.AppCompat.Light">
         <item name="colorPrimary">#55B046</item>
     </style>

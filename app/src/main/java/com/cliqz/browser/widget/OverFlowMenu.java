@@ -3,6 +3,8 @@ package com.cliqz.browser.widget;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.PorterDuff;
+import android.media.Image;
+import android.support.annotation.StringRes;
 import android.support.v4.content.ContextCompat;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -22,6 +24,7 @@ import com.squareup.otto.Bus;
 import javax.inject.Inject;
 
 import acr.browser.lightning.R;
+import acr.browser.lightning.bus.BrowserEvents;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -33,11 +36,42 @@ import static android.view.View.MeasureSpec.makeMeasureSpec;
  */
 public class OverFlowMenu extends ListPopupWindow{
 
+    private enum Entries {
+        ACTIONS(-1),
+        NEW_INCOGNITO_TAB(R.string.action_incognito),
+        COPY_LINK(R.string.action_copy),
+        SETTINGS(R.string.settings),
+        CONTACT_CLIQZ(R.string.contact_cliqz);
+
+        final int stringID;
+
+        Entries(@StringRes int title) {
+            stringID = title;
+        }
+    }
+
+    private static final Entries[] ENTRIES = new Entries[] {
+            Entries.ACTIONS,
+            Entries.NEW_INCOGNITO_TAB,
+            Entries.COPY_LINK,
+            Entries.SETTINGS,
+            Entries.CONTACT_CLIQZ
+    };
+
+    private static final Entries[] INCOGNITO_ENTRIES = new Entries[] {
+            Entries.ACTIONS,
+            Entries.SETTINGS,
+            Entries.CONTACT_CLIQZ
+    };
+
     private static final String HEADER = "header";
     private final Context context;
     private final OverFlowMenuAdapter overFlowMenuAdapter;
     private MainFragment.State mState = MainFragment.State.SHOWING_SEARCH;
     private boolean mCanGoForward = false;
+    private boolean mIncognitoMode;
+
+    private Entries[] mEntries = ENTRIES;
 
     @Inject
     Bus bus;
@@ -93,17 +127,27 @@ public class OverFlowMenu extends ListPopupWindow{
         overFlowMenuAdapter.notifyDataSetChanged();
     }
 
+    public boolean isIncognitoMode() {
+        return mIncognitoMode;
+    }
+
+    public void setIncognitoMode(boolean newValue) {
+        mIncognitoMode = newValue;
+        mEntries = mIncognitoMode ? INCOGNITO_ENTRIES : ENTRIES;
+        overFlowMenuAdapter.notifyDataSetInvalidated();
+    }
+
     private class OverFlowMenuAdapter extends BaseAdapter {
 
-        private String[] menuItems;
+        // private String[] menuItems;
 
-        public OverFlowMenuAdapter() {
-            menuItems = context.getResources().getStringArray(R.array.overflow_menu);
-        }
+//        public OverFlowMenuAdapter() {
+//            menuItems = context.getResources().getStringArray(R.array.overflow_menu);
+//        }
 
         @Override
         public int getCount() {
-            return menuItems.length + 1;  //+1 for header
+            return mEntries.length;
         }
 
         @Override
@@ -113,17 +157,22 @@ public class OverFlowMenu extends ListPopupWindow{
 
         @Override
         public int getItemViewType(int position) {
-            return (position == 0) ? 0 : 1;
+            switch (mEntries[position]) {
+                case ACTIONS:
+                    return 0;
+                default:
+                    return 1;
+            }
         }
 
         @Override
         public Object getItem(int position) {
-            return null;
+            return mEntries[position];
         }
 
         @Override
         public long getItemId(int position) {
-            return 0;
+            return mEntries[position].ordinal();
         }
 
         @Override
@@ -133,7 +182,7 @@ public class OverFlowMenu extends ListPopupWindow{
 
         @Override
         public boolean isEnabled(int position) {
-            return position != 1 || mState.equals(MainFragment.State.SHOWING_BROWSER);
+            return mEntries[position] != Entries.COPY_LINK || mState.equals(MainFragment.State.SHOWING_BROWSER);
         }
 
         @Override
@@ -147,10 +196,10 @@ public class OverFlowMenu extends ListPopupWindow{
                     ButterKnife.bind(OverFlowMenu.this, view);
                     if(mState.equals(MainFragment.State.SHOWING_SEARCH)) {
                         setButtonDisabled(actionRefreshButton);
-                        setButtonDisabled(actionShareButton);
+                        //setButtonDisabled(actionShareButton);
                     } else {
                         setButtonEnabled(actionRefreshButton);
-                        setButtonEnabled(actionShareButton);
+                        //setButtonEnabled(actionShareButton);
                     }
                     if (!mCanGoForward) {
                         setButtonDisabled(actionForwardButton);
@@ -162,13 +211,14 @@ public class OverFlowMenu extends ListPopupWindow{
                 }
             }
 
-            if(position == 0) {
-                view.setTag(HEADER);
+            if(mEntries[position] == Entries.ACTIONS) {
+                view.setTag(mEntries[position]);
             } else {
                 TextView option = (TextView) view.findViewById(android.R.id.text1);
-                option.setText(menuItems[position-1]);
-                view.setTag(menuItems[position-1]);
-                if(position == 1 && mState.equals(MainFragment.State.SHOWING_SEARCH)) {
+                option.setText(mEntries[position].stringID);
+                view.setTag(mEntries[position]);
+                option.setTextColor(ContextCompat.getColor(context, R.color.black));
+                if(mEntries[position] == Entries.COPY_LINK && mState.equals(MainFragment.State.SHOWING_SEARCH)) {
                     option.setTextColor(ContextCompat.getColor(context, R.color.hint_text));
                 }
             }
@@ -192,17 +242,26 @@ public class OverFlowMenu extends ListPopupWindow{
     private AdapterView.OnItemClickListener itemClickListener = new AdapterView.OnItemClickListener() {
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-            final String tag = view.getTag().toString();
-            if (tag.equals(context.getString(R.string.action_copy)) &&
-                    mState.equals(MainFragment.State.SHOWING_BROWSER)) {
-                bus.post(new Messages.CopyUrl());
-                OverFlowMenu.this.dismiss();
-            } else if (tag.equals(context.getString(R.string.settings))) {
-                bus.post(new Messages.GoToSettings());
-                OverFlowMenu.this.dismiss();
-            } else if (tag.equals(context.getString(R.string.contact_cliqz))) {
-                bus.post(new Messages.ContactCliqz());
-                OverFlowMenu.this.dismiss();
+            final Entries tag = (Entries)view.getTag();
+            switch (tag) {
+                case COPY_LINK:
+                    if (mState.equals(MainFragment.State.SHOWING_BROWSER)) {
+                        bus.post(new Messages.CopyUrl());
+                        OverFlowMenu.this.dismiss();
+                    }
+                    break;
+                case SETTINGS:
+                    bus.post(new Messages.GoToSettings());
+                    OverFlowMenu.this.dismiss();
+                    break;
+                case CONTACT_CLIQZ:
+                    bus.post(new Messages.ContactCliqz());
+                    OverFlowMenu.this.dismiss();
+                    break;
+                case NEW_INCOGNITO_TAB:
+                    bus.post(new BrowserEvents.NewIncognitoTab());
+                    OverFlowMenu.this.dismiss();
+                    break;
             }
         }
     };
