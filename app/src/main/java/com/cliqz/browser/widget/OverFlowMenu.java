@@ -131,8 +131,8 @@ public class OverFlowMenu extends ListPopupWindow{
         return mIncognitoMode;
     }
 
-    public void setIncognitoMode(boolean mIncognitoMode) {
-        this.mIncognitoMode = mIncognitoMode;
+    public void setIncognitoMode(boolean newValue) {
+        mIncognitoMode = newValue;
         mEntries = mIncognitoMode ? INCOGNITO_ENTRIES : ENTRIES;
         overFlowMenuAdapter.notifyDataSetInvalidated();
     }
@@ -243,19 +243,25 @@ public class OverFlowMenu extends ListPopupWindow{
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
             final Entries tag = (Entries)view.getTag();
-            if (tag.equals(Entries.COPY_LINK) &&
-                    mState.equals(MainFragment.State.SHOWING_BROWSER)) {
-                bus.post(new Messages.CopyUrl());
-                OverFlowMenu.this.dismiss();
-            } else if (tag.equals(Entries.SETTINGS)) {
-                bus.post(new Messages.GoToSettings());
-                OverFlowMenu.this.dismiss();
-            } else if (tag.equals(Entries.CONTACT_CLIQZ)) {
-                bus.post(new Messages.ContactCliqz());
-                OverFlowMenu.this.dismiss();
-            } else if (tag.equals(Entries.NEW_INCOGNITO_TAB)) {
-                bus.post(new BrowserEvents.NewIncognitoTab());
-                OverFlowMenu.this.dismiss();
+            switch (tag) {
+                case COPY_LINK:
+                    if (mState.equals(MainFragment.State.SHOWING_BROWSER)) {
+                        bus.post(new Messages.CopyUrl());
+                        OverFlowMenu.this.dismiss();
+                    }
+                    break;
+                case SETTINGS:
+                    bus.post(new Messages.GoToSettings());
+                    OverFlowMenu.this.dismiss();
+                    break;
+                case CONTACT_CLIQZ:
+                    bus.post(new Messages.ContactCliqz());
+                    OverFlowMenu.this.dismiss();
+                    break;
+                case NEW_INCOGNITO_TAB:
+                    bus.post(new BrowserEvents.NewIncognitoTab());
+                    OverFlowMenu.this.dismiss();
+                    break;
             }
         }
     };

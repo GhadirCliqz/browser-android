@@ -36,7 +36,10 @@ public final class Constants {
     public static final String JAVASCRIPT_LOAD_ANTIPHISHING = "javascript:(function(d){script = d.createElement('script'); script.type = 'text/javascript'; script.async = true; script.onload = function() { window.setTimeout(function() { CliqzAntiPhishing.auxOnPageLoad(document.location.href); }, 10) }; script.src = 'cliqz://js/CliqzAntiPhishing.js'; d.getElementsByTagName('head')[0].appendChild(script)})(document);";
     public static final String JAVASCRIPT_TEXT_REFLOW = "javascript:document.getElementsByTagName('body')[0].style.width=window.innerWidth+'px';";
     public static final String CLIQZ_TRAMPOLINE = "cliqz://trampoline/goto.html";
-    public static final String IS_INCOGNITO = "incognito";
+
+    //Keys for arguments in intents/bundles
+    public static final String KEY_IS_INCOGNITO = "incognito";
+    public static final String KEY_URL = "url";
 
     public static final String LOAD_READING_URL = "ReadingUrl";
 

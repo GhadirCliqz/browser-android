@@ -274,11 +274,11 @@ public class LightningDialogBuilder {
     }
 
     public void showLongPressLinkDialog(final Context context, final String url) {
-        final List<String> options = new ArrayList<String>();
-        options.add(context.getString(R.string.action_copy));
-        options.add(context.getString(R.string.open_in_new_tab));
-        options.add(context.getString(R.string.open_in_incognito_tab));
-        final CharSequence[] mOptions = options.toArray(new String[options.size()]);
+        final CharSequence[] mOptions = new CharSequence[] {
+                context.getString(R.string.action_copy),
+                context.getString(R.string.open_in_new_tab),
+                context.getString(R.string.open_in_incognito_tab)
+        };
         final AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(context);
         dialogBuilder.setTitle(url)
                 .setItems(mOptions, new DialogInterface.OnClickListener() {

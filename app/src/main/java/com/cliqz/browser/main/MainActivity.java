@@ -64,7 +64,6 @@ public class MainActivity extends AppCompatActivity {
     private final static String TAG = MainActivity.class.getSimpleName();
 
     public ActivityComponent mActivityComponent;
-    public Boolean isIncognito = false;
 
     private static final String HISTORY_FRAGMENT_TAG = "history_fragment";
     private static final String SUGGESTIONS_FRAGMENT_TAG = "suggestions_fragment";
@@ -130,19 +129,21 @@ public class MainActivity extends AppCompatActivity {
         // Ignore intent if we are being recreated
         final Intent intent = savedInstanceState == null ? getIntent() : null;
         final String url;
+        final boolean isIncognito;
         if (intent != null && Intent.ACTION_VIEW.equals(intent.getAction())) {
             url = intent.getDataString();
-            isIncognito = intent.getExtras().getBoolean(Constants.IS_INCOGNITO);
+            isIncognito = intent.getExtras().getBoolean(Constants.KEY_IS_INCOGNITO);
         } else {
             url = null;
             isIncognito = false;
         }
+        final Bundle args = new Bundle();
+        args.putBoolean(Constants.KEY_IS_INCOGNITO, isIncognito);
         if (url != null && Patterns.WEB_URL.matcher(url).matches()) {
             setIntent(null);
-            final Bundle args = new Bundle();
-            args.putString("URL", url);
-            mMainFragment.setArguments(args);
+            args.putString(Constants.KEY_URL, url);
         }
+        mMainFragment.setArguments(args);
 
         if(!preferenceManager.getOnBoardingComplete()) {
             preferenceManager.setSessionId(telemetry.generateSessionID());
@@ -300,7 +301,7 @@ public class MainActivity extends AppCompatActivity {
         if (url != null) {
             intent.setData(Uri.parse(url));
         }
-        intent.putExtra(Constants.IS_INCOGNITO, isIncognito);
+        intent.putExtra(Constants.KEY_IS_INCOGNITO, isIncognito);
         intent.addFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK
                 | Intent.FLAG_ACTIVITY_NEW_DOCUMENT);
         startActivity(intent);

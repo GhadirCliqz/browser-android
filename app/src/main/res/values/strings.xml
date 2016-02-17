@@ -256,4 +256,5 @@
     <string name="gps_permission">Please enable GPS for better search results</string>
     <string name="open_in_new_tab">Open in new tab</string>
     <string name="open_in_incognito_tab">Open in incognito tab</string>
+    <string name="not_shareable">This card is not shareable</string>
 </resources>
