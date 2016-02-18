@@ -11,7 +11,6 @@ import com.cliqz.browser.widget.AutocompleteEditText;
 
 import javax.inject.Singleton;
 
-import acr.browser.lightning.activity.BrowserMenuPopup;
 import acr.browser.lightning.activity.OnBoardingActivity;
 import acr.browser.lightning.activity.ThemableBrowserActivity;
 import acr.browser.lightning.constant.BookmarkPage;
@@ -19,7 +18,6 @@ import acr.browser.lightning.database.BookmarkManager;
 import acr.browser.lightning.database.HistoryDatabase;
 import acr.browser.lightning.fragment.BookmarkSettingsFragment;
 import acr.browser.lightning.fragment.LightningPreferenceFragment;
-import acr.browser.lightning.object.SearchAdapter;
 import acr.browser.lightning.preference.PreferenceManager;
 import dagger.Component;
 
@@ -34,8 +32,6 @@ public interface AppComponent {
     void inject(OnBoardingActivity activity);
 
     void inject(BookmarkSettingsFragment fragment);
-
-    void inject(SearchAdapter adapter);
 
     void inject(BookmarkPage bookmarkPage);
 
@@ -58,8 +54,6 @@ public interface AppComponent {
     BookmarkManager getBookmarkManager();
 
     void inject(ThemableBrowserActivity activity);
-
-    void inject(BrowserMenuPopup browserMenuPopup);
 
     void inject(BaseSettingsFragment baseSettingsFragment);
 

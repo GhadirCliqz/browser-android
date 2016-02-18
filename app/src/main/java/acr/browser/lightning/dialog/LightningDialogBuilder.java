@@ -25,7 +25,6 @@ import acr.browser.lightning.R;
 import acr.browser.lightning.bus.BookmarkEvents;
 import acr.browser.lightning.bus.BrowserEvents;
 import acr.browser.lightning.constant.Constants;
-import acr.browser.lightning.constant.HistoryPage;
 import acr.browser.lightning.database.BookmarkManager;
 import acr.browser.lightning.database.HistoryDatabase;
 import acr.browser.lightning.database.HistoryItem;
@@ -210,6 +209,7 @@ public class LightningDialogBuilder {
         editFolderDialog.show();
     }
 
+    /*
     public void showLongPressedHistoryLinkDialog(final Context context, final String url) {
         DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
             @Override
@@ -241,6 +241,7 @@ public class LightningDialogBuilder {
                 .setNeutralButton(R.string.action_open, dialogClickListener)
                 .show();
     }
+    */
 
     // TODO There should be a way in which we do not need an activity reference to dowload a file
     public void showLongPressImageDialog(@NonNull final Activity activity, @NonNull final String url,
