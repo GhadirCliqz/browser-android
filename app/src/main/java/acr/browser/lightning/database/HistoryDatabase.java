@@ -12,15 +12,8 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
-import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
 
 import acr.browser.lightning.R;
 
@@ -57,6 +50,7 @@ public class HistoryDatabase extends SQLiteOpenHelper {
         public static final String ID = "id";
         public static final String URL_ID = "url_id";
         public static final String TIME = "time";
+        public static final String FAVORITE = "favorite";
     }
 
     public static final class JsonKeys {
@@ -134,12 +128,6 @@ public class HistoryDatabase extends SQLiteOpenHelper {
         }
     }
 
-    public synchronized void deleteHistory() {
-        final SQLiteDatabase db = dbHandler.getDatabase();
-        db.delete(HistoryTable.TABLE_NAME, null, null);
-        dbHandler.forceReload();
-    }
-
     @Override
     public synchronized void close() {
         dbHandler.close();
@@ -153,6 +141,12 @@ public class HistoryDatabase extends SQLiteOpenHelper {
                 new String[]{Integer.toString(id)});
     }
 
+    /**
+     * Update an history and urls
+     *
+     * @param url   the url to update
+     * @param title the title of the page to which the url is pointing
+     */
     public synchronized void visitHistoryItem(@NonNull String url, @Nullable String title) {
         final SQLiteDatabase db = dbHandler.getDatabase();
         Cursor q = db.query(false, UrlsTable.TABLE_NAME,
@@ -189,15 +183,6 @@ public class HistoryDatabase extends SQLiteOpenHelper {
         }
     }
 
-//    private synchronized void addHistoryItem(@NonNull HistoryItem item) {
-//        openIfNecessary();
-//        ContentValues values = new ContentValues();
-//        values.put(KEY_URL, item.getUrl());
-//        values.put(KEY_TITLE, item.getTitle());
-//        values.put(KEY_TIME_VISITED, System.currentTimeMillis());
-//        mDatabase.insert(TABLE_HISTORY, null, values);
-//    }
-
     /**
      * Query the history db to fetch the top most visited websites.
      * @param limit the number of items to return
@@ -212,7 +197,7 @@ public class HistoryDatabase extends SQLiteOpenHelper {
         }
         final JsonArray itemList = new JsonArray();
         Cursor cursor = db.query(UrlsTable.TABLE_NAME,
-                new String[] { UrlsTable.URL, UrlsTable.TITLE },
+                new String[]{UrlsTable.URL, UrlsTable.TITLE},
                 null, null, null, null,
                 String.format("%s DESC", UrlsTable.VISITS), Integer.toString(limit));
         int counter = 0;
@@ -300,7 +285,7 @@ public class HistoryDatabase extends SQLiteOpenHelper {
         final SQLiteDatabase db = dbHandler.getDatabase();
         final int limit = end - start;
         final Cursor cursor =
-                db.rawQuery(res.getString(R.string.get_history_query_v4), new String[] {
+                db.rawQuery(res.getString(R.string.get_history_query_v4), new String[]{
                         Integer.toString(limit),
                         Integer.toString(start)
                 });
@@ -324,10 +309,15 @@ public class HistoryDatabase extends SQLiteOpenHelper {
         return results;
     }
 
+    /**
+     * The bookmarked ulrs list
+     * @return The bookmarks as a json array
+     */
     public synchronized JsonArray getBookmarks() {
         final JsonArray results = new JsonArray();
         final SQLiteDatabase db = dbHandler.getDatabase();
-        final Cursor cursor = db.rawQuery(res.getString(R.string.get_favorites_query_v4), null);
+        final Cursor cursor = db.query(UrlsTable.TABLE_NAME, null,
+                "favorite > 0", null, null, null, null);
         if (cursor.moveToFirst()) {
             final int idIndex = cursor.getColumnIndex(UrlsTable.ID);
             final int urlIndex = cursor.getColumnIndex(UrlsTable.URL);
@@ -344,5 +334,73 @@ public class HistoryDatabase extends SQLiteOpenHelper {
         }
         cursor.close();
         return results;
+    }
+
+    /**
+     * Mark an history point as favorite or remove the favorite status
+     * @param id an History Table id
+     * @param favorite true to mark the history point as a favorite, false otherwise
+     */
+    public synchronized void markHistory(final long id, boolean favorite) {
+        final SQLiteDatabase db = dbHandler.getDatabase();
+        final ContentValues values = new ContentValues();
+        values.put(HistoryTable.FAVORITE, favorite);
+        db.update(HistoryTable.TABLE_NAME, values, "id = ?", new String[]{Long.toString(id)});
+    }
+
+    /**
+     * Delete an history point. If the history point is the last one for a given url and the url is
+     * not favorite, the method will delete the url from the urls table also
+     * @param id the id of the history point
+     */
+    public synchronized void deleteHistoryPoint(final long id) {
+        final SQLiteDatabase db = dbHandler.getDatabase();
+        final Cursor cursor = db.rawQuery(res.getString(R.string.get_url_from_by_history_id_v4),
+                new String[] { Long.toString(id) });
+        if (cursor.moveToFirst()) {
+            final long uid = cursor.getLong(cursor.getColumnIndex(UrlsTable.ID));
+            final long visits = cursor.getLong(cursor.getColumnIndex(UrlsTable.VISITS)) - 1;
+            final boolean favorite = cursor.getInt(cursor.getColumnIndex(UrlsTable.FAVORITE)) > 0;
+            db.beginTransaction();
+            try {
+                db.delete(HistoryTable.TABLE_NAME, "id=?", new String[] { Long.toString(id) });
+                if (visits <= 0 && !favorite) {
+                    db.delete(UrlsTable.TABLE_NAME, "id=?", new String[] { Long.toString(uid) });
+                } else {
+                    final ContentValues value = new ContentValues();
+                    value.put(UrlsTable.VISITS, visits < 0 ? 0 : visits);
+                    db.update(UrlsTable.TABLE_NAME, value, "id=?", new String[] { Long.toString(uid) });
+                }
+                db.setTransactionSuccessful();
+            } finally {
+                db.endTransaction();
+            }
+        }
+        cursor.close();
+    }
+
+    /**
+     * Clear the history, can delete also the favorites
+     *
+     * @param deleteFavorites if true delete also the favorites
+     */
+    public synchronized void clearHistory(boolean deleteFavorites) {
+        final SQLiteDatabase db = dbHandler.getDatabase();
+        db.beginTransaction();
+        try {
+            if (deleteFavorites) {
+                db.delete(HistoryTable.TABLE_NAME, null, null);
+            } else {
+                db.delete(HistoryTable.TABLE_NAME, "favorite<1", null);
+            }
+            // Update the urls table too
+            final ContentValues values = new ContentValues();
+            values.put(UrlsTable.VISITS, 1);
+            db.rawQuery(res.getString(R.string.reset_visits_for_existing_history_v4), null, null);
+            db.delete(UrlsTable.TABLE_NAME, "visits!=1", null);
+            db.setTransactionSuccessful();
+        } finally {
+            db.endTransaction();
+        }
     }
 }

@@ -7,6 +7,7 @@ import android.preference.PreferenceFragment;
 import javax.inject.Inject;
 
 import acr.browser.lightning.app.BrowserApp;
+import acr.browser.lightning.database.HistoryDatabase;
 import acr.browser.lightning.preference.PreferenceManager;
 import acr.browser.lightning.utils.ProxyUtils;
 
@@ -22,6 +23,9 @@ public abstract class BaseSettingsFragment extends PreferenceFragment
 
     @Inject
     ProxyUtils mProxyUtils;
+
+    @Inject
+    HistoryDatabase mHistoryDatabase;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {

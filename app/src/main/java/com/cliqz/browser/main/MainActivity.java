@@ -3,8 +3,6 @@ package com.cliqz.browser.main;
 import android.Manifest;
 import android.app.ActivityManager;
 import android.app.AlertDialog;
-import android.content.ClipData;
-import android.content.ClipboardManager;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
