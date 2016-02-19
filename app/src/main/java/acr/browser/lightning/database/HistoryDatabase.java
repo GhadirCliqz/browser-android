@@ -12,6 +12,10 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,7 +24,6 @@ import javax.inject.Singleton;
 
 import acr.browser.lightning.R;
 
-@Singleton
 public class HistoryDatabase extends SQLiteOpenHelper {
 
     // All Static variables
@@ -56,14 +59,25 @@ public class HistoryDatabase extends SQLiteOpenHelper {
         public static final String TIME = "time";
     }
 
+    public static final class JsonKeys {
+        private JsonKeys() {}
+
+        // Fields
+        public static final String URL_ID = "uid";
+        public static final String HISTORY_ID = "id";
+        public static final String URL = "url";
+        public static final String TITLE = "title";
+        public static final String FAVORITE = "fav";
+        public static final String TIME = "timestamp";
+    }
+
     private final Resources res;
     private final DatabaseHandler dbHandler;
 
-    @Inject
     public HistoryDatabase(Context context) {
         super(context.getApplicationContext(), DATABASE_NAME, null, DATABASE_VERSION);
-        res = context.getResources();
-        dbHandler = new DatabaseHandler(this);
+        this.res = context.getResources();
+        this.dbHandler = new DatabaseHandler(this);
     }
 
     // Creating Tables
@@ -187,16 +201,16 @@ public class HistoryDatabase extends SQLiteOpenHelper {
     /**
      * Query the history db to fetch the top most visited websites.
      * @param limit the number of items to return
-     * @return a list of {@link HistoryItem}. The time stamp of these elements is always -1.
+     * @return a list of {@link JsonObject}. The time stamp of these elements is always -1.
      */
-    public synchronized List<HistoryItem> getTopSites(int limit) {
+    public synchronized JsonArray getTopSites(int limit) {
         final SQLiteDatabase db = dbHandler.getDatabase();
         if (limit < 1) {
             limit = 1;
         } else if (limit > 100) {
             limit = 100;
         }
-        List<HistoryItem> itemList = new ArrayList<>();
+        final JsonArray itemList = new JsonArray();
         Cursor cursor = db.query(UrlsTable.TABLE_NAME,
                 new String[] { UrlsTable.URL, UrlsTable.TITLE },
                 null, null, null, null,
@@ -206,11 +220,9 @@ public class HistoryDatabase extends SQLiteOpenHelper {
             final int urlIndex = cursor.getColumnIndex(UrlsTable.URL);
             final int titleIndex = cursor.getColumnIndex(UrlsTable.TITLE);
             do {
-                final HistoryItem item = new HistoryItem();
-                item.setUrl(cursor.getString(urlIndex));
-                item.setTitle(cursor.getString(titleIndex));
-                item.setTimestamp(-1);
-                item.setImageId(R.drawable.ic_history);
+                final JsonObject item = new JsonObject();
+                item.addProperty(JsonKeys.URL, cursor.getString(urlIndex));
+                item.addProperty(JsonKeys.TITLE, cursor.getString(titleIndex));
                 itemList.add(item);
                 counter++;
             } while (cursor.moveToNext() && counter < 100);
@@ -220,18 +232,18 @@ public class HistoryDatabase extends SQLiteOpenHelper {
     }
 
 
-    public synchronized List<HistoryItem> findItemsContaining(@Nullable String search, int limit) {
+    public synchronized JsonArray findItemsContaining(@Nullable String search, int limit) {
+        final JsonArray itemList = new JsonArray();
+        if (search == null) {
+            return itemList;
+        }
         final SQLiteDatabase mDatabase = dbHandler.getDatabase();
         if (limit <= 0) {
             limit = 5;
         }
-        List<HistoryItem> itemList = new ArrayList<>();
-        if (search == null) {
-            return itemList;
-        }
         final String formattedSearch = String.format("%%%s%%", search);
         final String selectQuery = res.getString(R.string.seach_history_query_v4);
-        Cursor cursor = mDatabase.rawQuery(selectQuery, new String[] {
+        final Cursor cursor = mDatabase.rawQuery(selectQuery, new String[]{
                 formattedSearch,
                 formattedSearch,
                 Integer.toString(limit)
@@ -243,12 +255,9 @@ public class HistoryDatabase extends SQLiteOpenHelper {
             final int urlIndex = cursor.getColumnIndex(UrlsTable.URL);
             final int titleIndex = cursor.getColumnIndex(UrlsTable.TITLE);
             do {
-                HistoryItem item = new HistoryItem();
-                // item.setId(cursor.getString(idIndex));
-                item.setUrl(cursor.getString(urlIndex));
-                item.setTitle(cursor.getString(titleIndex));
-                item.setTimestamp(-1);
-                item.setImageId(R.drawable.ic_history);
+                final JsonObject item = new JsonObject();
+                item.addProperty(JsonKeys.URL, cursor.getString(urlIndex));
+                item.addProperty(JsonKeys.TITLE, cursor.getString(titleIndex));
                 itemList.add(item);
                 n++;
             } while (cursor.moveToNext() && n < limit);
@@ -261,9 +270,9 @@ public class HistoryDatabase extends SQLiteOpenHelper {
         final SQLiteDatabase db = dbHandler.getDatabase();
         final String countQuery = "SELECT COUNT(*) FROM " + HistoryTable.TABLE_NAME;
         final Cursor cursor = db.rawQuery(countQuery, null);
-        final int count = cursor.getInt(1);
+        final int result = cursor.moveToNext() ? (int) cursor.getLong(0) : 0;
         cursor.close();
-        return count;
+        return result;
     }
 
     public synchronized long getFirstHistoryItemTimestamp() {
@@ -283,8 +292,8 @@ public class HistoryDatabase extends SQLiteOpenHelper {
         return timestamp;
     }
 
-    public synchronized List<HistoryItem> getHistoryItems(final int start, final int end) {
-        final List<HistoryItem> results = new ArrayList<>();
+    public synchronized JsonArray getHistoryItems(final int start, final int end) {
+        final JsonArray results = new JsonArray();
         if (start >= end) {
             return results;
         }
@@ -299,13 +308,37 @@ public class HistoryDatabase extends SQLiteOpenHelper {
             final int idIndex = cursor.getColumnIndex(HistoryTable.ID);
             final int urlIndex = cursor.getColumnIndex(UrlsTable.URL);
             final int titleIndex = cursor.getColumnIndex(UrlsTable.TITLE);
+            final int favoriteIndex = cursor.getColumnIndex(UrlsTable.FAVORITE);
             final int timeIndex = cursor.getColumnIndex(HistoryTable.TIME);
             do {
-                final HistoryItem item = new HistoryItem();
-                item.setId(cursor.getString(idIndex));
-                item.setUrl(cursor.getString(urlIndex));
-                item.setTitle(cursor.getString(titleIndex));
-                item.setTimestamp(cursor.getLong(timeIndex));
+                final JsonObject item = new JsonObject();
+                item.addProperty(JsonKeys.HISTORY_ID, cursor.getLong(idIndex));
+                item.addProperty(JsonKeys.URL, cursor.getString(urlIndex));
+                item.addProperty(JsonKeys.TITLE, cursor.getString(titleIndex));
+                item.addProperty(JsonKeys.FAVORITE, cursor.getInt(favoriteIndex) > 0);
+                item.addProperty(JsonKeys.TIME, cursor.getLong(timeIndex));
+                results.add(item);
+            } while (cursor.moveToNext());
+        }
+        cursor.close();
+        return results;
+    }
+
+    public synchronized JsonArray getBookmarks() {
+        final JsonArray results = new JsonArray();
+        final SQLiteDatabase db = dbHandler.getDatabase();
+        final Cursor cursor = db.rawQuery(res.getString(R.string.get_favorites_query_v4), null);
+        if (cursor.moveToFirst()) {
+            final int idIndex = cursor.getColumnIndex(UrlsTable.ID);
+            final int urlIndex = cursor.getColumnIndex(UrlsTable.URL);
+            final int titleIndex = cursor.getColumnIndex(UrlsTable.TITLE);
+            final int timeIndex = cursor.getColumnIndex(UrlsTable.TIME);
+            do {
+                final JsonObject item = new JsonObject();
+                item.addProperty(JsonKeys.URL_ID, cursor.getLong(idIndex));
+                item.addProperty(JsonKeys.URL, cursor.getString(urlIndex));
+                item.addProperty(JsonKeys.TITLE, cursor.getString(titleIndex));
+                item.addProperty(JsonKeys.TIME, cursor.getLong(timeIndex));
                 results.add(item);
             } while (cursor.moveToNext());
         }

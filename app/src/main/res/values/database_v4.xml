@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="create_urls_table_v4" translatable="false">CREATE TABLE urls (id INTEGER PRIMARY KEY, url TEXT, title TEXT, visits INTEGER, time INTEGER, favorite BOOLEAN)</string>
-    <string name="create_history_table_v4" translatable="false">CREATE TABLE history (id INTEGER PRIMARY KEY, url_id INTEGER, time INTEGER)</string>
+    <string name="create_history_table_v4" translatable="false">CREATE TABLE history (id INTEGER PRIMARY KEY, url_id INTEGER, time INTEGER, favorite BOOLEAN)</string>
     <string name="create_urls_index_v4" translatable="false">CREATE INDEX IF NOT EXISTS urlIndex ON urls (url COLLATE NOCASE)</string>
     <string name="create_visits_index_v4" translatable="false">CREATE INDEX IF NOT EXISTS visitsIndex ON urls (visits DESC)</string>
     <string name="rename_history_table_to_tempHistory_v3_to_v4" translatable="false">ALTER TABLE history RENAME TO tempHistory</string>
@@ -12,5 +12,6 @@
     <string name="drop_countIndex_v3_to_v4" translatable="false">DROP INDEX IF EXISTS countIndex</string>
 
     <string name="seach_history_query_v4" translatable="false">SELECT DISTINCT urls.id, urls.url, urls.title FROM urls, history WHERE urls.id=history.url_id AND (title LIKE ? OR url LIKE ?) ORDER BY history.time DESC LIMIT ?</string>
-    <string name="get_history_query_v4" translatable="false">SELECT history.id, urls.url, urls.title, history.time FROM urls, history WHERE urls.id=history.url_id ORDER BY history.time DESC LIMIT ? OFFSET ?</string>
+    <string name="get_history_query_v4" translatable="false">SELECT history.id, urls.url, urls.title, urls.favorite, history.time FROM urls, history WHERE urls.id=history.url_id ORDER BY history.time DESC LIMIT ? OFFSET ?</string>
+    <string name="get_favorites_query_v4" translatable="false">SELECT * FROM urls WHERE favorite &gt; 0</string>
 </resources>

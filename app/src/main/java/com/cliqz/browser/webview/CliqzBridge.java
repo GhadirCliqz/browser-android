@@ -4,11 +4,10 @@ import android.app.Activity;
 import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.util.Log;
-import android.webkit.WebView;
 
 import com.cliqz.browser.main.Messages;
-import com.cliqz.browser.utils.Telemetry;
-import com.squareup.otto.Bus;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -18,7 +17,6 @@ import java.util.List;
 import java.util.Locale;
 
 import acr.browser.lightning.database.HistoryDatabase;
-import acr.browser.lightning.database.HistoryItem;
 
 /**
  * @author Stefano Pacifici
@@ -49,7 +47,7 @@ public class CliqzBridge extends Bridge {
                 }
 
                 if (query != null && !query.isEmpty()) {
-                    final List<HistoryItem> items = bridge.historyDatabase.findItemsContaining(query, 50);
+                    final JsonArray items = bridge.historyDatabase.findItemsContaining(query, 50);
                     final String callbackCode = buildItemsCallback(callback, query, items);
                     bridge.executeJavascript(callbackCode);
                 } else {
@@ -80,7 +78,7 @@ public class CliqzBridge extends Bridge {
                 final int start = jsonObject.optInt("start", 0);
                 final int end = jsonObject.optInt("end", 50);
 
-                final List<HistoryItem> items =
+                final JsonArray items =
                         bridge.historyDatabase.getHistoryItems(start, end);
 
                 final String callbackCode = buildItemsCallback(callback, "", items);
@@ -167,12 +165,8 @@ public class CliqzBridge extends Bridge {
                 final HistoryDatabase history = ((BaseWebView) bridge.getWebView()).historyDatabase;
                 String result = "[]";
                 if (history != null) {
-                    final List<HistoryItem> items = history.getTopSites(no);
-                    try {
-                        result = historyToJSON(items);
-                    } catch (Exception e) {
-                        Log.e(TAG, "Cannot serialize History", e);
-                    }
+                    final JsonArray items = history.getTopSites(no);
+                        result = items.toString();
                 }
                 final String js = String.format("%s(%s)", callback, result);
                 bridge.executeJavascript(js);
@@ -241,21 +235,13 @@ public class CliqzBridge extends Bridge {
             }
         });
 
-        private static String buildItemsCallback(String callback, String query, List<HistoryItem> items) {
-            final StringBuilder builder = new StringBuilder();
-            builder.append(callback).append("({results: [");
-            String sep = "";
-            for (HistoryItem item: items) {
-                builder.append(sep);
-                item.toJsonString(builder);
-                sep = ",";
-            }
-            builder.append("]");
+        private static String buildItemsCallback(String callback, String query, JsonArray items) {
+            final JsonObject result = new JsonObject();
+            result.add("results", items);
             if (query != null) {
-                builder.append(",query:\"").append(query).append("\"");
+                result.addProperty("query", query);
             }
-            builder.append("})");
-            return builder.toString();
+            return String.format("%s(%s)", callback,result.toString());
         }
 
         private final IAction action;
@@ -284,18 +270,5 @@ public class CliqzBridge extends Bridge {
     @Override
     protected boolean checkCapabilities() {
         return true;
-    }
-
-    private static String historyToJSON(final List<HistoryItem> items) {
-        final StringBuilder sb = new StringBuilder(items.size() * 100);
-        sb.append("[");
-        String sep = "";
-        for (final HistoryItem item : items) {
-            sb.append(sep);
-            item.toJsonString(sb);
-            sep = ",";
-        }
-        sb.append("]");
-        return sb.toString();
     }
 }

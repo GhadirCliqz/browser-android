@@ -10,12 +10,10 @@ import android.util.Log;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.List;
 import java.util.Locale;
 
 import acr.browser.lightning.BuildConfig;
 import acr.browser.lightning.constant.Constants;
-import acr.browser.lightning.database.HistoryItem;
 
 /**
  * Created by kread on 13/07/15.
@@ -62,36 +60,6 @@ public class SearchWebView extends BaseWebView {
     private boolean isCliqzUrl() {
         final String url = getUrl();
         return url != null && url.startsWith(CLIQZ_URL);
-    }
-
-    private String historyToJSON(final List<HistoryItem> items) {
-        final StringBuilder sb = new StringBuilder(items.size() * 100);
-        sb.append("[");
-        String sep = "";
-        for (final HistoryItem item : items) {
-            sb.append(sep);
-            item.toJsonString(sb);
-            sep = ",";
-        }
-        sb.append("]");
-        return sb.toString();
-    }
-
-    /**
-     * Support for the {@link CliqzBridge} to search the history
-     * @param query
-     * @return a stringified json result string
-     */
-    String searchHistory(final String query) {
-        if (historyDatabase != null) {
-            final List<HistoryItem> items = historyDatabase.findItemsContaining(query, 100);
-            try {
-                return historyToJSON(items);
-            } catch (Exception e) {
-                Log.e(TAG, "Cannot serialize History", e);
-            }
-        }
-        return "[]";
     }
 
     public void onQueryChanged(String q) {

@@ -196,7 +196,7 @@ public class LightningView implements ILightningTab {
         }
         File bookmarkWebPage = new File(mActivity.getFilesDir(), Constants.BOOKMARKS_FILENAME);
 
-        BrowserApp.getAppComponent().getBookmarkPage().buildBookmarkPage(null);
+        // BrowserApp.getAppComponent().getBookmarkPage().buildBookmarkPage(null);
         mWebView.loadUrl(Constants.FILE + bookmarkWebPage, mRequestHeaders);
 
     }
