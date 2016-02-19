@@ -13,11 +13,7 @@ import javax.inject.Singleton;
 
 import acr.browser.lightning.activity.OnBoardingActivity;
 import acr.browser.lightning.activity.ThemableBrowserActivity;
-import acr.browser.lightning.constant.BookmarkPage;
-import acr.browser.lightning.database.BookmarkManager;
 import acr.browser.lightning.database.HistoryDatabase;
-import acr.browser.lightning.fragment.BookmarkSettingsFragment;
-import acr.browser.lightning.fragment.LightningPreferenceFragment;
 import acr.browser.lightning.preference.PreferenceManager;
 import dagger.Component;
 
@@ -31,15 +27,7 @@ public interface AppComponent {
     //TODO Remove classes that are not part of flat-navigation
     void inject(OnBoardingActivity activity);
 
-    void inject(BookmarkSettingsFragment fragment);
-
-    void inject(BookmarkPage bookmarkPage);
-
     PreferenceManager getPreferenceManager();
-
-    void inject(LightningPreferenceFragment fragment);
-
-    BookmarkPage getBookmarkPage();
 
     Telemetry getTelemetry();
 
@@ -48,8 +36,6 @@ public interface AppComponent {
     Timings getTimings();
 
     HistoryDatabase getHistoryDatabase();
-
-    BookmarkManager getBookmarkManager();
 
     void inject(ThemableBrowserActivity activity);
 

@@ -3,13 +3,14 @@ package com.cliqz.browser.di.modules;
 import android.content.Context;
 
 import com.cliqz.browser.utils.Telemetry;
+import com.google.gson.Gson;
 
 import net.i2p.android.ui.I2PAndroidHelper;
 
 import javax.inject.Singleton;
 
 import acr.browser.lightning.app.BrowserApp;
-import acr.browser.lightning.database.BookmarkManager;
+import acr.browser.lightning.database.HistoryDatabase;
 import acr.browser.lightning.preference.PreferenceManager;
 import acr.browser.lightning.utils.AdBlock;
 import acr.browser.lightning.utils.ProxyUtils;
@@ -30,12 +31,6 @@ public class AppModule {
     @Provides
     public Context provideContext() {
         return app.getApplicationContext();
-    }
-
-    @Provides
-    @Singleton
-    public BookmarkManager provideBookmarkManager() {
-        return new BookmarkManager(app.getApplicationContext());
     }
 
     @Provides
@@ -66,4 +61,16 @@ public class AppModule {
     public ProxyUtils providesProxyUtils(PreferenceManager manager, I2PAndroidHelper helper) {
         return new ProxyUtils(manager, helper);
     }
+
+    @Provides
+    public Gson providesGson() {
+        return new Gson();
+    }
+
+    @Provides
+    @Singleton
+    public HistoryDatabase providesHistoryDatabase(Context context) {
+        return new HistoryDatabase(context);
+    }
+
 }
