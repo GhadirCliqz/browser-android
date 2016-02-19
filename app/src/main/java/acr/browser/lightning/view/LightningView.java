@@ -52,7 +52,6 @@ import acr.browser.lightning.R;
 import acr.browser.lightning.app.BrowserApp;
 import acr.browser.lightning.bus.BrowserEvents;
 import acr.browser.lightning.constant.Constants;
-import acr.browser.lightning.constant.HistoryPage;
 import acr.browser.lightning.constant.StartPage;
 import acr.browser.lightning.database.HistoryDatabase;
 import acr.browser.lightning.dialog.LightningDialogBuilder;
@@ -670,23 +669,23 @@ public class LightningView implements ILightningTab {
     private void longClickPage(final String url) {
         final WebView.HitTestResult result = mWebView.getHitTestResult();
         String currentUrl = mWebView.getUrl();
-        if (currentUrl != null && currentUrl.startsWith(Constants.FILE)) {
-            if (currentUrl.endsWith(HistoryPage.FILENAME)) {
-                if (url != null) {
-                    mBookmarksDialogBuilder.showLongPressedHistoryLinkDialog(mActivity, url);
-                } else if (result != null && result.getExtra() != null) {
-                    final String newUrl = result.getExtra();
-                    mBookmarksDialogBuilder.showLongPressedHistoryLinkDialog(mActivity, newUrl);
-                }
-            } else if (currentUrl.endsWith(Constants.BOOKMARKS_FILENAME)) {
-                if (url != null) {
-                    mBookmarksDialogBuilder.showLongPressedDialogForBookmarkUrl(mActivity, url);
-                } else if (result != null && result.getExtra() != null) {
-                    final String newUrl = result.getExtra();
-                    mBookmarksDialogBuilder.showLongPressedDialogForBookmarkUrl(mActivity, newUrl);
-                }
-            }
-        } else {
+//        if (currentUrl != null && currentUrl.startsWith(Constants.FILE)) {
+//            if (currentUrl.endsWith(HistoryPage.FILENAME)) {
+//                if (url != null) {
+//                    mBookmarksDialogBuilder.showLongPressedHistoryLinkDialog(mActivity, url);
+//                } else if (result != null && result.getExtra() != null) {
+//                    final String newUrl = result.getExtra();
+//                    mBookmarksDialogBuilder.showLongPressedHistoryLinkDialog(mActivity, newUrl);
+//                }
+//            } else if (currentUrl.endsWith(Constants.BOOKMARKS_FILENAME)) {
+//                if (url != null) {
+//                    mBookmarksDialogBuilder.showLongPressedDialogForBookmarkUrl(mActivity, url);
+//                } else if (result != null && result.getExtra() != null) {
+//                    final String newUrl = result.getExtra();
+//                    mBookmarksDialogBuilder.showLongPressedDialogForBookmarkUrl(mActivity, newUrl);
+//                }
+//            }
+//        } else {
             if (url != null) {
                 if (result != null) {
                     if (result.getType() == WebView.HitTestResult.SRC_IMAGE_ANCHOR_TYPE || result.getType() == WebView.HitTestResult.IMAGE_TYPE) {
@@ -705,7 +704,7 @@ public class LightningView implements ILightningTab {
                     mBookmarksDialogBuilder.showLongPressLinkDialog(mActivity, newUrl);
                 }
             }
-        }
+//        }
     }
 
     public boolean canGoBack() {

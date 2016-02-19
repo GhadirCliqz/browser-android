@@ -48,20 +48,43 @@ public class CliqzBridge extends Bridge {
                     return; // Nothing to do without callback or data
                 }
 
-                final List<HistoryItem> items =
-                        bridge.historyDatabase.findItemsContaining(query, 50);
-
-                final StringBuilder builder = new StringBuilder();
-                builder.append(callback).append("({results: [");
-                String sep = "";
-                for (HistoryItem item: items) {
-                    builder.append(sep);
-                    item.toJsonString(builder);
-                    sep = ",";
+                if (query != null && !query.isEmpty()) {
+                    final List<HistoryItem> items = bridge.historyDatabase.findItemsContaining(query, 50);
+                    final String callbackCode = buildItemsCallback(callback, query, items);
+                    bridge.executeJavascript(callbackCode);
+                } else {
+                    // Back compatibility
+                    // TODO This fallback should be removed when the JS bridge will use pagination
+                    try {
+                        final JSONObject params = new JSONObject().put("start", 0).put("end", 50);
+                        getHistory.execute(bridge, params, callback);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
                 }
-                builder.append("] ,query:\"")
-                        .append(query).append("\"})");
-                bridge.executeJavascript(builder.toString());
+            }
+        }),
+
+        /**
+         *
+         */
+        getHistory(new IAction() {
+            @Override
+            public void execute(Bridge bridge, Object data, String callback) {
+                final JSONObject jsonObject = (data instanceof JSONObject) ? (JSONObject) data: new JSONObject();
+                if (callback == null || callback.isEmpty()) {
+                    Log.e(TAG, "Can't perform getHistory without a callback");
+                    return; // Nothing to do without callback or data
+                }
+
+                final int start = jsonObject.optInt("start", 0);
+                final int end = jsonObject.optInt("end", 50);
+
+                final List<HistoryItem> items =
+                        bridge.historyDatabase.getHistoryItems(start, end);
+
+                final String callbackCode = buildItemsCallback(callback, "", items);
+                bridge.executeJavascript(callbackCode);
             }
         }),
 
@@ -217,6 +240,23 @@ public class CliqzBridge extends Bridge {
                 throw new RuntimeException("Invalid action invoked");
             }
         });
+
+        private static String buildItemsCallback(String callback, String query, List<HistoryItem> items) {
+            final StringBuilder builder = new StringBuilder();
+            builder.append(callback).append("({results: [");
+            String sep = "";
+            for (HistoryItem item: items) {
+                builder.append(sep);
+                item.toJsonString(builder);
+                sep = ",";
+            }
+            builder.append("]");
+            if (query != null) {
+                builder.append(",query:\"").append(query).append("\"");
+            }
+            builder.append("})");
+            return builder.toString();
+        }
 
         private final IAction action;
 

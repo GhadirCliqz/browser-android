@@ -26,7 +26,6 @@ import java.io.IOException;
 
 import acr.browser.lightning.BuildConfig;
 import acr.browser.lightning.R;
-import acr.browser.lightning.activity.MainActivity;
 import acr.browser.lightning.app.BrowserApp;
 import acr.browser.lightning.bus.BrowserEvents;
 import acr.browser.lightning.constant.Constants;
@@ -76,7 +75,7 @@ public class DownloadHandler {
                 // If we resolved to ourselves, we don't want to attempt to
                 // load the url only to try and download it again.
                 if (BuildConfig.APPLICATION_ID.equals(info.activityInfo.packageName)
-                        || MainActivity.class.getName().equals(info.activityInfo.name)) {
+                        /*|| MainActivity.class.getName().equals(info.activityInfo.name)*/) {
                     // someone (other than us) knows how to handle this mime
                     // type with this scheme, don't download.
                     try {

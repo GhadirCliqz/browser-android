@@ -324,7 +324,8 @@ public class Telemetry {
             return;
         }
         timings.setLastEnvSingalTime();
-        JSONObject signal = new JSONObject(); ;
+        final int historySize = mHistoryDatabase.getHistoryItemsCount();
+        JSONObject signal = new JSONObject();
         try {
             signal.put(Key.TYPE, Key.ENVIRONMENT);
             signal.put(Key.DEVICE, Build.MODEL);
@@ -332,12 +333,12 @@ public class Telemetry {
             signal.put(Key.VERSION, BuildConfig.VERSION_NAME);
             signal.put(Key.OS_VERSION, Integer.toString(Build.VERSION.SDK_INT));
             signal.put(Key.DEFAULT_SEARCH_ENGINE, getDefaultSearchEngine());
-            signal.put(Key.HISTORY_URLS, mHistoryDatabase.getHistoryItemsCount());
+            signal.put(Key.HISTORY_URLS, historySize);
         } catch (JSONException e) {
             e.printStackTrace();
         }
-        if(mHistoryDatabase.getHistoryItemsCount() > 0) {
-            long firstItemTime = mHistoryDatabase.getFirstHistoryItem().getTimestamp();
+        if(historySize > 0) {
+            long firstItemTime = mHistoryDatabase.getFirstHistoryItemTimestamp();
             days = (getUnixTimeStamp() - firstItemTime) / oneDay;
         }
         try {

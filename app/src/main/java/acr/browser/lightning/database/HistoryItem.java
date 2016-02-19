@@ -71,9 +71,11 @@ public class HistoryItem implements Comparable<HistoryItem> {
             } else {
                 title = mTitle;
             }
-            sb.append("{\"id\":")
-                    .append(mId)
-                    .append(",\"title\":\"")
+            sb.append("{");
+            if (mId != null && !mId.isEmpty()) {
+                sb.append("\"id\":").append(mId).append(",");
+            }
+            sb.append("\"title\":\"")
                     .append(title)
                     .append("\",\"url\":\"")
                     .append(mUrl)
