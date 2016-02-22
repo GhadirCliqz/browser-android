@@ -27,6 +27,7 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 
 import com.cliqz.browser.main.Messages;
+import com.cliqz.browser.utils.PasswordManager;
 import com.squareup.otto.Bus;
 
 import java.io.ByteArrayInputStream;
@@ -37,6 +38,7 @@ import java.util.List;
 import acr.browser.lightning.R;
 import acr.browser.lightning.bus.BrowserEvents;
 import acr.browser.lightning.constant.Constants;
+import acr.browser.lightning.database.LoginDetailItem;
 import acr.browser.lightning.utils.Utils;
 
 /**
@@ -50,10 +52,12 @@ class LightningWebClient extends WebViewClient {
     private static final String CLIQZ_TRAMPOLINE_FORWARD = "/goto.html";
     private static final String CLIQZ_TRAMPOLINE_SEARCH = "/search.html";
     private static final String CLIQZ_TRAMPOLINE_CLOSE = "/close.html";
+    private static final String CLIQZ_PATH = "/CLIQZ";
 
     private final Activity mActivity;
     private final LightningView mLightningView;
     private final Bus mEventBus;
+    private final PasswordManager mPasswordManager;
 //    private final IntentUtils mIntentUtils;
 //    private final WebView mWebView;
 
@@ -61,6 +65,8 @@ class LightningWebClient extends WebViewClient {
         mActivity = activity;
         mLightningView = lightningView;
         mEventBus = lightningView.mEventBus;
+        mPasswordManager = lightningView.passwordManager;
+
 //        mIntentUtils = new IntentUtils(activity);
 //        mWebView = lightningView.getWebView();
     }
@@ -84,12 +90,12 @@ class LightningWebClient extends WebViewClient {
             return new WebResourceResponse("text/html", "UTF-8",
                     new ByteArrayInputStream("".getBytes()));
         }
+        final String path = uri.getPath();
 
-        if (!CLIQZ_SCHEME.equals(uri.getScheme())) {
+        if (!CLIQZ_SCHEME.equals(uri.getScheme()) && !path.equals(CLIQZ_PATH+Integer.toString(view.getId()))) {
             return null;
         }
 
-        final String path = uri.getPath();
         if (CLIQZ_TRAMPOLINE_AUTHORITY.equals(uri.getAuthority())) {
             if (CLIQZ_TRAMPOLINE_FORWARD.equals(path)) {
                 final Resources resources = view.getResources();
@@ -120,6 +126,12 @@ class LightningWebClient extends WebViewClient {
                     }
                 });
             }
+        } else if (path.equals(CLIQZ_PATH + Integer.toString(view.getId()))) {
+            mPasswordManager.provideOrSavePassword(uri, view);
+            final WebResourceResponse response =
+                    new WebResourceResponse("test/plain", "UTF-8",
+                            new ByteArrayInputStream("OK".getBytes()));
+            return response;
         }
         return null;
     }
@@ -139,6 +151,11 @@ class LightningWebClient extends WebViewClient {
         if (Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT &&
                 mLightningView.getInvertePage()) {
             view.evaluateJavascript(Constants.JAVASCRIPT_INVERT_PAGE, null);
+        }
+
+        if (!mLightningView.mIsIncognitoTab && mLightningView.mPreferences.getSavePasswordsEnabled()) {
+            //Inject javascript to check for id and pass fields in the page
+            mPasswordManager.injectJavascript(view);
         }
         mEventBus.post(new BrowserEvents.TabsChanged());
     }

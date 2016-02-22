@@ -2,6 +2,7 @@ package com.cliqz.browser.di.modules;
 
 import android.content.Context;
 
+import com.cliqz.browser.utils.PasswordManager;
 import com.cliqz.browser.utils.Telemetry;
 import com.google.gson.Gson;
 
@@ -37,6 +38,12 @@ public class AppModule {
     @Singleton
     Telemetry provideTelemetry() {
         return new Telemetry(app.getApplicationContext());
+    }
+
+    @Provides
+    @Singleton
+    PasswordManager providePasswordManager() {
+        return new PasswordManager();
     }
 
     @Provides

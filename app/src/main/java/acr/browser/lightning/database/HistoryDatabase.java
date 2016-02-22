@@ -21,7 +21,7 @@ public class HistoryDatabase extends SQLiteOpenHelper {
 
     // All Static variables
     // Database Version
-    private static final int DATABASE_VERSION = 4;
+    private static final int DATABASE_VERSION = 5;
 
     // Database Name
     private static final String DATABASE_NAME = "historyManager";
@@ -53,6 +53,18 @@ public class HistoryDatabase extends SQLiteOpenHelper {
         public static final String FAVORITE = "favorite";
     }
 
+    private static final class LoginDetailsTable {
+        private LoginDetailsTable() {};
+
+        public static final String TABLE_NAME = "login_details";
+
+        //Columns
+        public static final String ID = "id";
+        public static final String DOMAIN = "domain";
+        public static final String LOGIN_ID = "login_id";
+        public static final String PASSWORD = "password";
+    }
+
     public static final class JsonKeys {
         private JsonKeys() {}
 
@@ -80,6 +92,7 @@ public class HistoryDatabase extends SQLiteOpenHelper {
         db.beginTransaction();
         try {
             createV4DB(db);
+            createV5DB(db);
             db.setTransactionSuccessful();
         } finally {
             db.endTransaction();
@@ -91,6 +104,11 @@ public class HistoryDatabase extends SQLiteOpenHelper {
         db.execSQL(res.getString(R.string.create_history_table_v4));
         db.execSQL(res.getString(R.string.create_urls_index_v4));
         db.execSQL(res.getString(R.string.create_visits_index_v4));
+    }
+
+    private void createV5DB(SQLiteDatabase db) {
+        db.execSQL(res.getString(R.string.create_login_detials_table_v5));
+        db.execSQL(res.getString(R.string.create_login_url_index_v5));
     }
 
     // Upgrading database
@@ -110,7 +128,8 @@ public class HistoryDatabase extends SQLiteOpenHelper {
                     db.execSQL(res.getString(R.string.move_to_new_history_v3_to_v4));
                     db.execSQL(res.getString(R.string.move_to_urls_v3_to_v4));
                     db.execSQL(res.getString(R.string.drop_tempHistory_v3_to_v4));
-
+                case 4:
+                    createV5DB(db);
                     // !!! Remeber the break here !!!
                     db.setTransactionSuccessful();
                     break;
@@ -118,8 +137,10 @@ public class HistoryDatabase extends SQLiteOpenHelper {
                     // Drop older table if it exists
                     db.execSQL("DROP TABLE IF EXISTS " + UrlsTable.TABLE_NAME);
                     db.execSQL("DROP TABLE IF EXISTS " + HistoryTable.TABLE_NAME);
+                    db.execSQL("DROP TABLE IF EXISTS " + LoginDetailsTable.TABLE_NAME);
                     // Create tables again
                     createV4DB(db);
+                    createV5DB(db);
                     db.setTransactionSuccessful();
                     break;
             }
@@ -326,6 +347,41 @@ public class HistoryDatabase extends SQLiteOpenHelper {
         return results;
     }
 
+    public synchronized LoginDetailItem getLoginDetails(String domain) {
+        final SQLiteDatabase db = dbHandler.getDatabase();
+        Cursor cursor = db.query(LoginDetailsTable.TABLE_NAME,
+                new String[]{LoginDetailsTable.DOMAIN,LoginDetailsTable.LOGIN_ID,LoginDetailsTable.PASSWORD},
+                LoginDetailsTable.DOMAIN + " = ?", new String[]{domain}, null, null, null);
+        cursor.moveToFirst();
+        if (cursor.getCount() > 0) {
+            final int domainIndex = cursor.getColumnIndex(LoginDetailsTable.DOMAIN);
+            final int loginIdIndex = cursor.getColumnIndex(LoginDetailsTable.LOGIN_ID);
+            final int passwordIndex = cursor.getColumnIndex(LoginDetailsTable.PASSWORD);
+            final LoginDetailItem loginDetailItem = new LoginDetailItem(
+                    cursor.getString(domainIndex),
+                    cursor.getString(loginIdIndex),
+                    cursor.getString(passwordIndex));
+            return loginDetailItem;
+        } else {
+            return null;
+        }
+    }
+
+    public synchronized void  saveLoginDetails(LoginDetailItem loginDetailItem) {
+        final SQLiteDatabase db = dbHandler.getDatabase();
+        final ContentValues loginDetailValues = new ContentValues();
+        loginDetailValues.put(LoginDetailsTable.DOMAIN, loginDetailItem.getDomain());
+        loginDetailValues.put(LoginDetailsTable.LOGIN_ID, loginDetailItem.getLoginId());
+        loginDetailValues.put(LoginDetailsTable.PASSWORD, loginDetailItem.getPassword());
+        db.beginTransaction();
+        try {
+            db.insertWithOnConflict(LoginDetailsTable.TABLE_NAME, null, loginDetailValues,
+                    SQLiteDatabase.CONFLICT_REPLACE);
+            db.setTransactionSuccessful();
+        } finally {
+            db.endTransaction();
+        }
+    }
     /**
      * Mark an history point as favorite or remove the favorite status
      * @param id an History Table id

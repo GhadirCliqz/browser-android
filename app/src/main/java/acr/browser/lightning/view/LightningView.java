@@ -36,6 +36,7 @@ import android.webkit.WebSettings.PluginState;
 import android.webkit.WebView;
 
 import com.cliqz.browser.main.MainActivity;
+import com.cliqz.browser.utils.PasswordManager;
 import com.cliqz.browser.utils.Telemetry;
 import com.squareup.otto.Bus;
 
@@ -121,6 +122,9 @@ public class LightningView implements ILightningTab {
 
     @Inject
     ProxyUtils proxyUtils;
+
+    @Inject
+    PasswordManager passwordManager;
 
     @SuppressLint("NewApi")
     public LightningView(final Activity activity, boolean isIncognito, String uniqueId) {
@@ -261,19 +265,19 @@ public class LightningView implements ILightningTab {
 
         setUserAgent(context, mPreferences.getUserAgentChoice());
 
-        if (mPreferences.getSavePasswordsEnabled() && !mIsIncognitoTab) {
-            if (API < Build.VERSION_CODES.JELLY_BEAN_MR2) {
-                //noinspection deprecation
-                settings.setSavePassword(true);
-            }
-            settings.setSaveFormData(true);
-        } else {
-            if (API < Build.VERSION_CODES.JELLY_BEAN_MR2) {
-                //noinspection deprecation
-                settings.setSavePassword(false);
-            }
-            settings.setSaveFormData(false);
-        }
+//        if (mPreferences.getSavePasswordsEnabled() && !mIsIncognitoTab) {
+//            if (API < Build.VERSION_CODES.JELLY_BEAN_MR2) {
+//                //noinspection deprecation
+//                settings.setSavePassword(true);
+//            }
+//            settings.setSaveFormData(true);
+//        } else {
+//            if (API < Build.VERSION_CODES.JELLY_BEAN_MR2) {
+//                //noinspection deprecation
+//                settings.setSavePassword(false);
+//            }
+//            settings.setSaveFormData(false);
+//        }
 
         if (mPreferences.getJavaScriptEnabled()) {
             settings.setJavaScriptEnabled(true);
