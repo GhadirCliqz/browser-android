@@ -93,6 +93,8 @@ dependencies {
     compile 'com.android.support:appcompat-v7:23.0.1'
     compile 'com.android.support:design:23.0.1'
     compile 'com.android.support:recyclerview-v7:23.0.1'
+    // Gson
+    compile 'com.google.code.gson:gson:2.6.1'
     // html parsing fo reading mode
     compile 'org.jsoup:jsoup:1.8.3'
     // event bus

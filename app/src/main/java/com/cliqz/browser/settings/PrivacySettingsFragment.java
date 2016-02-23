@@ -204,7 +204,8 @@ public class PrivacySettingsFragment extends BaseSettingsFragment {
     }
 
     private void clearHistory() {
-        WebUtils.clearHistory(getActivity());
+        mHistoryDatabase.clearHistory(false);
+        // WebUtils.clearHistory(getActivity());
         messageHandler.sendEmptyMessage(1);
     }
 

@@ -33,7 +33,7 @@ public class WebUtils {
         WebStorage.getInstance().deleteAllData();
     }
 
-    public static void clearHistory(@NonNull Context context) {
+    /* public static void clearHistory(@NonNull Context context) {
         BrowserApp.getAppComponent().getHistoryDatabase().deleteHistory();
         WebViewDatabase m = WebViewDatabase.getInstance(context);
         m.clearFormData();
@@ -45,7 +45,7 @@ public class WebUtils {
             WebIconDatabase.getInstance().removeAllIcons();
         }
         Utils.trimCache(context);
-    }
+    } */
 
     public static void clearCache(WebView view) {
         if (view == null) return;

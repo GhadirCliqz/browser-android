@@ -1,16 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="create_urls_table_v4" translatable="false">CREATE TABLE urls (id INTEGER PRIMARY KEY, url TEXT, title TEXT, visits INTEGER, time INTEGER, favorite BOOLEAN)</string>
-    <string name="create_history_table_v4" translatable="false">CREATE TABLE history (id INTEGER PRIMARY KEY, url_id INTEGER, time INTEGER)</string>
+    <string name="create_urls_table_v4" translatable="false">CREATE TABLE urls (id INTEGER PRIMARY KEY, url TEXT, title TEXT, visits INTEGER, time INTEGER, favorite BOOLEAN DEFAULT 0)</string>
+    <string name="create_history_table_v4" translatable="false">CREATE TABLE history (id INTEGER PRIMARY KEY, url_id INTEGER, time INTEGER, favorite BOOLEAN DEFAULT 0)</string>
     <string name="create_urls_index_v4" translatable="false">CREATE INDEX IF NOT EXISTS urlIndex ON urls (url COLLATE NOCASE)</string>
     <string name="create_visits_index_v4" translatable="false">CREATE INDEX IF NOT EXISTS visitsIndex ON urls (visits DESC)</string>
     <string name="rename_history_table_to_tempHistory_v3_to_v4" translatable="false">ALTER TABLE history RENAME TO tempHistory</string>
     <string name="move_to_new_history_v3_to_v4" translatable="false">INSERT INTO history (url_id, time) SELECT id, time FROM tempHistory</string>
-    <string name="move_to_urls_v3_to_v4" translatable="false">INSERT INTO urls (id, url, title, visits, time) SELECT id, url, title, visits, time FROM tempHistory</string>
+    <string name="move_to_urls_v3_to_v4" translatable="false">INSERT INTO urls (id, url, title, visits, time) SELECT id, url, title, 1, time FROM tempHistory</string>
     <string name="drop_tempHistory_v3_to_v4" translatable="false">DROP TABLE IF EXISTS tempHistory</string>
     <string name="drop_urlIndex_v3_to_v4" translatable="false">DROP INDEX IF EXISTS urlIndex</string>
     <string name="drop_countIndex_v3_to_v4" translatable="false">DROP INDEX IF EXISTS countIndex</string>
 
     <string name="seach_history_query_v4" translatable="false">SELECT DISTINCT urls.id, urls.url, urls.title FROM urls, history WHERE urls.id=history.url_id AND (title LIKE ? OR url LIKE ?) ORDER BY history.time DESC LIMIT ?</string>
-    <string name="get_history_query_v4" translatable="false">SELECT history.id, urls.url, urls.title, history.time FROM urls, history WHERE urls.id=history.url_id ORDER BY history.time DESC LIMIT ? OFFSET ?</string>
+    <string name="get_history_query_v4" translatable="false">SELECT history.id, urls.url, urls.title, urls.favorite, history.time FROM urls, history WHERE urls.id=history.url_id ORDER BY history.time DESC LIMIT ? OFFSET ?</string>
+    <string name="get_url_from_by_history_id_v4" translatable="false">SELECT urls.* FROM urls,history WHERE history.id=? AND history.url_id=urls.id</string>
+
+    <string name="move_urls_to_temp_table_v4" translatable="false">ALTER TABLE urls RENAME to tempUrls</string>
+    <string name="drop_temporary_urls_table_v4" translatable="false">DROP TABLE IF EXISTS tempUrls</string>
+    <string name="restore_favorite_urls_v4" translatable="false">INSERT INTO urls (id, url, title, visits, time, favorite) SELECT t.id, t.url, t.title, count(h.url_id), h.time, t.favorite FROM tempUrls AS t, history AS h WHERE t.id=h.url_id AND (t.favorite>0 OR h.favorite>0) GROUP BY h.url_id</string>
 </resources>

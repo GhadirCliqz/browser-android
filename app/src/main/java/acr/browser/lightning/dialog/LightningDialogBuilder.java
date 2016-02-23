@@ -5,29 +5,17 @@ import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AlertDialog;
-import android.view.View;
-import android.widget.ArrayAdapter;
-import android.widget.AutoCompleteTextView;
-import android.widget.EditText;
-import android.widget.LinearLayout;
 
 import com.squareup.otto.Bus;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import javax.inject.Inject;
 
 import acr.browser.lightning.R;
-import acr.browser.lightning.bus.BookmarkEvents;
 import acr.browser.lightning.bus.BrowserEvents;
 import acr.browser.lightning.constant.Constants;
-import acr.browser.lightning.database.BookmarkManager;
 import acr.browser.lightning.database.HistoryDatabase;
-import acr.browser.lightning.database.HistoryItem;
 import acr.browser.lightning.utils.Utils;
 
 /**
@@ -37,8 +25,8 @@ import acr.browser.lightning.utils.Utils;
  */
 public class LightningDialogBuilder {
 
-    @Inject
-    BookmarkManager bookmarkManager;
+//    @Inject
+//    BookmarkManager bookmarkManager;
 
     @Inject
     HistoryDatabase mHistoryDatabase;
@@ -54,9 +42,10 @@ public class LightningDialogBuilder {
     /**
      * Show the appropriated dialog for the long pressed link. It means that we try to understand
      * if the link is relative to a bookmark or is just a folder.
-     * @param context   used to show the dialog
-     * @param url   the long pressed url
+     * param context   used to show the dialog
+     * param url   the long pressed url
      */
+    /*
     public void showLongPressedDialogForBookmarkUrl(final Context context, final String url) {
         final HistoryItem item;
         if (url.startsWith(Constants.FILE) && url.endsWith(Constants.BOOKMARKS_FILENAME)) {
@@ -80,7 +69,9 @@ public class LightningDialogBuilder {
             }
         }
     }
+    */
 
+/*
     public void showLongPressedDialogForBookmarkUrl(final Context context, final HistoryItem item) {
         final DialogInterface.OnClickListener dialogClickListener =
                 new DialogInterface.OnClickListener() {
@@ -111,7 +102,9 @@ public class LightningDialogBuilder {
                 .setNeutralButton(R.string.action_edit, dialogClickListener)
                 .show();
     }
+*/
 
+/*
     private void showEditBookmarkDialog(final Context context, final HistoryItem item) {
         final AlertDialog.Builder editBookmarkDialog = new AlertDialog.Builder(context);
         editBookmarkDialog.setTitle(R.string.title_edit_bookmark);
@@ -146,7 +139,9 @@ public class LightningDialogBuilder {
                 });
         editBookmarkDialog.show();
     }
+*/
 
+/*
     public void showBookmarkFolderLongPressedDialog(final Context context, final HistoryItem item) {
         // assert item.isFolder();
         final DialogInterface.OnClickListener dialogClickListener =
@@ -175,7 +170,9 @@ public class LightningDialogBuilder {
                 .setNegativeButton(R.string.action_delete, dialogClickListener)
                 .show();
     }
+*/
 
+/*
     private void showRenameFolderDialog(final Context context, final HistoryItem item) {
         // assert item.isFolder();
         final AlertDialog.Builder editFolderDialog = new AlertDialog.Builder(context);
@@ -208,6 +205,7 @@ public class LightningDialogBuilder {
                 });
         editFolderDialog.show();
     }
+*/
 
     /*
     public void showLongPressedHistoryLinkDialog(final Context context, final String url) {
