@@ -11,7 +11,6 @@ import javax.inject.Singleton;
  * @author Stefano Pacifici
  * @date 2015/12/21
  */
-@Singleton
 public class CliqzBrowserState implements Serializable {
 
     public enum Mode {
@@ -92,7 +91,6 @@ public class CliqzBrowserState implements Serializable {
         this.mode = mode;
     }
 
-    @Inject
     public CliqzBrowserState() {
     }
 

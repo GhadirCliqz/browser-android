@@ -47,8 +47,6 @@ public interface AppComponent {
 
     Timings getTimings();
 
-    CliqzBrowserState getCliqzBrowserState();
-
     HistoryDatabase getHistoryDatabase();
 
     BookmarkManager getBookmarkManager();

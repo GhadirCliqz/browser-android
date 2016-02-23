@@ -3,6 +3,7 @@ package com.cliqz.browser.di.modules;
 import android.app.Activity;
 
 import com.cliqz.browser.di.annotations.PerActivity;
+import com.cliqz.browser.main.CliqzBrowserState;
 import com.cliqz.browser.webview.CliqzBridge;
 import com.squareup.otto.Bus;
 
@@ -35,5 +36,11 @@ public class ActivityModule {
     @Provides
     public Activity providesActivity() {
         return activity;
+    }
+
+    @Provides
+    @PerActivity
+    CliqzBrowserState providesCliqzBrowserState() {
+        return new CliqzBrowserState();
     }
 }
