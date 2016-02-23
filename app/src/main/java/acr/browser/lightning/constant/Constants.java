@@ -23,6 +23,7 @@ public final class Constants {
     public static final String GOOGLE_SEARCH = "https://www.google.com/search?client=com.cliqz.browser&ie=UTF-8&oe=UTF-8&q=";
     public static final String BING_SEARCH = "https://www.bing.com/search?q=";
     public static final String DUCK_SEARCH = "https://duckduckgo.com/?t=com.cliqz.browser&q=";
+    public static final String ECOSIA_SEARCH = "https://www.ecosia.org/search?q=";
     public static final String DUCK_LITE_SEARCH = "https://duckduckgo.com/lite/?t=com.cliqz.browser&q=";
     public static final String STARTPAGE_MOBILE_SEARCH = "https://startpage.com/do/m/mobilesearch?language=english&query=";
     public static final String STARTPAGE_SEARCH = "https://startpage.com/do/search?language=english&query=";
