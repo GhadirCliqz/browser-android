@@ -189,10 +189,7 @@ public class HistoryDatabase extends SQLiteOpenHelper {
             limit = 100;
         }
         final JsonArray itemList = new JsonArray();
-        Cursor cursor = db.query(UrlsTable.TABLE_NAME,
-                new String[]{UrlsTable.URL, UrlsTable.TITLE},
-                null, null, null, null,
-                String.format("%s DESC", UrlsTable.VISITS), Integer.toString(limit));
+        Cursor cursor = db.rawQuery(res.getString(R.string.get_top_sites_v4), null);
         int counter = 0;
         if (cursor.moveToFirst()) {
             final int urlIndex = cursor.getColumnIndex(UrlsTable.URL);

@@ -18,4 +18,5 @@
     <string name="move_urls_to_temp_table_v4" translatable="false">ALTER TABLE urls RENAME to tempUrls</string>
     <string name="drop_temporary_urls_table_v4" translatable="false">DROP TABLE IF EXISTS tempUrls</string>
     <string name="restore_favorite_urls_v4" translatable="false">INSERT INTO urls (id, url, title, visits, time, favorite) SELECT t.id, t.url, t.title, count(h.url_id), h.time, t.favorite FROM tempUrls AS t, history AS h WHERE t.id=h.url_id AND (t.favorite>0 OR h.favorite>0) GROUP BY h.url_id</string>
+    <string name="get_top_sites_v4" translatable="false">SELECT t.url AS url, t.title AS title, SUM(t.days_count) as count FROM (SELECT urls.url, urls.title, (history.time / 86400000 - STRFTIME(\'%s\', DATE(\'now\', \'-6 months\')) / 86400) AS days_count, urls.id AS id FROM urls, history WHERE urls.id=history.id AND history.time&gt;STRFTIME(\'%s\', DATE(\'now\', \'-6 months\'))*1000) AS t GROUP by t.id ORDER BY count DESC LIMIT 15</string>
 </resources>
