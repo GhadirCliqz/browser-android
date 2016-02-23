@@ -63,7 +63,7 @@ public class CliqzBridge extends Bridge {
         }),
 
         /**
-         *
+         * Return history (paged)
          */
         getHistory(new IAction() {
             @Override
@@ -86,21 +86,38 @@ public class CliqzBridge extends Bridge {
         }),
 
         /**
-         * Delete history with the passed List of ids.
+         * Mark history entry as favorite or remove the favorite status
+         */
+        setHistoryFavorite(new IAction() {
+            @Override
+            public void execute(Bridge bridge, Object data, String callback) {
+                final JSONObject json = (data instanceof JSONObject) ? (JSONObject) data : null;
+                if (json != null && json.has("ids") && json.has("value")) {
+                    final JSONArray ids = json.optJSONArray("ids");
+                    final boolean value = json.optBoolean("value");
+                    for (int i = 0; ids != null && i < ids.length(); i++) {
+                        final long id = ids.optLong(i, -1);
+                        if (id > -1) {
+                            bridge.historyDatabase.markHistory(id, value);
+                        }
+                    }
+                }
+            }
+        }),
+
+        /**
+         * Remove multiple items from the history
+         * Javascript example: removeHistory([id1, id2, id3, ...])
          */
         removeHistory(new IAction() {
             @Override
             public void execute(Bridge bridge, Object data, String callback) {
-                final JSONArray ids = (data instanceof JSONArray) ? (JSONArray) data : null;
-                if(ids == null) {
-                    Log.e(TAG, "Can't delete without an ID");
-                } else {
-                    for(int i = 0; i < ids.length(); i++) {
-                        try {
-                            bridge.historyDatabase.deleteHistoryItem(ids.getInt(i));
-                        } catch (JSONException e) {
-                            Log.e(TAG, "JSONException while reading ids in removeHistory", e);
-                        }
+                final JSONArray json = (data instanceof JSONArray) ? (JSONArray) data : null;
+                final int size = json != null ? json.length() : 0;
+                for (int i = 0; i < size; i++ ) {
+                    final long id = json.optLong(i, -1);
+                    if (i > -1) {
+                        bridge.historyDatabase.deleteHistoryPoint(id);
                     }
                 }
             }

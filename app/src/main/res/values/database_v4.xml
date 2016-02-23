@@ -14,5 +14,8 @@
     <string name="seach_history_query_v4" translatable="false">SELECT DISTINCT urls.id, urls.url, urls.title FROM urls, history WHERE urls.id=history.url_id AND (title LIKE ? OR url LIKE ?) ORDER BY history.time DESC LIMIT ?</string>
     <string name="get_history_query_v4" translatable="false">SELECT history.id, urls.url, urls.title, urls.favorite, history.time FROM urls, history WHERE urls.id=history.url_id ORDER BY history.time DESC LIMIT ? OFFSET ?</string>
     <string name="get_url_from_by_history_id_v4" translatable="false">SELECT urls.* FROM urls,history WHERE history.id=? AND history.url_id=urls.id</string>
-    <string name="reset_visits_for_existing_history_v4" translatable="false">UPDATE urls SET visits=1 WHERE EXISTS (SELECT url_id FROM history WHERE url_id=urls.id)</string>
+
+    <string name="move_urls_to_temp_table_v4" translatable="false">ALTER TABLE urls RENAME to tempUrls</string>
+    <string name="drop_temporary_urls_table_v4" translatable="false">DROP TABLE IF EXISTS tempUrls</string>
+    <string name="restore_favorite_urls_v4" translatable="false">INSERT INTO urls (id, url, title, visits, time, favorite) SELECT t.id, t.url, t.title, count(h.url_id), h.time, t.favorite FROM tempUrls AS t, history AS h WHERE t.id=h.url_id AND (t.favorite>0 OR h.favorite>0) GROUP BY h.url_id</string>
 </resources>

@@ -134,13 +134,6 @@ public class HistoryDatabase extends SQLiteOpenHelper {
         super.close();
     }
 
-    public synchronized void deleteHistoryItem(int id) {
-        final SQLiteDatabase db = dbHandler.getDatabase();
-        db.delete(HistoryTable.TABLE_NAME,
-                HistoryTable.ID + " = ?",
-                new String[]{Integer.toString(id)});
-    }
-
     /**
      * Update an history and urls
      *
@@ -388,16 +381,22 @@ public class HistoryDatabase extends SQLiteOpenHelper {
         final SQLiteDatabase db = dbHandler.getDatabase();
         db.beginTransaction();
         try {
+            // Move urls table to a temporary table;
+            db.rawQuery(res.getString(R.string.move_urls_to_temp_table_v4), null);
+            // Recreate the table
+            db.rawQuery(res.getString(R.string.create_urls_table_v4), null);
+            // Delete from the history table (preserving or not the favorites)
             if (deleteFavorites) {
                 db.delete(HistoryTable.TABLE_NAME, null, null);
             } else {
                 db.delete(HistoryTable.TABLE_NAME, "favorite<1", null);
             }
-            // Update the urls table too
-            final ContentValues values = new ContentValues();
-            values.put(UrlsTable.VISITS, 1);
-            db.rawQuery(res.getString(R.string.reset_visits_for_existing_history_v4), null, null);
-            db.delete(UrlsTable.TABLE_NAME, "visits!=1", null);
+            // Restore still existing entries in the urls table if needed
+            if (!deleteFavorites) {
+                db.rawQuery(res.getString(R.string.restore_favorite_urls_v4), null);
+            }
+            // Drop the temporary urls table
+            db.rawQuery(res.getString(R.string.drop_temporary_urls_table_v4), null);
             db.setTransactionSuccessful();
         } finally {
             db.endTransaction();
