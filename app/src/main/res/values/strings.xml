@@ -249,7 +249,7 @@
     <string name="what_is_humanweb">What is Human Web?</string>
     <string name="enable_human_web">Enable Human Web</string>
     <string name="humanweb" translatable="false">Human Web</string>
-    <string name="about_humanweb_url">https://cliqz.com/en/whycliqz/human-web</string>
+    <string name="about_humanweb_url">https://cliqz.com/whycliqz/human-web</string>
     <string name="share_link">Share using</string>
     <string name="shared_using">Shared with CLIQZ for Android</string>
     <string name="dont_show_again">Don\'t show again</string>
