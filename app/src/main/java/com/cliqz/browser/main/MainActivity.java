@@ -360,7 +360,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onBackStackChanged() {
                 fm.removeOnBackStackChangedListener(this);
-                bus.post(new CliqzMessages.OpenLink(url));
+                bus.post(new CliqzMessages.OpenHistoryLink(url));
             }
         });
     }

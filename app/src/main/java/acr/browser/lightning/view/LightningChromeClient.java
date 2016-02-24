@@ -44,6 +44,10 @@ class LightningChromeClient extends WebChromeClient {
     private final LightningView mLightningView;
     private final Bus eventBus;
 
+    // These fields are used to avoid multiple history point creation when we receive multiple
+    // titles for the same web page
+    private String mLastTitleUrl = null;
+
     LightningChromeClient(Activity activity, LightningView lightningView) {
         mActivity = activity;
         mLightningView = lightningView;
@@ -103,11 +107,16 @@ class LightningChromeClient extends WebChromeClient {
             eventBus.post(new Messages.UpdateTitle());
         }
         eventBus.post(new BrowserEvents.TabsChanged());
-        final String url = view != null ? view.getUrl() : null;
-        if (url != null && !url.startsWith("cliqz://") && !mLightningView.mIsIncognitoTab) {
+        final String rawUrl = view != null ? view.getUrl() : null;
+        final String url = rawUrl != null ? rawUrl.split("\\?")[0] : "";
+        if (!url.startsWith("cliqz://") &&
+                !url.equals(mLastTitleUrl) &&
+                !mLightningView.mIsIncognitoTab &&
+                mLightningView.isHistoryItemCreationEnabled) {
+            mLastTitleUrl = url;
             mLightningView.addItemToHistory(title, url);
         }
-
+        mLightningView.isHistoryItemCreationEnabled = true;
     }
 
     @Override

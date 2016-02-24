@@ -83,15 +83,20 @@ public class LightningView implements ILightningTab {
     private static float mMaxFling;
     private static final int API = android.os.Build.VERSION.SDK_INT;
     private static final int SCROLL_UP_THRESHOLD = Utils.dpToPx(10);
-    // private final boolean mIsCustomWebView;
-    private String mAntiPhishingSrc;
     private final String mId;
     private String mUrl;
-    // TODO fix so that mWebpageBitmap can be static - static changes the icon when switching from light to dark and then back to light
-    private Bitmap mWebpageBitmap;
-    private boolean mTextReflow = false;
+//    // TODO fix so that mWebpageBitmap can be static - static changes the icon when switching from light to dark and then back to light
+//    private Bitmap mWebpageBitmap;
+//    private boolean mTextReflow = false;
     public boolean clicked = false;
 
+    /**
+     * This prevent history point creation when navigating back and forward. It's used by {@link
+     * LightningView} and {@link LightningChromeClient} in combination: the first set it to false
+     * when navigation back or forward, the latter reset it at the end of {@link
+     * LightningChromeClient#onReceivedTitle(WebView, String)}
+     */
+    boolean isHistoryItemCreationEnabled = true;
 
     private static final float[] mNegativeColorArray = {
             -1.0f, 0, 0, 0, 255, // red
@@ -571,6 +576,7 @@ public class LightningView implements ILightningTab {
         }
 
         if (mWebView != null) {
+            isHistoryItemCreationEnabled = false;
             mWebView.reload();
         }
     }
@@ -620,6 +626,7 @@ public class LightningView implements ILightningTab {
 
     public synchronized void goBack() {
         if (mWebView != null) {
+            isHistoryItemCreationEnabled = false;
             mWebView.goBack();
         }
     }
@@ -634,6 +641,7 @@ public class LightningView implements ILightningTab {
 
     public synchronized void goForward() {
         if (mWebView != null) {
+            isHistoryItemCreationEnabled = false;
             mWebView.goForward();
         }
     }

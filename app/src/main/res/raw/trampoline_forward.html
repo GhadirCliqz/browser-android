@@ -5,29 +5,11 @@
     <script>
         "use strict";
 
-        // Polyfill for Object.assign
-        if (typeof Object.assign != 'function') {
-          (function () {
-            Object.assign = function (target) {
-              'use strict';
-              if (target === undefined || target === null) {
-                throw new TypeError('Cannot convert undefined or null to object');
-              }
-
-              var output = Object(target);
-              for (var index = 1; index < arguments.length; index++) {
-                var source = arguments[index];
-                if (source !== undefined && source !== null) {
-                  for (var nextKey in source) {
-                    if (source.hasOwnProperty(nextKey)) {
-                      output[nextKey] = source[nextKey];
-                    }
-                  }
-                }
-              }
-              return output;
-            };
-          })();
+        function navigateTo(state) {
+          history.replaceState(state, 'trampoline', 'goto.html');
+          setTimeout(function() {
+            window.location.href = state.url;
+          }, 0);
         }
 
         /*
@@ -44,18 +26,26 @@
                     acc[kv[0]] = decodeURIComponent(kv[1]);
                     return acc;
                 }, {});
-            state.status = 'create';
+            state.status = Boolean(state.h) ? 'history_result' : 'search_result';
           } else {
-            state = Object.assign({}, history.state);
+            var s = history.state;
+            state = {
+              url: s.url,
+              r: s.r,
+              status: s.status,
+              q: s.q,
+              h: s.h
+            }
           }
 
           switch (state.status) {
-            case 'create':
+            case 'search_result':
               state.status = 'search';
-              history.replaceState(state, 'trampoline', 'goto.html');
-              setTimeout(function() {
-                window.location.href = state.url;
-              }, 0);
+              navigateTo(state);
+              break;
+            case 'history_result':
+              state.status = 'history';
+              navigateTo(state);
               break;
             case 'search':
               if (Boolean(state.r)) {
@@ -64,10 +54,14 @@
                 oreq.send();
                 return;
               }
-
               var query = state.q;
               var oreq = new XMLHttpRequest();
               oreq.open("GET", "cliqz://trampoline/search.html?q=" + encodeURIComponent(query));
+              oreq.send();
+              break;
+            case 'history':
+              var oreq = new XMLHttpRequest();
+              oreq.open("GET", "cliqz://trampoline/history.html");
               oreq.send();
               break;
             default:

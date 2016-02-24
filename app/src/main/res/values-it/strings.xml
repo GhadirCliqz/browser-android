@@ -244,4 +244,13 @@
     <string name="enable_human_web">Abilita Human Web</string>
     <string name="share_link">Condividi con</string>
     <string name="shared_using">Condiviso con CLIQZ per Android</string>
+    <string name="also_clear_favorites">Cancella favoriti</string>
+    <string name="also_clear_queries">Cancella le query</string>
+    <string name="clear_history">Cancella cronologia</string>
+    <string name="deleting_in_progress_message">Cancellando...</string>
+    <string name="dont_show_again">Non mostrare di nuovo</string>
+    <string name="gps_permission">Abilita il GPS per una ricerca migliore</string>
+    <string name="not_shareable">Questa card non può essere condivisa.</string>
+    <string name="open_in_incognito_tab">Apri in una scheda anonima</string>
+    <string name="open_in_new_tab">Apri in una nuova scheda</string>
 </resources>
