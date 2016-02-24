@@ -38,4 +38,8 @@ public class HistoryWebView extends BaseWebView {
     public void fourceUpdateHistory() {
         executeJS("osBridge.searchHistory(\"\", \"showHistory\")");
     }
+
+    public void cleanupQueries(boolean b) {
+        executeJS(String.format("clearQueries(%s)", b ? "true" : "false"));
+    }
 }

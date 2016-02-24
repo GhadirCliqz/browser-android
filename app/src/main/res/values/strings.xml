@@ -257,4 +257,8 @@
     <string name="open_in_new_tab">Open in new tab</string>
     <string name="open_in_incognito_tab">Open in incognito tab</string>
     <string name="not_shareable">This card is not shareable</string>
+    <string name="clear_history">Clear History</string>
+    <string name="also_clear_favorites">Delete favorites</string>
+    <string name="also_clear_queries">Delete queries</string>
+    <string name="deleting_in_progress_message">Deleting...</string>
 </resources>
