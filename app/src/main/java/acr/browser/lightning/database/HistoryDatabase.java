@@ -378,10 +378,8 @@ public class HistoryDatabase extends SQLiteOpenHelper {
         final SQLiteDatabase db = dbHandler.getDatabase();
         db.beginTransaction();
         try {
-            // Move urls table to a temporary table;
-            db.rawQuery(res.getString(R.string.move_urls_to_temp_table_v4), null);
-            // Recreate the table
-            db.rawQuery(res.getString(R.string.create_urls_table_v4), null);
+            // Create cleanup table
+            db.execSQL(res.getString(R.string.create_temp_cleanup_table_v4));
             // Delete from the history table (preserving or not the favorites)
             if (deleteFavorites) {
                 db.delete(HistoryTable.TABLE_NAME, null, null);
@@ -390,10 +388,12 @@ public class HistoryDatabase extends SQLiteOpenHelper {
             }
             // Restore still existing entries in the urls table if needed
             if (!deleteFavorites) {
-                db.rawQuery(res.getString(R.string.restore_favorite_urls_v4), null);
+                db.execSQL(res.getString(R.string.restore_favorite_urls_v4));
             }
-            // Drop the temporary urls table
-            db.rawQuery(res.getString(R.string.drop_temporary_urls_table_v4), null);
+            // Drop the original urls tablse
+            db.execSQL(res.getString(R.string.drop_temporary_urls_table_v4));
+            // Rename the cleanup table
+            db.execSQL(res.getString(R.string.move_cleanup_table_to_urls_v4));
             db.setTransactionSuccessful();
         } finally {
             db.endTransaction();

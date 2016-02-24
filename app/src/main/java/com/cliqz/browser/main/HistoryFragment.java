@@ -13,6 +13,7 @@ import com.cliqz.browser.webview.HistoryWebView;
 import com.squareup.otto.Subscribe;
 
 import acr.browser.lightning.R;
+import acr.browser.lightning.preference.PreferenceManager;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
@@ -96,6 +97,12 @@ public class HistoryFragment extends BaseFragment {
     public void onStart() {
         super.onStart();
         telemetry.sendLayerChangeSignal("past");
+
+        final PreferenceManager.ClearQueriesOptions clear = preferenceManager.shouldClearQueries();
+        if (clear != PreferenceManager.ClearQueriesOptions.NO) {
+            mHistoryWebView.cleanupQueries(clear == PreferenceManager.ClearQueriesOptions.CLEAR_QUERIES_INCLUDING_FAVORITES);
+            preferenceManager.setShouldClearQueries(PreferenceManager.ClearQueriesOptions.NO);
+        }
     }
 
     @Nullable

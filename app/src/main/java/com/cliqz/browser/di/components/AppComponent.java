@@ -2,8 +2,8 @@ package com.cliqz.browser.di.components;
 
 import com.cliqz.browser.di.modules.ActivityModule;
 import com.cliqz.browser.di.modules.AppModule;
-import com.cliqz.browser.main.CliqzBrowserState;
 import com.cliqz.browser.settings.BaseSettingsFragment;
+import com.cliqz.browser.utils.HistoryCleaner;
 import com.cliqz.browser.utils.LocationCache;
 import com.cliqz.browser.utils.Telemetry;
 import com.cliqz.browser.utils.Timings;
@@ -48,4 +48,6 @@ public interface AppComponent {
     void inject(com.cliqz.browser.main.OnBoardingActivity onBoardingActivity);
 
     ActivityComponent plus(ActivityModule module);
+
+    void inject(HistoryCleaner historyCleaner);
 }

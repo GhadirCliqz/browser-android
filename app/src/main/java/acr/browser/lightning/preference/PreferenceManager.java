@@ -12,6 +12,20 @@ import acr.browser.lightning.download.DownloadHandler;
 @Singleton
 public class PreferenceManager {
 
+    public enum ClearQueriesOptions {
+        NO,
+        CLEAR_QUERIES,
+        CLEAR_QUERIES_INCLUDING_FAVORITES;
+
+        public static ClearQueriesOptions safeValueOf(String name) {
+            try {
+                return ClearQueriesOptions.valueOf(name);
+            } catch (IllegalArgumentException e) {
+                return NO;
+            }
+        }
+    }
+
     private static class Name {
         public static final String ADOBE_FLASH_SUPPORT = "enableflash";
         public static final String BLOCK_ADS = "AdBlock";
@@ -72,6 +86,7 @@ public class PreferenceManager {
         public static final String BLOCK_ADULT_CONTENT = "blockAdultContent";
         public static final String HUMAN_WEB = "humanweb";
         public static final String NEVER_ASK_GPS_PERMISSION = "gpsPermission";
+        public static final String CLEAR_QUERIES = "clearQueries";
     }
 
     private final SharedPreferences mPrefs;
@@ -301,6 +316,10 @@ public class PreferenceManager {
 
     public boolean getNeverAskGPSPermission() {
         return mPrefs.getBoolean(Name.NEVER_ASK_GPS_PERMISSION, false);
+    }
+
+    public ClearQueriesOptions shouldClearQueries() {
+        return ClearQueriesOptions.safeValueOf(mPrefs.getString(Name.CLEAR_QUERIES, "NO"));
     }
 
     private void putBoolean(String name, boolean value) {
@@ -541,5 +560,9 @@ public class PreferenceManager {
 
     public void setNeverAskGPSPermission(boolean neverAskGPSPermission) {
         putBoolean(Name.NEVER_ASK_GPS_PERMISSION, neverAskGPSPermission);
+    }
+
+    public void setShouldClearQueries(ClearQueriesOptions value) {
+        putString(Name.CLEAR_QUERIES, value.name());
     }
 }

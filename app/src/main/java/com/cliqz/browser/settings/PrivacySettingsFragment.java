@@ -12,7 +12,11 @@ import android.os.Message;
 import android.preference.CheckBoxPreference;
 import android.preference.Preference;
 import android.support.v7.app.AlertDialog;
+import android.view.View;
 import android.webkit.WebView;
+import android.widget.CheckBox;
+
+import com.cliqz.browser.utils.HistoryCleaner;
 
 import acr.browser.lightning.R;
 import acr.browser.lightning.utils.Utils;
@@ -24,12 +28,12 @@ public class PrivacySettingsFragment extends BaseSettingsFragment {
     private static final String SETTINGS_ENABLECOOKIES = "allow_cookies";
     private static final String SETTINGS_THIRDPCOOKIES = "third_party";
     private static final String SETTINGS_SAVEPASSWORD = "password";
+    private static final String SETTINGS_CLEARHISTORY = "clear_history";
     // private static final String SETTINGS_COOKIESINKOGNITO = "incognito_cookies";
     // private static final String SETTINGS_CACHEEXIT = "clear_cache_exit";
     // private static final String SETTINGS_HISTORYEXIT = "clear_history_exit";
     // private static final String SETTINGS_COOKIEEXIT = "clear_cookies_exit";
     // private static final String SETTINGS_CLEARCACHE = "clear_cache";
-    // private static final String SETTINGS_CLEARHISTORY = "clear_history";
     // private static final String SETTINGS_CLEARCOOKIES = "clear_cookies";
     // private static final String SETTINGS_CLEARWEBSTORAGE = "clear_webstorage";
     // private static final String SETTINGS_WEBSTORAGEEXIT = "clear_webstorage_exit";
@@ -39,7 +43,7 @@ public class PrivacySettingsFragment extends BaseSettingsFragment {
     private CheckBoxPreference cblocation, cbenablecookies, cb3cookies, cbsavepasswords;
             /* , cbcookiesInkognito, cbcacheexit, cbhistoryexit, cbcookiesexit, cbwebstorageexit
             */
-    private boolean mSystemBrowser;
+    // private boolean mSystemBrowser;
     private Handler messageHandler;
 
     @Override
@@ -55,7 +59,7 @@ public class PrivacySettingsFragment extends BaseSettingsFragment {
 
     private void initPrefs() {
         // mPreferenceManager storage
-        mSystemBrowser = mPreferenceManager.getSystemBrowserPresent();
+        // mSystemBrowser = mPreferenceManager.getSystemBrowserPresent();
 
         // !!! Commented out to permit us to restore later !!!!
         // Preference clearcache = findPreference(SETTINGS_CLEARCACHE);
@@ -97,9 +101,10 @@ public class PrivacySettingsFragment extends BaseSettingsFragment {
         // cbcookiesexit.setChecked(mPreferenceManager.getClearCookiesExitEnabled());
         cb3cookies.setChecked(mPreferenceManager.getBlockThirdPartyCookiesEnabled());
         // cbwebstorageexit.setChecked(mPreferenceManager.getClearWebStorageExitEnabled());
-
         cb3cookies.setEnabled(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP);
 
+        final Preference prefClearHistory = (Preference) findPreference(SETTINGS_CLEARHISTORY);
+        prefClearHistory.setOnPreferenceClickListener(this);
 
         messageHandler = new MessageHandler(mActivity);
     }
@@ -132,9 +137,9 @@ public class PrivacySettingsFragment extends BaseSettingsFragment {
 //            case SETTINGS_CLEARCACHE:
 //                clearCache();
 //                return true;
-//            case SETTINGS_CLEARHISTORY:
-//                clearHistoryDialog();
-//                return true;
+            case SETTINGS_CLEARHISTORY:
+                clearHistoryDialog();
+                return true;
 //            case SETTINGS_CLEARCOOKIES:
 //                clearCookiesDialog();
 //                return true;
@@ -147,28 +152,35 @@ public class PrivacySettingsFragment extends BaseSettingsFragment {
     }
 
     private void clearHistoryDialog() {
+        final View view = View.inflate(getActivity(), R.layout.dialog_clear_history, null);
+        final CheckBox deleteFavoritesCheckbox = (CheckBox) view.findViewById(R.id.clear_history_favorites);
+        final CheckBox deleteQueriesCheckbox = (CheckBox) view.findViewById(R.id.clear_history_queries);
+        final DialogInterface.OnClickListener dialogListener = new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                switch (which) {
+                    case DialogInterface.BUTTON_POSITIVE:
+                        HistoryCleaner
+                                .builder()
+                                .setContext(getActivity())
+                                .setDeleteFavorites(deleteFavoritesCheckbox.isChecked())
+                                .setDeleteQueries(deleteQueriesCheckbox.isChecked())
+                                .build()
+                                .cleanup();
+                        break;
+                    default:
+                        break;
+                }
+                dialog.dismiss();
+            }
+        };
         AlertDialog.Builder builder = new AlertDialog.Builder(mActivity);
-        builder.setTitle(getResources().getString(R.string.title_clear_history));
-        builder.setMessage(getResources().getString(R.string.dialog_history))
-                .setPositiveButton(getResources().getString(R.string.action_yes),
-                        new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface arg0, int arg1) {
-                                Thread clear = new Thread(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        clearHistory();
-                                    }
-                                });
-                                clear.start();
-                            }
-                        })
-                .setNegativeButton(getResources().getString(R.string.action_no),
-                        new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface arg0, int arg1) {
-                            }
-                        }).show();
+            builder.setTitle(getResources().getString(R.string.title_clear_history))
+                    .setMessage(R.string.dialog_history)
+                    .setView(view)
+                    .setPositiveButton(R.string.action_delete, dialogListener)
+                    .setNegativeButton(R.string.action_cancel, dialogListener)
+                    .show();
     }
 
     private void clearCookiesDialog() {

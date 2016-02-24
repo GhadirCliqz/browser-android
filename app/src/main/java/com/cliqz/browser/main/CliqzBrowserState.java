@@ -2,9 +2,6 @@ package com.cliqz.browser.main;
 
 import java.io.Serializable;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
-
 /**
  * This class keep the state of the app and help to dispatch it to the extension during init.
  *
