@@ -92,6 +92,7 @@ class LightningWebClient extends WebViewClient {
         }
         final String path = uri.getPath();
 
+        //If the url scheme is not "cliqz" or path is not "/CLIQZ+(webviewId)" we don't handle the url
         if (!CLIQZ_SCHEME.equals(uri.getScheme()) && !path.equals(CLIQZ_PATH+Integer.toString(view.getId()))) {
             return null;
         }

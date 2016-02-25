@@ -15,6 +15,7 @@ import acr.browser.lightning.R;
 import acr.browser.lightning.app.BrowserApp;
 import acr.browser.lightning.database.HistoryDatabase;
 import acr.browser.lightning.database.LoginDetailItem;
+import acr.browser.lightning.database.PasswordDatabase;
 
 /**
  * Created by Ravjit on 24/02/16.
@@ -22,7 +23,7 @@ import acr.browser.lightning.database.LoginDetailItem;
 public class PasswordManager {
 
     @Inject
-    HistoryDatabase historyDatabase;
+    PasswordDatabase passwordDatabase;
 
     public PasswordManager() {
         BrowserApp.getAppComponent().inject(this);
@@ -67,7 +68,7 @@ public class PasswordManager {
             return;
         }
         if (username == null && password == null) {
-            final LoginDetailItem loginDetailItem = historyDatabase.getLoginDetails(domain);
+            final LoginDetailItem loginDetailItem = passwordDatabase.getLoginDetails(domain);
             if (loginDetailItem != null) {
                 String loginId = loginDetailItem.getLoginId();
                 String loginPassword = loginDetailItem.getPassword();
@@ -75,7 +76,7 @@ public class PasswordManager {
             }
         } else if (username != null && password != null) {
             LoginDetailItem loginDetailItem = new LoginDetailItem(domain, username, password);
-            historyDatabase.saveLoginDetails(loginDetailItem);
+            passwordDatabase.saveLoginDetails(loginDetailItem);
         }
     }
 
