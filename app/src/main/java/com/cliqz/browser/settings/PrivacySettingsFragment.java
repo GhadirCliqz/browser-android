@@ -85,7 +85,6 @@ public class PrivacySettingsFragment extends BaseSettingsFragment {
         cblocation.setOnPreferenceChangeListener(this);
         cbenablecookies.setOnPreferenceChangeListener(this);
         // cbcookiesInkognito.setOnPreferenceChangeListener(this);
-        cb3cookies.setOnPreferenceChangeListener(this);
         cbsavepasswords.setOnPreferenceChangeListener(this);
         // cbcacheexit.setOnPreferenceChangeListener(this);
         // cbhistoryexit.setOnPreferenceChangeListener(this);
@@ -99,9 +98,13 @@ public class PrivacySettingsFragment extends BaseSettingsFragment {
         // cbcacheexit.setChecked(mPreferenceManager.getClearCacheExit());
         // cbhistoryexit.setChecked(mPreferenceManager.getClearHistoryExitEnabled());
         // cbcookiesexit.setChecked(mPreferenceManager.getClearCookiesExitEnabled());
-        cb3cookies.setChecked(mPreferenceManager.getBlockThirdPartyCookiesEnabled());
         // cbwebstorageexit.setChecked(mPreferenceManager.getClearWebStorageExitEnabled());
-        cb3cookies.setEnabled(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            cb3cookies.setOnPreferenceChangeListener(this);
+            cb3cookies.setChecked(mPreferenceManager.getBlockThirdPartyCookiesEnabled());
+        } else {
+            getPreferenceScreen().removePreference(cb3cookies);
+        }
 
         final Preference prefClearHistory = (Preference) findPreference(SETTINGS_CLEARHISTORY);
         prefClearHistory.setOnPreferenceClickListener(this);

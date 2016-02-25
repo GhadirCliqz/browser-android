@@ -50,8 +50,8 @@ public class PasswordDatabase extends SQLiteOpenHelper {
     }
 
     private void createV1DB(SQLiteDatabase db) {
-        db.execSQL(resources.getString(R.string.create_login_detials_table_v5));
-        db.execSQL(resources.getString(R.string.create_login_url_index_v5));
+        db.execSQL(resources.getString(R.string.create_login_details_table_v1));
+        db.execSQL(resources.getString(R.string.create_login_url_index_v1));
     }
 
     @Override
