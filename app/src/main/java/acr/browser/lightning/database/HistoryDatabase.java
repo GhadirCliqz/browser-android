@@ -110,7 +110,6 @@ public class HistoryDatabase extends SQLiteOpenHelper {
                     db.execSQL(res.getString(R.string.move_to_new_history_v3_to_v4));
                     db.execSQL(res.getString(R.string.move_to_urls_v3_to_v4));
                     db.execSQL(res.getString(R.string.drop_tempHistory_v3_to_v4));
-
                     // !!! Remeber the break here !!!
                     db.setTransactionSuccessful();
                     break;
@@ -120,6 +119,7 @@ public class HistoryDatabase extends SQLiteOpenHelper {
                     db.execSQL("DROP TABLE IF EXISTS " + HistoryTable.TABLE_NAME);
                     // Create tables again
                     createV4DB(db);
+
                     db.setTransactionSuccessful();
                     break;
             }

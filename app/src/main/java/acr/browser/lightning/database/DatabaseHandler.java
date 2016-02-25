@@ -1,16 +1,17 @@
 package acr.browser.lightning.database;
 
 import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteOpenHelper;
 
 /**
  * @author Stefano Pacifici
  * @date 2016/02/18
  */
 class DatabaseHandler {
-    private final HistoryDatabase helper;
+    private final SQLiteOpenHelper helper;
     private SQLiteDatabase mDatabase;
 
-    DatabaseHandler(HistoryDatabase helper) {
+    DatabaseHandler(SQLiteOpenHelper helper) {
         this.helper = helper;
         mDatabase = helper.getWritableDatabase();
     }

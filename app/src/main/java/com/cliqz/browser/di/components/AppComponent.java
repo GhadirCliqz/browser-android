@@ -5,6 +5,7 @@ import com.cliqz.browser.di.modules.AppModule;
 import com.cliqz.browser.settings.BaseSettingsFragment;
 import com.cliqz.browser.utils.HistoryCleaner;
 import com.cliqz.browser.utils.LocationCache;
+import com.cliqz.browser.utils.PasswordManager;
 import com.cliqz.browser.utils.Telemetry;
 import com.cliqz.browser.utils.Timings;
 import com.cliqz.browser.widget.AutocompleteEditText;
@@ -46,6 +47,8 @@ public interface AppComponent {
     void inject(Telemetry telemetry);
 
     void inject(com.cliqz.browser.main.OnBoardingActivity onBoardingActivity);
+
+    void inject(PasswordManager passwordManager);
 
     ActivityComponent plus(ActivityModule module);
 

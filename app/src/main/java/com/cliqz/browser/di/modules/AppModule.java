@@ -2,6 +2,7 @@ package com.cliqz.browser.di.modules;
 
 import android.content.Context;
 
+import com.cliqz.browser.utils.PasswordManager;
 import com.cliqz.browser.utils.Telemetry;
 import com.google.gson.Gson;
 
@@ -11,6 +12,7 @@ import javax.inject.Singleton;
 
 import acr.browser.lightning.app.BrowserApp;
 import acr.browser.lightning.database.HistoryDatabase;
+import acr.browser.lightning.database.PasswordDatabase;
 import acr.browser.lightning.preference.PreferenceManager;
 import acr.browser.lightning.utils.AdBlock;
 import acr.browser.lightning.utils.ProxyUtils;
@@ -37,6 +39,12 @@ public class AppModule {
     @Singleton
     Telemetry provideTelemetry() {
         return new Telemetry(app.getApplicationContext());
+    }
+
+    @Provides
+    @Singleton
+    PasswordManager providePasswordManager() {
+        return new PasswordManager();
     }
 
     @Provides
@@ -71,6 +79,12 @@ public class AppModule {
     @Singleton
     public HistoryDatabase providesHistoryDatabase(Context context) {
         return new HistoryDatabase(context);
+    }
+
+    @Provides
+    @Singleton
+    public PasswordDatabase providesPasswordDatabase(Context context) {
+        return new PasswordDatabase(context);
     }
 
 }
