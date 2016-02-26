@@ -47,11 +47,6 @@ import acr.browser.lightning.utils.Utils;
  */
 class LightningWebClient extends WebViewClient {
 
-    private static final String CLIQZ_SCHEME = "cliqz";
-    private static final String CLIQZ_TRAMPOLINE_AUTHORITY = "trampoline";
-    private static final String CLIQZ_TRAMPOLINE_FORWARD = "/goto.html";
-    private static final String CLIQZ_TRAMPOLINE_SEARCH = "/search.html";
-    private static final String CLIQZ_TRAMPOLINE_CLOSE = "/close.html";
     private static final String CLIQZ_PATH = "/CLIQZ";
 
     private final Activity mActivity;
@@ -84,7 +79,7 @@ class LightningWebClient extends WebViewClient {
         return response != null ? response : super.shouldInterceptRequest(view, url);
     }
 
-    private WebResourceResponse handleUrl(WebView view, Uri uri) {
+    private WebResourceResponse handleUrl(final WebView view, Uri uri) {
         // Check if this is ad
         if (mLightningView.mAdBlock.isAd(uri)) {
             return new WebResourceResponse("text/html", "UTF-8",
@@ -93,19 +88,19 @@ class LightningWebClient extends WebViewClient {
         final String path = uri.getPath();
 
         //If the url scheme is not "cliqz" or path is not "/CLIQZ+(webviewId)" we don't handle the url
-        if (!CLIQZ_SCHEME.equals(uri.getScheme()) && !path.equals(CLIQZ_PATH+Integer.toString(view.getId()))) {
+        if (!TrampolineConstants.CLIQZ_SCHEME.equals(uri.getScheme()) && !path.equals(CLIQZ_PATH+Integer.toString(view.getId()))) {
             return null;
         }
 
-        if (CLIQZ_TRAMPOLINE_AUTHORITY.equals(uri.getAuthority())) {
-            if (CLIQZ_TRAMPOLINE_FORWARD.equals(path)) {
+        if (TrampolineConstants.CLIQZ_TRAMPOLINE_AUTHORITY.equals(uri.getAuthority())) {
+            if (TrampolineConstants.CLIQZ_TRAMPOLINE_FORWARD.equals(path)) {
                 final Resources resources = view.getResources();
                 final WebResourceResponse response =
                         new WebResourceResponse("text/html", "UTF-8",
                                 resources.openRawResource(R.raw.trampoline_forward));
                 return response;
             }
-            if (CLIQZ_TRAMPOLINE_SEARCH.equals(path)) {
+            if (TrampolineConstants.CLIQZ_TRAMPOLINE_SEARCH.equals(path)) {
                 final String query = uri.getQueryParameter("q");
                 mLightningView.telemetry.sendBackPressedSignal("web", "cards", query.length());
                 view.post(new Runnable() {
@@ -114,12 +109,9 @@ class LightningWebClient extends WebViewClient {
                         mEventBus.post(new Messages.ShowSearch(query));
                     }
                 });
-                final WebResourceResponse response =
-                        new WebResourceResponse("test/plain", "UTF-8",
-                                new ByteArrayInputStream("OK".getBytes()));
-                return response;
+                return createOKResponse();
             }
-            if (CLIQZ_TRAMPOLINE_CLOSE.equals(path)) {
+            if (TrampolineConstants.CLIQZ_TRAMPOLINE_CLOSE.equals(path)) {
                 view.post(new Runnable() {
                     @Override
                     public void run() {
@@ -127,14 +119,31 @@ class LightningWebClient extends WebViewClient {
                     }
                 });
             }
+            if (TrampolineConstants.CLIQZ_TRAMPOLINE_HISTORY.equals(path)) {
+                mLightningView.telemetry.sendBackPressedSignal("web", "history", 0);
+                view.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        mEventBus.post(new Messages.GoToHistory());
+                        if (mLightningView.canGoBack()) {
+                            mLightningView.goBack();
+                        }
+                    }
+                });
+                return createOKResponse();
+            }
         } else if (path.equals(CLIQZ_PATH + Integer.toString(view.getId()))) {
             mPasswordManager.provideOrSavePassword(uri, view);
-            final WebResourceResponse response =
-                    new WebResourceResponse("test/plain", "UTF-8",
-                            new ByteArrayInputStream("OK".getBytes()));
-            return response;
+            return createOKResponse();
         }
         return null;
+    }
+
+    private WebResourceResponse createOKResponse() {
+        final WebResourceResponse response =
+                new WebResourceResponse("test/plain", "UTF-8",
+                        new ByteArrayInputStream("OK".getBytes()));
+        return response;
     }
 
     @TargetApi(Build.VERSION_CODES.KITKAT)

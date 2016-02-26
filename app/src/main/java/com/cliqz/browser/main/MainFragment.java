@@ -45,6 +45,7 @@ import acr.browser.lightning.utils.ThemeUtils;
 import acr.browser.lightning.utils.UrlUtils;
 import acr.browser.lightning.view.AnimatedProgressBar;
 import acr.browser.lightning.view.LightningView;
+import acr.browser.lightning.view.TrampolineConstants;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -200,7 +201,11 @@ public class MainFragment extends BaseFragment {
             url = null;
         } else {
             final boolean reset = System.currentTimeMillis() - state.getTimestamp() >= Constants.HOME_RESET_DELAY;
-            mState = reset ? State.SHOWING_SEARCH : mState;
+            final String lightningUrl = mLightningView.getUrl();
+            final boolean showSearch = reset || // Force to show the search interface
+                    lightningUrl == null || // Should never happens but just in case
+                    lightningUrl.startsWith(TrampolineConstants.CLIQZ_TRAMPOLINE_PREFIX); // Be sure to not show the trampoline
+            mState = showSearch ? State.SHOWING_SEARCH : mState;
             final String query = reset ? "" : state.getQuery();
             if (mState == State.SHOWING_SEARCH) {
                 showToolBar(null);
@@ -382,14 +387,24 @@ public class MainFragment extends BaseFragment {
 
     @Subscribe
     public void openLink(CliqzMessages.OpenLink event) {
-        final String eventUrl = event.url;
-        // final String eventQuery = lastQuery;
+        openLink(event.url, event.reset, false);
+    }
+
+    @Subscribe
+    public void openHistoryLink(CliqzMessages.OpenHistoryLink event) {
+        openLink(event.url, false, true);
+    }
+
+    private void openLink(String eventUrl, boolean reset, boolean fromHistory) {
         telemetry.resetNavigationVariables(eventUrl.length());
         final Uri.Builder builder = Uri.parse(Constants.CLIQZ_TRAMPOLINE).buildUpon();
         builder.appendQueryParameter("url", eventUrl)
                 .appendQueryParameter("q", lastQuery);
-        if (event.reset) {
+        if (reset) {
             builder.appendQueryParameter("r", "true");
+        }
+        if (fromHistory) {
+            builder.appendQueryParameter("h", "true");
         }
         final String url = builder.build().toString();
         mLightningView.loadUrl(url);
@@ -409,10 +424,11 @@ public class MainFragment extends BaseFragment {
         if (mOverFlowMenu != null && mOverFlowMenu.isShowing()) {
             mOverFlowMenu.dismiss();
             mOverFlowMenu = null;
-        } else if (mState == State.SHOWING_SEARCH && mLightningView.canGoBack()) {
-            // In any case the trampoline will be current page predecessor
-            bringWebViewToFront();
         } else if (mLightningView.canGoBack()) {
+            // In any case the trampoline will be current page predecessor
+            if (mState == State.SHOWING_SEARCH) {
+                bringWebViewToFront();
+            }
             telemetry.backPressed = true;
             telemetry.showingCards = mState == State.SHOWING_SEARCH ? true : false;
             mLightningView.goBack();
