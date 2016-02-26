@@ -12,6 +12,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.util.Log;
 import android.util.Patterns;
 import android.view.LayoutInflater;
@@ -104,6 +105,8 @@ public class MainFragment extends BaseFragment {
     @Bind(R.id.overflow_menu)
     View overflowMenuButton;
 
+    private SwipeRefreshLayout mLightningContainer;
+
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -156,9 +159,22 @@ public class MainFragment extends BaseFragment {
                 Log.i(TAG, "Can't convert " + stateName + " to state enum");
             }
         }
-        mLocalContainer.addView(webView);
+        mLightningContainer = new SwipeRefreshLayout(getContext());
+        mLightningContainer.setColorSchemeResources(R.color.accent_color);
+        mLightningContainer.setLayoutParams(
+                new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
+        mLightningContainer.addView(webView);
+        mLightningContainer.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                webView.reload();
+
+            }
+        });
+        mLocalContainer.addView(mLightningContainer);
         mLocalContainer.addView(mSearchWebView);
         titleBar.setOnTouchListener(onTouchListener);
+
     }
 
     @Override
@@ -211,7 +227,7 @@ public class MainFragment extends BaseFragment {
                 showToolBar(null);
                 bus.post(new Messages.ShowSearch(query));
             } else {
-                mLightningView.getWebView().bringToFront();
+                mLightningContainer.bringToFront();
                 searchBar.showTitleBar();
                 searchBar.setTitle(mLightningView.getTitle());
                 switchIcon(ICON_STATE_NONE);
@@ -357,6 +373,9 @@ public class MainFragment extends BaseFragment {
     public void updateProgress(BrowserEvents.UpdateProgress event) {
         mProgressBar.setProgress(event.progress);
         if (!mLightningView.getUrl().contains(Constants.CLIQZ_TRAMPOLINE)) {
+            if(event.progress > 30) {
+                mLightningContainer.setRefreshing(false); //Dismiss the refreshing spinner
+            }
             if (event.progress == 100) {
                 switchIcon(ICON_STATE_NONE);
             } else {
@@ -379,9 +398,8 @@ public class MainFragment extends BaseFragment {
     }
 
     private void bringWebViewToFront() {
-        final WebView webView = mLightningView.getWebView();
         searchBar.showTitleBar();
-        webView.bringToFront();
+        mLightningContainer.bringToFront();
         mState = State.SHOWING_BROWSER;
     }
 
