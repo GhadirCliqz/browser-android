@@ -1,5 +1,6 @@
 package com.cliqz.browser.main;
 
+import android.app.Activity;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
@@ -26,17 +27,31 @@ public class HistoryFragment extends BaseFragment {
     private HistoryWebView mHistoryWebView;
 
     private boolean mJustCreated;
-    
+
+    public HistoryFragment(Activity activity) {
+        super();
+        createWebView(activity);
+    }
+
+    public HistoryFragment() {
+        super();
+    }
+
+    private void createWebView(Activity activity) {
+        mJustCreated = true;
+        // Must use activity due to Crosswalk webview
+        mHistoryWebView = new HistoryWebView(activity);
+        mHistoryWebView.setLayoutParams(
+                new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
+    }
+
     @Override
     protected View onCreateContentView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        ViewGroup parent = (ViewGroup) mHistoryWebView.getParent();
         if (mHistoryWebView == null) {
-            mJustCreated = true;
-            // Must use activity due to Crosswalk webview
-            mHistoryWebView = new HistoryWebView(getActivity());
-            mHistoryWebView.setLayoutParams(
-                    new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
-        } else {
-            ((ViewGroup) mHistoryWebView.getParent()).removeView(mHistoryWebView);
+            createWebView(getActivity());
+        } else if (parent != null) {
+            parent.removeView(mHistoryWebView);
         }
         return mHistoryWebView;
     }
