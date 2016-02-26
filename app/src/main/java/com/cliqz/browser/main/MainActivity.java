@@ -121,7 +121,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         mFreshTabFragment = new FreshTabFragment();
-        mHistoryFragment = new HistoryFragment();
+        mHistoryFragment = new HistoryFragment(this);
         mMainFragment = new MainFragment();
 
         // Ignore intent if we are being recreated
