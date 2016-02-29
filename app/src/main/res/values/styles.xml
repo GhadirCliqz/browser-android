@@ -113,7 +113,7 @@
     </style>
 
     <style name="Theme.Cliqz.Present" parent="Theme.AppCompat.Light">
-        <item name="colorPrimary">#1F68AD</item>
+        <item name="colorPrimary">@color/normal_tab_color</item>
     </style>
 
     <style name="Theme.Cliqz.History" parent="Theme.AppCompat.Light">
@@ -121,7 +121,7 @@
     </style>
 
     <style name="Theme.Cliqz.Present.Incognito" parent="Theme.AppCompat.Light">
-        <item name="colorPrimary">#4F4F4F</item>
+        <item name="colorPrimary">@color/incognito_tab_color</item>
     </style>
 
     <style name="Theme.Cliqz.Suggestions" parent="Theme.AppCompat.Light">

@@ -36,4 +36,7 @@
     <color name="error_red">#F44336</color>
     <color name="onboarding_background">#5DB0EA</color>
 
+    <color name="incognito_tab_color">#4F4F4F</color>
+    <color name="normal_tab_color">#1F68AD</color>
+
 </resources>

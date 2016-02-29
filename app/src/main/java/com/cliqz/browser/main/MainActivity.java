@@ -8,6 +8,8 @@ import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
@@ -15,6 +17,7 @@ import android.os.Bundle;
 import android.provider.Settings;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Patterns;
@@ -163,6 +166,12 @@ public class MainActivity extends AppCompatActivity {
             preferenceManager.setVersionCode(currentVersionCode);
             telemetry.sendLifeCycleSignal(Telemetry.Action.UPDATE);
         }
+
+        final int taskBarColor = isIncognito ? R.color.incognito_tab_color : R.color.normal_tab_color;
+        final Bitmap appIcon = BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher);
+        final ActivityManager.TaskDescription taskDescription = new ActivityManager.TaskDescription(
+                getString(R.string.cliqz_app_name), appIcon, ContextCompat.getColor(this, taskBarColor));
+        setTaskDescription(taskDescription);
     }
 
     private void setupContentView() {
