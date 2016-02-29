@@ -52,8 +52,7 @@ android {
     sourceSets {
         main {
             assets.srcDirs += [
-                    '../../navigation/build/mobile',
-                    '../../tab-manager/build/android'
+                    '../external/extension/build/mobile',
             ]
         }
     }

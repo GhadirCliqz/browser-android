@@ -1,84 +1,82 @@
-#Lightning Browser [![Build Status](https://travis-ci.org/anthonycr/Lightning-Browser.svg?branch=master)](https://travis-ci.org/anthonycr/Lightning-Browser)
-####Speed, Simplicity, Security
-#![](ic_launcher_small.png)
-####Download
-* [Download APK from here](https://github.com/anthonycr/Lightning-Browser/releases)
+![Android Browser Icon][icon]
 
-* [Download from F-Droid](https://f-droid.org/repository/browse/?fdfilter=lightning&fdid=acr.browser.lightning)
+[icon]: ic_launcher_small.png
 
-* [Download Free from Google Play](https://play.google.com/store/apps/details?id=acr.browser.barebones)
+# CLIQZ Browser for Android
 
-* [Download Paid from Google Play](https://play.google.com/store/apps/details?id=acr.browser.lightning)
+The CLIQZ Browser for Android. Originally a fork of [Anthony Restaino](https://github.com/anthonycr)'s [Lightning Browser](https://github.com/anthonycr/Lightning-Browser).
 
-####Master Branch
-* [![Build Status](https://travis-ci.org/anthonycr/Lightning-Browser.svg?branch=master)](https://travis-ci.org/anthonycr/Lightning-Browser)
+## How to clone and start hacking
 
-####Dev Branch
-* [![Build Status](https://travis-ci.org/anthonycr/Lightning-Browser.svg?branch=dev)](https://travis-ci.org/anthonycr/Lightning-Browser)
+Run these commands in a shell:
 
-####Features
-* Bookmarks
+```bash
+$> git clone git@github.com:cliqz/android-browser.git
+$> cd android-browser
+$> git submodule init
+$> git submodule update
+```
 
-* History
+You can compile the project using the the gradle wrapper on the command line:
 
-* Multiple search engines (Google, Bing, Yahoo, StartPage, DuckDuckGo, etc.)
+```bash
+$> ./gradlew assembleStandardDebug
+```
 
-* Incognito mode
+Please notice you have to have the [Android SDK](http://developer.android.com/sdk/index.html). On Mac OSX, the latter can be installed using brew:
 
-* Follows Google design guidelines
+```bash
+$> brew install android
+```
 
-* Unique utilization of navigation drawer for tabs
+Then, some Android submodule must be installed by using the __Android SDK Manager__:
 
-* Google search suggestions
+```bash
+$> android
+```
 
-* Orbot Proxy support and I2P support
+The minimal set of packets to build the project is:
 
-####Permissions
+* Android SDK Tools (24.4.1+)
+* Android SDK Platform-tools (23.1+)
+* Android SDK Build-tools (23.0.2+)
+* SDK Platform (23+, Android 6.0)
+* Android Support Repository (25+)
+* Android Support Library (23.1.1+)
 
-* ````INTERNET````: For accessing the web
+You need also to set an environment variable:
 
-* ````WRITE_EXTERNAL_STORAGE````: For downloading files from the browser
+```bash
+$> export ANDROID_HOME=<path_to_android>
+```
 
-* ````READ_EXTERNAL_STORAGE````: For downloading files from the browser
+Replace *path_to_android* with the correct Android installation path (i.e. `usr/local/Cellar/android-sdk/24.4.1_1`). Alternately, a file called `local.properties` can be created in the project root. It should contain a single line containing the *sdk.dir* variable declaration. Below, an example of the file content:
 
-* ````ACCESS_FINE_LOCATION````: For sites like Google Maps, it is disabled by default in settings and displays a pop-up asking if a site may use your location when it is enabled
+```java
+sdk.dir=/usr/local/Cellar/android-sdk/24.4.1_1
+```
 
-* ````ACCESS_NETWORK_STATE````: Required for the WebView to function by some OEM versions of WebKit
+## Flavors
 
-####The Code
-* Please contribute code back if you can. The code isn't perfect.
-* Please add translations/translation fixes as you see need
+The project has two flavors:
 
-####Contributing
-* [The Trello Board](https://trello.com/b/Gwjx8MC3/lightning-browser)
-* Contributions are always welcome
-* If you want a feature and can code, feel free to fork and add the change yourself and make a pull request
-* PLEASE use the ````dev```` branch when contributing as the ````master```` branch is supposed to be for stable builds. I will not reject your pull request if you make it on master, but it will annoy me and make my life harder.
-* Code Style
-    * Hungarian Notation
-         * Prefix member variables with 'm'
-         * Prefix static member variables with 's'
-    * Use 4 spaces instead of a tab (\t)
+* Standard
+* XWalk
 
-####Setting Up the Project
-Due to the inclusion of the netcipher library for Orbot proxy support, importing the project will show you some errors. To fix this, first run the following git command in your project folder (NOTE: You need the git command installed to use this):
-````
-git submodule update --init --recursive
-````
-Once you run that command, the IDE should automatically import netcipher and a couple submodules in as separate projects. Than you need to set the netcipher library project as a libary of the browser project however your IDE makes you do that. Once those steps are done, the project should be all set up and ready to go. [Please read this tutorial for more information on git submodules](http://www.vogella.com/tutorials/Git/article.html#submodules)
+### Standard
 
-####License
-````
-Copyright 2014 Anthony Restaino
+Compile the standard version that uses the phone WebView to render the navigation extension. It supports only devices from Android 5.0 (21) up. The flavor produce a small APK (almost 6MB).
 
-Lightning Browser
+Command examples
+* Build standard debug APK: `$> ./gradlew assembleStandardDebug`
+* Build standard release APK: `$> ./gradlew assembleStandardRelease`
+* Install the debug version on a single device connect using USB cable: `$> ./gradlew installStandardDebug`
 
-   This Source Code Form is subject to the terms of the 
-   Mozilla Public License, v. 2.0. If a copy of the MPL 
-   was not distributed with this file, You can obtain one at 
-   
-   http://mozilla.org/MPL/2.0/
-````
-This means that you MUST provide attribution in your application to Lightning Browser for the use of this code. The way you can do this is to provide a separate screen in settings showing what open-source libraries and/or apps (this one) you used in your application. You must also open-source any files that you use from this repository and if you use any code at all from this repository, the file you put it in must be open-sourced according the the MPL 2.0 license. To put it simply, if you create a fork of this browser, your browser must be open-source, no exceptions. The only way to avoid open-sourcing a file is to completely write all the code yourself and to not use any code from Lightning. This is in order to provide a way for companies to utilize the code without making private server code public. For further explanation, please email me, or seek legal counsel :-P
+### XWalk
 
-If you have any questions regarding the open-source license, please contact me at [anthonyrestaino11@gmail.com](mailto:anthonyrestaino11@gmail.com)
+Compile a version that uses the [Crosswalk Project](https://crosswalk-project.org/) WebView to render the navigation extension. It supports devices starting from Android 4.0 (14) up. Due to the external WebView used, the generated APK is pretty big (more than 23MB) and architecture dependent (only ARM devices, no X86, no MIPS).
+
+Command examples
+* Build XWalk debug APK: `$> ./gradlew assembleXwalkDebug`
+* Build XWalk release APK: `$> ./gradlew assembleXwalkRelease`
+* Install the debug version on a single device connect using USB cable: `$> ./gradlew installXwalkDebug`
