@@ -99,6 +99,9 @@ public class Telemetry {
         private static final String APP_STATE_CHANGE = "app_state_change";
         private static final String STATE = "state";
         private static final String ONBOARDING_VERSION = "1.0";
+        private static final String SHARE = "share";
+        private static final String TARGET_TYPE = "target_type";
+        private static final String MAIN = "main";
     }
 
     public static class Action {
@@ -119,6 +122,7 @@ public class Telemetry {
         public static final String LOCATION_CHANGE = "location_change";
         public static final String BACK = "back";
         public static final String RESULT_ENTER = "result_enter";
+        public static final String CLICK = "click";
     }
 
     private static final int BATCH_SIZE = 50;
@@ -473,6 +477,23 @@ public class Telemetry {
                 signal.put(Key.AUTOCOMPLETED, "url");
                 signal.put(Key.AUTOCOMPLETED_LENGTH, autoCompleteLength);
             }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        saveSignal(signal, false);
+    }
+
+    /**
+     * Send telemetry signal when user shares a link
+     * @param context "web" if user shared link of a webpage, "cards" if user shared link of a card
+     */
+    public void sendShareSignal(String context) {
+       JSONObject signal = new JSONObject();
+        try {
+            signal.put(Key.TYPE, Key.SHARE);
+            signal.put(Key.ACTION, Action.CLICK);
+            signal.put(Key.TARGET_TYPE, Key.MAIN);
+            signal.put(Key.CONTEXT, context);
         } catch (JSONException e) {
             e.printStackTrace();
         }

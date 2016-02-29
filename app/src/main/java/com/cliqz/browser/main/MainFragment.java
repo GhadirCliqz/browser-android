@@ -496,6 +496,7 @@ public class MainFragment extends BaseFragment {
         } else {
             final String url = mLightningView.getUrl();
             shareText(url);
+            telemetry.sendShareSignal("web");
         }
     }
 
@@ -506,6 +507,7 @@ public class MainFragment extends BaseFragment {
             Toast.makeText(getContext(), getString(R.string.not_shareable), Toast.LENGTH_SHORT).show();
         } else {
             shareText(url);
+            telemetry.sendShareSignal("cards");
         }
     }
 
