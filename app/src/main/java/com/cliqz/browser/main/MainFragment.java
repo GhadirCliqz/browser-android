@@ -6,6 +6,8 @@ import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
@@ -622,7 +624,11 @@ public class MainFragment extends BaseFragment {
         searchBar.setTitle(title);
         state.setTitle(title);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            getActivity().setTaskDescription(new ActivityManager.TaskDescription(title));
+            final int taskBarColor = isIncognito ? R.color.incognito_tab_color : R.color.normal_tab_color;
+            final Bitmap appIcon = BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher);
+            final ActivityManager.TaskDescription taskDescription = new ActivityManager.TaskDescription(
+                    title, appIcon, ContextCompat.getColor(getContext(), taskBarColor));
+            getActivity().setTaskDescription(taskDescription);
         }
     }
 
