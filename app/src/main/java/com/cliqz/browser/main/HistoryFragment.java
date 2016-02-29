@@ -47,10 +47,11 @@ public class HistoryFragment extends BaseFragment {
 
     @Override
     protected View onCreateContentView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        ViewGroup parent = (ViewGroup) mHistoryWebView.getParent();
         if (mHistoryWebView == null) {
             createWebView(getActivity());
-        } else if (parent != null) {
+        }
+        final ViewGroup parent = (ViewGroup) mHistoryWebView.getParent();
+        if (parent != null) {
             parent.removeView(mHistoryWebView);
         }
         return mHistoryWebView;

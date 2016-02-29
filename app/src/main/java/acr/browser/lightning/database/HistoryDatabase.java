@@ -61,7 +61,7 @@ public class HistoryDatabase extends SQLiteOpenHelper {
         public static final String HISTORY_ID = "id";
         public static final String URL = "url";
         public static final String TITLE = "title";
-        public static final String FAVORITE = "fav";
+        public static final String FAVORITE = "favorite";
         public static final String TIME = "timestamp";
     }
 
@@ -283,7 +283,7 @@ public class HistoryDatabase extends SQLiteOpenHelper {
             final int idIndex = cursor.getColumnIndex(HistoryTable.ID);
             final int urlIndex = cursor.getColumnIndex(UrlsTable.URL);
             final int titleIndex = cursor.getColumnIndex(UrlsTable.TITLE);
-            final int favoriteIndex = cursor.getColumnIndex(UrlsTable.FAVORITE);
+            final int favoriteIndex = cursor.getColumnIndex(HistoryTable.FAVORITE);
             final int timeIndex = cursor.getColumnIndex(HistoryTable.TIME);
             do {
                 final JsonObject item = new JsonObject();
@@ -313,6 +313,32 @@ public class HistoryDatabase extends SQLiteOpenHelper {
             final int urlIndex = cursor.getColumnIndex(UrlsTable.URL);
             final int titleIndex = cursor.getColumnIndex(UrlsTable.TITLE);
             final int timeIndex = cursor.getColumnIndex(UrlsTable.TIME);
+            do {
+                final JsonObject item = new JsonObject();
+                item.addProperty(JsonKeys.URL_ID, cursor.getLong(idIndex));
+                item.addProperty(JsonKeys.URL, cursor.getString(urlIndex));
+                item.addProperty(JsonKeys.TITLE, cursor.getString(titleIndex));
+                item.addProperty(JsonKeys.TIME, cursor.getLong(timeIndex));
+                results.add(item);
+            } while (cursor.moveToNext());
+        }
+        cursor.close();
+        return results;
+    }
+
+    /**
+     * The favorite history points ulrs list
+     * @return The bookmarks as a json array
+     */
+    public synchronized JsonArray getHistoryFavorites() {
+        final JsonArray results = new JsonArray();
+        final SQLiteDatabase db = dbHandler.getDatabase();
+        final Cursor cursor = db.rawQuery(res.getString(R.string.get_history_favorite_v4), null);
+        if (cursor.moveToFirst()) {
+            final int idIndex = cursor.getColumnIndex(HistoryTable.ID);
+            final int urlIndex = cursor.getColumnIndex(UrlsTable.URL);
+            final int titleIndex = cursor.getColumnIndex(UrlsTable.TITLE);
+            final int timeIndex = cursor.getColumnIndex(HistoryTable.TIME);
             do {
                 final JsonObject item = new JsonObject();
                 item.addProperty(JsonKeys.URL_ID, cursor.getLong(idIndex));
