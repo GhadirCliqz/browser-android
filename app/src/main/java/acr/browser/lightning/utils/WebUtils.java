@@ -5,12 +5,8 @@ import android.os.Build;
 import android.support.annotation.NonNull;
 import android.webkit.CookieManager;
 import android.webkit.CookieSyncManager;
-import android.webkit.WebIconDatabase;
 import android.webkit.WebStorage;
 import android.webkit.WebView;
-import android.webkit.WebViewDatabase;
-
-import acr.browser.lightning.app.BrowserApp;
 
 /**
  * Copyright 8/4/2015 Anthony Restaino

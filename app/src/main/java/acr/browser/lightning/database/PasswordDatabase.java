@@ -7,7 +7,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
-import acr.browser.lightning.R;
+import com.cliqz.browser.R;
 
 /**
  * Created by Ravjit on 25/02/16.

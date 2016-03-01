@@ -17,7 +17,7 @@ import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
-import acr.browser.lightning.R;
+import com.cliqz.browser.R;
 
 public class DisplaySettingsFragment extends BaseSettingsFragment {
 

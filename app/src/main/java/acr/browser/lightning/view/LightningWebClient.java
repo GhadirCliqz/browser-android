@@ -26,6 +26,7 @@ import android.webkit.WebViewClient;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 
+import com.cliqz.browser.R;
 import com.cliqz.browser.main.Messages;
 import com.cliqz.browser.utils.PasswordManager;
 import com.squareup.otto.Bus;
@@ -35,10 +36,8 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 
-import acr.browser.lightning.R;
 import acr.browser.lightning.bus.BrowserEvents;
 import acr.browser.lightning.constant.Constants;
-import acr.browser.lightning.database.LoginDetailItem;
 import acr.browser.lightning.utils.Utils;
 
 /**

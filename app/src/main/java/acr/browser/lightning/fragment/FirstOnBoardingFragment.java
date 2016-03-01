@@ -6,7 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import acr.browser.lightning.R;
+import com.cliqz.browser.R;
 
 /**
  * Created by Ravjit on 10/11/15.

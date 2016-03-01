@@ -21,10 +21,11 @@ import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
 
+import com.cliqz.browser.R;
+import com.cliqz.browser.app.BrowserApp;
+
 import java.lang.ref.WeakReference;
 
-import acr.browser.lightning.R;
-import acr.browser.lightning.app.BrowserApp;
 import acr.browser.lightning.constant.Constants;
 import acr.browser.lightning.preference.PreferenceManager;
 import acr.browser.lightning.reading.HtmlFetcher;

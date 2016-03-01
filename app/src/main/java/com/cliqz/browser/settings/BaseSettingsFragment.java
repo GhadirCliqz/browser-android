@@ -4,9 +4,10 @@ import android.os.Bundle;
 import android.preference.Preference;
 import android.preference.PreferenceFragment;
 
+import com.cliqz.browser.app.BrowserApp;
+
 import javax.inject.Inject;
 
-import acr.browser.lightning.app.BrowserApp;
 import acr.browser.lightning.database.HistoryDatabase;
 import acr.browser.lightning.preference.PreferenceManager;
 import acr.browser.lightning.utils.ProxyUtils;

@@ -3,7 +3,8 @@ package acr.browser.lightning.view;
 import android.content.Context;
 import android.graphics.Bitmap;
 
-import acr.browser.lightning.R;
+import com.cliqz.browser.R;
+
 import acr.browser.lightning.utils.ThemeUtils;
 import acr.browser.lightning.utils.Utils;
 

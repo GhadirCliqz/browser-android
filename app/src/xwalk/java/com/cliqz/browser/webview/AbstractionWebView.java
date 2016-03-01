@@ -13,7 +13,7 @@ import org.xwalk.core.XWalkUIClient;
 import org.xwalk.core.XWalkView;
 import org.xwalk.core.internal.XWalkSettings;
 
-import acr.browser.lightning.BuildConfig;
+import com.cliqz.browser.BuildConfig;
 
 /**
  * @author Stefano Pacifici

@@ -263,4 +263,6 @@
     <string name="deleting_in_progress_message">Deleting...</string>
     <string name="add_to_favourites">Add to favourites</string>
     <string name="save_link">Save Link</string>
+    <string name="device_registered">Device Registered</string>
+    <string name="error_registering">Error registering the device</string>
 </resources>

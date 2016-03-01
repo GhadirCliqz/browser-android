@@ -16,13 +16,12 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 
 import com.anthonycr.grant.PermissionsManager;
+import com.cliqz.browser.BuildConfig;
+import com.cliqz.browser.R;
 import com.cliqz.browser.main.MainActivity;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import acr.browser.lightning.BuildConfig;
-import acr.browser.lightning.R;
 
 public class SettingsActivity extends ThemableSettingsActivity {
 

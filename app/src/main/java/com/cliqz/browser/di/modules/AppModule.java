@@ -2,6 +2,7 @@ package com.cliqz.browser.di.modules;
 
 import android.content.Context;
 
+import com.cliqz.browser.app.BrowserApp;
 import com.cliqz.browser.utils.PasswordManager;
 import com.cliqz.browser.utils.Telemetry;
 import com.google.gson.Gson;
@@ -10,7 +11,6 @@ import net.i2p.android.ui.I2PAndroidHelper;
 
 import javax.inject.Singleton;
 
-import acr.browser.lightning.app.BrowserApp;
 import acr.browser.lightning.database.HistoryDatabase;
 import acr.browser.lightning.database.PasswordDatabase;
 import acr.browser.lightning.preference.PreferenceManager;

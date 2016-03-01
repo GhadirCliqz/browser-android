@@ -13,9 +13,9 @@ import android.preference.Preference;
 import android.support.v7.app.AlertDialog;
 import android.widget.EditText;
 
+import com.cliqz.browser.R;
 import com.cliqz.browser.main.OnBoardingActivity;
 
-import acr.browser.lightning.R;
 import acr.browser.lightning.constant.SearchEngines;
 
 public class GeneralSettingsFragment extends BaseSettingsFragment {

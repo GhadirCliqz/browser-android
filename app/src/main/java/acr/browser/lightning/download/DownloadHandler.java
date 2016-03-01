@@ -19,14 +19,14 @@ import android.util.Log;
 import android.webkit.CookieManager;
 import android.webkit.URLUtil;
 
+import com.cliqz.browser.BuildConfig;
+import com.cliqz.browser.R;
+import com.cliqz.browser.app.BrowserApp;
 import com.squareup.otto.Bus;
 
 import java.io.File;
 import java.io.IOException;
 
-import acr.browser.lightning.BuildConfig;
-import acr.browser.lightning.R;
-import acr.browser.lightning.app.BrowserApp;
 import acr.browser.lightning.bus.BrowserEvents;
 import acr.browser.lightning.constant.Constants;
 

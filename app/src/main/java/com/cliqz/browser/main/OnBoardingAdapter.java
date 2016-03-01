@@ -5,9 +5,8 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 
+import com.cliqz.browser.R;
 import com.cliqz.browser.utils.Telemetry;
-
-import acr.browser.lightning.R;
 
 /**
  * Created by Ravjit on 25/01/16.

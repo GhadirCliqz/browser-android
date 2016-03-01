@@ -15,7 +15,7 @@ import android.view.animation.DecelerateInterpolator;
 import android.view.animation.Transformation;
 import android.widget.LinearLayout;
 
-import acr.browser.lightning.R;
+import com.cliqz.browser.R;
 
 /**
  * Copyright 11/4/2014 Anthony Restaino

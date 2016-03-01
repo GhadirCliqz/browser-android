@@ -3,7 +3,7 @@ package com.cliqz.browser.webview;
 import android.content.Context;
 import android.support.annotation.Nullable;
 
-import acr.browser.lightning.BuildConfig;
+import com.cliqz.browser.BuildConfig;
 
 /**
  * @author Stefano Pacifici

@@ -19,7 +19,7 @@ import android.support.v4.content.ContextCompat;
 import android.util.TypedValue;
 import android.widget.ImageView;
 
-import acr.browser.lightning.R;
+import com.cliqz.browser.R;
 
 public class ThemeUtils {
 

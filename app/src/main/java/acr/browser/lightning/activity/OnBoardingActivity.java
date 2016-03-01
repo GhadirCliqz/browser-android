@@ -8,10 +8,11 @@ import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.view.View;
 
+import com.cliqz.browser.R;
+import com.cliqz.browser.app.BrowserApp;
+
 import javax.inject.Inject;
 
-import acr.browser.lightning.R;
-import acr.browser.lightning.app.BrowserApp;
 import acr.browser.lightning.fragment.FirstOnBoardingFragment;
 import acr.browser.lightning.fragment.SecondOnBoardingFragment;
 import acr.browser.lightning.preference.PreferenceManager;

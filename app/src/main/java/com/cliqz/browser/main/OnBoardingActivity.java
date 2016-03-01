@@ -8,12 +8,11 @@ import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 
+import com.cliqz.browser.R;
+import com.cliqz.browser.app.BrowserApp;
 import com.cliqz.browser.utils.Telemetry;
 
 import javax.inject.Inject;
-
-import acr.browser.lightning.R;
-import acr.browser.lightning.app.BrowserApp;
 
 /**
  * Created by Ravjit on 25/01/16.

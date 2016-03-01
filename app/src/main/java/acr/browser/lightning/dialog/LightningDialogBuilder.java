@@ -8,11 +8,11 @@ import android.content.DialogInterface;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AlertDialog;
 
+import com.cliqz.browser.R;
 import com.squareup.otto.Bus;
 
 import javax.inject.Inject;
 
-import acr.browser.lightning.R;
 import acr.browser.lightning.bus.BrowserEvents;
 import acr.browser.lightning.constant.Constants;
 import acr.browser.lightning.database.HistoryDatabase;

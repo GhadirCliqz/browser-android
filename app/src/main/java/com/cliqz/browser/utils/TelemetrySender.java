@@ -3,6 +3,8 @@ package com.cliqz.browser.utils;
 import android.content.Context;
 import android.util.Log;
 
+import com.cliqz.browser.app.BrowserApp;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -22,7 +24,6 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Locale;
 
-import acr.browser.lightning.app.BrowserApp;
 import acr.browser.lightning.constant.Constants;
 
 /**

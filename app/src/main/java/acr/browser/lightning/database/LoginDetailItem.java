@@ -1,7 +1,5 @@
 package acr.browser.lightning.database;
 
-import android.support.annotation.NonNull;
-
 /**
  * Created by Ravjit on 19/02/16.
  */

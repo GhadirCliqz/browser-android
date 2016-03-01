@@ -5,10 +5,11 @@ import android.content.Context;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 
+import com.cliqz.browser.R;
+import com.cliqz.browser.app.BrowserApp;
+
 import javax.inject.Inject;
 
-import acr.browser.lightning.R;
-import acr.browser.lightning.app.BrowserApp;
 import acr.browser.lightning.database.HistoryDatabase;
 import acr.browser.lightning.preference.PreferenceManager;
 

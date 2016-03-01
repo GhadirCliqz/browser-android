@@ -7,7 +7,7 @@ import android.widget.FrameLayout;
 
 /**
  * Workaround to solve insect problems and resize of the content when the keyboard appears.
- * Notice that on appluWindowsInsects can be used to detect if keyboard has be opened.
+ * Notice that on applyWindowsInsects can be used to detect if keyboard has be opened.
  *
  * @author Stefano Pacifici
  * @date 2015/12/16

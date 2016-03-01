@@ -3,8 +3,9 @@ package acr.browser.lightning.activity;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 
-import acr.browser.lightning.R;
-import acr.browser.lightning.app.BrowserApp;
+import com.cliqz.browser.R;
+import com.cliqz.browser.app.BrowserApp;
+
 import acr.browser.lightning.utils.ThemeUtils;
 
 public abstract class ThemableSettingsActivity extends AppCompatPreferenceActivity {

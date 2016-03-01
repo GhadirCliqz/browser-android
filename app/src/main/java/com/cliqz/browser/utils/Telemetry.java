@@ -11,6 +11,9 @@ import android.os.BatteryManager;
 import android.os.Build;
 import android.os.Debug;
 
+import com.cliqz.browser.BuildConfig;
+import com.cliqz.browser.app.BrowserApp;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -24,8 +27,6 @@ import java.util.concurrent.Executors;
 
 import javax.inject.Inject;
 
-import acr.browser.lightning.BuildConfig;
-import acr.browser.lightning.app.BrowserApp;
 import acr.browser.lightning.database.HistoryDatabase;
 import acr.browser.lightning.preference.PreferenceManager;
 

@@ -5,14 +5,15 @@ import android.net.Uri;
 import android.os.Build;
 import android.webkit.WebView;
 
+import com.cliqz.browser.R;
+import com.cliqz.browser.app.BrowserApp;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
 import javax.inject.Inject;
 
-import acr.browser.lightning.R;
-import acr.browser.lightning.app.BrowserApp;
 import acr.browser.lightning.database.LoginDetailItem;
 import acr.browser.lightning.database.PasswordDatabase;
 
