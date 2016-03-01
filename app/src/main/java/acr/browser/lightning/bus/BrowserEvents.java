@@ -218,6 +218,12 @@ public final class BrowserEvents {
         }
     }
 
-    public static class NewIncognitoTab {}
+    public static class NewTab {
+        public final boolean isIncognito;
+
+        public NewTab(boolean isIncognito) {
+            this.isIncognito = isIncognito;
+        }
+    }
 
 }

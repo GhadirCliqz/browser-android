@@ -299,8 +299,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Subscribe
-    public void createIncognitoTab(BrowserEvents.NewIncognitoTab event) {
-        createTab(null, true);
+    public void createNewTab(BrowserEvents.NewTab event) {
+        createTab(null, event.isIncognito);
     }
 
     private void createTab(String url, boolean isIncognito) {
