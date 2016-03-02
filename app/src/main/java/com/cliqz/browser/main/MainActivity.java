@@ -133,7 +133,8 @@ public class MainActivity extends AppCompatActivity {
         final boolean isIncognito;
         if (intent != null && Intent.ACTION_VIEW.equals(intent.getAction())) {
             url = intent.getDataString();
-            isIncognito = intent.getExtras().getBoolean(Constants.KEY_IS_INCOGNITO);
+            final Bundle bundle = intent.getExtras();
+            isIncognito = bundle != null ? bundle.getBoolean(Constants.KEY_IS_INCOGNITO) : false;
         } else {
             url = null;
             isIncognito = false;
@@ -298,8 +299,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Subscribe
-    public void createIncognitoTab(BrowserEvents.NewIncognitoTab event) {
-        createTab(null, true);
+    public void createNewTab(BrowserEvents.NewTab event) {
+        createTab(null, event.isIncognito);
     }
 
     private void createTab(String url, boolean isIncognito) {

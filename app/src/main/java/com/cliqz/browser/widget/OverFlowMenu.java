@@ -37,6 +37,7 @@ public class OverFlowMenu extends ListPopupWindow{
 
     private enum Entries {
         ACTIONS(-1),
+        NEW_TAB(R.string.action_new_tab),
         NEW_INCOGNITO_TAB(R.string.action_incognito),
         COPY_LINK(R.string.action_copy),
         SETTINGS(R.string.settings),
@@ -51,6 +52,7 @@ public class OverFlowMenu extends ListPopupWindow{
 
     private static final Entries[] ENTRIES = new Entries[] {
             Entries.ACTIONS,
+            Entries.NEW_TAB,
             Entries.NEW_INCOGNITO_TAB,
             Entries.COPY_LINK,
             Entries.SETTINGS,
@@ -63,7 +65,6 @@ public class OverFlowMenu extends ListPopupWindow{
             Entries.CONTACT_CLIQZ
     };
 
-    private static final String HEADER = "header";
     private final Context context;
     private final OverFlowMenuAdapter overFlowMenuAdapter;
     private MainFragment.State mState = MainFragment.State.SHOWING_SEARCH;
@@ -258,9 +259,11 @@ public class OverFlowMenu extends ListPopupWindow{
                     OverFlowMenu.this.dismiss();
                     break;
                 case NEW_INCOGNITO_TAB:
-                    bus.post(new BrowserEvents.NewIncognitoTab());
+                    bus.post(new BrowserEvents.NewTab(true));
                     OverFlowMenu.this.dismiss();
                     break;
+                case NEW_TAB:
+                    bus.post(new BrowserEvents.NewTab(false));
             }
         }
     };
