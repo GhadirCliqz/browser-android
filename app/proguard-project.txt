@@ -111,3 +111,9 @@
 -dontwarn org.apache.http.conn.ssl.DefaultHostnameVerifier
 
 -dontwarn org.apache.http.HttpHost
+-dontwarn android.app.Notification
+
+-keep class com.cliqz.browser.webview.AbstractionWebView$BridgeWrapper* {
+    *;
+}
+
