@@ -81,6 +81,7 @@ public class MainActivity extends AppCompatActivity {
     private HistoryFragment mHistoryFragment;
     private OnBoardingAdapter onBoardingAdapter;
     private ViewPager pager;
+    private CustomViewHandler mCustomViewHandler;
 
     @Inject
     Bus bus;
@@ -317,10 +318,20 @@ public class MainActivity extends AppCompatActivity {
 
     @Subscribe
     public void showCustomView(BrowserEvents.ShowCustomView event) {
-        final CustomViewFragment fragment = CustomViewFragment.create(event.view, event.callback);
-        fragment.show(getSupportFragmentManager(), CUSTOM_VIEW_FRAGMENT_TAG);
+        if (mCustomViewHandler != null) {
+            mCustomViewHandler.onHideCustomView();
+        }
+        mCustomViewHandler = new CustomViewHandler(this, event.view, event.callback);
+        mCustomViewHandler.showCustomView();
     }
 
+    @Subscribe
+    public void hideCustomView(BrowserEvents.HideCustomView event) {
+        if (mCustomViewHandler != null) {
+            mCustomViewHandler.onHideCustomView();
+            mCustomViewHandler = null;
+        }
+    }
     @Subscribe
     public void goToHistory(Messages.GoToHistory event) {
         telemetry.resetBackNavigationVariables(-1);
