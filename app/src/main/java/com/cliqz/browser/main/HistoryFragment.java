@@ -1,5 +1,6 @@
 package com.cliqz.browser.main;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -26,8 +27,9 @@ public class HistoryFragment extends BaseFragment {
 
     private HistoryWebView mHistoryWebView;
 
-    private boolean mJustCreated;
+    private boolean mJustCreated = false;
 
+    @SuppressLint("ValidFragment")
     public HistoryFragment(Activity activity) {
         super();
         createWebView(activity);
@@ -38,7 +40,6 @@ public class HistoryFragment extends BaseFragment {
     }
 
     private void createWebView(Activity activity) {
-        mJustCreated = true;
         // Must use activity due to Crosswalk webview
         mHistoryWebView = new HistoryWebView(activity);
         mHistoryWebView.setLayoutParams(
@@ -49,6 +50,7 @@ public class HistoryFragment extends BaseFragment {
     protected View onCreateContentView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         if (mHistoryWebView == null) {
             createWebView(getActivity());
+            mJustCreated = true;
         }
         final ViewGroup parent = (ViewGroup) mHistoryWebView.getParent();
         if (parent != null) {
@@ -133,8 +135,8 @@ public class HistoryFragment extends BaseFragment {
                 .getSupportFragmentManager()
                 .findFragmentByTag(MainActivity.SEARCH_FRAGMENT_TAG);
         if(mainFragment != null) {
-            String state = mainFragment.mState == MainFragment.State.SHOWING_BROWSER ? "web" : "cards";
-            telemetry.sendBackPressedSignal("past", state, mainFragment.mAutocompleteEditText.length());
+            String sstate = state.getMode() == CliqzBrowserState.Mode.WEBPAGE ? "web" : "cards";
+            telemetry.sendBackPressedSignal("past", sstate, mainFragment.mAutocompleteEditText.length());
         }
         bus.post(new Messages.GoToSearch());
     }

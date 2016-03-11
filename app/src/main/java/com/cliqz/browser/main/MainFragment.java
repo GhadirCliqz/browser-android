@@ -80,7 +80,7 @@ public class MainFragment extends BaseFragment {
     private String mSearchEngine;
     String lastQuery = "";
 
-    public State mState = State.SHOWING_SEARCH;
+    // public State mState = State.SHOWING_SEARCH;
 
     SearchWebView mSearchWebView = null;
     public LightningView mLightningView = null;
@@ -147,16 +147,16 @@ public class MainFragment extends BaseFragment {
         final WebView webView = mLightningView.getWebView();
         webView.setId(R.id.right_drawer_list);
         if (savedInstanceState != null) {
-            final String stateName = savedInstanceState.getString(STATE_KEY);
+//            final String stateName = savedInstanceState.getString(STATE_KEY);
             final Bundle webViewOutState = savedInstanceState.getBundle(NAVIGATION_STATE_KEY);
             if (webViewOutState != null) {
                 webView.restoreState(webViewOutState);
             }
-            try {
-                mState = State.valueOf(stateName);
-            } catch (IllegalArgumentException e) {
-                Log.i(TAG, "Can't convert " + stateName + " to state enum");
-            }
+//            try {
+//                mState = State.valueOf(stateName);
+//            } catch (IllegalArgumentException e) {
+//                Log.i(TAG, "Can't convert " + stateName + " to state enum");
+//            }
         }
         mLocalContainer.addView(webView);
         mLocalContainer.addView(mSearchWebView);
@@ -178,7 +178,7 @@ public class MainFragment extends BaseFragment {
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putString(STATE_KEY, mState.toString());
+        // outState.putString(STATE_KEY, mState.toString());
         final WebView webView = mLightningView != null ? mLightningView.getWebView() : null;
         if (webView != null) {
             final Bundle webViewOutState = new Bundle();
@@ -199,18 +199,18 @@ public class MainFragment extends BaseFragment {
         }
 
         if (url != null && !url.isEmpty()) {
-            mState = State.SHOWING_BROWSER;
+            state.setMode(CliqzBrowserState.Mode.WEBPAGE);
             bus.post(new CliqzMessages.OpenLink(url, true));
             url = null;
         } else {
             final boolean reset = System.currentTimeMillis() - state.getTimestamp() >= Constants.HOME_RESET_DELAY;
-            final String lightningUrl = mLightningView.getUrl();
-            final boolean showSearch = reset || // Force to show the search interface
-                    lightningUrl == null || // Should never happens but just in case
-                    lightningUrl.startsWith(TrampolineConstants.CLIQZ_TRAMPOLINE_PREFIX); // Be sure to not show the trampoline
-            mState = showSearch ? State.SHOWING_SEARCH : mState;
+            if (reset) {
+                state.setMode(CliqzBrowserState.Mode.SEARCH);
+                mAutocompleteEditText.setText("");
+                // lastQuery = "";
+            }
             final String query = reset ? "" : state.getQuery();
-            if (mState == State.SHOWING_SEARCH) {
+            if (state.getMode() == CliqzBrowserState.Mode.SEARCH) {
                 showToolBar(null);
                 bus.post(new Messages.ShowSearch(query));
             } else {
@@ -296,7 +296,7 @@ public class MainFragment extends BaseFragment {
     @OnClick(R.id.overflow_menu)
     void menuClicked() {
         mOverFlowMenu = new OverFlowMenu(getActivity());
-        mOverFlowMenu.setBrowserState(mState);
+        mOverFlowMenu.setBrowserState(state.getMode());
         mOverFlowMenu.setCanGoForward(mLightningView.canGoForward());
         mOverFlowMenu.setAnchorView(overflowMenuButton);
         mOverFlowMenu.setIncognitoMode(isIncognito);
@@ -385,7 +385,7 @@ public class MainFragment extends BaseFragment {
         final WebView webView = mLightningView.getWebView();
         searchBar.showTitleBar();
         webView.bringToFront();
-        mState = State.SHOWING_BROWSER;
+        state.setMode(CliqzBrowserState.Mode.WEBPAGE);
     }
 
     @Subscribe
@@ -422,18 +422,16 @@ public class MainFragment extends BaseFragment {
 
     @Subscribe
     public void onBackPressed(Messages.BackPressed event) {
-        // We can go back if:
-        // 1. the webview can go back
+        final String url = mLightningView.getUrl();
+        CliqzBrowserState.Mode mState = state.getMode();
         if (mOverFlowMenu != null && mOverFlowMenu.isShowing()) {
             mOverFlowMenu.dismiss();
             mOverFlowMenu = null;
         } else if (mLightningView.canGoBack()) {
             // In any case the trampoline will be current page predecessor
-            if (mState == State.SHOWING_SEARCH) {
-                bringWebViewToFront();
-            }
+            bringWebViewToFront();
             telemetry.backPressed = true;
-            telemetry.showingCards = mState == State.SHOWING_SEARCH ? true : false;
+            telemetry.showingCards = mState == CliqzBrowserState.Mode.SEARCH;
             mLightningView.goBack();
         } else {
             bus.post(new Messages.Exit());
@@ -444,11 +442,12 @@ public class MainFragment extends BaseFragment {
     public void onGoForward(Messages.GoForward event) {
         if (mLightningView.canGoForward()) {
             mLightningView.goForward();
-            if (mState == State.SHOWING_SEARCH) {
+            if (state.getMode() == CliqzBrowserState.Mode.SEARCH) {
                 bringWebViewToFront();
             }
         }
     }
+
 
     @Subscribe
     public void showSearch(Messages.ShowSearch event) {
@@ -459,7 +458,7 @@ public class MainFragment extends BaseFragment {
             mAutocompleteEditText.setText(event.query);
             mAutocompleteEditText.setSelection(event.query.length());
         }
-        mState = State.SHOWING_SEARCH;
+        state.setMode(CliqzBrowserState.Mode.SEARCH);
         showKeyBoard();
     }
 
@@ -476,7 +475,7 @@ public class MainFragment extends BaseFragment {
 
     @Subscribe
     public void shareLink(Messages.ShareLink event) {
-        if(mState == State.SHOWING_SEARCH) {
+        if(state.getMode() == CliqzBrowserState.Mode.SEARCH) {
             mSearchWebView.requestCardUrl();
         } else {
             final String url = mLightningView.getUrl();

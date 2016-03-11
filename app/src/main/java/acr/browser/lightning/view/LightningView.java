@@ -38,6 +38,7 @@ import android.webkit.WebView;
 import com.cliqz.browser.main.MainActivity;
 import com.cliqz.browser.utils.PasswordManager;
 import com.cliqz.browser.utils.Telemetry;
+import com.cliqz.browser.webview.CliqzMessages;
 import com.squareup.otto.Bus;
 
 import java.io.File;
@@ -70,7 +71,7 @@ public class LightningView implements ILightningTab {
     public static final String HEADER_DNT = "DNT";
 
     final LightningViewTitle mTitle;
-    private WebView mWebView;
+    private CliqzWebView mWebView;
     final boolean mIsIncognitoTab;
     private GestureDetector mGestureDetector;
     private final Activity mActivity;
@@ -136,7 +137,7 @@ public class LightningView implements ILightningTab {
         ((MainActivity)activity).mActivityComponent.inject(this);
         mActivity = activity;
         mId = uniqueId;
-        mWebView = /* overrideWebView != null ? overrideWebView : */new WebView(activity);
+        mWebView = /* overrideWebView != null ? overrideWebView : */new CliqzWebView(activity);
         mIsIncognitoTab = isIncognito;
         Boolean useDarkTheme = mPreferences.getUseTheme() != 0 || isIncognito;
         mTitle = new LightningViewTitle(activity, useDarkTheme);

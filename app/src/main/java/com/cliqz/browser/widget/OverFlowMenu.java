@@ -15,6 +15,7 @@ import android.widget.ImageView;
 import android.widget.ListPopupWindow;
 import android.widget.TextView;
 
+import com.cliqz.browser.main.CliqzBrowserState;
 import com.cliqz.browser.main.MainActivity;
 import com.cliqz.browser.main.MainFragment;
 import com.cliqz.browser.main.Messages;
@@ -67,7 +68,7 @@ public class OverFlowMenu extends ListPopupWindow{
 
     private final Context context;
     private final OverFlowMenuAdapter overFlowMenuAdapter;
-    private MainFragment.State mState = MainFragment.State.SHOWING_SEARCH;
+    private CliqzBrowserState.Mode mState = CliqzBrowserState.Mode.SEARCH;
     private boolean mCanGoForward = false;
     private boolean mIncognitoMode;
 
@@ -109,11 +110,11 @@ public class OverFlowMenu extends ListPopupWindow{
         this.setWidth(measuredWidth);
     }
 
-    public MainFragment.State getBrowserState() {
+    public CliqzBrowserState.Mode getBrowserState() {
         return mState;
     }
 
-    public void setBrowserState(MainFragment.State mState) {
+    public void setBrowserState(CliqzBrowserState.Mode mState) {
         this.mState = mState;
         overFlowMenuAdapter.notifyDataSetChanged();
     }

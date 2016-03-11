@@ -7,6 +7,8 @@ import android.os.Debug;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
+import com.cliqz.browser.main.CliqzBrowserState;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -79,7 +81,7 @@ public class SearchWebView extends BaseWebView {
         Log.d(TAG, "Query: " + query);
 
         // If JS isn't ready yet, just store the query for now. Will be fetched once JS is ready
-        if (!isExtesionReady() || !isCliqzUrl()) {
+        if (!isExtensionReady() || !isCliqzUrl()) {
             mLastQuery = query;
             return;
         }
@@ -92,8 +94,10 @@ public class SearchWebView extends BaseWebView {
         super.extensionReady();
         final long t = System.currentTimeMillis() - state.getTimestamp();
         initExtensionPreferences();
+        // We are not sure this is called in onResume, especially if we were
         if (shouldShowHomePage()) {
             showHomepage();
+            state.setTimestamp(System.currentTimeMillis());
         } else if (mLastQuery != null && !mLastQuery.isEmpty()) {
             performSearch(mLastQuery);
         }
@@ -125,12 +129,12 @@ public class SearchWebView extends BaseWebView {
     public void onResume() {
         super.onResume();
         initPreferences();
-        if (isExtesionReady()) {
+        if (isExtensionReady()) {
             // Apply settings here
             initExtensionPreferences();
-            if (shouldShowHomePage()) {
-                showHomepage();
-            }
+//            if (shouldShowHomePage()) {
+//                showHomepage();
+//            }
         }
     }
 
@@ -175,6 +179,9 @@ public class SearchWebView extends BaseWebView {
                     break;
             }
             executeJS(String.format(Locale.US, "resetState(%s);", params.toString()));
+            bringToFront();
+            state.setTimestamp(System.currentTimeMillis());
+            state.setMode(CliqzBrowserState.Mode.SEARCH);
         } catch (JSONException e) {
             e.printStackTrace();
         }
