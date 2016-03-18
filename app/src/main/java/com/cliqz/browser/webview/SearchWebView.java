@@ -92,7 +92,6 @@ public class SearchWebView extends BaseWebView {
     @Override
     void extensionReady() {
         super.extensionReady();
-        final long t = System.currentTimeMillis() - state.getTimestamp();
         initExtensionPreferences();
         // We are not sure this is called in onResume, especially if we were
         if (shouldShowHomePage()) {
@@ -100,7 +99,11 @@ public class SearchWebView extends BaseWebView {
             state.setTimestamp(System.currentTimeMillis());
         } else if (mLastQuery != null && !mLastQuery.isEmpty()) {
             performSearch(mLastQuery);
+        } /*  TODO: Why?
+        else {
+            showHomepage();
         }
+        */
     }
 
     private void performSearch(String query) {

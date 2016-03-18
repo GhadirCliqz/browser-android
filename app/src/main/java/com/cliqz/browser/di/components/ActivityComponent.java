@@ -1,7 +1,7 @@
 package com.cliqz.browser.di.components;
 
 import com.cliqz.browser.di.annotations.PerActivity;
-import com.cliqz.browser.di.modules.ActivityModule;
+import com.cliqz.browser.di.modules.MainActivityModule;
 import com.cliqz.browser.main.FragmentWithBus;
 import com.cliqz.browser.main.MainActivity;
 import com.cliqz.browser.webview.BaseWebView;
@@ -17,7 +17,7 @@ import dagger.Subcomponent;
  * Created by Ravjit on 30/12/15.
  */
 @PerActivity
-@Subcomponent(modules = {ActivityModule.class})
+@Subcomponent(modules = {MainActivityModule.class})
 public interface ActivityComponent {
 
     void inject(MainActivity mainActivity);

@@ -135,8 +135,8 @@ public class HistoryFragment extends BaseFragment {
                 .getSupportFragmentManager()
                 .findFragmentByTag(MainActivity.SEARCH_FRAGMENT_TAG);
         if(mainFragment != null) {
-            String sstate = state.getMode() == CliqzBrowserState.Mode.WEBPAGE ? "web" : "cards";
-            telemetry.sendBackPressedSignal("past", sstate, mainFragment.mAutocompleteEditText.length());
+            final String s = state.getMode() == CliqzBrowserState.Mode.WEBPAGE ? "web" : "cards";
+            telemetry.sendBackPressedSignal("past", s, mainFragment.mAutocompleteEditText.length());
         }
         bus.post(new Messages.GoToSearch());
     }

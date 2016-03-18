@@ -1,6 +1,6 @@
 package com.cliqz.browser.di.components;
 
-import com.cliqz.browser.di.modules.ActivityModule;
+import com.cliqz.browser.di.modules.MainActivityModule;
 import com.cliqz.browser.di.modules.AppModule;
 import com.cliqz.browser.settings.BaseSettingsFragment;
 import com.cliqz.browser.utils.HistoryCleaner;
@@ -50,7 +50,7 @@ public interface AppComponent {
 
     void inject(PasswordManager passwordManager);
 
-    ActivityComponent plus(ActivityModule module);
+    ActivityComponent plus(MainActivityModule module);
 
     void inject(HistoryCleaner historyCleaner);
 }

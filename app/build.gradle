@@ -3,8 +3,8 @@ apply plugin: 'com.neenbedankt.android-apt'
 apply plugin: 'com.getkeepsafe.dexcount'
 apply from: 'adhosts.gradle'
 
-android.metaClass.baseVersionCode = 37
-android.metaClass.baseVersionName = "0.6.0"
+android.metaClass.baseVersionCode = 39
+android.metaClass.baseVersionName = "0.6.1"
 
 android {
     compileSdkVersion 23

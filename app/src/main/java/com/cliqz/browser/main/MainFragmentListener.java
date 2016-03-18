@@ -4,6 +4,9 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
 
+import com.cliqz.browser.main.CliqzBrowserState.Mode;
+import com.cliqz.browser.webview.SearchWebView;
+
 /**
  * @author Stefano Pacifici
  * @date 2015/11/24
@@ -24,10 +27,11 @@ class MainFragmentListener implements View.OnFocusChangeListener, TextWatcher {
 
     @Override
     public void onFocusChange(View v, boolean hasFocus) {
+        Mode mode = fragment.state.getMode();
         if (!hasFocus) {
             fragment.telemetry.sendURLBarBlurSignal();
             fragment.hideKeyboard();
-            if(fragment.state.getMode() == CliqzBrowserState.Mode.WEBPAGE) {
+            if(mode == Mode.WEBPAGE) {
                 fragment.searchBar.showTitleBar();
             }
         } else {
@@ -53,11 +57,12 @@ class MainFragmentListener implements View.OnFocusChangeListener, TextWatcher {
         // fragment.showSearch(null);
 
         final String q = s.toString();
+        final SearchWebView searchWebView = fragment.mSearchWebView;
         final boolean shouldSend = ((start + count) != before) ||
                 !q.equalsIgnoreCase(fragment.lastQuery);
-        if (fragment.mSearchWebView != null && shouldSend) {
+        if (searchWebView != null && shouldSend) {
             fragment.lastQuery = q;
-            fragment.mSearchWebView.onQueryChanged(q);
+            searchWebView.onQueryChanged(q);
         }
     }
 

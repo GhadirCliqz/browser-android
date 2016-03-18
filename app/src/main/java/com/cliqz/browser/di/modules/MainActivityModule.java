@@ -15,11 +15,11 @@ import dagger.Provides;
  * Created by Ravjit on 30/12/15.
  */
 @Module
-public class ActivityModule {
+public class MainActivityModule {
 
     private final MainActivity activity;
 
-    public ActivityModule(MainActivity activity) {
+    public MainActivityModule(MainActivity activity) {
         this.activity = activity;
     }
 
@@ -40,8 +40,7 @@ public class ActivityModule {
     }
 
     @Provides
-    @PerActivity
     CliqzBrowserState providesCliqzBrowserState() {
-        return new CliqzBrowserState();
+        return activity.getBrowserState();
     }
 }

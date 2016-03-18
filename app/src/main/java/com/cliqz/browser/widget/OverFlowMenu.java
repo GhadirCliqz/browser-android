@@ -16,6 +16,7 @@ import android.widget.ListPopupWindow;
 import android.widget.TextView;
 
 import com.cliqz.browser.main.CliqzBrowserState;
+import com.cliqz.browser.main.CliqzBrowserState.Mode;
 import com.cliqz.browser.main.MainActivity;
 import com.cliqz.browser.main.MainFragment;
 import com.cliqz.browser.main.Messages;
@@ -68,7 +69,6 @@ public class OverFlowMenu extends ListPopupWindow{
 
     private final Context context;
     private final OverFlowMenuAdapter overFlowMenuAdapter;
-    private CliqzBrowserState.Mode mState = CliqzBrowserState.Mode.SEARCH;
     private boolean mCanGoForward = false;
     private boolean mIncognitoMode;
 
@@ -85,6 +85,9 @@ public class OverFlowMenu extends ListPopupWindow{
 
     @Bind(R.id.action_forward)
     ImageView actionForwardButton;
+
+    @Inject
+    CliqzBrowserState state;
 
     public OverFlowMenu(Context context) {
         super(context);
@@ -108,15 +111,6 @@ public class OverFlowMenu extends ListPopupWindow{
                 makeMeasureSpec(maxHeight, View.MeasureSpec.AT_MOST));
         final int measuredWidth = view.getMeasuredWidth();
         this.setWidth(measuredWidth);
-    }
-
-    public CliqzBrowserState.Mode getBrowserState() {
-        return mState;
-    }
-
-    public void setBrowserState(CliqzBrowserState.Mode mState) {
-        this.mState = mState;
-        overFlowMenuAdapter.notifyDataSetChanged();
     }
 
     public boolean canGoForward() {
@@ -183,19 +177,21 @@ public class OverFlowMenu extends ListPopupWindow{
 
         @Override
         public boolean isEnabled(int position) {
-            return mEntries[position] != Entries.COPY_LINK || mState.equals(MainFragment.State.SHOWING_BROWSER);
+            return mEntries[position] != Entries.COPY_LINK ||
+                state.getMode() == Mode.WEBPAGE;
         }
 
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
             View view = convertView;
+            final Mode mode = state.getMode();
             if(view == null) {
                 LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
                 if(position == 0) {
                     view = inflater.inflate(R.layout.overflow_menu_header, parent, false);
                     OverFlowMenu.this.setWidth(view);
                     ButterKnife.bind(OverFlowMenu.this, view);
-                    if(mState.equals(MainFragment.State.SHOWING_SEARCH)) {
+                    if(mode == Mode.SEARCH) {
                         setButtonDisabled(actionRefreshButton);
                         //setButtonDisabled(actionShareButton);
                     } else {
@@ -219,7 +215,7 @@ public class OverFlowMenu extends ListPopupWindow{
                 option.setText(mEntries[position].stringID);
                 view.setTag(mEntries[position]);
                 option.setTextColor(ContextCompat.getColor(context, R.color.black));
-                if(mEntries[position] == Entries.COPY_LINK && mState.equals(MainFragment.State.SHOWING_SEARCH)) {
+                if(mEntries[position] == Entries.COPY_LINK && mode == Mode.SEARCH) {
                     option.setTextColor(ContextCompat.getColor(context, R.color.hint_text));
                 }
             }
@@ -246,7 +242,7 @@ public class OverFlowMenu extends ListPopupWindow{
             final Entries tag = (Entries)view.getTag();
             switch (tag) {
                 case COPY_LINK:
-                    if (mState.equals(MainFragment.State.SHOWING_BROWSER)) {
+                    if (state.getMode() == Mode.WEBPAGE) {
                         bus.post(new Messages.CopyUrl());
                         OverFlowMenu.this.dismiss();
                     }

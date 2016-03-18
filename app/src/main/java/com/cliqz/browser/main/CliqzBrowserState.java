@@ -92,14 +92,14 @@ public class CliqzBrowserState implements Serializable {
     public CliqzBrowserState() {
     }
 
-    public final void copyFrom(CliqzBrowserState state) {
-        this.timestamp = state.timestamp;
-        this.query = state.query;
-        this.cardIndex = state.cardIndex;
-        this.latitude = state.latitude;
-        this.longitude = state.longitude;
-        this.title = state.title;
-        this.url = state.url;
-        this.mode = state.mode;
-    }
+//    public final void copyFrom(CliqzBrowserState state) {
+//        this.timestamp = state.timestamp;
+//        this.query = state.query;
+//        this.cardIndex = state.cardIndex;
+//        this.latitude = state.latitude;
+//        this.longitude = state.longitude;
+//        this.title = state.title;
+//        this.url = state.url;
+//        this.mode = state.mode;
+//    }
 }
