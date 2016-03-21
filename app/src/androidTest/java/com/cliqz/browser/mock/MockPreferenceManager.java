@@ -23,4 +23,9 @@ public class MockPreferenceManager extends PreferenceManager{
     public SearchEngines getSearchChoice() {
         return SearchEngines.google;
     }
+
+    @Override
+    public boolean getLocationEnabled() {
+        return false;
+    }
 }
