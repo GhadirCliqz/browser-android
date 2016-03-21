@@ -421,11 +421,12 @@ public class MainActivity extends AppCompatActivity {
     @Subscribe
     public void exit(Messages.Exit event) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            ActivityManager activityManager = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
-            List<ActivityManager.AppTask> cliqzTasks = activityManager.getAppTasks();
-            if (cliqzTasks.size() > 1) {
-                cliqzTasks.get(1).moveToFront();
-            }
+            //This overrides system's task management and always brings other open cliqz tab(if any) to front
+//            ActivityManager activityManager = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
+//            List<ActivityManager.AppTask> cliqzTasks = activityManager.getAppTasks();
+//            if (cliqzTasks.size() > 1) {
+//                cliqzTasks.get(1).moveToFront();
+//            }
             finishAndRemoveTask();
         } else {
             finish();
