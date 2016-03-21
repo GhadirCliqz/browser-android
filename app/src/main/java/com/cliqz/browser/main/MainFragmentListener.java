@@ -27,13 +27,15 @@ class MainFragmentListener implements View.OnFocusChangeListener, TextWatcher {
         if (!hasFocus) {
             fragment.telemetry.sendURLBarBlurSignal();
             fragment.hideKeyboard();
-            if(fragment.mState == MainFragment.State.SHOWING_BROWSER) {
+            if(fragment.state.getMode() == CliqzBrowserState.Mode.WEBPAGE) {
                 fragment.searchBar.showTitleBar();
             }
         } else {
             fragment.timings.setUrlBarFocusedTime();
-            String context = fragment.mState == MainFragment.State.SHOWING_BROWSER ? "web" : "cards";
-            fragment.telemetry.sendURLBarFocusSignal(context);
+            // TODO: The next two lines should be in a method
+            fragment.mSearchWebView.bringToFront();
+            fragment.state.setMode(CliqzBrowserState.Mode.SEARCH);
+            fragment.telemetry.sendURLBarFocusSignal("cards");
         }
     }
 
@@ -48,7 +50,7 @@ class MainFragmentListener implements View.OnFocusChangeListener, TextWatcher {
             return;
         }
 
-        fragment.showSearch(null);
+        // fragment.showSearch(null);
 
         final String q = s.toString();
         final boolean shouldSend = ((start + count) != before) ||

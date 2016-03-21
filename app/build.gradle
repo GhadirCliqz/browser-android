@@ -3,18 +3,10 @@ apply plugin: 'com.neenbedankt.android-apt'
 apply plugin: 'com.getkeepsafe.dexcount'
 apply from: 'adhosts.gradle'
 
-android.metaClass.baseVersionCode = 23
-android.metaClass.baseVersionName = "0.5.0"
+android.metaClass.baseVersionCode = 35
+android.metaClass.baseVersionName = "0.5.5"
 
 android {
-    signingConfigs {
-        config {
-            keyAlias 'browser'
-            keyPassword 'cliqz-245'
-            storeFile file('/Users/stefano/Dropbox/cliqz/androidkey.jks')
-            storePassword 'cliqz-245'
-        }
-    }
     compileSdkVersion 23
     buildToolsVersion "23.0.2"
     defaultConfig {
@@ -65,12 +57,12 @@ android {
         xwalk {
             versionCode baseVersionCode
             versionName baseVersionName+"xw"
-            minSdkVersion 14
+            minSdkVersion 16
             splits {
                 abi {
                     enable true
                     reset()
-                    include 'armeabi-v7a'
+                    include 'armeabi-v7a', 'x86'
                     universalApk false
                 }
             }
@@ -125,5 +117,5 @@ dependencies {
     androidTestCompile 'com.android.support.test.espresso:espresso-web:2.2'
 
     // xwalk webview
-    xwalkCompile 'org.xwalk:xwalk_core_library:16.45.421.19'
+    xwalkCompile 'org.xwalk:xwalk_core_library:14.43.343.25'
 }

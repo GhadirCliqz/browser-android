@@ -86,6 +86,7 @@ public class CliqzBrowserState implements Serializable {
 
     public void setMode(Mode mode) {
         this.mode = mode;
+        this.timestamp = System.currentTimeMillis();
     }
 
     public CliqzBrowserState() {
