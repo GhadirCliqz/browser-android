@@ -4,6 +4,7 @@ import android.app.Activity;
 
 import com.cliqz.browser.di.annotations.PerActivity;
 import com.cliqz.browser.main.CliqzBrowserState;
+import com.cliqz.browser.main.MainActivity;
 import com.cliqz.browser.webview.CliqzBridge;
 import com.squareup.otto.Bus;
 
@@ -16,9 +17,9 @@ import dagger.Provides;
 @Module
 public class ActivityModule {
 
-    private final Activity activity;
+    private final MainActivity activity;
 
-    public ActivityModule(Activity activity) {
+    public ActivityModule(MainActivity activity) {
         this.activity = activity;
     }
 

@@ -1,6 +1,7 @@
 package com.cliqz.browser.webview;
 
 import android.content.Context;
+import android.os.Build;
 import android.util.Log;
 
 import org.xwalk.core.JavascriptInterface;
@@ -78,6 +79,14 @@ public class AbstractionWebView extends XWalkView {
 
     void addBridge(Bridge bridge, String name) {
         addJavascriptInterface(new BridgeWrapper(bridge), name);
+    }
+
+    @Override
+    public void bringToFront() {
+        super.bringToFront();
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT) {
+            requestLayout();
+        }
     }
 
     public void executeJS(String script) {

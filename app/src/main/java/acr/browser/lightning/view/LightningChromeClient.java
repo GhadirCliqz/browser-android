@@ -102,18 +102,13 @@ class LightningChromeClient extends WebChromeClient {
 
     @Override
     public void onReceivedTitle(WebView view, String title) {
-        if (title != null && !title.isEmpty() && !title.contains(Constants.CLIQZ_TRAMPOLINE)) {
+        final String url = view != null ? view.getUrl() : null;
+        if (title != null && !title.isEmpty() && !Constants.CLIQZ_TRAMPOLINE.equals(url)) {
             mLightningView.mTitle.setTitle(title);
             eventBus.post(new Messages.UpdateTitle());
         }
         eventBus.post(new BrowserEvents.TabsChanged());
-        final String rawUrl = view != null ? view.getUrl() : null;
-        final String url = rawUrl != null ? rawUrl.split("\\?")[0] : "";
-        if (!url.startsWith("cliqz://") &&
-                !url.equals(mLastTitleUrl) &&
-                !mLightningView.mIsIncognitoTab &&
-                mLightningView.isHistoryItemCreationEnabled) {
-            mLastTitleUrl = url;
+        if (url != null && !url.startsWith("cliqz://") && !mLightningView.mIsIncognitoTab) {
             mLightningView.addItemToHistory(title, url);
         }
         mLightningView.isHistoryItemCreationEnabled = true;

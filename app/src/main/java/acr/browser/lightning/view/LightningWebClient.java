@@ -154,7 +154,7 @@ class LightningWebClient extends WebViewClient {
             view.postInvalidate();
         }
         if (view.getTitle() != null && !view.getTitle().isEmpty()
-                && !view.getTitle().contains(Constants.CLIQZ_TRAMPOLINE)) {
+                && !Constants.CLIQZ_TRAMPOLINE.equals(url)) {
             mLightningView.mTitle.setTitle(view.getTitle());
             mEventBus.post(new Messages.UpdateTitle());
         }

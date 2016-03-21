@@ -98,7 +98,7 @@ public class FreshTabFragment extends BaseFragment {
                 .getSupportFragmentManager()
                 .findFragmentByTag(MainActivity.SEARCH_FRAGMENT_TAG);
         if(mainFragment != null) {
-            String state = mainFragment.mState == MainFragment.State.SHOWING_BROWSER ? "web" : "cards";
+            String state = "web"; // : "cards";
             telemetry.sendBackPressedSignal("future", state, mainFragment.mAutocompleteEditText.length());
         }
         bus.post(new Messages.GoToSearch());

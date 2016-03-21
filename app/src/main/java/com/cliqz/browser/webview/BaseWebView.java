@@ -96,7 +96,7 @@ public abstract class BaseWebView extends AbstractionWebView {
         setDefaultSearchEngine();
     }
 
-    public boolean isExtesionReady() { return mJsReady; }
+    public boolean isExtensionReady() { return mJsReady; }
 
     @Override
     public void onPause() {

@@ -81,6 +81,8 @@ public class MainActivity extends AppCompatActivity {
     private HistoryFragment mHistoryFragment;
     private OnBoardingAdapter onBoardingAdapter;
     private ViewPager pager;
+    private boolean askedGPSPermission = false;
+    private CustomViewHandler mCustomViewHandler;
 
     @Inject
     Bus bus;
@@ -170,9 +172,12 @@ public class MainActivity extends AppCompatActivity {
 
         final int taskBarColor = isIncognito ? R.color.incognito_tab_color : R.color.normal_tab_color;
         final Bitmap appIcon = BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher);
-        final ActivityManager.TaskDescription taskDescription = new ActivityManager.TaskDescription(
+        final ActivityManager.TaskDescription taskDescription;
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
+            taskDescription = new ActivityManager.TaskDescription(
                 getString(R.string.cliqz_app_name), appIcon, ContextCompat.getColor(this, taskBarColor));
         setTaskDescription(taskDescription);
+    }
     }
 
     private void setupContentView() {
@@ -202,18 +207,25 @@ public class MainActivity extends AppCompatActivity {
         }
         //Ask for "Dangerous Permissions" on runtime
         if(Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP_MR1) {
-            if(preferenceManager.getLocationEnabled() &&
-                    checkSelfPermission(LOCATION_PERMISSION) != PackageManager.PERMISSION_GRANTED) {
+            if(preferenceManager.getLocationEnabled()
+                    && preferenceManager.getOnBoardingComplete()
+                    && !askedGPSPermission
+                    && checkSelfPermission(LOCATION_PERMISSION) != PackageManager.PERMISSION_GRANTED) {
+                askedGPSPermission = true;
                 final String[] permissions = {LOCATION_PERMISSION}; //Array of permissions needed
                 final int requestCode = 1; //Used to identify the request in the callback onRequestPermissionsResult(Not used)
                 requestPermissions(permissions, requestCode);
             }
         }
         locationCache.start();
+        //Asks for permission if GPS is not enabled on the device.
+        // Note: Will ask for permission even if location is enabled, but not using GPS
         if(!locationCache.isGPSEnabled()
                 && !preferenceManager.getNeverAskGPSPermission()
                 && preferenceManager.getOnBoardingComplete()
-                && preferenceManager.getLocationEnabled()) {
+                && preferenceManager.getLocationEnabled()
+                && !askedGPSPermission) {
+            askedGPSPermission = true;
             showGPSPermissionDialog();
         }
     }
@@ -261,8 +273,8 @@ public class MainActivity extends AppCompatActivity {
         }
         locationCache.stop();
         state.setTimestamp(System.currentTimeMillis());
-        state.setMode(mMainFragment.mState == MainFragment.State.SHOWING_SEARCH ?
-                CliqzBrowserState.Mode.SEARCH : CliqzBrowserState.Mode.WEBPAGE);
+//        state.setMode(mMainFragment.mState == MainFragment.State.SHOWING_SEARCH ?
+//                CliqzBrowserState.Mode.SEARCH : CliqzBrowserState.Mode.WEBPAGE);
     }
 
     @Override
@@ -317,10 +329,20 @@ public class MainActivity extends AppCompatActivity {
 
     @Subscribe
     public void showCustomView(BrowserEvents.ShowCustomView event) {
-        final CustomViewFragment fragment = CustomViewFragment.create(event.view, event.callback);
-        fragment.show(getSupportFragmentManager(), CUSTOM_VIEW_FRAGMENT_TAG);
+        if (mCustomViewHandler != null) {
+            mCustomViewHandler.onHideCustomView();
+        }
+        mCustomViewHandler = new CustomViewHandler(this, event.view, event.callback);
+        mCustomViewHandler.showCustomView();
     }
 
+    @Subscribe
+    public void hideCustomView(BrowserEvents.HideCustomView event) {
+        if (mCustomViewHandler != null) {
+            mCustomViewHandler.onHideCustomView();
+            mCustomViewHandler = null;
+        }
+    }
     @Subscribe
     public void goToHistory(Messages.GoToHistory event) {
         telemetry.resetBackNavigationVariables(-1);
@@ -430,7 +452,7 @@ public class MainActivity extends AppCompatActivity {
     private String getCurrentVisibleFragmentName() {
         String name = "";
         if (mMainFragment != null && mMainFragment.isVisible()) {
-            if (((MainFragment)mMainFragment).mState == MainFragment.State.SHOWING_BROWSER) {
+            if (state.getMode() == CliqzBrowserState.Mode.WEBPAGE) {
                 name = "web";
             } else {
                 name = "cards";
