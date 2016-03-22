@@ -1,6 +1,7 @@
 package acr.browser.lightning.bus;
 
 import android.net.Uri;
+import android.os.Message;
 import android.support.annotation.StringRes;
 import android.view.View;
 import android.webkit.ValueCallback;
@@ -143,10 +144,10 @@ public final class BrowserEvents {
      * Request the browser to create a new window
      */
     public static class CreateWindow {
-        public final String url;
+        public final Message msg;
 
-        public CreateWindow(final String url) {
-            this.url = url;
+        public CreateWindow(final Message msg) {
+            this.msg = msg;
         }
     }
 

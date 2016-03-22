@@ -12,9 +12,9 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Message;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
-import android.util.Log;
 import android.util.Patterns;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -47,7 +47,6 @@ import acr.browser.lightning.utils.ThemeUtils;
 import acr.browser.lightning.utils.UrlUtils;
 import acr.browser.lightning.view.AnimatedProgressBar;
 import acr.browser.lightning.view.LightningView;
-import acr.browser.lightning.view.TrampolineConstants;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -78,6 +77,8 @@ public class MainFragment extends BaseFragment {
 
     private String url = null;
     private String mSearchEngine;
+    private Message newTabMessage = null;
+
     String lastQuery = "";
 
     // public State mState = State.SHOWING_SEARCH;
@@ -118,6 +119,7 @@ public class MainFragment extends BaseFragment {
     private void parseArguments(Bundle arguments) {
         isIncognito = arguments.getBoolean(Constants.KEY_IS_INCOGNITO, false);
         url = arguments.getString(Constants.KEY_URL, null);
+        newTabMessage = arguments.getParcelable(Constants.KEY_NEW_TAB_MESSAGE);
         // We need to remove the key, otherwise the url get reloaded for each resume
         arguments.remove(Constants.KEY_URL);
     }
@@ -147,16 +149,10 @@ public class MainFragment extends BaseFragment {
         final WebView webView = mLightningView.getWebView();
         webView.setId(R.id.right_drawer_list);
         if (savedInstanceState != null) {
-//            final String stateName = savedInstanceState.getString(STATE_KEY);
             final Bundle webViewOutState = savedInstanceState.getBundle(NAVIGATION_STATE_KEY);
             if (webViewOutState != null) {
                 webView.restoreState(webViewOutState);
             }
-//            try {
-//                mState = State.valueOf(stateName);
-//            } catch (IllegalArgumentException e) {
-//                Log.i(TAG, "Can't convert " + stateName + " to state enum");
-//            }
         }
         mLocalContainer.addView(webView);
         mLocalContainer.addView(mSearchWebView);
@@ -202,6 +198,13 @@ public class MainFragment extends BaseFragment {
             state.setMode(CliqzBrowserState.Mode.WEBPAGE);
             bus.post(new CliqzMessages.OpenLink(url, true));
             url = null;
+        } else if (newTabMessage != null) {
+            final WebView.WebViewTransport transport = (WebView.WebViewTransport) newTabMessage.obj;
+            final WebView webView = mLightningView.getWebView();
+            transport.setWebView(webView);
+            newTabMessage.sendToTarget();
+            newTabMessage = null;
+            bringWebViewToFront();
         } else {
             final boolean reset = System.currentTimeMillis() - state.getTimestamp() >= Constants.HOME_RESET_DELAY;
             if (reset) {

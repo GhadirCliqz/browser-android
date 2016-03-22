@@ -13,7 +13,6 @@ import javax.inject.Inject;
 
 import acr.browser.lightning.R;
 import acr.browser.lightning.app.BrowserApp;
-import acr.browser.lightning.database.HistoryDatabase;
 import acr.browser.lightning.database.LoginDetailItem;
 import acr.browser.lightning.database.PasswordDatabase;
 

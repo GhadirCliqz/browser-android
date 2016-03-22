@@ -2,6 +2,7 @@ package acr.browser.lightning.app;
 
 import android.app.Application;
 import android.content.Context;
+import android.os.Message;
 
 import com.cliqz.browser.di.components.AppComponent;
 import com.cliqz.browser.di.components.DaggerAppComponent;
@@ -11,7 +12,8 @@ import com.squareup.leakcanary.LeakCanary;
 public class BrowserApp extends Application {
 
     private static Context sContext;
-    private static AppComponent appComponent;
+    private static AppComponent sAppComponent;
+    private static Message sNewTabMessage;
 
     @Override
     public void onCreate() {
@@ -31,15 +33,26 @@ public class BrowserApp extends Application {
     }
 
     public static AppComponent getAppComponent() {
-        return appComponent;
+        return sAppComponent;
     }
 
     private void buildDepencyGraph() {
         final AppModule appModule = createAppModule();
-        appComponent = DaggerAppComponent.builder().appModule(appModule).build();
+        sAppComponent = DaggerAppComponent.builder().appModule(appModule).build();
     }
 
     protected AppModule createAppModule() {
         return new AppModule(this);
+    }
+
+    // TODO: This is an hack to make new tab creation to work please remove asap
+    public static void pushNewTabMessage(Message msg) {
+        sNewTabMessage = msg;
+    }
+
+    public static Message popNewTabMessage() {
+        final Message result = sNewTabMessage;
+        sNewTabMessage = null;
+        return result;
     }
 }
