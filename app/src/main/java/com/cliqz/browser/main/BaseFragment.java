@@ -1,6 +1,7 @@
 package com.cliqz.browser.main;
 
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -8,6 +9,7 @@ import android.os.Looper;
 import android.support.annotation.MenuRes;
 import android.support.annotation.Nullable;
 import android.support.annotation.StyleRes;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.Toolbar;
 import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
@@ -15,6 +17,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
+import android.view.WindowManager;
 import android.widget.FrameLayout;
 
 import acr.browser.lightning.R;
@@ -36,6 +39,9 @@ public abstract class BaseFragment extends FragmentWithBus {
     @Override
     public final View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         final int themeResId = getFragmentTheme();
+        final TypedArray typedArray = getActivity().getTheme().obtainStyledAttributes(themeResId, new int[]{R.attr.colorPrimaryDark});
+        final int resourceId = typedArray.getResourceId(0, R.color.normal_tab_primary_color);
+        getActivity().getWindow().setStatusBarColor(ContextCompat.getColor(getContext(), resourceId));
         final LayoutInflater localInflater;
         if (themeResId != 0) {
             final Context themedContext = new ContextThemeWrapper(getContext(), themeResId);

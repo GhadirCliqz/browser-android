@@ -177,7 +177,7 @@ public class MainActivity extends AppCompatActivity {
             telemetry.sendLifeCycleSignal(Telemetry.Action.UPDATE);
         }
 
-        final int taskBarColor = mIsIncognito ? R.color.incognito_tab_color : R.color.normal_tab_color;
+        final int taskBarColor = mIsIncognito ? R.color.incognito_tab_primary_color : R.color.normal_tab_primary_color;
         final Bitmap appIcon = BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher);
         final ActivityManager.TaskDescription taskDescription;
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {

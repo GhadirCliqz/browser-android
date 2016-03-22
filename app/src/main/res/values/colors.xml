@@ -36,7 +36,12 @@
     <color name="error_red">#F44336</color>
     <color name="onboarding_background">#5DB0EA</color>
 
-    <color name="incognito_tab_color">#4F4F4F</color>
-    <color name="normal_tab_color">#1F68AD</color>
+    <color name="incognito_tab_primary_color">#4F4F4F</color>
+    <color name="normal_tab_primary_color">#1F68AD</color>
+    <color name="history_primary_color">#F87140</color>
+
+    <color name="incognito_tab_primary_color_dark">#3E3E3E</color>
+    <color name="normal_tab_primary_color_dark">#0E579C</color>
+    <color name="history_primary_color_dark">#E76030</color>
 
 </resources>

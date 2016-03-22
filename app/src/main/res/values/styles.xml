@@ -113,15 +113,18 @@
     </style>
 
     <style name="Theme.Cliqz.Present" parent="Theme.AppCompat.Light">
-        <item name="colorPrimary">@color/normal_tab_color</item>
+        <item name="colorPrimary">@color/normal_tab_primary_color</item>
+        <item name="colorPrimaryDark">@color/normal_tab_primary_color_dark</item>
     </style>
 
     <style name="Theme.Cliqz.History" parent="Theme.AppCompat.Light">
-        <item name="colorPrimary">#F87140</item>
+        <item name="colorPrimary">@color/history_primary_color</item>
+        <item name="colorPrimaryDark">@color/history_primary_color_dark</item>
     </style>
 
     <style name="Theme.Cliqz.Present.Incognito" parent="Theme.AppCompat.Light">
-        <item name="colorPrimary">@color/incognito_tab_color</item>
+        <item name="colorPrimary">@color/incognito_tab_primary_color</item>
+        <item name="colorPrimaryDark">@color/incognito_tab_primary_color_dark</item>
     </style>
 
     <style name="Theme.Cliqz.Suggestions" parent="Theme.AppCompat.Light">

@@ -609,7 +609,7 @@ public class MainFragment extends BaseFragment {
         searchBar.setTitle(title);
         state.setTitle(title);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            final int taskBarColor = isIncognito ? R.color.incognito_tab_color : R.color.normal_tab_color;
+            final int taskBarColor = isIncognito ? R.color.incognito_tab_primary_color : R.color.normal_tab_primary_color;
             final Bitmap appIcon = BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher);
             final ActivityManager.TaskDescription taskDescription = new ActivityManager.TaskDescription(
                     title, appIcon, ContextCompat.getColor(getContext(), taskBarColor));
