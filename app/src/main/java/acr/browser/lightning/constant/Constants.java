@@ -41,6 +41,8 @@ public final class Constants {
     //Keys for arguments in intents/bundles
     public static final String KEY_IS_INCOGNITO = "incognito";
     public static final String KEY_URL = "url";
+    public static final String KEY_NEW_TAB_MESSAGE = "new_tab_message";
+
 
     public static final String LOAD_READING_URL = "ReadingUrl";
 
@@ -73,4 +75,5 @@ public final class Constants {
     public static final String TELEMETRY_FILE_NAME = "telemetry.dat";
 
     public static final String TELEMETRY_LOG_PREFIX = "telemetry_";
+
 }

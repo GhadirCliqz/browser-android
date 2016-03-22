@@ -14,6 +14,7 @@ import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Message;
 import android.provider.Settings;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
@@ -40,8 +41,6 @@ import com.cliqz.browser.widget.MainViewContainer;
 import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
 
-import java.util.List;
-
 import javax.inject.Inject;
 
 import acr.browser.lightning.BuildConfig;
@@ -64,6 +63,8 @@ public class MainActivity extends AppCompatActivity {
 
     private final static String TAG = MainActivity.class.getSimpleName();
 
+    private static final String NEW_TAB_MSG = "new_tab_message_extra";
+
     public ActivityComponent mActivityComponent;
 
     private static final String HISTORY_FRAGMENT_TAG = "history_fragment";
@@ -83,6 +84,7 @@ public class MainActivity extends AppCompatActivity {
     private ViewPager pager;
     private boolean askedGPSPermission = false;
     private CustomViewHandler mCustomViewHandler;
+    private boolean mIsIncognito;
 
     @Inject
     Bus bus;
@@ -132,20 +134,25 @@ public class MainActivity extends AppCompatActivity {
         // Ignore intent if we are being recreated
         final Intent intent = savedInstanceState == null ? getIntent() : null;
         final String url;
-        final boolean isIncognito;
-        if (intent != null && Intent.ACTION_VIEW.equals(intent.getAction())) {
-            url = intent.getDataString();
+        final Message message;
+        if (intent != null) {
             final Bundle bundle = intent.getExtras();
-            isIncognito = bundle != null ? bundle.getBoolean(Constants.KEY_IS_INCOGNITO) : false;
+            mIsIncognito = bundle != null ? bundle.getBoolean(Constants.KEY_IS_INCOGNITO) : false;
+            message = BrowserApp.popNewTabMessage();
+            url = Intent.ACTION_VIEW.equals(intent.getAction()) ? intent.getDataString() : null;
         } else {
             url = null;
-            isIncognito = false;
+            message = null;
+            mIsIncognito = false;
         }
         final Bundle args = new Bundle();
-        args.putBoolean(Constants.KEY_IS_INCOGNITO, isIncognito);
+        args.putBoolean(Constants.KEY_IS_INCOGNITO, mIsIncognito);
         if (url != null && Patterns.WEB_URL.matcher(url).matches()) {
             setIntent(null);
             args.putString(Constants.KEY_URL, url);
+        } else if (message != null) {
+            setIntent(null);
+            args.putParcelable(Constants.KEY_NEW_TAB_MESSAGE, message);
         }
         mMainFragment.setArguments(args);
 
@@ -170,7 +177,7 @@ public class MainActivity extends AppCompatActivity {
             telemetry.sendLifeCycleSignal(Telemetry.Action.UPDATE);
         }
 
-        final int taskBarColor = isIncognito ? R.color.incognito_tab_color : R.color.normal_tab_color;
+        final int taskBarColor = mIsIncognito ? R.color.incognito_tab_color : R.color.normal_tab_color;
         final Bitmap appIcon = BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher);
         final ActivityManager.TaskDescription taskDescription;
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
@@ -305,20 +312,30 @@ public class MainActivity extends AppCompatActivity {
 
     @Subscribe
     public void createWindow(BrowserEvents.CreateWindow event) {
-        createTab(event.url, false);
+        createTab(event.msg, mIsIncognito);
 //        // TODO: Temporary workaround, we want to open a new activity!
 //        bus.post(new CliqzMessages.OpenLink(event.url));
     }
 
     @Subscribe
     public void createNewTab(BrowserEvents.NewTab event) {
-        createTab(null, event.isIncognito);
+        createTab("", event.isIncognito);
+    }
+
+    private void createTab(Message msg, boolean isIncognito) {
+        final Intent intent = new Intent(getBaseContext(), MainActivity.class);
+        intent.putExtra(Constants.KEY_IS_INCOGNITO, isIncognito);
+        intent.putExtra(NEW_TAB_MSG, true);
+        BrowserApp.pushNewTabMessage(msg);
+        intent.addFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK
+                | Intent.FLAG_ACTIVITY_NEW_DOCUMENT);
+        startActivity(intent);
     }
 
     private void createTab(String url, boolean isIncognito) {
         final Intent intent = new Intent(getBaseContext(), MainActivity.class);
         intent.setAction(Intent.ACTION_VIEW);
-        if (url != null) {
+        if (url != null && !url.isEmpty()) {
             intent.setData(Uri.parse(url));
         }
         intent.putExtra(Constants.KEY_IS_INCOGNITO, isIncognito);
