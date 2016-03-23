@@ -39,9 +39,12 @@ public abstract class BaseFragment extends FragmentWithBus {
     @Override
     public final View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         final int themeResId = getFragmentTheme();
-        final TypedArray typedArray = getActivity().getTheme().obtainStyledAttributes(themeResId, new int[]{R.attr.colorPrimaryDark});
-        final int resourceId = typedArray.getResourceId(0, R.color.normal_tab_primary_color);
-        getActivity().getWindow().setStatusBarColor(ContextCompat.getColor(getContext(), resourceId));
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            final TypedArray typedArray = getActivity().getTheme().obtainStyledAttributes(themeResId, new int[]{R.attr.colorPrimaryDark});
+            final int resourceId = typedArray.getResourceId(0, R.color.normal_tab_primary_color);
+            getActivity().getWindow().setStatusBarColor(ContextCompat.getColor(getContext(), resourceId));
+            typedArray.recycle();
+        }
         final LayoutInflater localInflater;
         if (themeResId != 0) {
             final Context themedContext = new ContextThemeWrapper(getContext(), themeResId);
