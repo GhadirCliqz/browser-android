@@ -197,7 +197,7 @@ public class AutocompleteEditText extends EditText {
             }
             final String currentText = getText().toString();
             mIsAutocompleting = true;
-            if (completion.startsWith(currentText)) {
+            if (completion.startsWith(currentText) && !completion.equals(currentText)) {
                 mIsAutocompleted = true;
                 final int selectionBegin = currentText.length();
                 final int selectionEnd = completion.length();
