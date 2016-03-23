@@ -8,10 +8,13 @@ import com.amazonaws.regions.Regions;
 import com.amazonaws.services.sns.AmazonSNSClient;
 import com.amazonaws.services.sns.model.CreatePlatformEndpointRequest;
 import com.amazonaws.services.sns.model.CreatePlatformEndpointResult;
+import com.amazonaws.services.sns.model.CreateTopicRequest;
 import com.amazonaws.services.sns.model.GetEndpointAttributesRequest;
 import com.amazonaws.services.sns.model.GetEndpointAttributesResult;
 import com.amazonaws.services.sns.model.NotFoundException;
 import com.amazonaws.services.sns.model.SetEndpointAttributesRequest;
+import com.amazonaws.services.sns.model.SubscribeRequest;
+import com.amazonaws.services.sns.model.SubscribeResult;
 import com.cliqz.browser.BuildConfig;
 
 import java.security.InvalidParameterException;
@@ -26,7 +29,7 @@ import acr.browser.lightning.preference.PreferenceManager;
  * @author Stefano Pacifici
  * @date 2016/03/01
  */
-class AwsSNSManager {
+public class AwsSNSManager {
 
     private final static String TAG = AwsSNSManager.class.getSimpleName();
 
@@ -148,5 +151,19 @@ class AwsSNSManager {
      * */
     private void storeEndpointArn(String endpointArn) {
         preferenceManager.setARNEndpoint(endpointArn);
+    }
+
+    public void subscribeSNSTopic(String topicArn) {
+        final String endpointArn = retrieveEndpointArn();
+        if (endpointArn == null) {
+            throw new RuntimeException("Can't subscribe without an endpoint ARN");
+        }
+        final SubscribeRequest request = new SubscribeRequest(topicArn, "application", endpointArn);
+        try {
+            final SubscribeResult result = client.subscribe(request);
+            Log.i(TAG, "Subscribed: " + result.getSubscriptionArn());
+        } catch (Throwable e) {
+            Log.e(TAG, "Can't subscribe to " + topicArn, e);
+        }
     }
 }

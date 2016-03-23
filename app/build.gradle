@@ -20,6 +20,7 @@ android {
         testInstrumentationRunner "com.cliqz.browser.test.CustomTestRunner"
 
         buildConfigField 'String', 'APPLICATION_ARN', '"arn:aws:sns:us-east-1:141047255820:app/GCM/CLIQZ_Browser_for_Android"'
+        buildConfigField 'String[]', 'TOPIC_ARNS', 'new String[] {"arn:aws:sns:us-east-1:141047255820:mobile_news"}'
     }
     buildTypes {
         debug {

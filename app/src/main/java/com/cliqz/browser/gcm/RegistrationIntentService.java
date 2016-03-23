@@ -21,6 +21,7 @@ import android.content.Intent;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
+import com.cliqz.browser.BuildConfig;
 import com.cliqz.browser.R;
 import com.cliqz.browser.app.BrowserApp;
 import com.google.android.gms.gcm.GcmPubSub;
@@ -41,6 +42,9 @@ public class RegistrationIntentService extends IntentService {
 
     @Inject
     PreferenceManager preferenceManager;
+
+    @Inject
+    AwsSNSManager awsSNSManager;
 
     public RegistrationIntentService() {
         super(TAG);
@@ -93,8 +97,7 @@ public class RegistrationIntentService extends IntentService {
      * @param token The new token.
      */
     private void sendRegistrationToServer(String token) {
-        final AwsSNSManager manager = new AwsSNSManager(preferenceManager, this);
-        manager.registerWithSNS(token);
+        awsSNSManager.registerWithSNS(token);
     }
 
     /**
@@ -105,9 +108,12 @@ public class RegistrationIntentService extends IntentService {
      */
     // [START subscribe_topics]
     private void subscribeTopics(String token) throws IOException {
-        GcmPubSub pubSub = GcmPubSub.getInstance(this);
-        for (String topic : TOPICS) {
-            pubSub.subscribe(token, "/topics/" + topic, null);
+//        GcmPubSub pubSub = GcmPubSub.getInstance(this);
+//        for (String topic : TOPICS) {
+//            pubSub.subscribe(token, "/topics/" + topic, null);
+//        }
+        for (String topicArn: BuildConfig.TOPIC_ARNS) {
+            awsSNSManager.subscribeSNSTopic(topicArn);
         }
     }
     // [END subscribe_topics]
