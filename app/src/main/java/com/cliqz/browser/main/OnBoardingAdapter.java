@@ -7,8 +7,6 @@ import android.support.v4.view.ViewPager;
 
 import com.cliqz.browser.utils.Telemetry;
 
-import java.util.ArrayList;
-
 import acr.browser.lightning.R;
 
 /**
@@ -16,12 +14,26 @@ import acr.browser.lightning.R;
  */
 public class OnBoardingAdapter extends FragmentPagerAdapter {
 
-    private final int[] onBoardingLayouts = new int[] {
-            R.layout.on_boarding_first,
-            R.layout.on_boarding_second,
+    public static class FirstFragment extends OnBoardingFragment {
+        @Override
+        protected int getLayout() {
+            return R.layout.on_boarding_first;
+        }
+    }
+
+    public static class SecondFragment extends OnBoardingFragment {
+        @Override
+        protected int getLayout() {
+            return R.layout.on_boarding_second;
+        }
+    }
+
+    private final OnBoardingFragment[] onBoardingFragments = new OnBoardingFragment[] {
+            new FirstFragment(),
+            new SecondFragment()
     };
 
-    private ArrayList<Fragment> onBoardingFragments = new ArrayList<>(onBoardingLayouts.length);
+    // private ArrayList<Fragment> onBoardingFragments = new ArrayList<>(onBoardingLayouts.length);
     private Telemetry telemetry;
     public long startTime;
 
@@ -30,25 +42,16 @@ public class OnBoardingAdapter extends FragmentPagerAdapter {
         this.telemetry = telemetry;
         startTime = System.currentTimeMillis();
         telemetry.sendOnBoardingShowSignal(0);
-        for (int layout: onBoardingLayouts) {
-            final int finalLayout = layout;
-            onBoardingFragments.add(new OnBoardingFragment() {
-                @Override
-                protected int getLayout() {
-                    return finalLayout;
-                }
-            });
-        }
     }
 
     @Override
     public int getCount() {
-        return onBoardingFragments.size();
+        return onBoardingFragments.length;
     }
 
     @Override
     public Fragment getItem(int pos) {
-        return onBoardingFragments.get(pos);
+        return onBoardingFragments[pos];
     }
 
     ViewPager.OnPageChangeListener onPageChangeListener = new ViewPager.OnPageChangeListener() {
