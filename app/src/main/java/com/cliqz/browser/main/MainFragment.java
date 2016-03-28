@@ -189,18 +189,21 @@ public class MainFragment extends BaseFragment {
         if (mSearchWebView != null) {
             mSearchWebView.onResume();
         }
+        final WebView webView;
         if (mLightningView != null) {
             mLightningView.onResume();
             mLightningView.resumeTimers();
+            webView = mLightningView.getWebView();
+        } else {
+            webView = null;
         }
 
         if (url != null && !url.isEmpty()) {
             state.setMode(CliqzBrowserState.Mode.WEBPAGE);
             bus.post(new CliqzMessages.OpenLink(url, true));
             url = null;
-        } else if (newTabMessage != null) {
+        } else if (newTabMessage != null && webView != null && newTabMessage.obj != null) {
             final WebView.WebViewTransport transport = (WebView.WebViewTransport) newTabMessage.obj;
-            final WebView webView = mLightningView.getWebView();
             transport.setWebView(webView);
             newTabMessage.sendToTarget();
             newTabMessage = null;
