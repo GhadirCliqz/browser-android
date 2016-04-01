@@ -3,6 +3,9 @@
         <Preference
             android:key="pref_version"
             android:title="@string/version" />
+        <Preference
+            android:key="pref_arn"
+            android:title="Device ARN" />
     <PreferenceCategory android:title="@string/licenses">
         <Preference
             android:summary="@string/mpl_license"

@@ -5,6 +5,7 @@ package com.cliqz.browser.settings;
 
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.preference.Preference;
 import android.preference.PreferenceFragment;
@@ -12,11 +13,16 @@ import android.preference.PreferenceFragment;
 import com.cliqz.browser.BuildConfig;
 import com.cliqz.browser.R;
 
-public class AboutSettingsFragment extends PreferenceFragment {
+import java.net.URI;
+
+import acr.browser.lightning.preference.PreferenceManager;
+
+public class AboutSettingsFragment extends BaseSettingsFragment {
 
     private int mCounter = 1;
 
     private static final String SETTINGS_VERSION = "pref_version";
+    private static final String AMAZON_ARN = "pref_arn";
     private static final String CONTACT = "pref_contact";
 
     @Override
@@ -28,6 +34,16 @@ public class AboutSettingsFragment extends PreferenceFragment {
         Preference version = findPreference(SETTINGS_VERSION);
         version.setSummary(getVersion());
         version.setOnPreferenceClickListener(versionClickListener);
+
+        Preference arn = findPreference(AMAZON_ARN);
+        if (BuildConfig.DEBUG) {
+            final String ARN = mPreferenceManager.getARNEndpoint();
+            final String[] pieces = ARN != null ? ARN.split("/") : new String[]{"No ARN yet"};
+            final String hash = pieces[pieces.length - 1];
+            arn.setSummary(hash);
+        } else {
+            getPreferenceScreen().removePreference(arn);
+        }
     }
 
     private String getVersion() {
@@ -52,4 +68,14 @@ public class AboutSettingsFragment extends PreferenceFragment {
                     }
                 }
             };
+
+    @Override
+    public boolean onPreferenceChange(Preference preference, Object newValue) {
+        return false;
+    }
+
+    @Override
+    public boolean onPreferenceClick(Preference preference) {
+        return false;
+    }
 }

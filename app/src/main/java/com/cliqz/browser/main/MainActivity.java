@@ -199,14 +199,14 @@ public class MainActivity extends AppCompatActivity {
         final ActivityManager.TaskDescription taskDescription;
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
             taskDescription = new ActivityManager.TaskDescription(
-                    getString(R.string.cliqz_app_name), appIcon, ContextCompat.getColor(this, taskBarColor));
-            setTaskDescription(taskDescription);
+                getString(R.string.cliqz_app_name), appIcon, ContextCompat.getColor(this, taskBarColor));
+        setTaskDescription(taskDescription);
         }
-        
+
         if (checkPlayServices()) {
             final Intent registrationIntent = new Intent(this, RegistrationIntentService.class);
             startService(registrationIntent);
-        }
+    }
     }
 
     public CliqzBrowserState getBrowserState() {
