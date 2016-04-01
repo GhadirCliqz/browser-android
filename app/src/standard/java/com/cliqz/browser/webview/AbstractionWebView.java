@@ -1,12 +1,15 @@
 package com.cliqz.browser.webview;
 
 import android.content.Context;
+import android.net.http.SslError;
 import android.os.Build;
 import android.util.Log;
 import android.view.View;
 import android.webkit.ConsoleMessage;
 import android.webkit.GeolocationPermissions;
 import android.webkit.JavascriptInterface;
+import android.webkit.SslErrorHandler;
+import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
@@ -30,10 +33,28 @@ public class AbstractionWebView extends WebView {
         setWebViewClient(new WebViewClient() {
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, String url) {
-                final AbstractionWebView awv =
-                        view instanceof AbstractionWebView ? (AbstractionWebView) view : null;
                 return super.shouldOverrideUrlLoading(view, url) ||
-                        client.shouldOverrideUrlLoading(awv, url);
+                        client.shouldOverrideUrlLoading(getAbstractionWebView(view), url);
+            }
+
+            @Override
+            public void onReceivedSslError(WebView view, final SslErrorHandler handler, SslError error) {
+                client.onReceivedSslError(
+                        getAbstractionWebView(view),
+                        new ValueCallback<Boolean>() {
+                            @Override
+                            public void onReceiveValue(Boolean value) {
+                                if (true) {
+                                    handler.proceed();
+                                } else {
+                                    handler.cancel();
+                                }
+                            }
+                        }, error);
+            }
+
+            private AbstractionWebView getAbstractionWebView(WebView view) {
+                return view instanceof AbstractionWebView ? (AbstractionWebView) view : null;
             }
         });
     }

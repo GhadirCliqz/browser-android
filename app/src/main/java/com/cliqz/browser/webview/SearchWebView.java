@@ -39,7 +39,7 @@ public class SearchWebView extends BaseWebView {
     @Nullable
     @Override
     protected AWVClient createClient() {
-        return new AWVClient() {
+        return new SslWorkAroundClient() {
             @Override
             public boolean shouldOverrideUrlLoading(final AbstractionWebView wv, final String url) {
                 Log.d(TAG, "New url: " + url);

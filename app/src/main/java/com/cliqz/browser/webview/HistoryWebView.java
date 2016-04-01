@@ -22,7 +22,7 @@ public class HistoryWebView extends BaseWebView {
     @Nullable
     @Override
     protected AWVClient createClient() {
-        return null;
+        return new SslWorkAroundClient();
     }
 
     @Nullable
