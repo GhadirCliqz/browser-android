@@ -40,18 +40,22 @@ public class AdBlock {
      * @return true if it is an ad, false if it is not an ad
      */
     public boolean isAd(Uri uri) {
-        if (!mEnabled || uri == null) {
+        if (!mEnabled || uri == null || mBlockedDomainsList == null) {
             return false;
         }
 
         final String host = uri.getHost();
-        final String domain = host.startsWith("www.") ? host.substring(4) : host;
+        if (host != null) {
+            final String domain = host.startsWith("www.") ? host.substring(4) : host;
 
-        boolean isOnBlacklist = mBlockedDomainsList.contains(domain.toLowerCase(mLocale));
-        if (isOnBlacklist) {
-            Log.d(TAG, "URL '" + uri.toString() + "' is an ad");
+            boolean isOnBlacklist = mBlockedDomainsList.contains(domain.toLowerCase(mLocale));
+            if (isOnBlacklist) {
+                Log.d(TAG, "URL '" + uri.toString() + "' is an ad");
+            }
+            return isOnBlacklist;
+        } else {
+            return false;
         }
-        return isOnBlacklist;
     }
 
     /**

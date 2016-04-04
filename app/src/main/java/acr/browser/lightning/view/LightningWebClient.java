@@ -85,10 +85,11 @@ class LightningWebClient extends WebViewClient {
             return new WebResourceResponse("text/html", "UTF-8",
                     new ByteArrayInputStream("".getBytes()));
         }
+        final String cliqzPath = String.format("%s%d", CLIQZ_PATH, view.getId());
         final String path = uri.getPath();
 
         //If the url scheme is not "cliqz" or path is not "/CLIQZ+(webviewId)" we don't handle the url
-        if (!TrampolineConstants.CLIQZ_SCHEME.equals(uri.getScheme()) && !path.equals(CLIQZ_PATH+Integer.toString(view.getId()))) {
+        if (!TrampolineConstants.CLIQZ_SCHEME.equals(uri.getScheme()) && !cliqzPath.equals(path)) {
             return null;
         }
 
@@ -132,7 +133,7 @@ class LightningWebClient extends WebViewClient {
                 });
                 return createOKResponse();
             }
-        } else if (path.equals(CLIQZ_PATH + Integer.toString(view.getId()))) {
+        } else if (cliqzPath.equals(path)) {
             mPasswordManager.provideOrSavePassword(uri, view);
             return createOKResponse();
         }
