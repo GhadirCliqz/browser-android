@@ -1,8 +1,10 @@
 package com.cliqz.browser.webview;
 
 import android.content.Context;
+import android.net.http.SslError;
 import android.os.Build;
 import android.util.Log;
+import android.webkit.ValueCallback;
 
 import org.xwalk.core.JavascriptInterface;
 import org.xwalk.core.XWalkPreferences;
@@ -60,6 +62,13 @@ public class AbstractionWebView extends XWalkView {
                 public void onLoadFinished(XWalkView view, String url) {
                     super.onLoadFinished(view, url);
                     client.onPageFinished(AbstractionWebView.this, url);
+                }
+
+                @Override
+                public void onReceivedSslError(XWalkView view, ValueCallback<Boolean> callback, SslError error) {
+                    // Do not call super here!
+                    // super.onReceivedSslError(view, callback, error);
+                    client.onReceivedSslError(AbstractionWebView.this , callback, error);
                 }
             });
         }

@@ -81,12 +81,6 @@ public abstract class Bridge {
     }
 
     void executeJavascript(final String javascript) {
-        if (javascript != null || !javascript.isEmpty()) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-                webView.evaluateJavascript(javascript, null);
-            } else {
-                webView.loadUrl("javascript:" + javascript);
-            }
-        }
+        webView.evaluateJavascript(javascript, null);
     }
 }
