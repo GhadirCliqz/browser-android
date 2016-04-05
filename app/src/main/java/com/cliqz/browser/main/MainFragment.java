@@ -438,6 +438,7 @@ public class MainFragment extends BaseFragment {
             mOverFlowMenu.dismiss();
             mOverFlowMenu = null;
         } else if (state.getMode() == CliqzBrowserState.Mode.SEARCH &&
+                !"".equals(url) &&
                 !TrampolineConstants.CLIQZ_TRAMPOLINE_GOTO.equals(url)) {
             bringWebViewToFront();
         } else if (mLightningView.canGoBack()) {
