@@ -150,6 +150,7 @@ public class SearchWebView extends BaseWebView {
         try {
             preferences.put("adultContentFilter",
                     preferenceManager.getBlockAdultContent() ? "moderate" : "liberal");
+            preferences.put("incognito", state.isIncognito());
         } catch (JSONException e) {
             e.printStackTrace();
         }

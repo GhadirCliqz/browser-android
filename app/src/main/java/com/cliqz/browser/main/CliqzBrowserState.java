@@ -23,6 +23,7 @@ public class CliqzBrowserState implements Serializable {
     private String title = "";
     private String url = "";
     private Mode mode = Mode.SEARCH;
+    private boolean incognito;
 
     public long getTimestamp() {
         return timestamp;
@@ -87,6 +88,14 @@ public class CliqzBrowserState implements Serializable {
     public void setMode(Mode mode) {
         this.mode = mode;
         this.timestamp = System.currentTimeMillis();
+    }
+
+    public boolean isIncognito() {
+        return incognito;
+    }
+
+    public void setIncognito(boolean incognito) {
+        this.incognito = incognito;
     }
 
     public CliqzBrowserState() {
