@@ -82,7 +82,7 @@ public class MainActivity extends AppCompatActivity {
     private ViewPager pager;
     private boolean askedGPSPermission = false;
     private CustomViewHandler mCustomViewHandler;
-    private boolean mIsIncognito;
+    // private boolean mIsIncognito;
     // Keep the current shared browsing state
     private CliqzBrowserState mBrowserState;
 
@@ -131,16 +131,16 @@ public class MainActivity extends AppCompatActivity {
         final Message message;
         if (intent != null) {
             final Bundle bundle = intent.getExtras();
-            mIsIncognito = bundle != null ? bundle.getBoolean(Constants.KEY_IS_INCOGNITO) : false;
+            mBrowserState.setIncognito(bundle != null ? bundle.getBoolean(Constants.KEY_IS_INCOGNITO) : false);
             message = BrowserApp.popNewTabMessage();
             url = Intent.ACTION_VIEW.equals(intent.getAction()) ? intent.getDataString() : null;
         } else {
             url = null;
             message = null;
-            mIsIncognito = false;
+            mBrowserState.setIncognito(false);
         }
         final Bundle args = new Bundle();
-        args.putBoolean(Constants.KEY_IS_INCOGNITO, mIsIncognito);
+        args.putBoolean(Constants.KEY_IS_INCOGNITO, mBrowserState.isIncognito());
         if (url != null && Patterns.WEB_URL.matcher(url).matches()) {
             setIntent(null);
             args.putString(Constants.KEY_URL, url);
@@ -171,7 +171,7 @@ public class MainActivity extends AppCompatActivity {
             telemetry.sendLifeCycleSignal(Telemetry.Action.UPDATE);
         }
 
-        final int taskBarColor = mIsIncognito ? R.color.incognito_tab_primary_color : R.color.normal_tab_primary_color;
+        final int taskBarColor = mBrowserState.isIncognito() ? R.color.incognito_tab_primary_color : R.color.normal_tab_primary_color;
         final Bitmap appIcon = BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher);
         final ActivityManager.TaskDescription taskDescription;
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
@@ -312,7 +312,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Subscribe
     public void createWindow(BrowserEvents.CreateWindow event) {
-        createTab(event.msg, mIsIncognito);
+        createTab(event.msg, mBrowserState.isIncognito());
 //        // TODO: Temporary workaround, we want to open a new activity!
 //        bus.post(new CliqzMessages.OpenLink(event.url));
     }
