@@ -132,8 +132,8 @@ class LightningWebClient extends WebViewClient {
                 });
                 return createOKResponse();
             }
-        } else if (path.equals(CLIQZ_PATH + Integer.toString(view.getId()))) {
-            // mPasswordManager.provideOrSavePassword(uri, view);
+        } else if (cliqzPath.equals(path)) {
+            mPasswordManager.provideOrSavePassword(uri, view);
             return createOKResponse();
         }
         return null;
@@ -153,8 +153,11 @@ class LightningWebClient extends WebViewClient {
             mEventBus.post(new BrowserEvents.UpdateUrl(url,true));
             view.postInvalidate();
         }
-        if (view.getTitle() != null && !view.getTitle().isEmpty()
-                && !view.getTitle().contains(TrampolineConstants.CLIQZ_TRAMPOLINE_GOTO)) {
+        final String title = view.getTitle();
+        if (title != null &&
+                !title.isEmpty() &&
+                !title.startsWith(TrampolineConstants.CLIQZ_TRAMPOLINE_GOTO) &&
+                !TrampolineConstants.CLIQZ_TRAMPOLINE_GOTO.equals(url)) {
             mLightningView.mTitle.setTitle(view.getTitle());
             mEventBus.post(new Messages.UpdateTitle());
         }

@@ -103,7 +103,8 @@ class LightningChromeClient extends WebChromeClient {
     @Override
     public void onReceivedTitle(WebView view, String title) {
         final String url = view != null ? view.getUrl() : null;
-        if (title != null && !title.isEmpty() && !TrampolineConstants.CLIQZ_TRAMPOLINE_GOTO.equals(url)) {
+        if (title != null && !title.isEmpty() &&
+                !TrampolineConstants.CLIQZ_TRAMPOLINE_GOTO.equals(url)) {
             mLightningView.mTitle.setTitle(title);
             eventBus.post(new Messages.UpdateTitle());
         }
