@@ -132,8 +132,8 @@ class LightningWebClient extends WebViewClient {
                 });
                 return createOKResponse();
             }
-        } else if (path.equals(CLIQZ_PATH + Integer.toString(view.getId()))) {
-            // mPasswordManager.provideOrSavePassword(uri, view);
+        } else if (cliqzPath.equals(path)) {
+            mPasswordManager.provideOrSavePassword(uri, view);
             return createOKResponse();
         }
         return null;
