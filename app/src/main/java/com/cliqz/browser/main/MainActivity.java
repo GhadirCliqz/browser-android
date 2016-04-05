@@ -30,7 +30,7 @@ import android.widget.CheckBox;
 import android.widget.CompoundButton;
 
 import com.cliqz.browser.di.components.ActivityComponent;
-import com.cliqz.browser.di.modules.ActivityModule;
+import com.cliqz.browser.di.modules.MainActivityModule;
 import com.cliqz.browser.utils.LocationCache;
 import com.cliqz.browser.utils.Telemetry;
 import com.cliqz.browser.utils.Timings;
@@ -83,6 +83,8 @@ public class MainActivity extends AppCompatActivity {
     private boolean askedGPSPermission = false;
     private CustomViewHandler mCustomViewHandler;
     private boolean mIsIncognito;
+    // Keep the current shared browsing state
+    private CliqzBrowserState mBrowserState;
 
     @Inject
     Bus bus;
@@ -94,9 +96,6 @@ public class MainActivity extends AppCompatActivity {
     Telemetry telemetry;
 
     @Inject
-    CliqzBrowserState state;
-
-    @Inject
     LocationCache locationCache;
 
     @Inject
@@ -105,18 +104,15 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mActivityComponent = BrowserApp.getAppComponent().plus(new ActivityModule(this));
+        mActivityComponent = BrowserApp.getAppComponent().plus(new MainActivityModule(this));
         mActivityComponent.inject(this);
         bus.register(this);
 
         // Restore state
-        if (savedInstanceState != null) {
-            final CliqzBrowserState oldState =
-                    (CliqzBrowserState) savedInstanceState.getSerializable(SAVED_STATE);
-            if (oldState != null) {
-                state.copyFrom(oldState);
-            }
-        }
+        final CliqzBrowserState oldState = savedInstanceState != null ?
+                (CliqzBrowserState) savedInstanceState.getSerializable(SAVED_STATE) :
+                null;
+        mBrowserState = oldState != null ? oldState : new CliqzBrowserState();
 
         // Translucent status bar only on selected platforms
 //        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
@@ -180,9 +176,13 @@ public class MainActivity extends AppCompatActivity {
         final ActivityManager.TaskDescription taskDescription;
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
             taskDescription = new ActivityManager.TaskDescription(
-                getString(R.string.cliqz_app_name), appIcon, ContextCompat.getColor(this, taskBarColor));
-        setTaskDescription(taskDescription);
+                    getString(R.string.cliqz_app_name), appIcon, ContextCompat.getColor(this, taskBarColor));
+            setTaskDescription(taskDescription);
+        }
     }
+
+    public CliqzBrowserState getBrowserState() {
+        return mBrowserState;
     }
 
     private void setupContentView() {
@@ -206,6 +206,10 @@ public class MainActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         final String name = getCurrentVisibleFragmentName();
+        final boolean reset = System.currentTimeMillis() - mBrowserState.getTimestamp() > Constants.HOME_RESET_DELAY;
+        if (reset) {
+            mBrowserState.setMode(CliqzBrowserState.Mode.SEARCH);
+        }
         timings.setAppStartTime();
         if(!name.isEmpty()) {
             telemetry.sendStartingSignals(name);
@@ -277,14 +281,12 @@ public class MainActivity extends AppCompatActivity {
             telemetry.sendClosingSignals(Telemetry.Action.CLOSE, context);
         }
         locationCache.stop();
-        state.setTimestamp(System.currentTimeMillis());
-//        state.setMode(mMainFragment.mState == MainFragment.State.SHOWING_SEARCH ?
-//                CliqzBrowserState.Mode.SEARCH : CliqzBrowserState.Mode.WEBPAGE);
+        mBrowserState.setTimestamp(System.currentTimeMillis());
     }
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
-        outState.putSerializable(SAVED_STATE, state);
+        outState.putSerializable(SAVED_STATE, mBrowserState);
         super.onSaveInstanceState(outState);
     }
 
@@ -468,11 +470,7 @@ public class MainActivity extends AppCompatActivity {
     private String getCurrentVisibleFragmentName() {
         String name = "";
         if (mMainFragment != null && mMainFragment.isVisible()) {
-            if (state.getMode() == CliqzBrowserState.Mode.WEBPAGE) {
-                name = "web";
-            } else {
-                name = "cards";
-            }
+            name = mBrowserState.getMode() == CliqzBrowserState.Mode.SEARCH ? "cards" : "web";
         } else if (mHistoryFragment != null && mHistoryFragment.isVisible()) {
             name = "past";
         } else if (mFreshTabFragment != null && mFreshTabFragment.isVisible()) {

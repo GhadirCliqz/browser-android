@@ -85,23 +85,22 @@ class LightningWebClient extends WebViewClient {
             return new WebResourceResponse("text/html", "UTF-8",
                     new ByteArrayInputStream("".getBytes()));
         }
-        final String cliqzPath = String.format("%s%d", CLIQZ_PATH, view.getId());
+        final String cliqzPath = String.format("%s%d", CLIQZ_PATH, view.hashCode());
         final String path = uri.getPath();
-
-        //If the url scheme is not "cliqz" or path is not "/CLIQZ+(webviewId)" we don't handle the url
+        // We only handle urls that has the cliqz scheme or the cliqz path ("/CLIQZ+(webview hashcode)")
         if (!TrampolineConstants.CLIQZ_SCHEME.equals(uri.getScheme()) && !cliqzPath.equals(path)) {
             return null;
         }
 
         if (TrampolineConstants.CLIQZ_TRAMPOLINE_AUTHORITY.equals(uri.getAuthority())) {
-            if (TrampolineConstants.CLIQZ_TRAMPOLINE_FORWARD.equals(path)) {
+            if (TrampolineConstants.CLIQZ_TRAMPOLINE_GOTO_PATH.equals(path)) {
                 final Resources resources = view.getResources();
                 final WebResourceResponse response =
                         new WebResourceResponse("text/html", "UTF-8",
                                 resources.openRawResource(R.raw.trampoline_forward));
                 return response;
             }
-            if (TrampolineConstants.CLIQZ_TRAMPOLINE_SEARCH.equals(path)) {
+            if (TrampolineConstants.CLIQZ_TRAMPOLINE_SEARCH_PATH.equals(path)) {
                 final String query = uri.getQueryParameter("q");
                 mLightningView.telemetry.sendBackPressedSignal("web", "cards", query.length());
                 view.post(new Runnable() {
@@ -112,7 +111,7 @@ class LightningWebClient extends WebViewClient {
                 });
                 return createOKResponse();
             }
-            if (TrampolineConstants.CLIQZ_TRAMPOLINE_CLOSE.equals(path)) {
+            if (TrampolineConstants.CLIQZ_TRAMPOLINE_CLOSE_PATH.equals(path)) {
                 view.post(new Runnable() {
                     @Override
                     public void run() {
@@ -120,7 +119,7 @@ class LightningWebClient extends WebViewClient {
                     }
                 });
             }
-            if (TrampolineConstants.CLIQZ_TRAMPOLINE_HISTORY.equals(path)) {
+            if (TrampolineConstants.CLIQZ_TRAMPOLINE_HISTORY_PATH.equals(path)) {
                 mLightningView.telemetry.sendBackPressedSignal("web", "history", 0);
                 view.post(new Runnable() {
                     @Override
@@ -133,8 +132,8 @@ class LightningWebClient extends WebViewClient {
                 });
                 return createOKResponse();
             }
-        } else if (cliqzPath.equals(path)) {
-            mPasswordManager.provideOrSavePassword(uri, view);
+        } else if (path.equals(CLIQZ_PATH + Integer.toString(view.getId()))) {
+            // mPasswordManager.provideOrSavePassword(uri, view);
             return createOKResponse();
         }
         return null;
@@ -155,7 +154,7 @@ class LightningWebClient extends WebViewClient {
             view.postInvalidate();
         }
         if (view.getTitle() != null && !view.getTitle().isEmpty()
-                && !Constants.CLIQZ_TRAMPOLINE.equals(url)) {
+                && !view.getTitle().contains(TrampolineConstants.CLIQZ_TRAMPOLINE_GOTO)) {
             mLightningView.mTitle.setTitle(view.getTitle());
             mEventBus.post(new Messages.UpdateTitle());
         }
@@ -174,7 +173,7 @@ class LightningWebClient extends WebViewClient {
     @Override
     public void onPageStarted(WebView view, String url, Bitmap favicon) {
         if(mLightningView.telemetry.backPressed) {
-            if(!url.contains(Constants.CLIQZ_TRAMPOLINE)) {
+            if(!url.contains(TrampolineConstants.CLIQZ_TRAMPOLINE_GOTO)) {
                 if(mLightningView.telemetry.showingCards) {
                     mLightningView.telemetry.sendBackPressedSignal("cards", "web", url.length());
                     mLightningView.telemetry.showingCards = false;
@@ -399,7 +398,7 @@ class LightningWebClient extends WebViewClient {
         }
         // CLIQZ! We do not want to open external app from our browser, so we return false here
         // boolean startActivityForUrl = mIntentUtils.startActivityForUrl(view, url);
-         if(!url.contains(Constants.CLIQZ_TRAMPOLINE) && mLightningView.clicked) {
+         if(!url.contains(TrampolineConstants.CLIQZ_TRAMPOLINE_GOTO) && mLightningView.clicked) {
              mLightningView.clicked = false;
              mLightningView.telemetry.sendNavigationSignal(url.length());
          }

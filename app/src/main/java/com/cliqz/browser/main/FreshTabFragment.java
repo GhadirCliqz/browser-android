@@ -98,8 +98,8 @@ public class FreshTabFragment extends BaseFragment {
                 .getSupportFragmentManager()
                 .findFragmentByTag(MainActivity.SEARCH_FRAGMENT_TAG);
         if(mainFragment != null) {
-            String state = "web"; // : "cards";
-            telemetry.sendBackPressedSignal("future", state, mainFragment.mAutocompleteEditText.length());
+            final String s = state.getMode() == CliqzBrowserState.Mode.WEBPAGE ? "web" : "cards";
+            telemetry.sendBackPressedSignal("future", s, mainFragment.mAutocompleteEditText.length());
         }
         bus.post(new Messages.GoToSearch());
     }

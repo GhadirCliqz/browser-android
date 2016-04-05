@@ -32,6 +32,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.cliqz.browser.main.CliqzBrowserState.Mode;
 import com.cliqz.browser.webview.CliqzMessages;
 import com.cliqz.browser.webview.SearchWebView;
 import com.cliqz.browser.widget.AutocompleteEditText;
@@ -47,6 +48,7 @@ import acr.browser.lightning.utils.ThemeUtils;
 import acr.browser.lightning.utils.UrlUtils;
 import acr.browser.lightning.view.AnimatedProgressBar;
 import acr.browser.lightning.view.LightningView;
+import acr.browser.lightning.view.TrampolineConstants;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -59,7 +61,6 @@ import butterknife.OnEditorAction;
 public class MainFragment extends BaseFragment {
 
     private static final String TAG = MainFragment.class.getSimpleName();
-    private static final String STATE_KEY = TAG + ".STATE";
     private static final String NAVIGATION_STATE_KEY = TAG + ".NAVIGATION_STATE";
     private static final int ICON_STATE_CLEAR = 0;
     //private static final int RELOAD = 1;
@@ -70,18 +71,11 @@ public class MainFragment extends BaseFragment {
     private OverFlowMenu mOverFlowMenu = null;
     private boolean isIncognito = false;
 
-    public enum State {
-        SHOWING_SEARCH,
-        SHOWING_BROWSER,
-    }
-
-    private String url = null;
+    private String mInitialUrl = null;
     private String mSearchEngine;
     private Message newTabMessage = null;
 
     String lastQuery = "";
-
-    // public State mState = State.SHOWING_SEARCH;
 
     SearchWebView mSearchWebView = null;
     public LightningView mLightningView = null;
@@ -118,7 +112,7 @@ public class MainFragment extends BaseFragment {
 
     private void parseArguments(Bundle arguments) {
         isIncognito = arguments.getBoolean(Constants.KEY_IS_INCOGNITO, false);
-        url = arguments.getString(Constants.KEY_URL, null);
+        mInitialUrl = arguments.getString(Constants.KEY_URL, null);
         newTabMessage = arguments.getParcelable(Constants.KEY_NEW_TAB_MESSAGE);
         // We need to remove the key, otherwise the url get reloaded for each resume
         arguments.remove(Constants.KEY_URL);
@@ -174,7 +168,6 @@ public class MainFragment extends BaseFragment {
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        // outState.putString(STATE_KEY, mState.toString());
         final WebView webView = mLightningView != null ? mLightningView.getWebView() : null;
         if (webView != null) {
             final Bundle webViewOutState = new Bundle();
@@ -198,10 +191,11 @@ public class MainFragment extends BaseFragment {
             webView = null;
         }
 
-        if (url != null && !url.isEmpty()) {
-            state.setMode(CliqzBrowserState.Mode.WEBPAGE);
-            bus.post(new CliqzMessages.OpenLink(url, true));
-            url = null;
+        // The logic below should be in main activity
+        if (mInitialUrl != null && !mInitialUrl.isEmpty()) {
+            state.setMode(Mode.WEBPAGE);
+            bus.post(new CliqzMessages.OpenLink(mInitialUrl, true));
+            mInitialUrl = null;
         } else if (newTabMessage != null && webView != null && newTabMessage.obj != null) {
             final WebView.WebViewTransport transport = (WebView.WebViewTransport) newTabMessage.obj;
             transport.setWebView(webView);
@@ -209,14 +203,15 @@ public class MainFragment extends BaseFragment {
             newTabMessage = null;
             bringWebViewToFront();
         } else {
-            final boolean reset = System.currentTimeMillis() - state.getTimestamp() >= Constants.HOME_RESET_DELAY;
-            if (reset) {
-                state.setMode(CliqzBrowserState.Mode.SEARCH);
-                mAutocompleteEditText.setText("");
-                // lastQuery = "";
+            // final boolean reset = System.currentTimeMillis() - state.getTimestamp() >= Constants.HOME_RESET_DELAY;
+            final String lightningUrl = mLightningView.getUrl();
+            final boolean mustShowSearch = lightningUrl == null || // Should never happens but just in case
+                    lightningUrl.isEmpty();//  || // The url is empty
+            if (mustShowSearch) {
+                state.setMode(Mode.SEARCH);
             }
-            final String query = reset ? "" : state.getQuery();
-            if (state.getMode() == CliqzBrowserState.Mode.SEARCH) {
+            final String query = state.getQuery();
+            if (state.getMode() == Mode.SEARCH) {
                 showToolBar(null);
                 bus.post(new Messages.ShowSearch(query));
             } else {
@@ -302,7 +297,7 @@ public class MainFragment extends BaseFragment {
     @OnClick(R.id.overflow_menu)
     void menuClicked() {
         mOverFlowMenu = new OverFlowMenu(getActivity());
-        mOverFlowMenu.setBrowserState(state.getMode());
+        // mOverFlowMenu.setBrowserState(state.getMode());
         mOverFlowMenu.setCanGoForward(mLightningView.canGoForward());
         mOverFlowMenu.setAnchorView(overflowMenuButton);
         mOverFlowMenu.setIncognitoMode(isIncognito);
@@ -365,7 +360,10 @@ public class MainFragment extends BaseFragment {
     @Subscribe
     public void updateProgress(BrowserEvents.UpdateProgress event) {
         mProgressBar.setProgress(event.progress);
-        if (!mLightningView.getUrl().contains(Constants.CLIQZ_TRAMPOLINE)) {
+        if (!mLightningView.getUrl().contains(TrampolineConstants.CLIQZ_TRAMPOLINE_GOTO)) {
+            if(event.progress > 30) {
+                // mLightningContainer.setRefreshing(false); //Dismiss the refreshing spinner
+            }
             if (event.progress == 100) {
                 switchIcon(ICON_STATE_NONE);
             } else {
@@ -382,7 +380,7 @@ public class MainFragment extends BaseFragment {
     @Subscribe
     public void updateUrl(BrowserEvents.UpdateUrl event) {
         final String url = event.url;
-        if (url != null && !url.isEmpty() && !url.startsWith(Constants.CLIQZ_TRAMPOLINE)) {
+        if (url != null && !url.isEmpty() && !url.startsWith(TrampolineConstants.CLIQZ_TRAMPOLINE_GOTO)) {
             state.setUrl(url);
         }
     }
@@ -390,8 +388,8 @@ public class MainFragment extends BaseFragment {
     private void bringWebViewToFront() {
         final WebView webView = mLightningView.getWebView();
         searchBar.showTitleBar();
-        webView.bringToFront();
-        state.setMode(CliqzBrowserState.Mode.WEBPAGE);
+        mLightningView.getWebView().bringToFront();
+        state.setMode(Mode.WEBPAGE);
     }
 
     @Subscribe
@@ -406,8 +404,12 @@ public class MainFragment extends BaseFragment {
 
     private void openLink(String eventUrl, boolean reset, boolean fromHistory) {
         telemetry.resetNavigationVariables(eventUrl.length());
-        final Uri.Builder builder = Uri.parse(Constants.CLIQZ_TRAMPOLINE).buildUpon();
-        builder.appendQueryParameter("url", eventUrl)
+        new Uri.Builder();
+        final Uri.Builder builder = new Uri.Builder();
+        builder.scheme(TrampolineConstants.CLIQZ_SCHEME)
+                .authority(TrampolineConstants.CLIQZ_TRAMPOLINE_AUTHORITY)
+                .path(TrampolineConstants.CLIQZ_TRAMPOLINE_GOTO_PATH)
+                .appendQueryParameter("url", eventUrl)
                 .appendQueryParameter("q", lastQuery);
         if (reset) {
             builder.appendQueryParameter("r", "true");
@@ -428,16 +430,23 @@ public class MainFragment extends BaseFragment {
 
     @Subscribe
     public void onBackPressed(Messages.BackPressed event) {
-        final String url = mLightningView.getUrl();
-        CliqzBrowserState.Mode mState = state.getMode();
+        // We can go back if:
+        // 1. the webview can go back
+        final String url = mLightningView != null ? mLightningView.getUrl() : "";
+        final Mode mode = state.getMode();
         if (mOverFlowMenu != null && mOverFlowMenu.isShowing()) {
             mOverFlowMenu.dismiss();
             mOverFlowMenu = null;
+        } else if (state.getMode() == CliqzBrowserState.Mode.SEARCH &&
+                !TrampolineConstants.CLIQZ_TRAMPOLINE_GOTO.equals(url)) {
+            bringWebViewToFront();
         } else if (mLightningView.canGoBack()) {
             // In any case the trampoline will be current page predecessor
-            bringWebViewToFront();
+            if (mode == Mode.SEARCH) {
+                bringWebViewToFront();
+            }
             telemetry.backPressed = true;
-            telemetry.showingCards = mState == CliqzBrowserState.Mode.SEARCH;
+            telemetry.showingCards = mode == Mode.SEARCH;
             mLightningView.goBack();
         } else {
             bus.post(new Messages.Exit());
@@ -448,7 +457,7 @@ public class MainFragment extends BaseFragment {
     public void onGoForward(Messages.GoForward event) {
         if (mLightningView.canGoForward()) {
             mLightningView.goForward();
-            if (state.getMode() == CliqzBrowserState.Mode.SEARCH) {
+            if (state.getMode() == Mode.SEARCH) {
                 bringWebViewToFront();
             }
         }
@@ -464,7 +473,7 @@ public class MainFragment extends BaseFragment {
             mAutocompleteEditText.setText(event.query);
             mAutocompleteEditText.setSelection(event.query.length());
         }
-        state.setMode(CliqzBrowserState.Mode.SEARCH);
+        state.setMode(Mode.SEARCH);
         showKeyBoard();
     }
 
@@ -481,7 +490,7 @@ public class MainFragment extends BaseFragment {
 
     @Subscribe
     public void shareLink(Messages.ShareLink event) {
-        if(state.getMode() == CliqzBrowserState.Mode.SEARCH) {
+        if(state.getMode() == Mode.SEARCH) {
             mSearchWebView.requestCardUrl();
         } else {
             final String url = mLightningView.getUrl();
