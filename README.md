@@ -56,6 +56,17 @@ Replace *path_to_android* with the correct Android installation path (i.e. `usr/
 sdk.dir=/usr/local/Cellar/android-sdk/24.4.1_1
 ```
 
+### Cliqzers Notes
+
+The extension must be built. To do so, run the following commands:
+
+```bash
+$> cd <project_dir>/external/extension
+$> npm install
+$> bower install
+$> CLIQZ_BUILD_ENV=production ./fern.js build configs/mobile.json
+```
+
 ## Flavors
 
 The project has two flavors:
