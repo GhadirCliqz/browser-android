@@ -278,10 +278,10 @@ public class LightningView implements ILightningTab {
 //            }
 //            settings.setSaveFormData(true);
 //        } else {
-//            if (API < Build.VERSION_CODES.JELLY_BEAN_MR2) {
-//                //noinspection deprecation
-//                settings.setSavePassword(false);
-//            }
+        if (API <= Build.VERSION_CODES.JELLY_BEAN_MR2) {
+            //noinspection deprecation
+            settings.setSavePassword(false);
+        }
 //            settings.setSaveFormData(false);
 //        }
 
