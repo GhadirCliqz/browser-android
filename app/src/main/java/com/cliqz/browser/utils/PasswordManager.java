@@ -40,7 +40,7 @@ public class PasswordManager {
         final Resources resources = webView.getResources();
         final InputStream inputStream = resources.openRawResource(R.raw.password_manager_script);
         try {
-            final String passwordManagerScript = String.format(convertStreamToString(inputStream),webView.getId());
+            final String passwordManagerScript = String.format(convertStreamToString(inputStream),webView.hashCode());
             executeJS(passwordManagerScript, webView);
             inputStream.close();
 
