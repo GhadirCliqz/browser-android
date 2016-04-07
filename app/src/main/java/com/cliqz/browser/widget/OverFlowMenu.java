@@ -2,17 +2,27 @@ package com.cliqz.browser.widget;
 
 import android.content.Context;
 import android.content.res.Resources;
+import android.graphics.Color;
 import android.graphics.PorterDuff;
+import android.graphics.Rect;
+import android.graphics.drawable.Drawable;
+import android.support.annotation.IdRes;
 import android.support.annotation.StringRes;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.graphics.drawable.DrawableCompat;
+import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewParent;
 import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.ListPopupWindow;
+import android.widget.ListView;
 import android.widget.TextView;
 
 import com.cliqz.browser.main.CliqzBrowserState;
@@ -30,26 +40,33 @@ import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
+import static android.view.View.MeasureSpec.*;
+import static android.view.View.MeasureSpec.getMode;
+import static android.view.View.MeasureSpec.getSize;
 import static android.view.View.MeasureSpec.makeMeasureSpec;
 
 /**
  * Created by Ravjit on 03/02/16.
  */
-public class OverFlowMenu extends ListPopupWindow{
+public class OverFlowMenu extends FrameLayout {
+
+    private static final String TAG = OverFlowMenu.class.getSimpleName();
 
     private enum Entries {
-        ACTIONS(-1),
-        NEW_TAB(R.string.action_new_tab),
-        NEW_INCOGNITO_TAB(R.string.action_incognito),
-        COPY_LINK(R.string.action_copy),
-        ADD_TO_FAVOURITES(R.string.add_to_favourites),
-        SETTINGS(R.string.settings),
-        CONTACT_CLIQZ(R.string.contact_cliqz);
+        ACTIONS(-1, -1),
+        NEW_TAB(R.id.new_tab_menu_button, R.string.action_new_tab),
+        NEW_INCOGNITO_TAB(R.id.new_incognito_tab_menu_button, R.string.action_incognito),
+        COPY_LINK(R.id.copy_link_menu_button, R.string.action_copy),
+        ADD_TO_FAVOURITES(R.id.add_to_favourites_menu_button, R.string.add_to_favourites),
+        SETTINGS(R.id.settings_menu_button, R.string.settings),
+        CONTACT_CLIQZ(R.id.contact_cliqz_menu_button, R.string.contact_cliqz);
 
         final int stringID;
+        final int id;
 
-        Entries(@StringRes int title) {
-            stringID = title;
+        Entries(@IdRes int id, @StringRes int title) {
+            this.id = id;
+            this.stringID = title;
         }
     }
 
@@ -75,7 +92,19 @@ public class OverFlowMenu extends ListPopupWindow{
     private boolean mIncognitoMode;
     private long historyId;
 
+    public View getAnchorView() {
+        return mAnchorView;
+    }
+
+    public void setAnchorView(View mAnchorView) {
+        this.mAnchorView = mAnchorView;
+    }
+
+    private View mAnchorView = null;
+
     private Entries[] mEntries = ENTRIES;
+
+    private int mListViewWidth, mListViewHeight, mListViewY;
 
     @Inject
     Bus bus;
@@ -92,28 +121,91 @@ public class OverFlowMenu extends ListPopupWindow{
     @Inject
     CliqzBrowserState state;
 
+    private final ListView listView;
+
     public OverFlowMenu(Context context) {
         super(context);
         this.context = context;
+        listView = new ListView(context);
+        this.addView(listView);
         ((MainActivity)context).mActivityComponent.inject(this);
         overFlowMenuAdapter = new OverFlowMenuAdapter();
-        this.setAdapter(overFlowMenuAdapter);
-        this.setOnItemClickListener(itemClickListener);
+        listView.setAdapter(overFlowMenuAdapter);
+        listView.setOnItemClickListener(itemClickListener);
+        final Drawable drawable = ContextCompat.getDrawable(context, android.R.drawable.dialog_holo_light_frame);
+        listView.setBackground(drawable);
+        listView.setDivider(null);
     }
 
-    private void setWidth(View view) {
-        final Resources res = context.getResources();
-        final View root = getAnchorView().getRootView().findViewById(Window.ID_ANDROID_CONTENT);
-        final int rootWidth = root.getWidth();
-        final int rootHeight = root.getHeight();
-        final int horizontalMargin = (int) res.getDimension(R.dimen.browser_menu_horizontal_margin);
-        final int verticalMargin = (int) res.getDimension(R.dimen.browser_menu_vertical_margin);
-        final int maxWidth = (2 * rootWidth / 3) - horizontalMargin;
-        final int maxHeight = rootHeight - verticalMargin;
-        view.measure(makeMeasureSpec(maxWidth, View.MeasureSpec.EXACTLY),
-                makeMeasureSpec(maxHeight, View.MeasureSpec.AT_MOST));
-        final int measuredWidth = view.getMeasuredWidth();
-        this.setWidth(measuredWidth);
+    @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        final int wMode = getMode(widthMeasureSpec);
+        final int inWidth = getSize(widthMeasureSpec);
+        final int hMode = getMode(heightMeasureSpec);
+        final int inHeight = getSize(heightMeasureSpec);
+
+        // Find position of the anchor view
+        final int avX, avY, avW, avH;
+        if (mAnchorView != null) {
+            final int[] coords = new int[2];
+            mAnchorView.getLocationOnScreen(coords);
+            avX = coords[0];
+            avY = coords[1];
+            avW = mAnchorView.getWidth();
+            avH = mAnchorView.getHeight();
+        } else {
+            avX = 0;
+            avY = 0;
+            avW = inWidth;
+            avH = 0;
+        }
+
+        mListViewWidth = Math.min(inWidth, inHeight) * 2 / 3;
+        mListViewHeight = inHeight - avY - avH;
+        mListViewY = avY + avH / 2;
+
+        final int measuredListHeight = measureListViewContent(mListViewWidth, mListViewHeight);
+
+        mListViewHeight = Math.min(mListViewHeight, measuredListHeight);
+
+        final int lvW = makeMeasureSpec(mListViewWidth, EXACTLY);
+        final int lvH = makeMeasureSpec(mListViewHeight, EXACTLY);
+        listView.measure(lvW, lvH);
+        setMeasuredDimension(widthMeasureSpec, heightMeasureSpec);
+    }
+
+    private int measureListViewContent(int maxWidth, int maxHeight) {
+        final View firstRow = overFlowMenuAdapter.getView(0, null, listView);
+        final View otherRow = overFlowMenuAdapter.getView(1, null, listView);
+        final int widthMeasureSpec = makeMeasureSpec(maxWidth, AT_MOST);
+        final int heightMeasureSpec = makeMeasureSpec(maxHeight, AT_MOST);
+        firstRow.measure(widthMeasureSpec, heightMeasureSpec);
+        otherRow.measure(widthMeasureSpec, heightMeasureSpec);
+
+        final Drawable background = listView.getBackground();
+        final Rect drawablePadding = new Rect();
+        background.getPadding(drawablePadding);
+        final int result = firstRow.getMeasuredHeight() + (overFlowMenuAdapter.getCount() - 1) *
+                otherRow.getMeasuredHeight() + drawablePadding.top + drawablePadding.bottom;
+        return result;
+    }
+
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent ev) {
+        if (!super.dispatchTouchEvent(ev)) {
+            dismiss();
+        }
+        return true;
+    }
+
+    @Override
+    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+        if (!changed) {
+            return;
+        }
+
+        final int listViewX = right - mListViewWidth;
+        listView.layout(listViewX, mListViewY, right, mListViewY + mListViewHeight);
     }
 
     public boolean canGoForward() {
@@ -202,7 +294,6 @@ public class OverFlowMenu extends ListPopupWindow{
                 LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
                 if(position == 0) {
                     view = inflater.inflate(R.layout.overflow_menu_header, parent, false);
-                    OverFlowMenu.this.setWidth(view);
                     ButterKnife.bind(OverFlowMenu.this, view);
                     if(mode == Mode.SEARCH) {
                         setButtonDisabled(actionRefreshButton);
@@ -224,15 +315,27 @@ public class OverFlowMenu extends ListPopupWindow{
             if(mEntries[position] == Entries.ACTIONS) {
                 view.setTag(mEntries[position]);
             } else {
-                TextView option = (TextView) view.findViewById(android.R.id.text1);
-                option.setText(mEntries[position].stringID);
-                view.setTag(mEntries[position]);
+                final Entries entry = mEntries[position];
+                TextView option = getEntryTextView(view);
+                option.setText(entry.stringID);
+                view.setTag(entry);
+                view.setId(entry.id);
                 option.setTextColor(ContextCompat.getColor(context, R.color.black));
                 if(!isEnabled(position)) {
                     option.setTextColor(ContextCompat.getColor(context, R.color.hint_text));
                 }
             }
             return view;
+        }
+
+        private TextView getEntryTextView(final View view) {
+            final TextView result;
+            if (view instanceof TextView) {
+                result = (TextView) view;
+            } else {
+                result = (TextView) view.findViewById(android.R.id.text1);
+            }
+            return result;
         }
 
         private void setButtonDisabled(final ImageView view) {
@@ -249,10 +352,31 @@ public class OverFlowMenu extends ListPopupWindow{
 
     }
 
+    public void show() {
+        if (mAnchorView == null) {
+            throw new RuntimeException("Must be anchored");
+        }
+
+        final ViewGroup root = (ViewGroup) mAnchorView.getRootView();
+        root.addView(this);
+    }
+
+    public void dismiss() {
+        if (mAnchorView == null) {
+            throw new RuntimeException("Must be anchored");
+        }
+
+        final ViewParent parent = this.getParent();
+        if (parent != null) {
+            ((ViewGroup) parent).removeView(this);
+        }
+    }
+
     private AdapterView.OnItemClickListener itemClickListener = new AdapterView.OnItemClickListener() {
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
             final Entries tag = (Entries)view.getTag();
+            Log.e(TAG, "Entry id: " + tag.id);
             switch (tag) {
                 case COPY_LINK:
                     if (state.getMode() == Mode.WEBPAGE) {
@@ -302,4 +426,25 @@ public class OverFlowMenu extends ListPopupWindow{
         bus.post(new Messages.ShareLink());
         this.dismiss();
     }
+
+    /* @Override
+    public void show() {
+        super.show();
+        ViewParent v = this.getListView();
+        while (v != null) {
+            Log.e(TAG, dump(v));
+            v = v.getParent();
+        }
+    }
+
+    private static String dump(ViewParent viewParent) {
+        int id = -1;
+        try {
+            id = ((View) viewParent).getId();
+        } catch (ClassCastException e) {
+
+        }
+
+        return String.format("%s (%d) [%d]", viewParent.getClass().getCanonicalName(), id, viewParent.hashCode());
+    } */
 }

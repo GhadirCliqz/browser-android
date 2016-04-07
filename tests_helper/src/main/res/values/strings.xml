@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">CLIQZ Tests Helper</string>
+    <string name="open_url">Open URL</string>
+    <string name="select_a_browser">Select a Browser</string>
+</resources>

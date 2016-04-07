@@ -50,7 +50,7 @@ You need also to set an environment variable:
 $> export ANDROID_HOME=<path_to_android>
 ```
 
-Replace *path_to_android* with the correct Android installation path (i.e. `usr/local/Cellar/android-sdk/24.4.1_1`). Alternately, a file called `local.properties` can be created in the project root. It should contain a single line containing the *sdk.dir* variable declaration. Below, an example of the file content:
+Replace *path_to_android* with the correct Android installation path (i.e. `/usr/local/opt/android-sdk/`). Alternately, a file called `local.properties` can be created in the project root. It should contain a single line containing the *sdk.dir* variable declaration. Below, an example of the file content:
 
 ```java
 sdk.dir=/usr/local/Cellar/android-sdk/24.4.1_1
@@ -79,15 +79,51 @@ The project has two flavors:
 Compile the standard version that uses the phone WebView to render the navigation extension. It supports only devices from Android 5.0 (21) up. The flavor produce a small APK (almost 6MB).
 
 Command examples
-* Build standard debug APK: `$> ./gradlew assembleStandardDebug`
-* Build standard release APK: `$> ./gradlew assembleStandardRelease`
-* Install the debug version on a single device connect using USB cable: `$> ./gradlew installStandardDebug`
+* Build standard debug APK: `$> ./gradlew :app:assembleStandardDebug`
+* Build standard release APK: `$> ./gradlew :app:assembleStandardRelease`
+* Install the debug version on a single device connect using USB cable: `$> ./gradlew :app:installStandardDebug`
 
 ### XWalk
 
 Compile a version that uses the [Crosswalk Project](https://crosswalk-project.org/) WebView to render the navigation extension. It supports devices starting from Android 4.0 (14) up. Due to the external WebView used, the generated APK is pretty big (more than 23MB) and architecture dependent (only ARM devices, no X86, no MIPS).
 
 Command examples
-* Build XWalk debug APK: `$> ./gradlew assembleXwalkDebug`
-* Build XWalk release APK: `$> ./gradlew assembleXwalkRelease`
-* Install the debug version on a single device connect using USB cable: `$> ./gradlew installXwalkDebug`
+* Build XWalk debug APK: `$> ./gradlew :app:assembleXwalkDebug`
+* Build XWalk release APK: `$> ./gradlew :app:assembleXwalkRelease`
+* Install the debug version on a single device connect using USB cable: `$> ./gradlew :app:installXwalkDebug`
+
+## Testing
+
+We have some unit tests implemented and few instrumentation tests too, although our preferred way to test the app is via UI automation.  
+We use [Appium](http://appium.io/), [mocha](https://mochajs.org/) and [wd](http://admc.io/wd/) to run our tests. They are written in Javascript and reside in the [spec](./spec/) folder. To run them, you have to first install [Node.js](https://nodejs.org/), then install mocha using npm:
+
+```bash
+$> npm install -g mocha
+```
+
+After that, you can configure the (download the tests dependencies) running the following commands:
+
+```bash
+$> cd <project_dir>/external/extension
+$> npm install
+```
+
+Finally, you can run a test suite by running `mocha <testfile.js>` in the spec folder. IE:
+
+```bash
+$> mocha overflow_menu_tests.js
+```
+
+All tests can be run by using the star operator:
+
+```bash
+$> mocha *.js
+```
+
+We have an helper to test our application, it reside in [tests_helper](./tests_helper/) folder. Due to Appium limitations, this helper is downloaded from Internet at tests runtime using our CDN. The current version (v3) can be found [here](https://cdn.cliqz.com/mobile/browser/tests/testsHelper_v3.zip) and can be compiled using the following command:
+
+```bash
+$> ./gradlew :tests_helper:zipDebug
+```
+
+The final zip file should be in `<project_dir>/tests_helper/build/distribution`.
