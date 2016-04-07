@@ -74,6 +74,7 @@ public class MainFragment extends BaseFragment {
     private String mInitialUrl = null;
     private String mSearchEngine;
     private Message newTabMessage = null;
+    private String mExternalQuery = null;
 
     String lastQuery = "";
 
@@ -114,6 +115,7 @@ public class MainFragment extends BaseFragment {
         isIncognito = arguments.getBoolean(Constants.KEY_IS_INCOGNITO, false);
         mInitialUrl = arguments.getString(Constants.KEY_URL, null);
         newTabMessage = arguments.getParcelable(Constants.KEY_NEW_TAB_MESSAGE);
+        mExternalQuery = arguments.getString(Constants.KEY_QUERY);
         // We need to remove the key, otherwise the url get reloaded for each resume
         arguments.remove(Constants.KEY_URL);
     }
@@ -202,6 +204,9 @@ public class MainFragment extends BaseFragment {
             newTabMessage.sendToTarget();
             newTabMessage = null;
             bringWebViewToFront();
+        } else if (mExternalQuery != null && !mExternalQuery.isEmpty()) {
+            state.setMode(Mode.SEARCH);
+            bus.post(new Messages.ShowSearch(mExternalQuery));
         } else {
             // final boolean reset = System.currentTimeMillis() - state.getTimestamp() >= Constants.HOME_RESET_DELAY;
             final String lightningUrl = mLightningView.getUrl();

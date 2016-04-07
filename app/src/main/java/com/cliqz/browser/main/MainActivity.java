@@ -3,6 +3,7 @@ package com.cliqz.browser.main;
 import android.Manifest;
 import android.app.ActivityManager;
 import android.app.AlertDialog;
+import android.app.SearchManager;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
@@ -129,14 +130,17 @@ public class MainActivity extends AppCompatActivity {
         final Intent intent = savedInstanceState == null ? getIntent() : null;
         final String url;
         final Message message;
+        final String query;
         if (intent != null) {
             final Bundle bundle = intent.getExtras();
             mBrowserState.setIncognito(bundle != null ? bundle.getBoolean(Constants.KEY_IS_INCOGNITO) : false);
             message = BrowserApp.popNewTabMessage();
             url = Intent.ACTION_VIEW.equals(intent.getAction()) ? intent.getDataString() : null;
+            query = Intent.ACTION_WEB_SEARCH.equals(intent.getAction()) ? intent.getStringExtra(SearchManager.QUERY) : null;
         } else {
             url = null;
             message = null;
+            query = null;
             mBrowserState.setIncognito(false);
         }
         final Bundle args = new Bundle();
@@ -147,6 +151,9 @@ public class MainActivity extends AppCompatActivity {
         } else if (message != null) {
             setIntent(null);
             args.putParcelable(Constants.KEY_NEW_TAB_MESSAGE, message);
+        } else if (query != null) {
+            setIntent(null);
+            args.putString(Constants.KEY_QUERY, query);
         }
         mMainFragment.setArguments(args);
 

@@ -42,6 +42,7 @@ public final class Constants {
     public static final String KEY_IS_INCOGNITO = "incognito";
     public static final String KEY_URL = "url";
     public static final String KEY_NEW_TAB_MESSAGE = "new_tab_message";
+    public static final String KEY_QUERY = "query";
 
 
     public static final String LOAD_READING_URL = "ReadingUrl";
