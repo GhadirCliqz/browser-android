@@ -129,17 +129,17 @@ public class MainActivity extends AppCompatActivity {
         // Ignore intent if we are being recreated
         final Intent intent = savedInstanceState == null ? getIntent() : null;
         final String url;
-        final Message message;
+        final boolean message;
         final String query;
         if (intent != null) {
             final Bundle bundle = intent.getExtras();
             mBrowserState.setIncognito(bundle != null ? bundle.getBoolean(Constants.KEY_IS_INCOGNITO) : false);
-            message = BrowserApp.popNewTabMessage();
+            message = BrowserApp.hasNewTabMessage();
             url = Intent.ACTION_VIEW.equals(intent.getAction()) ? intent.getDataString() : null;
             query = Intent.ACTION_WEB_SEARCH.equals(intent.getAction()) ? intent.getStringExtra(SearchManager.QUERY) : null;
         } else {
             url = null;
-            message = null;
+            message = false;
             query = null;
             mBrowserState.setIncognito(false);
         }
@@ -148,9 +148,9 @@ public class MainActivity extends AppCompatActivity {
         if (url != null && Patterns.WEB_URL.matcher(url).matches()) {
             setIntent(null);
             args.putString(Constants.KEY_URL, url);
-        } else if (message != null) {
+        } else if (message) {
             setIntent(null);
-            args.putParcelable(Constants.KEY_NEW_TAB_MESSAGE, message);
+            args.putBoolean(Constants.KEY_NEW_TAB_MESSAGE, true);
         } else if (query != null) {
             setIntent(null);
             args.putString(Constants.KEY_QUERY, query);

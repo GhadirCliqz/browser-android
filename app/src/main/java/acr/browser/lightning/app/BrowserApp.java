@@ -55,4 +55,8 @@ public class BrowserApp extends Application {
         sNewTabMessage = null;
         return result;
     }
+
+    public static boolean hasNewTabMessage() {
+        return sNewTabMessage != null;
+    }
 }

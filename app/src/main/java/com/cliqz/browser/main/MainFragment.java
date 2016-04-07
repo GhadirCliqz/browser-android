@@ -42,6 +42,7 @@ import com.squareup.otto.Subscribe;
 
 import acr.browser.lightning.BuildConfig;
 import acr.browser.lightning.R;
+import acr.browser.lightning.app.BrowserApp;
 import acr.browser.lightning.bus.BrowserEvents;
 import acr.browser.lightning.constant.Constants;
 import acr.browser.lightning.utils.ThemeUtils;
@@ -114,8 +115,10 @@ public class MainFragment extends BaseFragment {
     private void parseArguments(Bundle arguments) {
         isIncognito = arguments.getBoolean(Constants.KEY_IS_INCOGNITO, false);
         mInitialUrl = arguments.getString(Constants.KEY_URL, null);
-        newTabMessage = arguments.getParcelable(Constants.KEY_NEW_TAB_MESSAGE);
         mExternalQuery = arguments.getString(Constants.KEY_QUERY);
+        if (arguments.getBoolean(Constants.KEY_NEW_TAB_MESSAGE, false)) {
+            newTabMessage = BrowserApp.popNewTabMessage();
+        }
         // We need to remove the key, otherwise the url get reloaded for each resume
         arguments.remove(Constants.KEY_URL);
     }
