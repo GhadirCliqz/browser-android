@@ -29,6 +29,8 @@ import android.util.Log;
 import com.cliqz.browser.main.MainActivity;
 import com.google.android.gms.gcm.GcmListenerService;
 
+import java.util.Locale;
+
 public class MessageListenerService extends GcmListenerService {
 
     private static final String TAG = "MyGcmListenerService";
@@ -43,9 +45,12 @@ public class MessageListenerService extends GcmListenerService {
     // [START receive_message]
     @Override
     public void onMessageReceived(String from, Bundle data) {
-        String message = data.getString("message");
-        Log.d(TAG, "From: " + from);
-        Log.d(TAG, "Message: " + message);
+        final int type = Integer.valueOf(data.getString("type"));
+        final String title = data.getString("title");
+        final String url = data.getString("url");
+        Log.i(TAG, String.format(Locale.US,
+                "Received message with type %d title \"%s\" and url \"%s\"",
+                type, title, url));
 
         if (from.startsWith("/topics/")) {
             // message received from some topic.
@@ -65,7 +70,7 @@ public class MessageListenerService extends GcmListenerService {
          * In some cases it may be useful to show a notification indicating to the user
          * that a message was received.
          */
-        sendNotification(message);
+        sendNotification(title, url);
         // [END_EXCLUDE]
     }
     // [END receive_message]
@@ -73,19 +78,22 @@ public class MessageListenerService extends GcmListenerService {
     /**
      * Create and show a simple notification containing the received GCM message.
      *
-     * @param message GCM message received.
+     * @param title GCM message received.
+     * @param url   url
      */
-    private void sendNotification(String message) {
+    private void sendNotification(String title, String url) {
         Intent intent = new Intent(this, MainActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        intent.setAction(Intent.ACTION_VIEW);
+        intent.setData(Uri.parse(url));
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0 /* Request code */, intent,
                 PendingIntent.FLAG_ONE_SHOT);
 
         Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
         NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this)
                 .setSmallIcon(android.R.drawable.ic_btn_speak_now)
-                .setContentTitle("GCM Message")
-                .setContentText(message)
+                .setContentTitle(title)
+                .setContentText(url)
                 .setAutoCancel(true)
                 .setSound(defaultSoundUri)
                 .setContentIntent(pendingIntent);
