@@ -27,8 +27,6 @@
         <Preference
             android:key="clear_history"
             android:title="@string/clear_history" />
-
-        <!-- !!! Too many unuseful checkboxes !!!
         <CheckBoxPreference
             android:defaultValue="false"
             android:key="clear_cache_exit"
@@ -41,6 +39,8 @@
             android:defaultValue="false"
             android:key="clear_cookies_exit"
             android:title="@string/clear_cookies_exit" />
+
+        <!-- !!! Too many unuseful checkboxes !!!
         <CheckBoxPreference
             android:defaultValue="false"
             android:key="clear_webstorage_exit"
