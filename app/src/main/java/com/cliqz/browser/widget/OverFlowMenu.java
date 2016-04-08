@@ -184,11 +184,14 @@ public class OverFlowMenu extends ListPopupWindow{
 
         @Override
         public boolean isEnabled(int position) {
-            if (mEntries[position] == Entries.ADD_TO_FAVOURITES && historyId == -1) {
-                return false;
-            }
-            return mEntries[position] != Entries.COPY_LINK ||
-                state.getMode() == Mode.WEBPAGE;
+            final boolean isAddToFavourites = mEntries[position] == Entries.ADD_TO_FAVOURITES;
+            final boolean isCopyLink = mEntries[position] == Entries.COPY_LINK;
+            final boolean hasValidId = historyId != -1;
+            final boolean isShowingWebPage = state.getMode() == Mode.WEBPAGE;
+
+            return (!isAddToFavourites && !isCopyLink) ||
+                    (isAddToFavourites && hasValidId) ||
+                    (isCopyLink && isShowingWebPage);
         }
 
         @Override
