@@ -253,4 +253,5 @@
     <string name="not_shareable">Questa card non può essere condivisa.</string>
     <string name="open_in_incognito_tab">Apri in una scheda anonima</string>
     <string name="open_in_new_tab">Apri in una nuova scheda</string>
+    <string name="add_to_favourites">Aggiungi ai favoriti</string>
 </resources>

@@ -53,6 +53,7 @@ class LightningWebClient extends WebViewClient {
     private final LightningView mLightningView;
     private final Bus mEventBus;
     private final PasswordManager mPasswordManager;
+    private String mLastUrl = "";
 //    private final IntentUtils mIntentUtils;
 //    private final WebView mWebView;
 
@@ -175,6 +176,10 @@ class LightningWebClient extends WebViewClient {
 
     @Override
     public void onPageStarted(WebView view, String url, Bitmap favicon) {
+        if (!mLastUrl.equals(url)) {
+            mLightningView.historyId = -1;
+            mLastUrl = url;
+        }
         if(mLightningView.telemetry.backPressed) {
             if(!url.contains(TrampolineConstants.CLIQZ_TRAMPOLINE_GOTO)) {
                 if(mLightningView.telemetry.showingCards) {

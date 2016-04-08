@@ -8,6 +8,7 @@ import com.squareup.otto.Bus;
 
 import javax.inject.Inject;
 
+import acr.browser.lightning.database.HistoryDatabase;
 import acr.browser.lightning.preference.PreferenceManager;
 
 /**
@@ -32,6 +33,9 @@ public abstract class FragmentWithBus extends Fragment {
 
     @Inject
     PreferenceManager preferenceManager;
+
+    @Inject
+    HistoryDatabase historyDatabase;
 
     public FragmentWithBus() {
         super();

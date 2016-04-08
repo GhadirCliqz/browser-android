@@ -79,4 +79,12 @@ public final class Messages {
             this.url = url;
         }
     }
+
+    public static class AddToFavourites {
+        public final long id;
+
+        public AddToFavourites(long id) {
+            this.id = id;
+        }
+    }
 }

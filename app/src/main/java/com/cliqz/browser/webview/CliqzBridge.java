@@ -98,7 +98,7 @@ public class CliqzBridge extends Bridge {
                     for (int i = 0; ids != null && i < ids.length(); i++) {
                         final long id = ids.optLong(i, -1);
                         if (id > -1) {
-                            bridge.historyDatabase.markHistory(id, value);
+                            bridge.historyDatabase.addToFavourites(id, value);
                         }
                     }
                 }

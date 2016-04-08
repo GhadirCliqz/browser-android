@@ -140,7 +140,7 @@ public class HistoryDatabase extends SQLiteOpenHelper {
      * @param url   the url to update
      * @param title the title of the page to which the url is pointing
      */
-    public synchronized void visitHistoryItem(@NonNull String url, @Nullable String title) {
+    public synchronized long visitHistoryItem(@NonNull String url, @Nullable String title) {
         final SQLiteDatabase db = dbHandler.getDatabase();
         Cursor q = db.query(false, UrlsTable.TABLE_NAME,
                 new String[]{UrlsTable.ID, UrlsTable.VISITS},
@@ -152,6 +152,7 @@ public class HistoryDatabase extends SQLiteOpenHelper {
         urlsValues.put(UrlsTable.VISITS, 0l);
         urlsValues.put(UrlsTable.TIME, time);
         db.beginTransaction();
+        long historyID = -1;
         try {
             final long urlId;
             if (q.getCount() > 0) {
@@ -169,10 +170,11 @@ public class HistoryDatabase extends SQLiteOpenHelper {
             final ContentValues historyValues = new ContentValues();
             historyValues.put(HistoryTable.URL_ID, urlId);
             historyValues.put(HistoryTable.TIME, time);
-            db.insert(HistoryTable.TABLE_NAME, null, historyValues);
+            historyID = db.insert(HistoryTable.TABLE_NAME, null, historyValues);
             db.setTransactionSuccessful();
         } finally {
             db.endTransaction();
+            return historyID;
         }
     }
 
@@ -357,7 +359,7 @@ public class HistoryDatabase extends SQLiteOpenHelper {
      * @param id an History Table id
      * @param favorite true to mark the history point as a favorite, false otherwise
      */
-    public synchronized void markHistory(final long id, boolean favorite) {
+    public synchronized void addToFavourites(final long id, boolean favorite) {
         final SQLiteDatabase db = dbHandler.getDatabase();
         final ContentValues values = new ContentValues();
         values.put(HistoryTable.FAVORITE, favorite);
