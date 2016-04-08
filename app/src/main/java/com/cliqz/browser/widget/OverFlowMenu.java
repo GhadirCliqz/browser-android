@@ -42,6 +42,7 @@ public class OverFlowMenu extends ListPopupWindow{
         NEW_TAB(R.string.action_new_tab),
         NEW_INCOGNITO_TAB(R.string.action_incognito),
         COPY_LINK(R.string.action_copy),
+        ADD_TO_FAVOURITES(R.string.add_to_favourites),
         SETTINGS(R.string.settings),
         CONTACT_CLIQZ(R.string.contact_cliqz);
 
@@ -57,6 +58,7 @@ public class OverFlowMenu extends ListPopupWindow{
             Entries.NEW_TAB,
             Entries.NEW_INCOGNITO_TAB,
             Entries.COPY_LINK,
+            Entries.ADD_TO_FAVOURITES,
             Entries.SETTINGS,
             Entries.CONTACT_CLIQZ
     };
@@ -71,6 +73,7 @@ public class OverFlowMenu extends ListPopupWindow{
     private final OverFlowMenuAdapter overFlowMenuAdapter;
     private boolean mCanGoForward = false;
     private boolean mIncognitoMode;
+    private long historyId;
 
     private Entries[] mEntries = ENTRIES;
 
@@ -132,6 +135,10 @@ public class OverFlowMenu extends ListPopupWindow{
         overFlowMenuAdapter.notifyDataSetInvalidated();
     }
 
+    public void setHistoryId(long historyId) {
+        this.historyId = historyId;
+    }
+
     private class OverFlowMenuAdapter extends BaseAdapter {
 
         // private String[] menuItems;
@@ -177,6 +184,9 @@ public class OverFlowMenu extends ListPopupWindow{
 
         @Override
         public boolean isEnabled(int position) {
+            if (mEntries[position] == Entries.ADD_TO_FAVOURITES && historyId == -1) {
+                return false;
+            }
             return mEntries[position] != Entries.COPY_LINK ||
                 state.getMode() == Mode.WEBPAGE;
         }
@@ -215,7 +225,7 @@ public class OverFlowMenu extends ListPopupWindow{
                 option.setText(mEntries[position].stringID);
                 view.setTag(mEntries[position]);
                 option.setTextColor(ContextCompat.getColor(context, R.color.black));
-                if(mEntries[position] == Entries.COPY_LINK && mode == Mode.SEARCH) {
+                if(!isEnabled(position)) {
                     option.setTextColor(ContextCompat.getColor(context, R.color.hint_text));
                 }
             }
@@ -261,6 +271,13 @@ public class OverFlowMenu extends ListPopupWindow{
                     break;
                 case NEW_TAB:
                     bus.post(new BrowserEvents.NewTab(false));
+                    OverFlowMenu.this.dismiss();
+                    break;
+                case ADD_TO_FAVOURITES:
+                    if (state.getMode() == Mode.WEBPAGE) {
+                        bus.post(new Messages.AddToFavourites(historyId));
+                        OverFlowMenu.this.dismiss();
+                    }
             }
         }
     };

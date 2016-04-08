@@ -306,6 +306,7 @@ public class MainFragment extends BaseFragment {
         mOverFlowMenu.setCanGoForward(mLightningView.canGoForward());
         mOverFlowMenu.setAnchorView(overflowMenuButton);
         mOverFlowMenu.setIncognitoMode(isIncognito);
+        mOverFlowMenu.setHistoryId(mLightningView.historyId);
         mOverFlowMenu.show();
     }
 
@@ -405,6 +406,11 @@ public class MainFragment extends BaseFragment {
     @Subscribe
     public void openHistoryLink(CliqzMessages.OpenHistoryLink event) {
         openLink(event.url, false, true);
+    }
+
+    @Subscribe
+    public void addToFavourites(Messages.AddToFavourites event) {
+        historyDatabase.addToFavourites(event.id, true);
     }
 
     private void openLink(String eventUrl, boolean reset, boolean fromHistory) {

@@ -108,6 +108,9 @@ public class LightningView implements ILightningTab {
     private final WebViewHandler mWebViewHandler = new WebViewHandler(this);
     private final Map<String, String> mRequestHeaders = new ArrayMap<>();
 
+    //Id of the current page in the history database
+    public long historyId = -1;
+
     @Inject
     Bus mEventBus;
 
@@ -944,7 +947,7 @@ public class LightningView implements ILightningTab {
             @Override
             public void run() {
                 try {
-                    mHistoryDatabase.visitHistoryItem(url, title);
+                   LightningView.this.historyId = mHistoryDatabase.visitHistoryItem(url, title);
                 } catch (IllegalStateException e) {
                     Log.e(Constants.TAG, "IllegalStateException in updateHistory", e);
                 } catch (NullPointerException e) {
