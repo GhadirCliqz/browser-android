@@ -49,6 +49,7 @@ import acr.browser.lightning.app.BrowserApp;
 import acr.browser.lightning.bus.BrowserEvents;
 import acr.browser.lightning.constant.Constants;
 import acr.browser.lightning.preference.PreferenceManager;
+import acr.browser.lightning.utils.WebUtils;
 
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 
@@ -304,6 +305,29 @@ public class MainActivity extends AppCompatActivity {
         String context = getCurrentVisibleFragmentName();
         if(!context.isEmpty()) {
             telemetry.sendClosingSignals(Telemetry.Action.KILL, context);
+        }
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+            performExitCleanUp();
+        } else {
+            //only perform clean up after the last tab is closed.
+            // NOTE! number of appTasks is zero after the last tab is closed
+            ActivityManager activityManager = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
+            if (activityManager.getAppTasks().size() == 0) {
+                performExitCleanUp();
+            }
+        }
+    }
+
+    private void performExitCleanUp() {
+        if (preferenceManager.getClearCacheExit()) {
+            WebUtils.clearCache(mMainFragment.mLightningView.getWebView());
+        }
+        if (preferenceManager.getClearHistoryExitEnabled()) {
+            mMainFragment.historyDatabase.clearHistory(false);
+            preferenceManager.setShouldClearQueries(PreferenceManager.ClearQueriesOptions.CLEAR_QUERIES);
+        }
+        if (preferenceManager.getClearCookiesExitEnabled()) {
+            WebUtils.clearCookies(this);
         }
     }
 

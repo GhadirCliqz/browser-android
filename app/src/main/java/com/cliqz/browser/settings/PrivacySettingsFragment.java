@@ -30,9 +30,9 @@ public class PrivacySettingsFragment extends BaseSettingsFragment {
     private static final String SETTINGS_SAVEPASSWORD = "password";
     private static final String SETTINGS_CLEARHISTORY = "clear_history";
     // private static final String SETTINGS_COOKIESINKOGNITO = "incognito_cookies";
-    // private static final String SETTINGS_CACHEEXIT = "clear_cache_exit";
-    // private static final String SETTINGS_HISTORYEXIT = "clear_history_exit";
-    // private static final String SETTINGS_COOKIEEXIT = "clear_cookies_exit";
+    private static final String SETTINGS_CACHEEXIT = "clear_cache_exit";
+    private static final String SETTINGS_HISTORYEXIT = "clear_history_exit";
+    private static final String SETTINGS_COOKIEEXIT = "clear_cookies_exit";
     // private static final String SETTINGS_CLEARCACHE = "clear_cache";
     // private static final String SETTINGS_CLEARCOOKIES = "clear_cookies";
     // private static final String SETTINGS_CLEARWEBSTORAGE = "clear_webstorage";
@@ -40,9 +40,8 @@ public class PrivacySettingsFragment extends BaseSettingsFragment {
 
     private static final int API = Build.VERSION.SDK_INT;
     private Activity mActivity;
-    private CheckBoxPreference cblocation, cbenablecookies, cb3cookies, cbsavepasswords;
-            /* , cbcookiesInkognito, cbcacheexit, cbhistoryexit, cbcookiesexit, cbwebstorageexit
-            */
+    private CheckBoxPreference cblocation, cbenablecookies, cb3cookies, cbsavepasswords, cbcacheexit,
+            cbhistoryexit, cbcookiesexit; //cbcookiesInkognito, cbwebstorageexit
     // private boolean mSystemBrowser;
     private Handler messageHandler;
 
@@ -72,9 +71,9 @@ public class PrivacySettingsFragment extends BaseSettingsFragment {
         // cbcookiesInkognito = (CheckBoxPreference) findPreference(SETTINGS_COOKIESINKOGNITO);
         cb3cookies = (CheckBoxPreference) findPreference(SETTINGS_THIRDPCOOKIES);
         cbsavepasswords = (CheckBoxPreference) findPreference(SETTINGS_SAVEPASSWORD);
-        // cbcacheexit = (CheckBoxPreference) findPreference(SETTINGS_CACHEEXIT);
-        // cbhistoryexit = (CheckBoxPreference) findPreference(SETTINGS_HISTORYEXIT);
-        // cbcookiesexit = (CheckBoxPreference) findPreference(SETTINGS_COOKIEEXIT);
+        cbcacheexit = (CheckBoxPreference) findPreference(SETTINGS_CACHEEXIT);
+        cbhistoryexit = (CheckBoxPreference) findPreference(SETTINGS_HISTORYEXIT);
+        cbcookiesexit = (CheckBoxPreference) findPreference(SETTINGS_COOKIEEXIT);
         // bwebstorageexit = (CheckBoxPreference) findPreference(SETTINGS_WEBSTORAGEEXIT);
 
         // clearcache.setOnPreferenceClickListener(this);
@@ -86,18 +85,18 @@ public class PrivacySettingsFragment extends BaseSettingsFragment {
         cbenablecookies.setOnPreferenceChangeListener(this);
         // cbcookiesInkognito.setOnPreferenceChangeListener(this);
         cbsavepasswords.setOnPreferenceChangeListener(this);
-        // cbcacheexit.setOnPreferenceChangeListener(this);
-        // cbhistoryexit.setOnPreferenceChangeListener(this);
-        // cbcookiesexit.setOnPreferenceChangeListener(this);
+        cbcacheexit.setOnPreferenceChangeListener(this);
+        cbhistoryexit.setOnPreferenceChangeListener(this);
+        cbcookiesexit.setOnPreferenceChangeListener(this);
         // cbwebstorageexit.setOnPreferenceChangeListener(this);
 
         cblocation.setChecked(mPreferenceManager.getLocationEnabled());
         cbenablecookies.setChecked(mPreferenceManager.getCookiesEnabled());
         // cbcookiesInkognito.setChecked(mPreferenceManager.getIncognitoCookiesEnabled());
         cbsavepasswords.setChecked(mPreferenceManager.getSavePasswordsEnabled());
-        // cbcacheexit.setChecked(mPreferenceManager.getClearCacheExit());
-        // cbhistoryexit.setChecked(mPreferenceManager.getClearHistoryExitEnabled());
-        // cbcookiesexit.setChecked(mPreferenceManager.getClearCookiesExitEnabled());
+        cbcacheexit.setChecked(mPreferenceManager.getClearCacheExit());
+        cbhistoryexit.setChecked(mPreferenceManager.getClearHistoryExitEnabled());
+        cbcookiesexit.setChecked(mPreferenceManager.getClearCookiesExitEnabled());
         // cbwebstorageexit.setChecked(mPreferenceManager.getClearWebStorageExitEnabled());
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             cb3cookies.setOnPreferenceChangeListener(this);
@@ -258,18 +257,18 @@ public class PrivacySettingsFragment extends BaseSettingsFragment {
                 mPreferenceManager.setSavePasswordsEnabled((Boolean) newValue);
                 cbsavepasswords.setChecked((Boolean) newValue);
                 return true;
-//            case SETTINGS_CACHEEXIT:
-//                mPreferenceManager.setClearCacheExit((Boolean) newValue);
-//                cbcacheexit.setChecked((Boolean) newValue);
-//                return true;
-//            case SETTINGS_HISTORYEXIT:
-//                mPreferenceManager.setClearHistoryExitEnabled((Boolean) newValue);
-//                cbhistoryexit.setChecked((Boolean) newValue);
-//                return true;
-//            case SETTINGS_COOKIEEXIT:
-//                mPreferenceManager.setClearCookiesExitEnabled((Boolean) newValue);
-//                cbcookiesexit.setChecked((Boolean) newValue);
-//                return true;
+            case SETTINGS_CACHEEXIT:
+                mPreferenceManager.setClearCacheExit((Boolean) newValue);
+                cbcacheexit.setChecked((Boolean) newValue);
+                return true;
+            case SETTINGS_HISTORYEXIT:
+                mPreferenceManager.setClearHistoryExitEnabled((Boolean) newValue);
+                cbhistoryexit.setChecked((Boolean) newValue);
+                return true;
+            case SETTINGS_COOKIEEXIT:
+                mPreferenceManager.setClearCookiesExitEnabled((Boolean) newValue);
+                cbcookiesexit.setChecked((Boolean) newValue);
+                return true;
 //            case SETTINGS_WEBSTORAGEEXIT:
 //                mPreferenceManager.setClearWebStorageExitEnabled((Boolean) newValue);
 //                cbwebstorageexit.setChecked((Boolean) newValue);
