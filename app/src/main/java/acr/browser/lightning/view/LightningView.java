@@ -707,17 +707,17 @@ public class LightningView implements ILightningTab {
                     if (result.getType() == WebView.HitTestResult.SRC_IMAGE_ANCHOR_TYPE || result.getType() == WebView.HitTestResult.IMAGE_TYPE) {
                         mBookmarksDialogBuilder.showLongPressImageDialog(mActivity, url, getUserAgent());
                     } else {
-                        mBookmarksDialogBuilder.showLongPressLinkDialog(mActivity, url);
+                        mBookmarksDialogBuilder.showLongPressLinkDialog(mActivity, url, getUserAgent());
                     }
                 } else {
-                    mBookmarksDialogBuilder.showLongPressLinkDialog(mActivity, url);
+                    mBookmarksDialogBuilder.showLongPressLinkDialog(mActivity, url, getUserAgent());
                 }
             } else if (result != null && result.getExtra() != null) {
                 final String newUrl = result.getExtra();
                 if (result.getType() == WebView.HitTestResult.SRC_IMAGE_ANCHOR_TYPE || result.getType() == WebView.HitTestResult.IMAGE_TYPE) {
                     mBookmarksDialogBuilder.showLongPressImageDialog(mActivity, newUrl, getUserAgent());
                 } else {
-                    mBookmarksDialogBuilder.showLongPressLinkDialog(mActivity, newUrl);
+                    mBookmarksDialogBuilder.showLongPressLinkDialog(mActivity, newUrl, getUserAgent());
                 }
             }
 //        }

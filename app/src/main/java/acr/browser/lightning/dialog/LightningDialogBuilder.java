@@ -272,13 +272,14 @@ public class LightningDialogBuilder {
                 .show();
     }
 
-    public void showLongPressLinkDialog(final Context context, final String url) {
+    public void showLongPressLinkDialog(final Activity activity, final String url, final String userAgent) {
         final CharSequence[] mOptions = new CharSequence[] {
-                context.getString(R.string.action_copy),
-                context.getString(R.string.open_in_new_tab),
-                context.getString(R.string.open_in_incognito_tab)
+                activity.getString(R.string.action_copy),
+                activity.getString(R.string.open_in_new_tab),
+                activity.getString(R.string.open_in_incognito_tab),
+                activity.getString(R.string.save_link)
         };
-        final AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(context);
+        final AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(activity);
         dialogBuilder.setTitle(url)
                 .setItems(mOptions, new DialogInterface.OnClickListener() {
                     @Override
@@ -286,7 +287,7 @@ public class LightningDialogBuilder {
                         switch (which) {
                             case 0:
                                 final ClipboardManager clipboardManager = (ClipboardManager)
-                                        context.getSystemService(Context.CLIPBOARD_SERVICE);
+                                        activity.getSystemService(Context.CLIPBOARD_SERVICE);
                                 final ClipData clipData = ClipData.newPlainText("url", url);
                                 clipboardManager.setPrimaryClip(clipData);
                                 break;
@@ -295,6 +296,9 @@ public class LightningDialogBuilder {
                                 break;
                             case 2:
                                 eventBus.post(new BrowserEvents.OpenUrlInNewTab(url, true));
+                                break;
+                            case 3:
+                                Utils.downloadFile(activity, url, userAgent, "attachment");
                                 break;
                         }
                     }
