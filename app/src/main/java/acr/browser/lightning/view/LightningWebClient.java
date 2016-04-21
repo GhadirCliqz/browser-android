@@ -364,6 +364,12 @@ class LightningWebClient extends WebViewClient {
         if (mLightningView.mIsIncognitoTab) {
             return super.shouldOverrideUrlLoading(view, url);
         }
+        if (url.startsWith("tel:")) {
+            final Intent intent = new Intent(Intent.ACTION_DIAL, Uri.parse(url));
+            mActivity.startActivity(intent);
+            view.reload();
+            return true;
+        }
         if (url.startsWith("about:")) {
             return super.shouldOverrideUrlLoading(view, url);
         }
