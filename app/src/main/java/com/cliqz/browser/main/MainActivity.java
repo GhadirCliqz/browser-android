@@ -40,6 +40,8 @@ import com.cliqz.browser.widget.MainViewContainer;
 import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
 
+import java.io.File;
+
 import javax.inject.Inject;
 
 import acr.browser.lightning.BuildConfig;
@@ -158,7 +160,14 @@ public class MainActivity extends AppCompatActivity {
         }
         mMainFragment.setArguments(args);
 
-        if(!preferenceManager.getOnBoardingComplete()) {
+        // File used to override the onboarding during UIAutomation tests
+        final File onBoardingOverrideFile = new File(Constants.ONBOARDING_OVERRIDE_FILE);
+        final boolean shouldOverrideOnBoarding =
+                onBoardingOverrideFile.exists() &&
+                onBoardingOverrideFile.length() > 0;
+        if (preferenceManager.getOnBoardingComplete() || shouldOverrideOnBoarding) {
+            setupContentView();
+        } else {
             preferenceManager.setSessionId(telemetry.generateSessionID());
             preferenceManager.setVersionCode(BuildConfig.VERSION_CODE);
             setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
@@ -167,8 +176,6 @@ public class MainActivity extends AppCompatActivity {
             pager = (ViewPager) findViewById(R.id.viewpager);
             pager.setAdapter(onBoardingAdapter);
             pager.addOnPageChangeListener(onBoardingAdapter.onPageChangeListener);
-        } else {
-            setupContentView();
         }
 
         // Telemetry (were we updated?)

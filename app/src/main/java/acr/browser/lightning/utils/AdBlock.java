@@ -74,8 +74,10 @@ public class AdBlock {
                     reader = new BufferedReader(new InputStreamReader(
                             asset.open(BLOCKED_DOMAINS_LIST_FILE_NAME)));
                     String line;
+                    int i = 0;
                     while ((line = reader.readLine()) != null) {
                         mBlockedDomainsList.add(line.trim());
+                        i++;
                     }
                 } catch (IOException e) {
                     Log.wtf(TAG, "Reading blocked domains list from file '"

@@ -4,12 +4,16 @@ import java.util.regex.Pattern
 def compileAdHostsList(File outputDir) {
     File parent = project.buildscript.sourceFile.parentFile
     File adFile = new File(parent, 'ad_servers.txt')
-    Pattern p = ~/((([1-2]\d\d)|([1-9]\d)|(\d))\.?){4}\s+([^(localhost)].*)/
+    // Pattern p = ~/((([1-2]\d\d)|([1-9]\d)|(\d))\.?){4}\s+([^(localhost)].*)/
+    Pattern p = ~/^127\.0\.0\.1\s((localhost.*)|(.*))/
     new File(outputDir, 'adhosts.txt').withWriter { writer ->
         adFile.eachLine { line ->
             Matcher matcher = p.matcher(line)
-            if (matcher.matches() && line !=~ /^localhost/ ) {
-                writer.println(matcher.group(6))
+            if (matcher.matches()) {
+                def host = matcher.group(3)
+                if (host != null) {
+                  writer.println(host)
+                }
             }
         }
     }

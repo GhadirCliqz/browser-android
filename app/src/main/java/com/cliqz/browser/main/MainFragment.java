@@ -304,13 +304,17 @@ public class MainFragment extends BaseFragment {
 
     @OnClick(R.id.overflow_menu)
     void menuClicked() {
-        mOverFlowMenu = new OverFlowMenu(getActivity());
-        // mOverFlowMenu.setBrowserState(state.getMode());
-        mOverFlowMenu.setCanGoForward(mLightningView.canGoForward());
-        mOverFlowMenu.setAnchorView(overflowMenuButton);
-        mOverFlowMenu.setIncognitoMode(isIncognito);
-        mOverFlowMenu.setHistoryId(mLightningView.historyId);
-        mOverFlowMenu.show();
+        if (mOverFlowMenu != null && mOverFlowMenu.isShown()) {
+            mOverFlowMenu.dismiss();
+        } else {
+            mOverFlowMenu = new OverFlowMenu(getActivity());
+            // mOverFlowMenu.setBrowserState(state.getMode());
+            mOverFlowMenu.setCanGoForward(mLightningView.canGoForward());
+            mOverFlowMenu.setAnchorView(overflowMenuButton);
+            mOverFlowMenu.setIncognitoMode(isIncognito);
+            mOverFlowMenu.setHistoryId(mLightningView.historyId);
+            mOverFlowMenu.show();
+        }
     }
 
     @OnEditorAction(R.id.search_edit_text)
@@ -448,7 +452,7 @@ public class MainFragment extends BaseFragment {
         // 1. the webview can go back
         final String url = mLightningView != null ? mLightningView.getUrl() : "";
         final Mode mode = state.getMode();
-        if (mOverFlowMenu != null && mOverFlowMenu.isShowing()) {
+        if (mOverFlowMenu != null && mOverFlowMenu.isShown()) {
             mOverFlowMenu.dismiss();
             mOverFlowMenu = null;
         } else if (state.getMode() == CliqzBrowserState.Mode.SEARCH &&
