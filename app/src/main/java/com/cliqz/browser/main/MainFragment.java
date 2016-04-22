@@ -626,9 +626,8 @@ public class MainFragment extends BaseFragment {
 
                         @Override
                         public void onAnimationEnd(Animator animation) {
-                            int containerh = mContentContainer.getHeight();
                             mContentContainer.setLayoutParams(new LinearLayout.LayoutParams(
-                                    LayoutParams.MATCH_PARENT, containerh - height));
+                                    LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
                             isAnimationInProgress = false;
                         }
                     }).start();

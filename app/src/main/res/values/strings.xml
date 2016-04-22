@@ -262,4 +262,5 @@
     <string name="also_clear_queries">Delete queries</string>
     <string name="deleting_in_progress_message">Deleting...</string>
     <string name="add_to_favourites">Add to favourites</string>
+    <string name="save_link">Save Link</string>
 </resources>
