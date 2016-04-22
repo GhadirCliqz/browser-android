@@ -26,6 +26,7 @@ import android.os.Bundle;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
+import com.cliqz.browser.R;
 import com.cliqz.browser.main.MainActivity;
 import com.google.android.gms.gcm.GcmListenerService;
 
@@ -33,7 +34,7 @@ import java.util.Locale;
 
 public class MessageListenerService extends GcmListenerService {
 
-    private static final String TAG = "MyGcmListenerService";
+    private static final String TAG = MessageListenerService.class.getSimpleName();
 
     /**
      * Called when message is received.
@@ -90,8 +91,8 @@ public class MessageListenerService extends GcmListenerService {
                 PendingIntent.FLAG_ONE_SHOT);
 
         Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-        NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this)
-                .setSmallIcon(android.R.drawable.ic_btn_speak_now)
+        final NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this)
+                .setSmallIcon(R.drawable.ic_notification_news)
                 .setContentTitle(title)
                 .setContentText(url)
                 .setAutoCancel(true)
