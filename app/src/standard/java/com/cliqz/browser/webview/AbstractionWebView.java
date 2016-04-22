@@ -15,7 +15,7 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
-import acr.browser.lightning.BuildConfig;
+import com.cliqz.browser.BuildConfig;
 
 /**
  * @author Stefano Pacifici

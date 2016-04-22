@@ -3,6 +3,8 @@ package com.cliqz.browser.widget;
 import android.content.Context;
 import android.util.Log;
 
+import com.cliqz.browser.R;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -13,8 +15,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
-
-import acr.browser.lightning.R;
 
 /**
  * @author Stefano Pacifici

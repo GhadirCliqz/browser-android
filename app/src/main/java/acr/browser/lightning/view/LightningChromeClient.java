@@ -19,6 +19,8 @@ import android.webkit.WebView;
 
 import com.anthonycr.grant.PermissionsManager;
 import com.anthonycr.grant.PermissionsResultAction;
+import com.cliqz.browser.R;
+import com.cliqz.browser.app.BrowserApp;
 import com.cliqz.browser.main.Messages;
 import com.squareup.otto.Bus;
 
@@ -26,8 +28,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
-import acr.browser.lightning.R;
-import acr.browser.lightning.app.BrowserApp;
 import acr.browser.lightning.bus.BrowserEvents;
 import acr.browser.lightning.constant.Constants;
 import acr.browser.lightning.utils.Utils;

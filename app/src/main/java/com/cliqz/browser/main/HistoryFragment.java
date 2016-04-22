@@ -10,11 +10,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 
+import com.cliqz.browser.R;
 import com.cliqz.browser.webview.CliqzMessages;
 import com.cliqz.browser.webview.HistoryWebView;
 import com.squareup.otto.Subscribe;
 
-import acr.browser.lightning.R;
 import acr.browser.lightning.preference.PreferenceManager;
 import butterknife.ButterKnife;
 import butterknife.OnClick;

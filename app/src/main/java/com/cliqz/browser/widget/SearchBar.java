@@ -9,7 +9,8 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 
-import acr.browser.lightning.R;
+import com.cliqz.browser.R;
+
 import acr.browser.lightning.utils.ThemeUtils;
 import butterknife.Bind;
 import butterknife.ButterKnife;

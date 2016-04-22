@@ -12,6 +12,7 @@ import android.os.Looper;
 import android.webkit.MimeTypeMap;
 import android.webkit.URLUtil;
 
+import com.cliqz.browser.R;
 import com.cliqz.browser.main.MainActivity;
 import com.squareup.otto.Bus;
 
@@ -19,7 +20,6 @@ import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
-import acr.browser.lightning.R;
 import acr.browser.lightning.bus.BrowserEvents;
 
 /**

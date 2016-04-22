@@ -21,10 +21,11 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.cliqz.browser.R;
+
 import java.util.Arrays;
 import java.util.List;
 
-import acr.browser.lightning.R;
 import acr.browser.lightning.constant.Constants;
 import acr.browser.lightning.utils.Utils;
 

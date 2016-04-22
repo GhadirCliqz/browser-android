@@ -27,6 +27,7 @@ import android.widget.TextView;
 
 import com.cliqz.browser.main.CliqzBrowserState;
 import com.cliqz.browser.main.CliqzBrowserState.Mode;
+import com.cliqz.browser.R;
 import com.cliqz.browser.main.MainActivity;
 import com.cliqz.browser.main.MainFragment;
 import com.cliqz.browser.main.Messages;
@@ -34,7 +35,6 @@ import com.squareup.otto.Bus;
 
 import javax.inject.Inject;
 
-import acr.browser.lightning.R;
 import acr.browser.lightning.bus.BrowserEvents;
 import butterknife.Bind;
 import butterknife.ButterKnife;

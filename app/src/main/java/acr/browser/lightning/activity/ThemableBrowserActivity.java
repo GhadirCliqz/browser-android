@@ -5,10 +5,11 @@ import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 
+import com.cliqz.browser.R;
+import com.cliqz.browser.app.BrowserApp;
+
 import javax.inject.Inject;
 
-import acr.browser.lightning.R;
-import acr.browser.lightning.app.BrowserApp;
 import acr.browser.lightning.preference.PreferenceManager;
 
 public abstract class ThemableBrowserActivity extends AppCompatActivity {

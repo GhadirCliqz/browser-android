@@ -16,9 +16,9 @@ import android.view.View;
 import android.webkit.WebView;
 import android.widget.CheckBox;
 
+import com.cliqz.browser.R;
 import com.cliqz.browser.utils.HistoryCleaner;
 
-import acr.browser.lightning.R;
 import acr.browser.lightning.utils.Utils;
 import acr.browser.lightning.utils.WebUtils;
 

@@ -9,9 +9,8 @@ import android.os.Bundle;
 import android.preference.CheckBoxPreference;
 import android.preference.Preference;
 
+import com.cliqz.browser.R;
 import com.cliqz.browser.main.MainActivity;
-
-import acr.browser.lightning.R;
 
 public class HumanWebSettings extends BaseSettingsFragment
         implements Preference.OnPreferenceChangeListener, Preference.OnPreferenceClickListener {

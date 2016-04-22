@@ -12,10 +12,9 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
+import com.cliqz.browser.R;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-
-import acr.browser.lightning.R;
 
 public class HistoryDatabase extends SQLiteOpenHelper {
 

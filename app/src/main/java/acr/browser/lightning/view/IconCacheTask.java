@@ -4,11 +4,12 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 import android.util.Log;
 
+import com.cliqz.browser.app.BrowserApp;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
-import acr.browser.lightning.app.BrowserApp;
 import acr.browser.lightning.constant.Constants;
 import acr.browser.lightning.utils.Utils;
 

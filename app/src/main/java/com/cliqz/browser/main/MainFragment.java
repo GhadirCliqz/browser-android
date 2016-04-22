@@ -32,7 +32,10 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.cliqz.browser.app.BrowserApp;
 import com.cliqz.browser.main.CliqzBrowserState.Mode;
+import com.cliqz.browser.BuildConfig;
+import com.cliqz.browser.R;
 import com.cliqz.browser.webview.CliqzMessages;
 import com.cliqz.browser.webview.SearchWebView;
 import com.cliqz.browser.widget.AutocompleteEditText;
@@ -40,9 +43,6 @@ import com.cliqz.browser.widget.OverFlowMenu;
 import com.cliqz.browser.widget.SearchBar;
 import com.squareup.otto.Subscribe;
 
-import acr.browser.lightning.BuildConfig;
-import acr.browser.lightning.R;
-import acr.browser.lightning.app.BrowserApp;
 import acr.browser.lightning.bus.BrowserEvents;
 import acr.browser.lightning.constant.Constants;
 import acr.browser.lightning.utils.ThemeUtils;

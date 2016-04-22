@@ -35,6 +35,7 @@ import android.webkit.WebSettings.LayoutAlgorithm;
 import android.webkit.WebSettings.PluginState;
 import android.webkit.WebView;
 
+import com.cliqz.browser.R;
 import com.cliqz.browser.main.MainActivity;
 import com.cliqz.browser.utils.PasswordManager;
 import com.cliqz.browser.utils.Telemetry;
@@ -50,11 +51,8 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
-import acr.browser.lightning.R;
-import acr.browser.lightning.app.BrowserApp;
 import acr.browser.lightning.bus.BrowserEvents;
 import acr.browser.lightning.constant.Constants;
-import acr.browser.lightning.constant.StartPage;
 import acr.browser.lightning.database.HistoryDatabase;
 import acr.browser.lightning.dialog.LightningDialogBuilder;
 import acr.browser.lightning.download.LightningDownloadListener;
@@ -176,18 +174,18 @@ public class LightningView implements ILightningTab {
 //        mWebView.loadUrl(mUrl);
     }
 
-    public void loadHomepage() {
-        if (mWebView == null) {
-            return;
-        }
-        if (mHomepage.startsWith("about:home")) {
-            mWebView.loadUrl(StartPage.getHomepage(mActivity), mRequestHeaders);
-        } else if (mHomepage.startsWith("about:bookmarks")) {
-            loadBookmarkpage();
-        } else {
-            mWebView.loadUrl(mHomepage, mRequestHeaders);
-        }
-    }
+//    public void loadHomepage() {
+//        if (mWebView == null) {
+//            return;
+//        }
+//        if (mHomepage.startsWith("about:home")) {
+//            mWebView.loadUrl(StartPage.getHomepage(mActivity), mRequestHeaders);
+//        } else if (mHomepage.startsWith("about:bookmarks")) {
+//            loadBookmarkpage();
+//        } else {
+//            mWebView.loadUrl(mHomepage, mRequestHeaders);
+//        }
+//    }
 
     /**
      * Load the HTML bookmarks page in this view

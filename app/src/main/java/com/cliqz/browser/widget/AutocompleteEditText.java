@@ -9,13 +9,12 @@ import android.util.Log;
 import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 
+import com.cliqz.browser.app.BrowserApp;
 import com.cliqz.browser.utils.Telemetry;
 
 import java.util.ArrayList;
 
 import javax.inject.Inject;
-
-import acr.browser.lightning.app.BrowserApp;
 
 /**
  * Custom EditText widget with autocompletion

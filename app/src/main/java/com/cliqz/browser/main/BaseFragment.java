@@ -20,7 +20,7 @@ import android.view.ViewGroup.LayoutParams;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
 
-import acr.browser.lightning.R;
+import com.cliqz.browser.R;
 
 /**
  * @author Stefano Pacifici

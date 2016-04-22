@@ -1,4 +1,4 @@
-package acr.browser.lightning.app;
+package com.cliqz.browser.app;
 
 import android.app.Application;
 import android.content.Context;

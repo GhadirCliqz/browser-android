@@ -87,6 +87,8 @@ public class PreferenceManager {
         public static final String HUMAN_WEB = "humanweb";
         public static final String NEVER_ASK_GPS_PERMISSION = "gpsPermission";
         public static final String CLEAR_QUERIES = "clearQueries";
+        public static final String GCM_TOKEN_SENT = "gcmTokenSent";
+        public static final String ARN_ENDPOINT = "aws_arn_endpoint";
     }
 
     private final SharedPreferences mPrefs;
@@ -320,6 +322,18 @@ public class PreferenceManager {
 
     public ClearQueriesOptions shouldClearQueries() {
         return ClearQueriesOptions.safeValueOf(mPrefs.getString(Name.CLEAR_QUERIES, "NO"));
+    }
+
+    public boolean isGCMTokenSent() {
+        return mPrefs.getBoolean(Name.GCM_TOKEN_SENT, false);
+    }
+
+    /**
+     * AWS ARN Enpoint for push notification
+     * @return The stored ARN endpoint or null if we don't have one
+     */
+    public String getARNEndpoint() {
+        return mPrefs.getString(Name.ARN_ENDPOINT, null);
     }
 
     private void putBoolean(String name, boolean value) {
@@ -564,5 +578,13 @@ public class PreferenceManager {
 
     public void setShouldClearQueries(ClearQueriesOptions value) {
         putString(Name.CLEAR_QUERIES, value.name());
+    }
+
+    public void setGCMTokenSent(boolean value) {
+        putBoolean(Name.GCM_TOKEN_SENT, value);
+    }
+
+    public void setARNEndpoint(String value) {
+        putString(Name.ARN_ENDPOINT, value);
     }
 }

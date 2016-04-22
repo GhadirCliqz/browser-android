@@ -13,7 +13,7 @@ import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import acr.browser.lightning.R;
+import com.cliqz.browser.R;
 
 /**
  * A {@link android.preference.PreferenceActivity} which implements and proxies the necessary calls

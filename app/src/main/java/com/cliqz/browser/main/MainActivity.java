@@ -22,6 +22,7 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.util.Patterns;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -30,13 +31,19 @@ import android.view.ViewGroup.LayoutParams;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 
+import com.cliqz.browser.BuildConfig;
+import com.cliqz.browser.R;
+import com.cliqz.browser.app.BrowserApp;
 import com.cliqz.browser.di.components.ActivityComponent;
 import com.cliqz.browser.di.modules.MainActivityModule;
+import com.cliqz.browser.gcm.RegistrationIntentService;
 import com.cliqz.browser.utils.LocationCache;
 import com.cliqz.browser.utils.Telemetry;
 import com.cliqz.browser.utils.Timings;
 import com.cliqz.browser.webview.CliqzMessages;
 import com.cliqz.browser.widget.MainViewContainer;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GoogleApiAvailability;
 import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
 
@@ -44,10 +51,7 @@ import java.io.File;
 
 import javax.inject.Inject;
 
-import acr.browser.lightning.BuildConfig;
-import acr.browser.lightning.R;
 import acr.browser.lightning.activity.SettingsActivity;
-import acr.browser.lightning.app.BrowserApp;
 import acr.browser.lightning.bus.BrowserEvents;
 import acr.browser.lightning.constant.Constants;
 import acr.browser.lightning.preference.PreferenceManager;
@@ -64,6 +68,7 @@ import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 public class MainActivity extends AppCompatActivity {
 
     private final static String TAG = MainActivity.class.getSimpleName();
+    private static final int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
 
     private static final String NEW_TAB_MSG = "new_tab_message_extra";
 
@@ -104,6 +109,9 @@ public class MainActivity extends AppCompatActivity {
 
     @Inject
     Timings timings;
+
+    @Inject
+    GCMRegistrationBroadcastReceiver gcmReceiver;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -191,9 +199,14 @@ public class MainActivity extends AppCompatActivity {
         final ActivityManager.TaskDescription taskDescription;
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
             taskDescription = new ActivityManager.TaskDescription(
-                    getString(R.string.cliqz_app_name), appIcon, ContextCompat.getColor(this, taskBarColor));
-            setTaskDescription(taskDescription);
+                getString(R.string.cliqz_app_name), appIcon, ContextCompat.getColor(this, taskBarColor));
+        setTaskDescription(taskDescription);
         }
+
+        if (checkPlayServices()) {
+            final Intent registrationIntent = new Intent(this, RegistrationIntentService.class);
+            startService(registrationIntent);
+    }
     }
 
     public CliqzBrowserState getBrowserState() {
@@ -220,6 +233,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        gcmReceiver.register();
         final String name = getCurrentVisibleFragmentName();
         final boolean reset = System.currentTimeMillis() - mBrowserState.getTimestamp() > Constants.HOME_RESET_DELAY;
         if (reset) {
@@ -290,6 +304,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onPause() {
         super.onPause();
+        gcmReceiver.unregister();
         String context = getCurrentVisibleFragmentName();
         timings.setAppStopTime();
         if(!context.isEmpty()) {
@@ -517,5 +532,25 @@ public class MainActivity extends AppCompatActivity {
             name = "web";
         }
         return name;
+    }
+
+    /**
+     * Fully copied from the code at https://github.com/googlesamples/google-services/blob/master/android/gcm/app/src/main/java/gcm/play/android/samples/com/gcmquickstart/MainActivity.java
+     * It checks form Google Play Services APK.
+     */
+    private boolean checkPlayServices() {
+        GoogleApiAvailability apiAvailability = GoogleApiAvailability.getInstance();
+        int resultCode = apiAvailability.isGooglePlayServicesAvailable(this);
+        if (resultCode != ConnectionResult.SUCCESS) {
+            if (apiAvailability.isUserResolvableError(resultCode)) {
+                apiAvailability.getErrorDialog(this, resultCode, PLAY_SERVICES_RESOLUTION_REQUEST)
+                        .show();
+            } else {
+                Log.i(TAG, "This device is not supported.");
+                // finish(); do not finish the app
+            }
+            return false;
+        }
+        return true;
     }
 }

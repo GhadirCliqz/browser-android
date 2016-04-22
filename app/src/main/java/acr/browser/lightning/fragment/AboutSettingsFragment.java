@@ -10,7 +10,7 @@ import android.os.Bundle;
 import android.preference.Preference;
 import android.preference.PreferenceFragment;
 
-import acr.browser.lightning.R;
+import com.cliqz.browser.R;
 
 public class AboutSettingsFragment extends PreferenceFragment {
 

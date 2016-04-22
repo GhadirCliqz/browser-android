@@ -5,10 +5,11 @@ import android.content.DialogInterface;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
 
+import com.cliqz.browser.R;
+import com.cliqz.browser.app.BrowserApp;
+
 import net.i2p.android.ui.I2PAndroidHelper;
 
-import acr.browser.lightning.R;
-import acr.browser.lightning.app.BrowserApp;
 import acr.browser.lightning.constant.Constants;
 import acr.browser.lightning.preference.PreferenceManager;
 import info.guardianproject.netcipher.proxy.OrbotHelper;

@@ -36,6 +36,7 @@ import android.webkit.URLUtil;
 
 import com.anthonycr.grant.PermissionsManager;
 import com.anthonycr.grant.PermissionsResultAction;
+import com.cliqz.browser.R;
 
 import java.io.Closeable;
 import java.io.File;
@@ -45,7 +46,6 @@ import java.net.URISyntaxException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import acr.browser.lightning.R;
 import acr.browser.lightning.constant.Constants;
 import acr.browser.lightning.download.DownloadHandler;
 

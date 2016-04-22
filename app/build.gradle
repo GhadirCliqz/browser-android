@@ -1,6 +1,7 @@
 apply plugin: 'com.android.application'
 apply plugin: 'com.neenbedankt.android-apt'
 apply plugin: 'com.getkeepsafe.dexcount'
+apply plugin: 'com.google.gms.google-services'
 apply from: 'adhosts.gradle'
 
 android.metaClass.baseVersionCode = 39
@@ -17,10 +18,14 @@ android {
 
         applicationId "com.cliqz.browser"
         testInstrumentationRunner "com.cliqz.browser.test.CustomTestRunner"
+
+        buildConfigField 'String', 'APPLICATION_ARN', '"arn:aws:sns:us-east-1:141047255820:app/GCM/CLIQZ_Browser_for_Android"'
+        buildConfigField 'String[]', 'TOPIC_ARNS', 'new String[] {"arn:aws:sns:us-east-1:141047255820:mobile_news"}'
     }
     buildTypes {
         debug {
             minifyEnabled false
+            proguardFile getDefaultProguardFile('proguard-android.txt')
             shrinkResources false
             proguardFiles 'proguard-project.txt'
             buildConfigField 'String', 'TELEMETRY_CHANNEL', '"MA02"'
@@ -28,6 +33,7 @@ android {
 
         release {
             minifyEnabled false
+            proguardFile getDefaultProguardFile('proguard-android.txt')
             shrinkResources true
             proguardFiles 'proguard-project.txt'
             buildConfigField 'String', 'TELEMETRY_CHANNEL', '"MA00"'
@@ -101,6 +107,7 @@ dependencies {
     // dependency injection
     compile 'com.google.dagger:dagger:2.0.1'
     apt 'com.google.dagger:dagger-compiler:2.0.1'
+    provided 'javax.annotation:jsr250-api:1.0'
     // view binding
     compile 'com.jakewharton:butterknife:7.0.1'
     // proxy support
@@ -115,6 +122,8 @@ dependencies {
     releaseCompile 'com.squareup.leakcanary:leakcanary-android-no-op:1.4-beta2'
     androidTestCompile 'com.squareup.leakcanary:leakcanary-android-no-op:1.4-beta2'
     provided 'javax.annotation:jsr250-api:1.0'
+    // Google Play Services
+    compile "com.google.android.gms:play-services-gcm:8.3.0"
 
     // Testing-only dependencies
     // Force usage of support annotations in the test app, since it is internally used by the runner module.
@@ -127,4 +136,8 @@ dependencies {
 
     // xwalk webview
     xwalkCompile 'org.xwalk:xwalk_core_library:14.43.343.25'
+    
+    // AWS SNS SDK
+    compile 'com.amazonaws:aws-android-sdk-sns:2.+'
+    compile 'com.amazonaws:aws-android-sdk-cognito:2.+'
 }

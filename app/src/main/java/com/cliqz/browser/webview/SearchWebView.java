@@ -8,13 +8,13 @@ import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.cliqz.browser.main.CliqzBrowserState;
+import com.cliqz.browser.BuildConfig;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.Locale;
 
-import acr.browser.lightning.BuildConfig;
 import acr.browser.lightning.constant.Constants;
 
 /**
@@ -138,8 +138,8 @@ public class SearchWebView extends BaseWebView {
 //            if (shouldShowHomePage()) {
 //                showHomepage();
 //            }
+            }
         }
-    }
 
     private void initPreferences() {
         mSearchWithLocation = preferenceManager.getLocationEnabled();
