@@ -6,6 +6,10 @@
         android:key="cb_drawertabs"
         android:title="@string/tabs_in_drawer" /> -->
     <CheckBoxPreference
+        android:defaultValue="true"
+        android:key="cb_news_notification"
+        android:title="@string/news_notification" />
+    <CheckBoxPreference
            android:defaultValue="false"
            android:key="cb_ads"
            android:title="@string/block_ads" />

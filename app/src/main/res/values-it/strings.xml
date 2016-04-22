@@ -255,4 +255,5 @@
     <string name="open_in_new_tab">Apri in una nuova scheda</string>
     <string name="add_to_favourites">Aggiungi ai favoriti</string>
     <string name="save_link">Salva destinazione</string>
+    <string name="news_notification">Notifica Notizie</string>
 </resources>
