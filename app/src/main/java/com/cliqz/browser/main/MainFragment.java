@@ -82,6 +82,9 @@ public class MainFragment extends BaseFragment {
     SearchWebView mSearchWebView = null;
     public LightningView mLightningView = null;
 
+    // A flag used to handle back button on old phones
+    private boolean mShowWebPageAgain = false;
+
     @Bind(R.id.local_container)
     FrameLayout mLocalContainer;
 
@@ -300,6 +303,7 @@ public class MainFragment extends BaseFragment {
         mAutocompleteEditText.setText(mLightningView.getUrl());
         mAutocompleteEditText.requestFocus();
         showKeyBoard();
+        mShowWebPageAgain = true;
     }
 
     @OnClick(R.id.overflow_menu)
@@ -307,14 +311,14 @@ public class MainFragment extends BaseFragment {
         if (mOverFlowMenu != null && mOverFlowMenu.isShown()) {
             mOverFlowMenu.dismiss();
         } else {
-            mOverFlowMenu = new OverFlowMenu(getActivity());
-            // mOverFlowMenu.setBrowserState(state.getMode());
-            mOverFlowMenu.setCanGoForward(mLightningView.canGoForward());
-            mOverFlowMenu.setAnchorView(overflowMenuButton);
-            mOverFlowMenu.setIncognitoMode(isIncognito);
-            mOverFlowMenu.setHistoryId(mLightningView.historyId);
-            mOverFlowMenu.show();
-        }
+        mOverFlowMenu = new OverFlowMenu(getActivity());
+        // mOverFlowMenu.setBrowserState(state.getMode());
+        mOverFlowMenu.setCanGoForward(mLightningView.canGoForward());
+        mOverFlowMenu.setAnchorView(overflowMenuButton);
+        mOverFlowMenu.setIncognitoMode(isIncognito);
+        mOverFlowMenu.setHistoryId(mLightningView.historyId);
+        mOverFlowMenu.show();
+    }
     }
 
     @OnEditorAction(R.id.search_edit_text)
@@ -408,6 +412,7 @@ public class MainFragment extends BaseFragment {
     @Subscribe
     public void openLink(CliqzMessages.OpenLink event) {
         openLink(event.url, event.reset, false);
+        mShowWebPageAgain = false;
     }
 
     @Subscribe
@@ -448,14 +453,37 @@ public class MainFragment extends BaseFragment {
 
     @Subscribe
     public void onBackPressed(Messages.BackPressed event) {
-        // We can go back if:
-        // 1. the webview can go back
+        // Due to webview bug (history manipulation doesn't work) we have to handle the back in a
+        // different way.
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+            onBackPressedV16();
+        } else {
+            onBackPressedV21();
+        }
+    }
+
+    private void onBackPressedV16() {
         final String url = mLightningView != null ? mLightningView.getUrl() : "";
         final Mode mode = state.getMode();
-        if (mOverFlowMenu != null && mOverFlowMenu.isShown()) {
-            mOverFlowMenu.dismiss();
-            mOverFlowMenu = null;
-        } else if (state.getMode() == CliqzBrowserState.Mode.SEARCH &&
+        if (hideOverFlowMenu()) {
+            return;
+        } else if (mode == Mode.WEBPAGE && mLightningView.canGoBack()) {
+            telemetry.backPressed = true;
+            telemetry.showingCards = false;
+            mLightningView.goBack();
+        } else if (mode == Mode.SEARCH && mShowWebPageAgain) {
+            bringWebViewToFront();
+        } else {
+            bus.post(new Messages.Exit());
+        }
+    }
+
+    private void onBackPressedV21() {
+        final String url = mLightningView != null ? mLightningView.getUrl() : "";
+        final Mode mode = state.getMode();
+        if (hideOverFlowMenu()) {
+            return;
+        } else if (mode == CliqzBrowserState.Mode.SEARCH &&
                 !"".equals(url) &&
                 !TrampolineConstants.CLIQZ_TRAMPOLINE_GOTO.equals(url)) {
             bringWebViewToFront();
@@ -470,6 +498,16 @@ public class MainFragment extends BaseFragment {
         } else {
             bus.post(new Messages.Exit());
         }
+    }
+
+    // Hide the OverFlowMenu if it is visible. Return true if it was, false otherwise.
+    private boolean hideOverFlowMenu() {
+        if (mOverFlowMenu != null && mOverFlowMenu.isShown()) {
+            mOverFlowMenu.dismiss();
+            mOverFlowMenu = null;
+            return true;
+        }
+        return false;
     }
 
     @Subscribe

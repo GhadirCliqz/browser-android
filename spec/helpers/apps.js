@@ -1,4 +1,5 @@
 exports.androidStandardDebug = __dirname + "/../../app/build/outputs/apk/app-standard-universal-debug.apk"
+exports.androidXwalkDebug = __dirname + "/../../app/build/outputs/apk/app-xwalk-universal-debug.apk"
 // if (process.env.DEV) {
 //   exports.iosTestApp = "sample-code/apps/TestApp/build/release-iphonesimulator/TestApp.app";
 //   exports.iosWebviewApp = "sample-code/apps/WebViewApp/build/release-iphonesimulator/WebViewApp.app";
