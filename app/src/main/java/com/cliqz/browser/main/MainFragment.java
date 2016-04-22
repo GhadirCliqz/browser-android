@@ -471,6 +471,7 @@ public class MainFragment extends BaseFragment {
             telemetry.backPressed = true;
             telemetry.showingCards = false;
             mLightningView.goBack();
+            mShowWebPageAgain = false;
         } else if (mode == Mode.SEARCH && mShowWebPageAgain) {
             bringWebViewToFront();
         } else {
