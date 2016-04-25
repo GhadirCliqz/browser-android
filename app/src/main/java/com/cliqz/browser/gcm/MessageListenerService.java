@@ -26,15 +26,19 @@ import android.os.Bundle;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
+import com.cliqz.browser.R;
 import com.cliqz.browser.main.MainActivity;
 import com.google.android.gms.gcm.GcmListenerService;
 
 import java.util.Locale;
 
+import acr.browser.lightning.utils.UrlUtils;
+
 public class MessageListenerService extends GcmListenerService {
 
-    private static final String TAG = "MyGcmListenerService";
+    private static final String TAG = MessageListenerService.class.getSimpleName();
 
+    private static final int MSG_ERROR_TYPE = -1;
     /**
      * Called when message is received.
      *
@@ -45,7 +49,10 @@ public class MessageListenerService extends GcmListenerService {
     // [START receive_message]
     @Override
     public void onMessageReceived(String from, Bundle data) {
-        final int type = Integer.valueOf(data.getString("type"));
+        final int type = Integer.valueOf(data.getString("type", "-1"));
+        if (type == MSG_ERROR_TYPE) {
+            return;
+        }
         final String title = data.getString("title");
         final String url = data.getString("url");
         Log.i(TAG, String.format(Locale.US,
@@ -89,14 +96,21 @@ public class MessageListenerService extends GcmListenerService {
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0 /* Request code */, intent,
                 PendingIntent.FLAG_ONE_SHOT);
 
-        Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-        NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this)
-                .setSmallIcon(android.R.drawable.ic_btn_speak_now)
-                .setContentTitle(title)
-                .setContentText(url)
+        final Uri uri = Uri.parse(url);
+        final String host = uri.getHost();
+        final String domain = UrlUtils.getTopDomain(url);
+        final Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+        final NotificationCompat.BigTextStyle style = new NotificationCompat.BigTextStyle();
+        style.bigText(title);
+        final NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this)
+                .setSmallIcon(R.drawable.ic_notification_news)
+                .setContentTitle(domain)
+                .setCategory(NotificationCompat.CATEGORY_RECOMMENDATION)
+                .setContentText(title)
                 .setAutoCancel(true)
                 .setSound(defaultSoundUri)
-                .setContentIntent(pendingIntent);
+                .setContentIntent(pendingIntent)
+                .setStyle(style);
 
         NotificationManager notificationManager =
                 (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);

@@ -250,4 +250,5 @@
     <string name="deleting_in_progress_message">Löschen</string>
     <string name="add_to_favourites">zu Favoriten hinzufügen</string>
     <string name="save_link">Link speichern</string>
+    <string name="news_notification">Schlagzeilen Benachrichtigungen</string>
 </resources>

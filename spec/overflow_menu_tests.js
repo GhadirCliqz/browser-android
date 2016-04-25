@@ -195,4 +195,36 @@ describe("Overflow menu", function () {
       .back(); // Always press back when opening a new tab
   });
 
+  it("should have receive notification by default", function() {
+    let si = { index: -1 };
+    return driver
+      .waitForElementById("com.cliqz.browser:id/overflow_menu")
+        .click()
+      .waitForElementById("com.cliqz.browser:id/settings_menu_button")
+        .click()
+      .waitForElementByName("General")
+        .click()
+      .waitForElementByName("News Notification")
+      .elementsByClassName("android.widget.TextView")
+        .then(function (elems) {
+          let results = [];
+          elems.forEach(function (elem, index) {
+            results.push(elem.text());
+          });
+          return Promise.all(results);
+        })
+        .then(function (elems) {
+          elems.forEach(function (elem, index) {
+            if (elem == "News Notification") {
+              si.index = index;
+            }
+          });
+          return driver;
+        })
+      .elementsByClassName("android.widget.CheckBox")
+        .then(function (elems) {
+          return elems[si.index].getAttribute("checked");
+        })
+        .should.eventually.equal('true');
+  });
 });

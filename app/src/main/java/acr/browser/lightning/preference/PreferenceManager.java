@@ -30,6 +30,7 @@ public class PreferenceManager {
         public static final String ADOBE_FLASH_SUPPORT = "enableflash";
         public static final String BLOCK_ADS = "AdBlock";
         public static final String BLOCK_IMAGES = "blockimages";
+        public static final String NEWS_NOTIFICATION = "newsnotification";
         public static final String CLEAR_CACHE_EXIT = "cache";
         public static final String COOKIES = "cookies";
         public static final String DOWNLOAD_DIRECTORY = "downloadLocation";
@@ -320,6 +321,10 @@ public class PreferenceManager {
         return mPrefs.getBoolean(Name.NEVER_ASK_GPS_PERMISSION, false);
     }
 
+    public boolean getNewsNotificationEnabled() {
+        return mPrefs.getBoolean(Name.NEWS_NOTIFICATION, true);
+    }
+
     public ClearQueriesOptions shouldClearQueries() {
         return ClearQueriesOptions.safeValueOf(mPrefs.getString(Name.CLEAR_QUERIES, "NO"));
     }
@@ -574,6 +579,10 @@ public class PreferenceManager {
 
     public void setNeverAskGPSPermission(boolean neverAskGPSPermission) {
         putBoolean(Name.NEVER_ASK_GPS_PERMISSION, neverAskGPSPermission);
+    }
+
+    public void setNewsNotificationEnabled(boolean enable) {
+        putBoolean(Name.NEWS_NOTIFICATION, enable);
     }
 
     public void setShouldClearQueries(ClearQueriesOptions value) {
