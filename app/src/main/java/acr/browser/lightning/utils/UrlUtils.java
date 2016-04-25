@@ -15,9 +15,21 @@
  */
 package acr.browser.lightning.utils;
 
+import android.net.Uri;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.util.ArraySet;
 import android.util.Patterns;
+import android.util.StringBuilderPrinter;
 import android.webkit.URLUtil;
 
+import com.squareup.haha.guava.collect.Lists$RandomAccessReverseList;
+
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -39,6 +51,10 @@ public class UrlUtils {
     // the trailing slash
     private static final Pattern STRIP_URL_PATTERN =
             Pattern.compile("^http://(.*?)/?$");
+
+    private final static Set<String> HOST_PREFIXES = new HashSet<>(Arrays.asList(new String[] {
+            "www", "m"
+    }));
 
     private UrlUtils() { /* cannot be instantiated */ }
 
@@ -102,47 +118,32 @@ public class UrlUtils {
         return null;
     }
 
-    /* package */
-    static String fixUrl(String inUrl) {
-        // FIXME: Converting the url to lower case
-        // duplicates functionality in smartUrlFilter().
-        // However, changing all current callers of fixUrl to
-        // call smartUrlFilter in addition may have unwanted
-        // consequences, and is deferred for now.
-        int colon = inUrl.indexOf(':');
-        boolean allLower = true;
-        for (int index = 0; index < colon; index++) {
-            char ch = inUrl.charAt(index);
-            if (!Character.isLetter(ch)) {
-                break;
-            }
-            allLower &= Character.isLowerCase(ch);
-            if (index == colon - 1 && !allLower) {
-                inUrl = inUrl.substring(0, colon).toLowerCase()
-                        + inUrl.substring(colon);
-            }
-        }
-        if (inUrl.startsWith("http://") || inUrl.startsWith("https://"))
-            return inUrl;
-        if (inUrl.startsWith("http:") ||
-                inUrl.startsWith("https:")) {
-            if (inUrl.startsWith("http:/") || inUrl.startsWith("https:/")) {
-                inUrl = inUrl.replaceFirst("/", "//");
-            } else inUrl = inUrl.replaceFirst(":", "://");
-        }
-        return inUrl;
-    }
-
-    // Returns the filtered URL. Cannot return null, but can return an empty string
-    /* package */
-    static String filteredUrl(String inUrl) {
-        if (inUrl == null) {
+    /**
+     * Try to determine the top level domain, removing www, m and other known prefixes.
+     *
+     * @param url The url from which we should extract the top domain
+     * @return a domain or an empty string
+     */
+    public static @NonNull String getTopDomain(@Nullable String url) {
+        if (url == null) {
             return "";
         }
-        if (inUrl.startsWith("content:")
-                || inUrl.startsWith("browser:")) {
+        final Uri uri = Uri.parse(url);
+        final String host = uri.getHost();
+        if (host == null || host.isEmpty()) {
             return "";
         }
-        return inUrl;
+        final LinkedList<String> parts = new LinkedList<>(Arrays.asList(host.split("\\.")));
+        while (parts.size() > 0 && HOST_PREFIXES.contains(parts.get(0))) {
+            parts.remove(0);
+        }
+        final StringBuilder builder = new StringBuilder();
+        String divider = "";
+        for (String part: parts) {
+            builder.append(divider)
+                .append(part);
+            divider=".";
+        }
+        return builder.toString();
     }
 }
