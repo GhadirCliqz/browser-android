@@ -27,18 +27,30 @@ import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
 import com.cliqz.browser.R;
+import com.cliqz.browser.app.BrowserApp;
 import com.cliqz.browser.main.MainActivity;
 import com.google.android.gms.gcm.GcmListenerService;
 
 import java.util.Locale;
 
+import javax.inject.Inject;
+
+import acr.browser.lightning.preference.PreferenceManager;
 import acr.browser.lightning.utils.UrlUtils;
 
 public class MessageListenerService extends GcmListenerService {
 
+    final PreferenceManager preferenceManager;
+
     private static final String TAG = MessageListenerService.class.getSimpleName();
 
     private static final int MSG_ERROR_TYPE = -1;
+
+    public MessageListenerService() {
+        super();
+        preferenceManager = BrowserApp.getAppComponent().getPreferenceManager();
+    }
+
     /**
      * Called when message is received.
      *
@@ -83,12 +95,17 @@ public class MessageListenerService extends GcmListenerService {
     // [END receive_message]
 
     /**
-     * Create and show a simple notification containing the received GCM message.
+     * Create and show a simple notification containing the received GCM message. Does nothing if
+     * the notifications are disabled in the preferences.
      *
      * @param title GCM message received.
      * @param url   url
      */
     private void sendNotification(String title, String url) {
+        if (!preferenceManager.getNewsNotificationEnabled()) {
+            return;
+        }
+
         Intent intent = new Intent(this, MainActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         intent.setAction(Intent.ACTION_VIEW);

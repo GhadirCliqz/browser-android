@@ -18,17 +18,12 @@ package acr.browser.lightning.utils;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.util.ArraySet;
 import android.util.Patterns;
-import android.util.StringBuilderPrinter;
 import android.webkit.URLUtil;
-
-import com.squareup.haha.guava.collect.Lists$RandomAccessReverseList;
 
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;

@@ -1,0 +1,19 @@
+if (project.hasProperty('Browser.storeFile')) {
+    def props = project.properties.withDefault { "" }
+    android {
+        signingConfigs {
+            release {
+                storeFile file(props['Browser.storeFile'])
+                storePassword props['Browser.storePassword']
+                keyAlias props['Browser.keyAlias']
+                keyPassword props['Browser.keyPassword']
+            }
+        }
+
+        buildTypes {
+            release {
+                signingConfig signingConfigs.release
+            }
+        }
+    }
+}

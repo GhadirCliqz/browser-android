@@ -127,3 +127,18 @@ $> ./gradlew :tests_helper:zipDebug
 ```
 
 The final zip file should be in `<project_dir>/tests_helper/build/distribution`.
+
+
+## Signing for distribution (CLIQZers only)
+
+The APK must be signed to be published on PlayStore, for more information follow this [link](http://developer.android.com/tools/publishing/app-signing.html). To sign the app you need the CLIQZ keystore, however it is not and must not be distributed with the source code, also keystore passwords must be kept secret.  
+If you have the keystore and the passwords, you can configure gradle to generate the signed APK. To do so, create a *gradle.properties* file and add (or append to it fi already exists) the following lines:
+
+```groovy
+Browser.storeFile=<key_store_path>
+Browser.storePassword=<key_store_password>
+Browser.keyAlias=<key_alias>
+Browser.keyPassword=<key_password>
+```
+
+Replace \<param\> with the appropriate arguments, then you can compile the release APK using the usual gradle tasks (```:app:assembleStandardRelease``` and ```:app:assembleXwalkRelease```).
