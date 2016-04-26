@@ -2,6 +2,7 @@ package com.cliqz.browser.helper;
 
 import android.content.Intent;
 import android.net.Uri;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
@@ -25,5 +26,11 @@ public class MainActivity extends AppCompatActivity {
         intent.setData(Uri.parse("https://cdn.cliqz.com/mobile/browser/tests/testpage.html"));
         final Intent chooser = Intent.createChooser(intent, getString(R.string.select_a_browser));
         startActivity(chooser);
+    }
+
+    @OnClick(R.id.send_msg_action)
+    void onSendNewsMessage() {
+        final NewsMessageDialog dialog = new NewsMessageDialog(this);
+        dialog.show();
     }
 }

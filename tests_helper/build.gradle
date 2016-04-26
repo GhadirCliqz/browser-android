@@ -8,14 +8,28 @@ android {
         applicationId "com.cliqz.browser.helper"
         minSdkVersion 16
         targetSdkVersion 23
-        versionCode 3
+        versionCode 4
         versionName "1.0"
         setProperty("archivesBaseName", "testsHelper_v$versionCode")
     }
+
+    signingConfigs {
+        common {
+            storeFile file('../debug.keystore')
+            storePassword 'android'
+            keyAlias 'debug'
+            keyPassword 'android'
+        }
+    }
+
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.common
+        }
+        debug {
+            signingConfig signingConfigs.common
         }
     }
 }

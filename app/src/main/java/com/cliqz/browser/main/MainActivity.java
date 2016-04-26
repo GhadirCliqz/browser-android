@@ -133,7 +133,7 @@ public class MainActivity extends AppCompatActivity {
 //                    WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
 //        }
 
-        mFreshTabFragment = new FreshTabFragment();
+//        mFreshTabFragment = new FreshTabFragment();
         mHistoryFragment = new HistoryFragment(this);
         mMainFragment = new MainFragment();
 

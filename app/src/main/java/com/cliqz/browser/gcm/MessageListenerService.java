@@ -33,12 +33,14 @@ import com.google.android.gms.gcm.GcmListenerService;
 
 import java.util.Locale;
 
-import javax.inject.Inject;
-
 import acr.browser.lightning.preference.PreferenceManager;
 import acr.browser.lightning.utils.UrlUtils;
 
 public class MessageListenerService extends GcmListenerService {
+
+    private static final int CATEGORY_MASK = 10000;
+    private static final int SERVICE_MESSAGE_TYPE = 1;
+    private static final int NEWS_MESSAGE_TYPE = 2;
 
     final PreferenceManager preferenceManager;
 
@@ -58,11 +60,11 @@ public class MessageListenerService extends GcmListenerService {
      * @param data Data bundle containing message data as key/value pairs.
      *             For Set of keys use data.keySet().
      */
-    // [START receive_message]
     @Override
     public void onMessageReceived(String from, Bundle data) {
         final int type = Integer.valueOf(data.getString("type", "-1"));
         if (type == MSG_ERROR_TYPE) {
+            Log.e(TAG, "Invalid message format " + data.toString());
             return;
         }
         final String title = data.getString("title");
@@ -71,28 +73,20 @@ public class MessageListenerService extends GcmListenerService {
                 "Received message with type %d title \"%s\" and url \"%s\"",
                 type, title, url));
 
-        if (from.startsWith("/topics/")) {
-            // message received from some topic.
-        } else {
-            // normal downstream message.
+        final int mainType = type / CATEGORY_MASK;
+        final int subType = type % CATEGORY_MASK;
+        switch (mainType) {
+            case SERVICE_MESSAGE_TYPE:
+                Log.w(TAG, "Not yet supported");
+                break;
+            case NEWS_MESSAGE_TYPE:
+                sendNewsNotification(subType, title, url);
+                break;
+            default:
+                Log.e(TAG, String.format("Unknown message with type %d and sub-type %d", mainType, subType));
+                break;
         }
-
-        // [START_EXCLUDE]
-        /**
-         * Production applications would usually process the message here.
-         * Eg: - Syncing with server.
-         *     - Store message in local database.
-         *     - Update UI.
-         */
-
-        /**
-         * In some cases it may be useful to show a notification indicating to the user
-         * that a message was received.
-         */
-        sendNotification(title, url);
-        // [END_EXCLUDE]
     }
-    // [END receive_message]
 
     /**
      * Create and show a simple notification containing the received GCM message. Does nothing if
@@ -101,7 +95,7 @@ public class MessageListenerService extends GcmListenerService {
      * @param title GCM message received.
      * @param url   url
      */
-    private void sendNotification(String title, String url) {
+    private void sendNewsNotification(int newType, String title, String url) {
         if (!preferenceManager.getNewsNotificationEnabled()) {
             return;
         }
