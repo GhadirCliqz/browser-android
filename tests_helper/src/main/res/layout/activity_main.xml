@@ -21,5 +21,12 @@
             android:text="@string/open_url"
             android:id="@+id/open_url_action"
             android:layout_gravity="center_horizontal"/>
+
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/send_news_message_action"
+            android:id="@+id/send_msg_action"
+            android:layout_gravity="center_horizontal"/>
     </LinearLayout>
 </ScrollView>

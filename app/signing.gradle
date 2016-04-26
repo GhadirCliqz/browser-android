@@ -17,3 +17,20 @@ if (project.hasProperty('Browser.storeFile')) {
         }
     }
 }
+
+android {
+    signingConfigs {
+        debug {
+            storeFile file('../debug.keystore')
+            storePassword 'android'
+            keyAlias 'debug'
+            keyPassword 'android'
+        }
+    }
+
+    buildTypes {
+        debug {
+            signingConfig signingConfigs.debug
+        }
+    }
+}

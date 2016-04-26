@@ -133,7 +133,8 @@
         </receiver>
         <service
             android:name=".gcm.MessageListenerService"
-            android:exported="false" >
+            android:exported="true"
+            android:permission="com.cliqz.browser.permission.C2D_MESSAGE">
             <intent-filter>
                 <action android:name="com.google.android.c2dm.intent.RECEIVE" />
             </intent-filter>
