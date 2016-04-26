@@ -87,4 +87,6 @@ public final class Messages {
             this.id = id;
         }
     }
+
+    public static class SaveLink {}
 }

@@ -59,7 +59,8 @@ public class OverFlowMenu extends FrameLayout {
         COPY_LINK(R.id.copy_link_menu_button, R.string.action_copy),
         ADD_TO_FAVOURITES(R.id.add_to_favourites_menu_button, R.string.add_to_favourites),
         SETTINGS(R.id.settings_menu_button, R.string.settings),
-        CONTACT_CLIQZ(R.id.contact_cliqz_menu_button, R.string.contact_cliqz);
+        CONTACT_CLIQZ(R.id.contact_cliqz_menu_button, R.string.contact_cliqz),
+        SAVE_LINK(R.id.save_link_menu_button, R.string.save_link);
 
         final int stringID;
         final int id;
@@ -75,6 +76,7 @@ public class OverFlowMenu extends FrameLayout {
             Entries.NEW_TAB,
             Entries.NEW_INCOGNITO_TAB,
             Entries.COPY_LINK,
+            Entries.SAVE_LINK,
             Entries.ADD_TO_FAVOURITES,
             Entries.SETTINGS,
             Entries.CONTACT_CLIQZ
@@ -278,12 +280,14 @@ public class OverFlowMenu extends FrameLayout {
         public boolean isEnabled(int position) {
             final boolean isAddToFavourites = mEntries[position] == Entries.ADD_TO_FAVOURITES;
             final boolean isCopyLink = mEntries[position] == Entries.COPY_LINK;
+            final boolean isSaveLink = mEntries[position] == Entries.SAVE_LINK;
             final boolean hasValidId = historyId != -1;
             final boolean isShowingWebPage = state.getMode() == Mode.WEBPAGE;
 
-            return (!isAddToFavourites && !isCopyLink) ||
-                    (isAddToFavourites && hasValidId) ||
-                    (isCopyLink && isShowingWebPage);
+            return (!isAddToFavourites && !isCopyLink && !isSaveLink) ||
+                    (isAddToFavourites && hasValidId && isShowingWebPage) ||
+                    (isCopyLink && isShowingWebPage) ||
+                    (isSaveLink && isShowingWebPage);
         }
 
         @Override
@@ -379,10 +383,8 @@ public class OverFlowMenu extends FrameLayout {
             Log.e(TAG, "Entry id: " + tag.id);
             switch (tag) {
                 case COPY_LINK:
-                    if (state.getMode() == Mode.WEBPAGE) {
-                        bus.post(new Messages.CopyUrl());
-                        OverFlowMenu.this.dismiss();
-                    }
+                    bus.post(new Messages.CopyUrl());
+                    OverFlowMenu.this.dismiss();
                     break;
                 case SETTINGS:
                     bus.post(new Messages.GoToSettings());
@@ -401,10 +403,12 @@ public class OverFlowMenu extends FrameLayout {
                     OverFlowMenu.this.dismiss();
                     break;
                 case ADD_TO_FAVOURITES:
-                    if (state.getMode() == Mode.WEBPAGE) {
-                        bus.post(new Messages.AddToFavourites(historyId));
-                        OverFlowMenu.this.dismiss();
-                    }
+                    bus.post(new Messages.AddToFavourites(historyId));
+                    OverFlowMenu.this.dismiss();
+                    break;
+                case SAVE_LINK:
+                    bus.post(new Messages.SaveLink());
+                    OverFlowMenu.this.dismiss();
             }
         }
     };

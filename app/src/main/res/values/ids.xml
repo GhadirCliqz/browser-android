@@ -9,4 +9,5 @@
     <item name="add_to_favourites_menu_button" type="id"/>
     <item name="settings_menu_button" type="id"/>
     <item name="contact_cliqz_menu_button" type="id"/>
+    <item name="save_link_menu_button" type="id"/>
 </resources>
