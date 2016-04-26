@@ -80,4 +80,6 @@ public final class Constants {
 
     public static final String TELEMETRY_LOG_PREFIX = "telemetry_";
 
+    public static final String NOTIFICATION_CLICKED = "notification_clicked";
+
 }

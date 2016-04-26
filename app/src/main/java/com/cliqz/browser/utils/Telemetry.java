@@ -103,6 +103,7 @@ public class Telemetry {
         private static final String SHARE = "share";
         private static final String TARGET_TYPE = "target_type";
         private static final String MAIN = "main";
+        private static final String NEWS_NOTIFICATION = "news_notification";
     }
 
     public static class Action {
@@ -124,6 +125,9 @@ public class Telemetry {
         public static final String BACK = "back";
         public static final String RESULT_ENTER = "result_enter";
         public static final String CLICK = "click";
+        public static final String ENABLE = "enable";
+        public static final String DISABLE = "disable";
+        public static final String RECEIVE = "receive";
     }
 
     private static final int BATCH_SIZE = 50;
@@ -339,6 +343,7 @@ public class Telemetry {
             signal.put(Key.OS_VERSION, Integer.toString(Build.VERSION.SDK_INT));
             signal.put(Key.DEFAULT_SEARCH_ENGINE, getDefaultSearchEngine());
             signal.put(Key.HISTORY_URLS, historySize);
+            signal.put(Key.NEWS_NOTIFICATION, mPreferenceManager.getNewsNotificationEnabled());
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -495,6 +500,21 @@ public class Telemetry {
             signal.put(Key.ACTION, Action.CLICK);
             signal.put(Key.TARGET_TYPE, Key.MAIN);
             signal.put(Key.CONTEXT, context);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        saveSignal(signal, false);
+    }
+
+    /**
+     * Send telemetry signal when user receives, opens, enables, disables news notification
+     * @param action type of signal
+     */
+    public void sendNewsNotificationSignal(String action) {
+        JSONObject signal = new JSONObject();
+        try {
+            signal.put(Key.TYPE, Key.NEWS_NOTIFICATION);
+            signal.put(Key.ACTION, action);
         } catch (JSONException e) {
             e.printStackTrace();
         }
