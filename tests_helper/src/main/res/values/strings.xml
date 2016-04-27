@@ -8,4 +8,6 @@
     <string name="hint_msg_title">Enter a title here</string>
     <string name="hint_msg_url">Enter a valid url here</string>
     <string name="send">Send</string>
+    <string name="on_boarding_toogle">Toggle Onboarding</string>
+    <string name="onboarding">Onboarding</string>
 </resources>
