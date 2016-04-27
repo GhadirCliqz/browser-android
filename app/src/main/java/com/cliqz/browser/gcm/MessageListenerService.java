@@ -29,10 +29,12 @@ import android.util.Log;
 import com.cliqz.browser.R;
 import com.cliqz.browser.app.BrowserApp;
 import com.cliqz.browser.main.MainActivity;
+import com.cliqz.browser.utils.Telemetry;
 import com.google.android.gms.gcm.GcmListenerService;
 
 import java.util.Locale;
 
+import acr.browser.lightning.constant.Constants;
 import acr.browser.lightning.preference.PreferenceManager;
 import acr.browser.lightning.utils.UrlUtils;
 
@@ -43,6 +45,7 @@ public class MessageListenerService extends GcmListenerService {
     private static final int NEWS_MESSAGE_TYPE = 2;
 
     final PreferenceManager preferenceManager;
+    final Telemetry telemetry;
 
     private static final String TAG = MessageListenerService.class.getSimpleName();
 
@@ -51,6 +54,7 @@ public class MessageListenerService extends GcmListenerService {
     public MessageListenerService() {
         super();
         preferenceManager = BrowserApp.getAppComponent().getPreferenceManager();
+        telemetry = BrowserApp.getAppComponent().getTelemetry();
     }
 
     /**
@@ -81,6 +85,7 @@ public class MessageListenerService extends GcmListenerService {
                 break;
             case NEWS_MESSAGE_TYPE:
                 sendNewsNotification(subType, title, url);
+				telemetry.sendNewsNotificationSignal(Telemetry.Action.RECEIVE);
                 break;
             default:
                 Log.e(TAG, String.format("Unknown message with type %d and sub-type %d", mainType, subType));
@@ -104,6 +109,7 @@ public class MessageListenerService extends GcmListenerService {
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         intent.setAction(Intent.ACTION_VIEW);
         intent.setData(Uri.parse(url));
+        intent.putExtra(Constants.NOTIFICATION_CLICKED, true);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0 /* Request code */, intent,
                 PendingIntent.FLAG_ONE_SHOT);
 

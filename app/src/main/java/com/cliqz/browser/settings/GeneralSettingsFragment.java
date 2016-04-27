@@ -15,6 +15,7 @@ import android.widget.EditText;
 
 import com.cliqz.browser.R;
 import com.cliqz.browser.main.OnBoardingActivity;
+import com.cliqz.browser.utils.Telemetry;
 
 import acr.browser.lightning.constant.SearchEngines;
 
@@ -163,6 +164,8 @@ public class GeneralSettingsFragment extends BaseSettingsFragment {
             case SETTINGS_NEWS_NOTIFICATION:
                 mPreferenceManager.setNewsNotificationEnabled((Boolean) newValue);
                 cbNewNotification.setChecked((Boolean) newValue);
+                final String action = (Boolean) newValue ? Telemetry.Action.ENABLE : Telemetry.Action.DISABLE;
+                mTelemetry.sendNewsNotificationSignal(action);
                  return true;
             case SETTINGS_ADS:
                 mPreferenceManager.setAdBlockEnabled((Boolean) newValue);

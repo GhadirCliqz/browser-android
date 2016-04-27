@@ -142,17 +142,23 @@ public class MainActivity extends AppCompatActivity {
         final String url;
         final boolean message;
         final String query;
+        final boolean isNotificationClicked;
         if (intent != null) {
             final Bundle bundle = intent.getExtras();
             mBrowserState.setIncognito(bundle != null ? bundle.getBoolean(Constants.KEY_IS_INCOGNITO) : false);
             message = BrowserApp.hasNewTabMessage();
             url = Intent.ACTION_VIEW.equals(intent.getAction()) ? intent.getDataString() : null;
             query = Intent.ACTION_WEB_SEARCH.equals(intent.getAction()) ? intent.getStringExtra(SearchManager.QUERY) : null;
+            isNotificationClicked = bundle != null ? bundle.getBoolean(Constants.NOTIFICATION_CLICKED) : false;
         } else {
             url = null;
             message = false;
             query = null;
+            isNotificationClicked = false;
             mBrowserState.setIncognito(false);
+        }
+        if(isNotificationClicked) {
+            telemetry.sendNewsNotificationSignal(Telemetry.Action.CLICK);
         }
         final Bundle args = new Bundle();
         args.putBoolean(Constants.KEY_IS_INCOGNITO, mBrowserState.isIncognito());

@@ -47,6 +47,7 @@ import acr.browser.lightning.bus.BrowserEvents;
 import acr.browser.lightning.constant.Constants;
 import acr.browser.lightning.utils.ThemeUtils;
 import acr.browser.lightning.utils.UrlUtils;
+import acr.browser.lightning.utils.Utils;
 import acr.browser.lightning.view.AnimatedProgressBar;
 import acr.browser.lightning.view.LightningView;
 import acr.browser.lightning.view.TrampolineConstants;
@@ -598,6 +599,11 @@ public class MainFragment extends BaseFragment {
         }
     }
 
+    @Subscribe
+    public void saveLink(Messages.SaveLink event) {
+        Utils.downloadFile(getActivity(), mLightningView.getUrl(),
+                mLightningView.getWebView().getSettings().getUserAgentString(), "attachment");
+    }
 
     @Subscribe
     public void copyData(CliqzMessages.CopyData event) {

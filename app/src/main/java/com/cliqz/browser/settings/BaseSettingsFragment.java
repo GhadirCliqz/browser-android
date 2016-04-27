@@ -5,6 +5,7 @@ import android.preference.Preference;
 import android.preference.PreferenceFragment;
 
 import com.cliqz.browser.app.BrowserApp;
+import com.cliqz.browser.utils.Telemetry;
 
 import javax.inject.Inject;
 
@@ -27,6 +28,9 @@ public abstract class BaseSettingsFragment extends PreferenceFragment
 
     @Inject
     HistoryDatabase mHistoryDatabase;
+
+    @Inject
+    Telemetry mTelemetry;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
