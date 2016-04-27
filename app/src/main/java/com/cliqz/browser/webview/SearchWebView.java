@@ -16,6 +16,7 @@ import org.json.JSONObject;
 import java.util.Locale;
 
 import acr.browser.lightning.constant.Constants;
+import acr.browser.lightning.constant.SearchEngines;
 
 /**
  * Created by kread on 13/07/15.
@@ -122,7 +123,7 @@ public class SearchWebView extends BaseWebView {
             state.setLatitude(Float.MAX_VALUE);
         }
         final String call = String.format(Locale.US,
-                "search_mobile('%1$s', %2$b, %3$.6f, %4$.6f)",
+                "jsAPI.search('%1$s', %2$b, %3$.6f, %4$.6f)",
                 lowerQuery, hasLocation, lat, lon);
 
         executeJS(call);
@@ -135,6 +136,7 @@ public class SearchWebView extends BaseWebView {
         if (isExtensionReady()) {
             // Apply settings here
             initExtensionPreferences();
+            setDefaultSearchEngine();
 //            if (shouldShowHomePage()) {
 //                showHomepage();
 //            }
@@ -155,7 +157,7 @@ public class SearchWebView extends BaseWebView {
             e.printStackTrace();
         }
         final String call =
-                String.format(Locale.US, "CLIQZEnvironment.setClientPreferences(%s);",
+                String.format(Locale.US, "jsAPI.setClientPreferences(%s);",
                         preferences.toString());
         executeJS(call);
     }
@@ -182,7 +184,7 @@ public class SearchWebView extends BaseWebView {
                     params.put("title", state.getTitle());
                     break;
             }
-            executeJS(String.format(Locale.US, "resetState(%s);", params.toString()));
+            executeJS(String.format(Locale.US, "jsAPI.resetState(%s);", params.toString()));
             bringToFront();
             state.setTimestamp(System.currentTimeMillis());
             state.setMode(CliqzBrowserState.Mode.SEARCH);
@@ -191,7 +193,23 @@ public class SearchWebView extends BaseWebView {
         }
     }
 
+    private void setDefaultSearchEngine() {
+        if (!isExtensionReady()) {
+            return;
+        }
+
+        final JSONObject param = new JSONObject();
+        final SearchEngines engine = preferenceManager.getSearchChoice();
+        try {
+            param.put("name", engine.engineName);
+            param.put("url", engine.engineUrl);
+            executeJS(String.format(Locale.US, "jsAPI.setDefaultSearchEngine(%s)", param.toString()));
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
     public void requestCardUrl() {
-        executeJS("getCardUrl()");
+        executeJS("jsAPI.getCardUrl()");
     }
 }
