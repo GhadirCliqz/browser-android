@@ -87,7 +87,7 @@ public class PreferenceManager {
         public static final String BLOCK_ADULT_CONTENT = "blockAdultContent";
         public static final String HUMAN_WEB = "humanweb";
         public static final String NEVER_ASK_GPS_PERMISSION = "gpsPermission";
-        public static final String CLEAR_QUERIES = "clearQueries";
+        public static final String CLEAR_QUERIES = "jsAPI.clearQueries";
         public static final String GCM_TOKEN_SENT = "gcmTokenSent";
         public static final String ARN_ENDPOINT = "aws_arn_endpoint";
     }

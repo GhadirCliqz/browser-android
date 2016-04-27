@@ -93,7 +93,6 @@ public abstract class BaseWebView extends AbstractionWebView {
 
     void extensionReady() {
         mJsReady = true;
-        setDefaultSearchEngine();
     }
 
     public boolean isExtensionReady() { return mJsReady; }
@@ -110,23 +109,6 @@ public abstract class BaseWebView extends AbstractionWebView {
         resumeTimers();
         // When created we call this twice (one here and one in extensionReady()
         // That should not be a problem
-        setDefaultSearchEngine();
-    }
-
-    private void setDefaultSearchEngine() {
-        if (!mJsReady) {
-            return;
-        }
-
-        final JSONObject param = new JSONObject();
-        final SearchEngines engine = preferenceManager.getSearchChoice();
-        try {
-            param.put("name", engine.engineName);
-            param.put("url", engine.engineUrl);
-            executeJS(String.format(Locale.US, "setDefaultSearchEngine(%s)", param.toString()));
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
     }
 
     @Override
