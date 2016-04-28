@@ -94,6 +94,7 @@ public class SearchWebView extends BaseWebView {
     void extensionReady() {
         super.extensionReady();
         initExtensionPreferences();
+        setDefaultSearchEngine();
         // We are not sure this is called in onResume, especially if we were
         if (shouldShowHomePage()) {
             showHomepage();
