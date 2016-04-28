@@ -32,10 +32,10 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.cliqz.browser.app.BrowserApp;
-import com.cliqz.browser.main.CliqzBrowserState.Mode;
 import com.cliqz.browser.BuildConfig;
 import com.cliqz.browser.R;
+import com.cliqz.browser.app.BrowserApp;
+import com.cliqz.browser.main.CliqzBrowserState.Mode;
 import com.cliqz.browser.webview.CliqzMessages;
 import com.cliqz.browser.webview.SearchWebView;
 import com.cliqz.browser.widget.AutocompleteEditText;
@@ -60,9 +60,9 @@ import butterknife.OnEditorAction;
  * @author Stefano Pacifici
  * @date 2015/11/23
  */
-public class MainFragment extends BaseFragment {
+public class TabFragment extends BaseFragment {
 
-    private static final String TAG = MainFragment.class.getSimpleName();
+    private static final String TAG = TabFragment.class.getSimpleName();
     private static final String NAVIGATION_STATE_KEY = TAG + ".NAVIGATION_STATE";
     private static final int ICON_STATE_CLEAR = 0;
     //private static final int RELOAD = 1;
@@ -77,6 +77,7 @@ public class MainFragment extends BaseFragment {
     private String mSearchEngine;
     private Message newTabMessage = null;
     private String mExternalQuery = null;
+    protected CliqzBrowserState state = null;
 
     String lastQuery = "";
 
@@ -136,15 +137,18 @@ public class MainFragment extends BaseFragment {
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         ButterKnife.bind(this, view);
+        if (state == null) {
+            state = new CliqzBrowserState();
+            state.setIncognito(isIncognito);
+        }
         if (mSearchWebView == null || mLightningView == null) {
             // Must use activity due to Crosswalk webview
-            mSearchWebView = new SearchWebView(getActivity());
+            mSearchWebView = ((MainActivity)getActivity()).searchWebView;
             mLightningView = new LightningView(getActivity()/*, mUrl */, isIncognito, "1");
             mSearchWebView.setLayoutParams(
                     new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
         } else {
             final WebView webView = mLightningView.getWebView();
-            ((ViewGroup) mSearchWebView.getParent()).removeView(mSearchWebView);
             ((ViewGroup) webView.getParent()).removeView(webView);
         }
 
@@ -157,10 +161,15 @@ public class MainFragment extends BaseFragment {
                 webView.restoreState(webViewOutState);
             }
         }
+        if (mSearchWebView.getParent() != null) {
+            ((ViewGroup) mSearchWebView.getParent()).removeView(mSearchWebView);
+        }
+        mSearchWebView.setCurrentTabState(state);
         mLocalContainer.addView(webView);
         mLocalContainer.addView(mSearchWebView);
         titleBar.setOnTouchListener(onTouchListener);
-
+        mSearchWebView.initExtensionPreferences();
+        mSearchWebView.shouldShowHomePage();
     }
 
     @Override
@@ -312,13 +321,14 @@ public class MainFragment extends BaseFragment {
         if (mOverFlowMenu != null && mOverFlowMenu.isShown()) {
             mOverFlowMenu.dismiss();
         } else {
-        mOverFlowMenu = new OverFlowMenu(getActivity());
-        // mOverFlowMenu.setBrowserState(state.getMode());
-        mOverFlowMenu.setCanGoForward(mLightningView.canGoForward());
-        mOverFlowMenu.setAnchorView(overflowMenuButton);
-        mOverFlowMenu.setIncognitoMode(isIncognito);
-        mOverFlowMenu.setHistoryId(mLightningView.historyId);
-        mOverFlowMenu.show();
+            mOverFlowMenu = new OverFlowMenu(getActivity());
+            // mOverFlowMenu.setBrowserState(state.getMode());
+            mOverFlowMenu.setCanGoForward(mLightningView.canGoForward());
+            mOverFlowMenu.setAnchorView(overflowMenuButton);
+            mOverFlowMenu.setIncognitoMode(isIncognito);
+            mOverFlowMenu.setHistoryId(mLightningView.historyId);
+            mOverFlowMenu.setState(state);
+            mOverFlowMenu.show();
     }
     }
 

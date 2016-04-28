@@ -41,9 +41,6 @@ public abstract class BaseWebView extends AbstractionWebView {
     Telemetry telemetry;
 
     @Inject
-    CliqzBrowserState state;
-
-    @Inject
     CliqzBridge bridge;
 
     Context context;

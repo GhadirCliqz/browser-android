@@ -12,14 +12,14 @@ import com.cliqz.browser.webview.SearchWebView;
  * @date 2015/11/24
  */
 class MainFragmentListener implements View.OnFocusChangeListener, TextWatcher {
-    private final MainFragment fragment;
+    private final TabFragment fragment;
     private int queryLength;
 
-    public static MainFragmentListener create(MainFragment fragment) {
+    public static MainFragmentListener create(TabFragment fragment) {
         return new MainFragmentListener(fragment);
     }
 
-    private MainFragmentListener(MainFragment fragment) {
+    private MainFragmentListener(TabFragment fragment) {
         this.fragment = fragment;
         fragment.mAutocompleteEditText.setOnFocusChangeListener(this);
         fragment.mAutocompleteEditText.addTextChangedListener(this);
@@ -35,6 +35,7 @@ class MainFragmentListener implements View.OnFocusChangeListener, TextWatcher {
                 fragment.searchBar.showTitleBar();
             }
         } else {
+
             fragment.timings.setUrlBarFocusedTime();
             // TODO: The next two lines should be in a method
             fragment.mSearchWebView.bringToFront();

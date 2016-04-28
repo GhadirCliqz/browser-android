@@ -4,6 +4,7 @@ import android.Manifest;
 import android.app.ActivityManager;
 import android.app.AlertDialog;
 import android.app.SearchManager;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
@@ -11,8 +12,6 @@ import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Color;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Message;
@@ -20,16 +19,23 @@ import android.provider.Settings;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.view.ViewCompat;
 import android.support.v4.view.ViewPager;
+import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.util.Patterns;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewGroup.LayoutParams;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
+import android.widget.FrameLayout;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import com.cliqz.browser.BuildConfig;
 import com.cliqz.browser.R;
@@ -41,13 +47,15 @@ import com.cliqz.browser.utils.LocationCache;
 import com.cliqz.browser.utils.Telemetry;
 import com.cliqz.browser.utils.Timings;
 import com.cliqz.browser.webview.CliqzMessages;
-import com.cliqz.browser.widget.MainViewContainer;
+import com.cliqz.browser.webview.SearchWebView;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.inject.Inject;
 
@@ -56,8 +64,6 @@ import acr.browser.lightning.bus.BrowserEvents;
 import acr.browser.lightning.constant.Constants;
 import acr.browser.lightning.preference.PreferenceManager;
 import acr.browser.lightning.utils.WebUtils;
-
-import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 
 /**
  * Flat navigation browser
@@ -84,7 +90,7 @@ public class MainActivity extends AppCompatActivity {
 
     private static final String SAVED_STATE = TAG + ".SAVED_STATE";
 
-    public MainFragment mMainFragment;
+    private TabFragment firstFragment;
     private FreshTabFragment mFreshTabFragment;
     private HistoryFragment mHistoryFragment;
     private OnBoardingAdapter onBoardingAdapter;
@@ -95,6 +101,12 @@ public class MainActivity extends AppCompatActivity {
     private boolean isColdStart = false;
     // Keep the current shared browsing state
     private CliqzBrowserState mBrowserState;
+    private final List<TabFragment> mFragmentsList = new ArrayList<>();
+    private RecyclerView mTabListView;
+    protected TabsAdapter mTabsAdapter;
+    private DrawerLayout drawerLayout;
+    protected SearchWebView searchWebView;
+    protected String currentMode;
 
     @Inject
     Bus bus;
@@ -137,8 +149,10 @@ public class MainActivity extends AppCompatActivity {
 //        }
 
 //        mFreshTabFragment = new FreshTabFragment();
+        searchWebView = new SearchWebView(this);
         mHistoryFragment = new HistoryFragment(this);
-        mMainFragment = new MainFragment();
+        firstFragment = new TabFragment();
+        mFragmentsList.add(firstFragment);
 
         // Ignore intent if we are being recreated
         final Intent intent = savedInstanceState == null ? getIntent() : null;
@@ -175,7 +189,7 @@ public class MainActivity extends AppCompatActivity {
             setIntent(null);
             args.putString(Constants.KEY_QUERY, query);
         }
-        mMainFragment.setArguments(args);
+        firstFragment.setArguments(args);
 
         // File used to override the onboarding during UIAutomation tests
         final File onBoardingOverrideFile = new File(Constants.ONBOARDING_OVERRIDE_FILE);
@@ -223,14 +237,23 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setupContentView() {
-        final MainViewContainer content = new MainViewContainer(this);
-        content.setFitsSystemWindows(true);
-        content.setBackgroundColor(Color.WHITE);
-        final LayoutParams params = new LayoutParams(MATCH_PARENT, MATCH_PARENT);
-        content.setId(CONTENT_VIEW_ID);
-        setContentView(content, params);
+        //final MainViewContainer content = new MainViewContainer(this);
+        //content.setFitsSystemWindows(true);
+        //content.setBackgroundColor(Color.WHITE);
+        //final LayoutParams params = new LayoutParams(MATCH_PARENT, MATCH_PARENT);
+        //content.setId(CONTENT_VIEW_ID);
+        //setContentView(content, params);
+        setContentView(R.layout.activity_main);
+        drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+        drawerLayout.setDrawerListener(new DrawerListener());
+        mTabListView = (RecyclerView) findViewById(R.id.tabs_list);
+        mTabsAdapter = new TabsAdapter(this, R.layout.tab_list_item, mFragmentsList);
+        mTabListView.setAdapter(mTabsAdapter);
+        final RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
+        mTabListView.setLayoutManager(layoutManager);
+        mTabListView.setHasFixedSize(true);
         final FragmentManager fm = getSupportFragmentManager();
-        fm.beginTransaction().add(CONTENT_VIEW_ID, mMainFragment, SEARCH_FRAGMENT_TAG).commit();
+        fm.beginTransaction().add(R.id.content_frame, firstFragment, SEARCH_FRAGMENT_TAG).commit();
     }
 
     @Override
@@ -279,6 +302,30 @@ public class MainActivity extends AppCompatActivity {
             askedGPSPermission = true;
             showGPSPermissionDialog();
         }
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        final Bundle bundle = intent.getExtras();
+        final String url = Intent.ACTION_VIEW.equals(intent.getAction()) ? intent.getDataString() : null;
+        final String query = Intent.ACTION_WEB_SEARCH.equals(intent.getAction()) ? intent.getStringExtra(SearchManager.QUERY) : null;
+        final boolean isNotificationClicked = bundle != null ? bundle.getBoolean(Constants.NOTIFICATION_CLICKED) : false;
+        final TabFragment newTab = new TabFragment();
+        final Bundle args = new Bundle();
+        args.putBoolean(Constants.KEY_IS_INCOGNITO, false);
+        if(url != null && Patterns.WEB_URL.matcher(url).matches()) {
+            args.putString(Constants.KEY_URL, url);
+        }
+        if (query != null) {
+            args.putString(Constants.KEY_QUERY, query);
+        }
+        if(isNotificationClicked) {
+            telemetry.sendNewsNotificationSignal(Telemetry.Action.CLICK);
+        }
+        newTab.setArguments(args);
+        mFragmentsList.add(newTab);
+        showTab(mFragmentsList.size()-1);
     }
 
     private void showGPSPermissionDialog() {
@@ -355,10 +402,11 @@ public class MainActivity extends AppCompatActivity {
 
     private void performExitCleanUp() {
         if (preferenceManager.getClearCacheExit()) {
-            WebUtils.clearCache(mMainFragment.mLightningView.getWebView());
+            WebUtils.clearCache(mFragmentsList.get(0).mLightningView.getWebView());
         }
         if (preferenceManager.getClearHistoryExitEnabled()) {
-            mMainFragment.historyDatabase.clearHistory(false);
+            //TODO reintroduce this
+            mFragmentsList.get(0).historyDatabase.clearHistory(false);
             preferenceManager.setShouldClearQueries(PreferenceManager.ClearQueriesOptions.CLEAR_QUERIES);
         }
         if (preferenceManager.getClearCookiesExitEnabled()) {
@@ -389,6 +437,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void createTab(Message msg, boolean isIncognito) {
+        //TODO Convert this to fragment
         final Intent intent = new Intent(getBaseContext(), MainActivity.class);
         intent.putExtra(Constants.KEY_IS_INCOGNITO, isIncognito);
         intent.putExtra(NEW_TAB_MSG, true);
@@ -399,15 +448,25 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void createTab(String url, boolean isIncognito) {
-        final Intent intent = new Intent(getBaseContext(), MainActivity.class);
-        intent.setAction(Intent.ACTION_VIEW);
-        if (url != null && !url.isEmpty()) {
-            intent.setData(Uri.parse(url));
+//        final Intent intent = new Intent(getBaseContext(), MainActivity.class);
+//        intent.setAction(Intent.ACTION_VIEW);
+//        if (url != null && !url.isEmpty()) {
+//            intent.setData(Uri.parse(url));
+//        }
+//        intent.putExtra(Constants.KEY_IS_INCOGNITO, isIncognito);
+//        intent.addFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK
+//                | Intent.FLAG_ACTIVITY_NEW_DOCUMENT);
+//        startActivity(intent);
+
+        final TabFragment newTab = new TabFragment();
+        final Bundle args = new Bundle();
+        args.putBoolean(Constants.KEY_IS_INCOGNITO, isIncognito);
+        if(url != null && Patterns.WEB_URL.matcher(url).matches()) {
+            args.putString(Constants.KEY_URL, url);
         }
-        intent.putExtra(Constants.KEY_IS_INCOGNITO, isIncognito);
-        intent.addFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK
-                | Intent.FLAG_ACTIVITY_NEW_DOCUMENT);
-        startActivity(intent);
+        newTab.setArguments(args);
+        mFragmentsList.add(newTab);
+        showTab(mFragmentsList.size()-1);
     }
 
     @Subscribe
@@ -441,7 +500,10 @@ public class MainActivity extends AppCompatActivity {
                     R.anim.fade_in, R.anim.fade_out);
         }
 */
-        transaction.replace(CONTENT_VIEW_ID, mHistoryFragment, HISTORY_FRAGMENT_TAG)
+        //workaround for getting the mode in hitroy fragment
+        currentMode = mFragmentsList.get(getCurrentTabPosition())
+                .state.getMode() == CliqzBrowserState.Mode.SEARCH ? "cards" : "web";
+        transaction.replace(R.id.content_frame, mHistoryFragment, HISTORY_FRAGMENT_TAG)
                 .addToBackStack(null)
                 .commit();
     }
@@ -461,7 +523,8 @@ public class MainActivity extends AppCompatActivity {
                     R.anim.fade_in, R.anim.fade_out);
         }
 */
-        transaction.replace(CONTENT_VIEW_ID, mFreshTabFragment, SUGGESTIONS_FRAGMENT_TAG)
+        transaction.replace(R.id.content_frame
+                , mFreshTabFragment, SUGGESTIONS_FRAGMENT_TAG)
                 .addToBackStack(null)
                 .commit();
     }
@@ -535,14 +598,10 @@ public class MainActivity extends AppCompatActivity {
     //returns screen that is visible
     private String getCurrentVisibleFragmentName() {
         String name = "";
-        if (mMainFragment != null && mMainFragment.isVisible()) {
-            name = mBrowserState.getMode() == CliqzBrowserState.Mode.SEARCH ? "cards" : "web";
-        } else if (mHistoryFragment != null && mHistoryFragment.isVisible()) {
+        if (mHistoryFragment != null && mHistoryFragment.isVisible()) {
             name = "past";
-        } else if (mFreshTabFragment != null && mFreshTabFragment.isVisible()) {
-            name = "future";
         } else {
-            name = "web";
+            name = mBrowserState.getMode() == CliqzBrowserState.Mode.SEARCH ? "cards" : "web";
         }
         return name;
     }
@@ -565,5 +624,156 @@ public class MainActivity extends AppCompatActivity {
             return false;
         }
         return true;
+    }
+
+    private int getCurrentTabPosition() {
+        for(TabFragment tabFragment : mFragmentsList) {
+            if (tabFragment.isVisible()) {
+                return mFragmentsList.indexOf(tabFragment);
+            }
+        }
+        return -1;
+    }
+
+    private void showTab(int position) {
+        final FragmentManager fm = getSupportFragmentManager();
+        fm.beginTransaction().replace(R.id.content_frame, mFragmentsList.get(position), SEARCH_FRAGMENT_TAG).commit();
+    }
+
+    private synchronized void deleteTab(int position) {
+        if (position >= mFragmentsList.size()) {
+            return;
+        }
+        int current = getCurrentTabPosition();
+        if (current < 0) {
+            return;
+        }
+        TabFragment reference = mFragmentsList.get(position);
+        if (reference == null) {
+            return;
+        }
+        if (current > position) {
+            mFragmentsList.remove(position);
+            mTabsAdapter.notifyDataSetChanged();
+            //reference.onDestroy();
+        } else if (mFragmentsList.size() > position + 1) {
+            if (current == position) {
+                showTab(position + 1);
+                mFragmentsList.remove(position);
+            } else {
+                mFragmentsList.remove(position);
+            }
+            mTabsAdapter.notifyDataSetChanged();
+            //reference.onDestroy();
+        } else if (mFragmentsList.size() > 1) {
+            if (current == position) {
+                showTab(position - 1);
+            }
+            mFragmentsList.remove(position);
+            mTabsAdapter.notifyDataSetChanged();
+            //reference.onDestroy();
+        } else {
+            finish();
+        }
+        Log.d(Constants.TAG, "deleted tab");
+    }
+
+    private class DrawerListener implements DrawerLayout.DrawerListener {
+
+        @Override
+        public void onDrawerOpened(View v) {
+        }
+
+        @Override
+        public void onDrawerClosed(View drawerView) {
+
+        }
+
+        @Override
+        public void onDrawerSlide(View v, float arg) {
+            //update the drawer list when drawer is about to be opened
+            if (arg < 0.1) {
+                mTabsAdapter.notifyDataSetChanged();
+            }
+        }
+
+        @Override
+        public void onDrawerStateChanged(int arg) {
+        }
+
+    }
+
+    protected class TabsAdapter extends RecyclerView.Adapter<TabsAdapter.TabViewHolder> {
+
+        private final Context context;
+        private final int layoutResourceId;
+        private List<TabFragment> data = null;
+
+        public TabsAdapter(Context context, int layoutResourceId, List<TabFragment> data) {
+            this.context = context;
+            this.layoutResourceId = layoutResourceId;
+            this.data = data;
+        }
+
+        @Override
+        public TabViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+            final LayoutInflater inflater = LayoutInflater.from(parent.getContext());
+            final View view = inflater.inflate(layoutResourceId, parent, false);
+            return new TabViewHolder(view);
+        }
+
+        @Override
+        public void onBindViewHolder(TabViewHolder holder, final int position) {
+            holder.layout.setTag(position);
+            holder.exitButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    deleteTab(position);
+                }
+            });
+            holder.layout.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    final FragmentManager fm = getSupportFragmentManager();
+                    fm.beginTransaction().replace(R.id.content_frame, mFragmentsList.get(position)
+                                                    ,SEARCH_FRAGMENT_TAG).commit();
+                    drawerLayout.closeDrawers();
+                }
+            });
+            //TODO set long click listener
+            ViewCompat.jumpDrawablesToCurrentState(holder.exitButton);
+            TabFragment tabFragment = data.get(position);
+            final String title;
+            if (tabFragment.state.getMode() == CliqzBrowserState.Mode.SEARCH) {
+                title = tabFragment.state.getQuery();
+            } else {
+                title = tabFragment.mLightningView.getTitle();
+            }
+            holder.title.setText(title.isEmpty() ? "Home" : title);
+            holder.icon.setImageBitmap(tabFragment.mLightningView.getFavicon());
+        }
+
+        @Override
+        public int getItemCount() {
+            return data != null ? data.size() : 0;
+        }
+
+        public class TabViewHolder extends RecyclerView.ViewHolder {
+
+            final TextView title;
+            final ImageView icon;
+            final ImageView exit;
+            final FrameLayout exitButton;
+            final LinearLayout layout;
+
+            public TabViewHolder(View view) {
+                super(view);
+                title = (TextView) view.findViewById(R.id.textTab);
+                icon = (ImageView) view.findViewById(R.id.faviconTab);
+                exit = (ImageView) view.findViewById(R.id.deleteButton);
+                layout = (LinearLayout) view.findViewById(R.id.tab_item_background);
+                exitButton = (FrameLayout) view.findViewById(R.id.deleteAction);
+            }
+        }
     }
 }
