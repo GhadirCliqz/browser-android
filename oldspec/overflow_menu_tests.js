@@ -52,21 +52,20 @@ describe("Overflow menu", function () {
 
   it("should be displayed", function () {
     return driver
-      .elementById("com.cliqz.browser:id/search_edit_text")
+      .waitForElementById("com.cliqz.browser:id/search_edit_text")
         .should.eventually.exist
-      .elementById("com.cliqz.browser:id/overflow_menu")
+      .waitForElementById("com.cliqz.browser:id/overflow_menu")
         .should.eventually.exist
         .click()
-      .sleep(1000)
-      .elementById("com.cliqz.browser:id/copy_link_menu_button")
+      .waitForElementById("com.cliqz.browser:id/copy_link_menu_button")
         .should.eventually.exist;
   });
 
   it("should copy link", function () {
     return driver
-      .elementById("com.cliqz.browser:id/search_edit_text")
+      .waitForElementById("com.cliqz.browser:id/search_edit_text")
         .should.eventually.exist
-        .sendKeys("https://de.m.wikipedia.org/wiki/Rafael_Nadal")
+        .sendKeys("https://cdn.cliqz.com/mobile/browser/tests/testpage.html")
       .pressDeviceKey(66)
       .sleep(3000)
       .elementById("com.cliqz.browser:id/overflow_menu")
@@ -83,7 +82,7 @@ describe("Overflow menu", function () {
       .pressDeviceKey(50, 28672) //ctrl + v
       .elementById("com.cliqz.browser:id/search_edit_text")
         .text()
-        .should.eventually.equal("https://de.m.wikipedia.org/wiki/Rafael_Nadal")
+        .should.eventually.equal("https://cdn.cliqz.com/mobile/browser/tests/testpage.html")
   });
 
   it("should share link", function() {
@@ -93,13 +92,13 @@ describe("Overflow menu", function () {
         .sendKeys("https://cdn.cliqz.com/mobile/browser/tests/testpage.html")
       .pressDeviceKey(66)
       .sleep(3000)
-      .elementById("com.cliqz.browser:id/overflow_menu")
+      .waitForElementById("com.cliqz.browser:id/overflow_menu")
         .should.eventually.exist
         .click()
-      .elementById("com.cliqz.browser:id/action_share")
+      .waitForElementById("com.cliqz.browser:id/action_share")
         .should.eventually.exist
         .click()
-      .elementByName("CLIQZ Tests Helper")
+      .waitForElementByName("CLIQZ Tests Helper")
         .should.eventually.exist;
   });
 
@@ -110,13 +109,13 @@ describe("Overflow menu", function () {
         .click()
       .waitForElementById("com.cliqz.browser:id/contact_cliqz_menu_button")
         .click()
-      .elementByName("CLIQZ Tests Helper")
+      .waitForElementByName("CLIQZ Tests Helper")
         .should.eventually.exist;
   });
 
   it("should go to settings", function() {
     return driver
-      .elementById("com.cliqz.browser:id/search_edit_text")
+      .waitForElementById("com.cliqz.browser:id/search_edit_text")
         .should.eventually.exist
         .sendKeys("https://de.m.wikipedia.org/wiki/Rafael_Nadal")
       .pressDeviceKey(66)
@@ -180,7 +179,7 @@ describe("Overflow menu", function () {
 
   it("should open a new incognito tab", function() {
     return driver
-      .elementById("com.cliqz.browser:id/overflow_menu")
+      .waitForElementById("com.cliqz.browser:id/overflow_menu")
         .should.eventually.exist
         .click()
       .elementById("com.cliqz.browser:id/new_incognito_tab_menu_button")
