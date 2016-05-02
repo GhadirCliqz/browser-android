@@ -437,27 +437,17 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void createTab(Message msg, boolean isIncognito) {
-        //TODO Convert this to fragment
-        final Intent intent = new Intent(getBaseContext(), MainActivity.class);
-        intent.putExtra(Constants.KEY_IS_INCOGNITO, isIncognito);
-        intent.putExtra(NEW_TAB_MSG, true);
+        final TabFragment newTab = new TabFragment();
+        final Bundle args = new Bundle();
+        args.putBoolean(Constants.KEY_IS_INCOGNITO, isIncognito);
+        args.putBoolean(Constants.KEY_NEW_TAB_MESSAGE, true);
         BrowserApp.pushNewTabMessage(msg);
-        intent.addFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK
-                | Intent.FLAG_ACTIVITY_NEW_DOCUMENT);
-        startActivity(intent);
+        newTab.setArguments(args);
+        mFragmentsList.add(newTab);
+        showTab(mFragmentsList.size()-1);
     }
 
     private void createTab(String url, boolean isIncognito) {
-//        final Intent intent = new Intent(getBaseContext(), MainActivity.class);
-//        intent.setAction(Intent.ACTION_VIEW);
-//        if (url != null && !url.isEmpty()) {
-//            intent.setData(Uri.parse(url));
-//        }
-//        intent.putExtra(Constants.KEY_IS_INCOGNITO, isIncognito);
-//        intent.addFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK
-//                | Intent.FLAG_ACTIVITY_NEW_DOCUMENT);
-//        startActivity(intent);
-
         final TabFragment newTab = new TabFragment();
         final Bundle args = new Bundle();
         args.putBoolean(Constants.KEY_IS_INCOGNITO, isIncognito);

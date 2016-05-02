@@ -124,8 +124,10 @@ public class TabFragment extends BaseFragment {
         if (arguments.getBoolean(Constants.KEY_NEW_TAB_MESSAGE, false)) {
             newTabMessage = BrowserApp.popNewTabMessage();
         }
-        // We need to remove the key, otherwise the url get reloaded for each resume
+        // We need to remove the key, otherwise the url/query/msg gets reloaded for each resume
         arguments.remove(Constants.KEY_URL);
+        arguments.remove(Constants.KEY_NEW_TAB_MESSAGE);
+        arguments.remove(Constants.KEY_QUERY);
     }
 
     @Override
