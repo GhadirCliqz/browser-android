@@ -171,7 +171,13 @@ public class TabFragment extends BaseFragment {
         mLocalContainer.addView(mSearchWebView);
         titleBar.setOnTouchListener(onTouchListener);
         mSearchWebView.initExtensionPreferences();
-        mSearchWebView.shouldShowHomePage();
+        boolean isHomePageShown = mSearchWebView.shouldShowHomePage();
+        if (!isHomePageShown && state.getMode() == Mode.SEARCH) {
+            mSearchWebView.performSearch(state.getQuery());
+        } else if (!isHomePageShown && state.getMode() == Mode.WEBPAGE) {
+            bringWebViewToFront();
+        }
+
     }
 
     @Override

@@ -174,13 +174,13 @@ public class SearchWebView extends BaseWebView {
         }
     }
 
-    public void shouldShowHomePage() {
+    public boolean shouldShowHomePage() {
         if (System.currentTimeMillis() - currentTabState.getTimestamp() >= Constants.HOME_RESET_DELAY) {
             showHomepage();
             currentTabState.setTimestamp(System.currentTimeMillis());
-        } else if (currentTabState.getMode() == CliqzBrowserState.Mode.SEARCH){
-            performSearch(currentTabState.getQuery());
+            return true;
         }
+        return false;
     }
 
     private void showHomepage() {

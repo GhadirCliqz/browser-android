@@ -325,6 +325,7 @@ public class MainActivity extends AppCompatActivity {
         }
         newTab.setArguments(args);
         mFragmentsList.add(newTab);
+        telemetry.sendNewTabSignal(mFragmentsList.size(), false);
         showTab(mFragmentsList.size()-1);
     }
 
@@ -444,6 +445,7 @@ public class MainActivity extends AppCompatActivity {
         BrowserApp.pushNewTabMessage(msg);
         newTab.setArguments(args);
         mFragmentsList.add(newTab);
+        telemetry.sendNewTabSignal(mFragmentsList.size(), isIncognito);
         showTab(mFragmentsList.size()-1);
     }
 
@@ -456,6 +458,7 @@ public class MainActivity extends AppCompatActivity {
         }
         newTab.setArguments(args);
         mFragmentsList.add(newTab);
+        telemetry.sendNewTabSignal(mFragmentsList.size(), isIncognito);
         showTab(mFragmentsList.size()-1);
     }
 
@@ -639,6 +642,7 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
         TabFragment reference = mFragmentsList.get(position);
+        telemetry.sendTabCloseSignal(mFragmentsList.size() - 1, reference.state.isIncognito());
         if (reference == null) {
             return;
         }
@@ -672,6 +676,7 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public void onDrawerOpened(View v) {
+            telemetry.sendTabsMenuOpen(mFragmentsList.size());
         }
 
         @Override
@@ -728,6 +733,8 @@ public class MainActivity extends AppCompatActivity {
                     fm.beginTransaction().replace(R.id.content_frame, mFragmentsList.get(position)
                                                     ,SEARCH_FRAGMENT_TAG).commit();
                     drawerLayout.closeDrawers();
+                    telemetry.sendTabOpenSignal(position, mFragmentsList.size(),
+                            mFragmentsList.get(position).state.isIncognito());
                 }
             });
             ViewCompat.jumpDrawablesToCurrentState(holder.exitButton);
