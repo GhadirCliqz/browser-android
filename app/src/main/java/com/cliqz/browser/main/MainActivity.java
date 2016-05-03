@@ -730,7 +730,6 @@ public class MainActivity extends AppCompatActivity {
                     drawerLayout.closeDrawers();
                 }
             });
-            //TODO set long click listener
             ViewCompat.jumpDrawablesToCurrentState(holder.exitButton);
             TabFragment tabFragment = data.get(position);
             final String title;
@@ -741,6 +740,11 @@ public class MainActivity extends AppCompatActivity {
             }
             holder.title.setText(title.isEmpty() ? "Home" : title);
             holder.icon.setImageBitmap(tabFragment.mLightningView.getFavicon());
+            if (position == getCurrentTabPosition()) {
+                holder.layout.setBackgroundColor(ContextCompat.getColor(MainActivity.this, R.color.gray_list_bg));
+            } else {
+                holder.layout.setBackgroundColor(ContextCompat.getColor(MainActivity.this, R.color.white));
+            }
         }
 
         @Override
