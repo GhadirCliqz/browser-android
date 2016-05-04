@@ -5,8 +5,8 @@ apply plugin: 'com.google.gms.google-services'
 apply from: 'adhosts.gradle'
 apply from: 'signing.gradle'
 
-android.metaClass.baseVersionCode = 39
-android.metaClass.baseVersionName = "0.6.1"
+android.metaClass.baseVersionCode = 41
+android.metaClass.baseVersionName = "0.7.0"
 
 android {
     compileSdkVersion 23
