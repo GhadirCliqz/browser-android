@@ -266,6 +266,8 @@ public class TabFragment extends BaseFragment {
     @Override
     public void onDestroyView() {
         mLightningView.pauseTimers();
+        //should we do this? if tab isn't opened for 30mins it gets reset
+        state.setTimestamp(System.currentTimeMillis());
         super.onDestroyView();
     }
 

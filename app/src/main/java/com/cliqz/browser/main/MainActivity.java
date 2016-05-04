@@ -10,8 +10,6 @@ import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Message;
@@ -98,15 +96,13 @@ public class MainActivity extends AppCompatActivity {
     private boolean askedGPSPermission = false;
     private CustomViewHandler mCustomViewHandler;
     // private boolean mIsIncognito;
-    private boolean isColdStart = false;
-    // Keep the current shared browsing state
-    private CliqzBrowserState mBrowserState;
     private final List<TabFragment> mFragmentsList = new ArrayList<>();
     private RecyclerView mTabListView;
     protected TabsAdapter mTabsAdapter;
     private DrawerLayout drawerLayout;
     protected SearchWebView searchWebView;
     protected String currentMode;
+    private boolean mIsColdStart = true;
 
     @Inject
     Bus bus;
@@ -132,15 +128,12 @@ public class MainActivity extends AppCompatActivity {
         mActivityComponent = BrowserApp.getAppComponent().plus(new MainActivityModule(this));
         mActivityComponent.inject(this);
         bus.register(this);
-        timings.setAppStartTime();
-        isColdStart = true;
-
-        // Restore state
-        final CliqzBrowserState oldState = savedInstanceState != null ?
-                (CliqzBrowserState) savedInstanceState.getSerializable(SAVED_STATE) :
-                null;
-        mBrowserState = oldState != null ? oldState : new CliqzBrowserState();
-
+        // TODO reintroduce savedInstanceState logic
+//        Restore state
+//        final CliqzBrowserState oldState = savedInstanceState != null ?
+//                (CliqzBrowserState) savedInstanceState.getSerializable(SAVED_STATE) :
+//                null;
+//        mBrowserState = oldState != null ? oldState : new CliqzBrowserState();
         // Translucent status bar only on selected platforms
 //        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
 //            final Window window = getWindow();
@@ -160,9 +153,10 @@ public class MainActivity extends AppCompatActivity {
         final boolean message;
         final String query;
         final boolean isNotificationClicked;
+        final boolean isIncognito;
         if (intent != null) {
             final Bundle bundle = intent.getExtras();
-            mBrowserState.setIncognito(bundle != null ? bundle.getBoolean(Constants.KEY_IS_INCOGNITO) : false);
+            isIncognito = bundle != null ? bundle.getBoolean(Constants.KEY_IS_INCOGNITO) : false;
             message = BrowserApp.hasNewTabMessage();
             url = Intent.ACTION_VIEW.equals(intent.getAction()) ? intent.getDataString() : null;
             query = Intent.ACTION_WEB_SEARCH.equals(intent.getAction()) ? intent.getStringExtra(SearchManager.QUERY) : null;
@@ -172,13 +166,13 @@ public class MainActivity extends AppCompatActivity {
             message = false;
             query = null;
             isNotificationClicked = false;
-            mBrowserState.setIncognito(false);
+            isIncognito = false;
         }
         if(isNotificationClicked) {
             telemetry.sendNewsNotificationSignal(Telemetry.Action.CLICK);
         }
         final Bundle args = new Bundle();
-        args.putBoolean(Constants.KEY_IS_INCOGNITO, mBrowserState.isIncognito());
+        args.putBoolean(Constants.KEY_IS_INCOGNITO, isIncognito);
         if (url != null && Patterns.WEB_URL.matcher(url).matches()) {
             setIntent(null);
             args.putString(Constants.KEY_URL, url);
@@ -217,23 +211,10 @@ public class MainActivity extends AppCompatActivity {
             telemetry.sendLifeCycleSignal(Telemetry.Action.UPDATE);
         }
 
-        final int taskBarColor = mBrowserState.isIncognito() ? R.color.incognito_tab_primary_color : R.color.normal_tab_primary_color;
-        final Bitmap appIcon = BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher);
-        final ActivityManager.TaskDescription taskDescription;
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
-            taskDescription = new ActivityManager.TaskDescription(
-                getString(R.string.cliqz_app_name), appIcon, ContextCompat.getColor(this, taskBarColor));
-        setTaskDescription(taskDescription);
-        }
-
         if (checkPlayServices()) {
             final Intent registrationIntent = new Intent(this, RegistrationIntentService.class);
             startService(registrationIntent);
-    }
-    }
-
-    public CliqzBrowserState getBrowserState() {
-        return mBrowserState;
+        }
     }
 
     private void setupContentView() {
@@ -266,18 +247,20 @@ public class MainActivity extends AppCompatActivity {
     protected void onResumeFragments() {
         super.onResumeFragments();
         final String name = getCurrentVisibleFragmentName();
-        if(!name.isEmpty() && !isColdStart) {
+        if(!name.isEmpty() && !mIsColdStart) {
             telemetry.sendStartingSignals(name, "warm");
         }
-        isColdStart = false;
+        mIsColdStart = false;
     }
 
     @Override
     protected void onResume() {
         super.onResume();
         gcmReceiver.register();
-        if (!isColdStart) {
-            timings.setAppStartTime();
+        final String name = getCurrentVisibleFragmentName();
+        timings.setAppStartTime();
+        if(!name.isEmpty()) {
+            telemetry.sendStartingSignals(name, mIsColdStart ? "cold" : "warm");
         }
         //Ask for "Dangerous Permissions" on runtime
         if(Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP_MR1) {
@@ -375,14 +358,14 @@ public class MainActivity extends AppCompatActivity {
             telemetry.sendClosingSignals(Telemetry.Action.CLOSE, context);
         }
         locationCache.stop();
-        mBrowserState.setTimestamp(System.currentTimeMillis());
     }
 
-    @Override
-    protected void onSaveInstanceState(Bundle outState) {
-        outState.putSerializable(SAVED_STATE, mBrowserState);
-        super.onSaveInstanceState(outState);
-    }
+    //TODO Reintroduce this
+//    @Override
+//    protected void onSaveInstanceState(Bundle outState) {
+//        outState.putSerializable(SAVED_STATE, mBrowserState);
+//        super.onSaveInstanceState(outState);
+//    }
 
     @Override
     protected void onDestroy() {
@@ -430,7 +413,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Subscribe
     public void createWindow(BrowserEvents.CreateWindow event) {
-        createTab(event.msg, mBrowserState.isIncognito());
+        createTab(event.msg, mFragmentsList.get(getCurrentTabPosition()).state.isIncognito());
 //        // TODO: Temporary workaround, we want to open a new activity!
 //        bus.post(new CliqzMessages.OpenLink(event.url));
     }
@@ -584,10 +567,13 @@ public class MainActivity extends AppCompatActivity {
     //returns screen that is visible
     private String getCurrentVisibleFragmentName() {
         String name = "";
+        final int currentTabPos = getCurrentTabPosition();
         if (mHistoryFragment != null && mHistoryFragment.isVisible()) {
             name = "past";
+        } else if (currentTabPos != -1){
+            name = mFragmentsList.get(getCurrentTabPosition()).state.getMode() == CliqzBrowserState.Mode.SEARCH ? "cards" : "web";
         } else {
-            name = mBrowserState.getMode() == CliqzBrowserState.Mode.SEARCH ? "cards" : "web";
+            name = "cards";
         }
         return name;
     }
