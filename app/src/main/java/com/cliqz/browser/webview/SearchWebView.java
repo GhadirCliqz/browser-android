@@ -95,6 +95,7 @@ public class SearchWebView extends BaseWebView {
         super.extensionReady();
         initExtensionPreferences();
         setDefaultSearchEngine();
+        telemetry.sendStartingSignals("cards", "cold");
         // We are not sure this is called in onResume, especially if we were
         if (shouldShowHomePage()) {
             showHomepage();

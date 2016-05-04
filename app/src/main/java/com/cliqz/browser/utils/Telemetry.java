@@ -104,6 +104,8 @@ public class Telemetry {
         private static final String TARGET_TYPE = "target_type";
         private static final String MAIN = "main";
         private static final String NEWS_NOTIFICATION = "news_notification";
+        private static final String STARTUP_TYPE = "startup_type";
+        private static final String STARTUP_TIME = "startup_time";
     }
 
     public static class Action {
@@ -168,14 +170,12 @@ public class Telemetry {
     }
 
     /**
-     * Send a telemetry signal when the app is opened or closed
-     * @param action One of the three: "open", "close" or "kill"
+     * Send a telemetry signal when the app is closed
+     * @param action One of the two: "close" or "kill"
      * @param context The screen which is visible when the this signal is sent.
      */
-    //TODO No startup time
-    private void sendAppUsageSignal(String action, String context) {
+    private void sendAppCloseSignal(String action, String context) {
         JSONObject signal = new JSONObject(); ;
-        boolean force = false;
         try {
             signal.put(Key.TYPE, Key.APP_STATE_CHANGE);
             signal.put(Key.STATE, action);
@@ -183,14 +183,35 @@ public class Telemetry {
             signal.put(Key.BATTERY, batteryLevel);
             signal.put(Key.MEMORY, getMemoryUsage());
             signal.put(Key.CONTEXT, context);
-            force = action.equals(Action.CLOSE) || action.equals(Action.KILL);
-            if(force) {
+            if(action.equals(Action.CLOSE)) {
                 signal.put(Key.TIME_USED, timings.getAppUsageTime());
             }
         } catch (JSONException e) {
             e.printStackTrace();
         }
-        saveSignal(signal, force);
+        saveSignal(signal, true);
+    }
+
+    /**
+     * Send a telemetry signal when the app is opened
+     * @param startType One of the two: warm or cold
+     * @param context  The screen which is visible when the this signal is sent.
+     */
+    private void sendAppStartupSignal(String context, String startType) {
+        JSONObject signal = new JSONObject();
+        try {
+            signal.put(Key.TYPE, Key.APP_STATE_CHANGE);
+            signal.put(Key.STATE, Action.OPEN);
+            signal.put(Key.NETWORK, getNetworkState());
+            signal.put(Key.BATTERY, batteryLevel);
+            signal.put(Key.CONTEXT, context);
+            signal.put(Key.STARTUP_TYPE, startType);
+            signal.put(Key.STARTUP_TIME, timings.getAppStartUpTime());
+            signal.put(Key.MEMORY, getMemoryUsage());
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        saveSignal(signal, false);
     }
 
     /**
@@ -378,12 +399,13 @@ public class Telemetry {
     /**
      * Send telemetry signal when the app starts/comes to foreground
      * @param context the layer which is visble
+     * @param startType Either warm or cold
      */
-    public void sendStartingSignals(String context) {
+    public void sendStartingSignals(String context, String startType) {
         timings.setNetworkStartTime();
         currentNetwork = getNetworkState();
         sendEnvironmentSignal();
-        sendAppUsageSignal(Action.OPEN, context);
+        sendAppStartupSignal(context, startType);
     }
 
     /**
@@ -393,7 +415,7 @@ public class Telemetry {
     public void sendClosingSignals(String closeOrKill, String context) {
         currentLayer = "";
         sendNetworkStatus();
-        sendAppUsageSignal(closeOrKill, context);
+        sendAppCloseSignal(closeOrKill, context);
     }
 
     /**
