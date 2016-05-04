@@ -307,6 +307,9 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
+        if (intent.getAction().equals(Intent.ACTION_MAIN)) {
+            return;
+        }
         final Bundle bundle = intent.getExtras();
         final String url = Intent.ACTION_VIEW.equals(intent.getAction()) ? intent.getDataString() : null;
         final String query = Intent.ACTION_WEB_SEARCH.equals(intent.getAction()) ? intent.getStringExtra(SearchManager.QUERY) : null;
