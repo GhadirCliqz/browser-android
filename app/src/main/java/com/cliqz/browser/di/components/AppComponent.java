@@ -2,6 +2,7 @@ package com.cliqz.browser.di.components;
 
 import com.cliqz.browser.di.modules.MainActivityModule;
 import com.cliqz.browser.di.modules.AppModule;
+import com.cliqz.browser.gcm.NotificationDismissedReceiver;
 import com.cliqz.browser.gcm.RegistrationIntentService;
 import com.cliqz.browser.settings.BaseSettingsFragment;
 import com.cliqz.browser.utils.HistoryCleaner;
@@ -56,4 +57,6 @@ public interface AppComponent {
     void inject(HistoryCleaner historyCleaner);
 
     void inject(RegistrationIntentService registrationIntentService);
+
+    void inject(NotificationDismissedReceiver notificationDismissedReceiver);
 }

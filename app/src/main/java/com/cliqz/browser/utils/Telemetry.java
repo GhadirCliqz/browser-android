@@ -130,6 +130,7 @@ public class Telemetry {
         public static final String ENABLE = "enable";
         public static final String DISABLE = "disable";
         public static final String RECEIVE = "receive";
+        public static final String DISMISS = "dismiss";
     }
 
     private static final int BATCH_SIZE = 50;
@@ -529,7 +530,7 @@ public class Telemetry {
     }
 
     /**
-     * Send telemetry signal when user receives, opens, enables, disables news notification
+     * Send telemetry signal when user receives, opens, enables, disables or dismisses news notification
      * @param action type of signal
      */
     public void sendNewsNotificationSignal(String action) {
