@@ -89,4 +89,14 @@ public class CliqzWebView extends WebView {
             return false;
         }
     }
+
+    protected final void executeJS(final String js) {
+        if (js != null && !js.isEmpty()) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                this.evaluateJavascript(js, null);
+            } else {
+                this.loadUrl("javascript:" + js);
+            }
+        }
+    }
 }
