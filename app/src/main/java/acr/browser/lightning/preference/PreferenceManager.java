@@ -90,6 +90,7 @@ public class PreferenceManager {
         public static final String CLEAR_QUERIES = "jsAPI.clearQueries";
         public static final String GCM_TOKEN_SENT = "gcmTokenSent";
         public static final String ARN_ENDPOINT = "aws_arn_endpoint";
+        public static final String RESETORE_TOP_SITES = "restore_top_sites";
     }
 
     private final SharedPreferences mPrefs;
@@ -323,6 +324,10 @@ public class PreferenceManager {
 
     public boolean getNewsNotificationEnabled() {
         return mPrefs.getBoolean(Name.NEWS_NOTIFICATION, true);
+    }
+
+    public boolean getRestoreTopSites() {
+        return mPrefs.getBoolean(Name.RESETORE_TOP_SITES, false);
     }
 
     public ClearQueriesOptions shouldClearQueries() {
@@ -596,4 +601,9 @@ public class PreferenceManager {
     public void setARNEndpoint(String value) {
         putString(Name.ARN_ENDPOINT, value);
     }
+
+    public void setRestoreTopSites(boolean restoreTopSites) {
+        putBoolean(Name.RESETORE_TOP_SITES, restoreTopSites);
+    }
+
 }

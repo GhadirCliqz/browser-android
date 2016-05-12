@@ -251,4 +251,6 @@
     <string name="add_to_favourites">zu Favoriten hinzufügen</string>
     <string name="save_link">Link speichern</string>
     <string name="news_notification">Schlagzeilen Benachrichtigungen</string>
+    <string name="restore_top_sites">Entfernte Topseiten anzeigen</string>
+    <string name="message_restore_top_sites">Alle entfernten Topseiten werden wieder auf der Startseite angezeigt.</string>
 </resources>

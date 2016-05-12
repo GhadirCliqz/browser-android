@@ -162,6 +162,12 @@ public class SearchWebView extends BaseWebView {
                 String.format(Locale.US, "jsAPI.setClientPreferences(%s);",
                         preferences.toString());
         executeJS(call);
+
+        final boolean shouldRestoreTopSites = preferenceManager.getRestoreTopSites();
+        if (shouldRestoreTopSites) {
+            evaluateJavascript("jsAPI.restoreBlockedTopSites()",null);
+            preferenceManager.setRestoreTopSites(false);
+        }
     }
 
     private boolean shouldShowHomePage() {

@@ -17,6 +17,7 @@ import android.webkit.WebView;
 import android.widget.CheckBox;
 
 import com.cliqz.browser.R;
+import com.cliqz.browser.main.Messages;
 import com.cliqz.browser.utils.HistoryCleaner;
 
 import acr.browser.lightning.utils.Utils;
@@ -33,6 +34,7 @@ public class PrivacySettingsFragment extends BaseSettingsFragment {
     private static final String SETTINGS_CACHEEXIT = "clear_cache_exit";
     private static final String SETTINGS_HISTORYEXIT = "clear_history_exit";
     private static final String SETTINGS_COOKIEEXIT = "clear_cookies_exit";
+    private static final String SETTINGS_RESTORETOPSITES = "restore_top_sites";
     // private static final String SETTINGS_CLEARCACHE = "clear_cache";
     // private static final String SETTINGS_CLEARCOOKIES = "clear_cookies";
     // private static final String SETTINGS_CLEARWEBSTORAGE = "clear_webstorage";
@@ -107,6 +109,8 @@ public class PrivacySettingsFragment extends BaseSettingsFragment {
 
         final Preference prefClearHistory = (Preference) findPreference(SETTINGS_CLEARHISTORY);
         prefClearHistory.setOnPreferenceClickListener(this);
+        final Preference restoreTopSites = findPreference(SETTINGS_RESTORETOPSITES);
+        restoreTopSites.setOnPreferenceClickListener(this);
 
         messageHandler = new MessageHandler(mActivity);
     }
@@ -148,6 +152,9 @@ public class PrivacySettingsFragment extends BaseSettingsFragment {
 //            case SETTINGS_CLEARWEBSTORAGE:
 //                clearWebStorage();
 //                return true;
+            case SETTINGS_RESTORETOPSITES:
+                restoreTopSitesDialog();
+                return true;
             default:
                 return false;
         }
@@ -183,6 +190,23 @@ public class PrivacySettingsFragment extends BaseSettingsFragment {
                     .setPositiveButton(R.string.action_delete, dialogListener)
                     .setNegativeButton(R.string.action_cancel, dialogListener)
                     .show();
+    }
+
+    private void restoreTopSitesDialog() {
+        final AlertDialog.Builder builder = new AlertDialog.Builder(mActivity);
+        builder.setTitle(getResources().getString(R.string.restore_top_sites));
+        builder.setMessage(getResources().getString(R.string.message_restore_top_sites))
+                .setPositiveButton(getResources().getString(R.string.action_ok), new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        mPreferenceManager.setRestoreTopSites(true);
+                    }
+                })
+                .setNegativeButton(getResources().getString(R.string.action_cancel), new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                    }
+                }).show();
     }
 
     private void clearCookiesDialog() {
