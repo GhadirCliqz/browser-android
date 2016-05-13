@@ -2,20 +2,16 @@ package com.cliqz.browser.webview;
 
 import android.content.Context;
 import android.support.annotation.Nullable;
+import android.view.MotionEvent;
+import android.view.inputmethod.InputMethodManager;
 
 import com.cliqz.browser.main.CliqzBrowserState;
 import com.cliqz.browser.main.MainActivity;
 import com.cliqz.browser.utils.LocationCache;
 import com.cliqz.browser.utils.Telemetry;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.util.Locale;
-
 import javax.inject.Inject;
 
-import acr.browser.lightning.constant.SearchEngines;
 import acr.browser.lightning.database.HistoryDatabase;
 import acr.browser.lightning.preference.PreferenceManager;
 
@@ -51,6 +47,9 @@ public abstract class BaseWebView extends AbstractionWebView {
     CliqzBridge bridge;
 
     Context context;
+    private boolean isTouched = false;
+    private float initialX;
+    private float initialY;
 
     public BaseWebView(Context context) {
         super(context);
@@ -114,5 +113,33 @@ public abstract class BaseWebView extends AbstractionWebView {
     @Override
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
         super.onLayout(changed, l, t, r, b);
+    }
+
+    //Have to use dispatchTouchEvent instead of onTouchListener because Xwalk doesn't fire that event.
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent motionEvent) {
+        final int mAction = motionEvent.getAction() & MotionEvent.ACTION_MASK;
+        if (mAction == MotionEvent.ACTION_DOWN) {
+            initialX = motionEvent.getX();
+            initialY = motionEvent.getY();
+            isTouched = true;
+        } else if (mAction == MotionEvent.ACTION_UP) {
+            isTouched = false;
+            final float finalX = motionEvent.getX();
+            final float finalY = motionEvent.getY();
+            final float distanceX = finalX - initialX;
+            final float distanceY = finalY - initialY;
+            //Dismiss only for vertical scroll
+            if (Math.abs(distanceY) > 50 && Math.abs(distanceX) < 100) {
+                hideKeyboard();
+            }
+        }
+        return super.dispatchTouchEvent(motionEvent);
+    }
+
+    private void hideKeyboard() {
+        InputMethodManager imm = (InputMethodManager)context
+                .getSystemService(Context.INPUT_METHOD_SERVICE);
+        imm.hideSoftInputFromWindow(this.getWindowToken(), 0);
     }
 }
