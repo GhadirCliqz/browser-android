@@ -1,10 +1,15 @@
 'use strict';
 
-const max_device_per_level = 2;
+const max_device_per_level = 1;
 const max_screen_size = 7;
 const tests_dir = './tests';
 const standard_project = 'CLIQZ Browser (android, standard)';
 const xwalk_project = 'CLIQZ Browser (android, xwalk)';
+
+
+if (!process.env.TESTDROID_API_KEY) throw "Must have apikey";
+if (!process.env.TESTDROID_APP_UNIVERSAL) throw "Please, specify the universal apk address";
+if (!process.env.TESTDROID_APP_XWALK) throw "Please, specify the xwalk apk address";
 
 let RestClient = require('node-rest-client').Client,
   fs = require('fs'),
@@ -72,7 +77,8 @@ let getTestDroidParams = function(device) {
     TESTDROID_TARGET: target,
     TESTDROID_PROJECT: project,
     TESTDROID_TESTRUN: testrun,
-    TESTDROID_DEVICE: device.displayName
+    TESTDROID_DEVICE: device.displayName,
+    APPIUM_API_LEVEL: device.api_level
   }
 }
 

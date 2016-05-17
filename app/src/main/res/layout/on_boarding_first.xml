@@ -25,6 +25,7 @@
         android:textAllCaps="false"
         android:paddingLeft="15dp"
         android:paddingRight="15dp"
-        android:layout_marginBottom="20dp"/>
+        android:layout_marginBottom="20dp"
+        android:contentDescription="@string/next"/>
 
 </RelativeLayout>

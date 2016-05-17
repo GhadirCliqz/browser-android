@@ -266,4 +266,5 @@
     <string name="device_registered">Device Registered</string>
     <string name="error_registering">Error registering the device</string>
     <string name="news_notification">News Notification</string>
+    <string name="descr_search_bar">Search Bar</string>
 </resources>

@@ -67,7 +67,8 @@
                     android:textAllCaps="false"
                     android:paddingLeft="15dp"
                     android:paddingRight="15dp"
-                    android:id="@+id/start_now"/>
+                    android:id="@+id/start_now"
+                    android:contentDescription="@string/start_now_bang"/>
             </FrameLayout>
         </RelativeLayout>
     </LinearLayout>

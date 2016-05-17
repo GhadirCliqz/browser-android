@@ -10,7 +10,6 @@
         android:id="@+id/search_edit_text"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_centerVertical="true"
         android:background="#11FFFFFF"
         android:drawableRight="@drawable/ic_action_delete"
         android:focusable="true"
@@ -26,7 +25,8 @@
         android:singleLine="true"
         android:textColor="@android:color/white"
         android:textColorHint="@color/hint_text"
-        android:textCursorDrawable="@null"/>
+        android:textCursorDrawable="@null"
+        android:contentDescription="@string/descr_search_bar"/>
 
     <TextView
         android:id="@+id/title_bar"
