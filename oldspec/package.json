@@ -22,14 +22,12 @@
   },
   "homepage": "https://www.cliqz.com",
   "devDependencies": {
-    "promise": "^7.1.1",
     "chai": "^2.2.0",
     "chai-as-promised": "^5.0.0",
     "colors": "^1.0.3",
     "express": "^4.12.3",
     "q": "^2.0.2",
     "underscore": "^1.8.3",
-    "wd": "^0.3.11",
-    "node-rest-client": "^1.8.0"
+    "wd": "^0.3.11"
   }
 }
