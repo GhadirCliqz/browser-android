@@ -24,8 +24,6 @@ describe("Browser", function () {
     return driver
       .init(desired)
       .setImplicitWaitTimeout(3000);
-      // .pushFileToDevice("/sdcard/com.cliqz.browser.no_onboarding", "")
-      // .resetApp();
   });
 
   after(function () {
