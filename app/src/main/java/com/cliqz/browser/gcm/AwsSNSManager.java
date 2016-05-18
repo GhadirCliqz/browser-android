@@ -1,6 +1,7 @@
 package com.cliqz.browser.gcm;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.amazonaws.auth.CognitoCachingCredentialsProvider;
@@ -38,17 +39,28 @@ public class AwsSNSManager {
 
     public AwsSNSManager(PreferenceManager preferenceManager, Context context) {
         this.preferenceManager = preferenceManager;
-        final CognitoCachingCredentialsProvider credentialsProvider =
-                new CognitoCachingCredentialsProvider(context,
-                        "141047255820",
-                        "us-east-1:68bb8256-a533-4b93-b744-423518ef0f02",
-                        "arn:aws:iam::141047255820:role/Cognito_CLIQZ_browser_androidUnauth_Role",
-                        "arn:aws:iam::141047255820:role/Cognito_CLIQZ_browser_androidAuth_Role",
-                        Regions.US_EAST_1);
-        this.client = new AmazonSNSClient(credentialsProvider);
+        if (BuildConfig.AMAZON_ACCOUNT_ID.isEmpty() ||
+                BuildConfig.AMAZON_IDENTITY_POOL_ID.isEmpty() ||
+                BuildConfig.AMAZON_UNAUTH_ROLE_ARN.isEmpty() ||
+                BuildConfig.AMAZON_AUTH_ROLE_ARN.isEmpty()) {
+            this.client = null;
+        } else {
+            final CognitoCachingCredentialsProvider credentialsProvider =
+                    new CognitoCachingCredentialsProvider(context,
+                            BuildConfig.AMAZON_ACCOUNT_ID,
+                            BuildConfig.AMAZON_IDENTITY_POOL_ID,
+                            BuildConfig.AMAZON_UNAUTH_ROLE_ARN,
+                            BuildConfig.AMAZON_AUTH_ROLE_ARN,
+                            Regions.US_EAST_1);
+            this.client = new AmazonSNSClient(credentialsProvider);
+        }
     }
 
     public void registerWithSNS(final String token) {
+        // This may mean we don't have a valid configuration
+        if (client == null) {
+            return;
+        }
 
         String endpointArn = retrieveEndpointArn();
 
@@ -104,6 +116,7 @@ public class AwsSNSManager {
     /**
      * @return never null
      * */
+    @NonNull
     private String createEndpoint(final String token) {
         String endpointArn = null;
         try {
@@ -154,6 +167,11 @@ public class AwsSNSManager {
     }
 
     public void subscribeSNSTopic(String topicArn) {
+        // This may mean we don't have a valid configuration
+        if (client == null) {
+            return;
+        }
+
         final String endpointArn = retrieveEndpointArn();
         if (endpointArn == null) {
             throw new RuntimeException("Can't subscribe without an endpoint ARN");

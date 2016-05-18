@@ -85,7 +85,7 @@ public class MessageListenerService extends GcmListenerService {
                 break;
             case NEWS_MESSAGE_TYPE:
                 sendNewsNotification(subType, title, url);
-				telemetry.sendNewsNotificationSignal(Telemetry.Action.RECEIVE);
+                telemetry.sendNewsNotificationSignal(Telemetry.Action.RECEIVE);
                 break;
             default:
                 Log.e(TAG, String.format("Unknown message with type %d and sub-type %d", mainType, subType));

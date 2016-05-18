@@ -1,5 +1,6 @@
+def props = project.properties.withDefault { "" }
+
 if (project.hasProperty('Browser.storeFile')) {
-    def props = project.properties.withDefault { "" }
     android {
         signingConfigs {
             release {
@@ -19,6 +20,17 @@ if (project.hasProperty('Browser.storeFile')) {
 }
 
 android {
+    def topics = props["Browser.topicARNs"].tokenize(',').collect { "\"${it}\"" }.join(',')
+
+    defaultConfig {
+        buildConfigField 'String', 'APPLICATION_ARN', "\"${props['Browser.applicationARN']}\""
+        buildConfigField 'String[]', 'TOPIC_ARNS', "new String[] { ${topics} }"
+        buildConfigField 'String', 'AMAZON_ACCOUNT_ID', "\"${props['Browser.amazonAccountID']}\""
+        buildConfigField 'String', 'AMAZON_IDENTITY_POOL_ID', "\"${props['Browser.amazonIdentityPoolID']}\""
+        buildConfigField 'String', 'AMAZON_UNAUTH_ROLE_ARN', "\"${props['Browser.amazonUnauthRoleARN']}\""
+        buildConfigField 'String', 'AMAZON_AUTH_ROLE_ARN', "\"${props['Browser.amazonAuthRoleARN']}\""
+    }
+
     signingConfigs {
         debug {
             storeFile file('../debug.keystore')
