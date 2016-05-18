@@ -170,6 +170,8 @@ class LightningWebClient extends WebViewClient {
             //Inject javascript to check for id and pass fields in the page
             mPasswordManager.injectJavascript(view);
         }
+        ((CliqzWebView)view).executeJS(Constants.JAVASCRIPT_COLLAPSE_SECTIONS);
+
         mEventBus.post(new BrowserEvents.TabsChanged());
     }
 
@@ -190,7 +192,6 @@ class LightningWebClient extends WebViewClient {
             }
             mLightningView.telemetry.backPressed = false;
         }
-
         mLightningView.mTitle.setFavicon(null);
         if (mLightningView.isShown()) {
             mEventBus.post(new BrowserEvents.UpdateUrl(url, false));

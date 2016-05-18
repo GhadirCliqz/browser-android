@@ -92,6 +92,7 @@ public class MainActivity extends AppCompatActivity {
     private boolean askedGPSPermission = false;
     private CustomViewHandler mCustomViewHandler;
     // private boolean mIsIncognito;
+    private boolean isColdStart = false;
     // Keep the current shared browsing state
     private CliqzBrowserState mBrowserState;
 
@@ -119,6 +120,8 @@ public class MainActivity extends AppCompatActivity {
         mActivityComponent = BrowserApp.getAppComponent().plus(new MainActivityModule(this));
         mActivityComponent.inject(this);
         bus.register(this);
+        timings.setAppStartTime();
+        isColdStart = true;
 
         // Restore state
         final CliqzBrowserState oldState = savedInstanceState != null ?
@@ -237,17 +240,21 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onResumeFragments() {
+        super.onResumeFragments();
+        final String name = getCurrentVisibleFragmentName();
+        if(!name.isEmpty() && !isColdStart) {
+            telemetry.sendStartingSignals(name, "warm");
+        }
+        isColdStart = false;
+    }
+
+    @Override
     protected void onResume() {
         super.onResume();
         gcmReceiver.register();
-        final String name = getCurrentVisibleFragmentName();
-        final boolean reset = System.currentTimeMillis() - mBrowserState.getTimestamp() > Constants.HOME_RESET_DELAY;
-        if (reset) {
-            mBrowserState.setMode(CliqzBrowserState.Mode.SEARCH);
-        }
-        timings.setAppStartTime();
-        if(!name.isEmpty()) {
-            telemetry.sendStartingSignals(name);
+        if (!isColdStart) {
+            timings.setAppStartTime();
         }
         //Ask for "Dangerous Permissions" on runtime
         if(Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP_MR1) {

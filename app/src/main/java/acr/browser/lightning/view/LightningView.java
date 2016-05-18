@@ -26,7 +26,6 @@ import android.view.GestureDetector;
 import android.view.GestureDetector.SimpleOnGestureListener;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.View.OnTouchListener;
 import android.view.ViewConfiguration;
 import android.view.ViewParent;
 import android.webkit.CookieManager;
@@ -39,7 +38,6 @@ import com.cliqz.browser.R;
 import com.cliqz.browser.main.MainActivity;
 import com.cliqz.browser.utils.PasswordManager;
 import com.cliqz.browser.utils.Telemetry;
-import com.cliqz.browser.webview.CliqzMessages;
 import com.squareup.otto.Bus;
 
 import java.io.File;
@@ -167,7 +165,7 @@ public class LightningView implements ILightningTab {
         mWebView.setWebViewClient(new LightningWebClient(activity, this));
         mWebView.setDownloadListener(new LightningDownloadListener(activity));
         mGestureDetector = new GestureDetector(activity, new CustomGestureListener());
-        mWebView.setOnTouchListener(new TouchListener());
+        //mWebView.setOnTouchListener(new TouchListener());
         mDefaultUserAgent = mWebView.getSettings().getUserAgentString();
         initializeSettings(mWebView.getSettings(), activity);
 //        mUrl = "about:blank";
@@ -209,7 +207,6 @@ public class LightningView implements ILightningTab {
 
         // BrowserApp.getAppComponent().getBookmarkPage().buildBookmarkPage(null);
         mWebView.loadUrl(Constants.FILE + bookmarkWebPage, mRequestHeaders);
-
     }
 
     /**
@@ -791,56 +788,56 @@ public class LightningView implements ILightningTab {
         }
     }
 
-    private class TouchListener implements OnTouchListener {
-
-        float mLocation;
-        float mY;
-        int mAction;
-
-        @SuppressLint("ClickableViewAccessibility")
-        @Override
-        public boolean onTouch(View view, MotionEvent motionEvent) {
-            if (view == null)
-                return false;
-
-            if (!view.hasFocus()) {
-                view.requestFocus();
-            }
-            mAction = motionEvent.getAction() & MotionEvent.ACTION_MASK;
-            mY = motionEvent.getY();
-            if (mAction == MotionEvent.ACTION_DOWN) {
-                mLocation = mY;
-                clicked = true;
-            } else if (mAction == MotionEvent.ACTION_POINTER_UP && motionEvent.getPointerCount() == 2) {
-                int pointerIndex = motionEvent.getActionIndex(); //index of the finger lifted
-                int lastPointerIndex = pointerIndex ^ 1; //index of the last finger, it is always 0 or 1
-                mLocation = motionEvent.getY(lastPointerIndex); //update the current location of the finger
-            } else if (mAction == MotionEvent.ACTION_UP) {
-                final float distance = (mY - mLocation);
-                if (distance > SCROLL_UP_THRESHOLD && view.getScrollY() < SCROLL_UP_THRESHOLD) {
-                    mEventBus.post(new BrowserEvents.ShowToolBar());
-                } else if (distance < -SCROLL_UP_THRESHOLD) {
-                    mEventBus.post(new BrowserEvents.HideToolBar());
-                }
-                mLocation = 0;
-            }
-            mGestureDetector.onTouchEvent(motionEvent);
-            return false;
-        }
-    }
+//    private class TouchListener implements OnTouchListener {
+//
+//        float mLocation;
+//        float mY;
+//        int mAction;
+//
+//        @SuppressLint("ClickableViewAccessibility")
+//        @Override
+//        public boolean onTouch(View view, MotionEvent motionEvent) {
+//            if (view == null)
+//                return false;
+//
+//            if (!view.hasFocus()) {
+//                view.requestFocus();
+//            }
+//            mAction = motionEvent.getAction() & MotionEvent.ACTION_MASK;
+//            mY = motionEvent.getY();
+//            if (mAction == MotionEvent.ACTION_DOWN) {
+//                mLocation = mY;
+//                clicked = true;
+//            } else if (mAction == MotionEvent.ACTION_POINTER_UP && motionEvent.getPointerCount() == 2) {
+//                int pointerIndex = motionEvent.getActionIndex(); //index of the finger lifted
+//                int lastPointerIndex = pointerIndex ^ 1; //index of the last finger, it is always 0 or 1
+//                mLocation = motionEvent.getY(lastPointerIndex); //update the current location of the finger
+//            } else if (mAction == MotionEvent.ACTION_UP) {
+//                final float distance = (mY - mLocation);
+//                if (distance > SCROLL_UP_THRESHOLD && view.getScrollY() < SCROLL_UP_THRESHOLD) {
+//                  //  mEventBus.post(new BrowserEvents.ShowToolBar());
+//                } else if (distance < -SCROLL_UP_THRESHOLD) {
+//                   // mEventBus.post(new BrowserEvents.HideToolBar());
+//                }
+//                mLocation = 0;
+//            }
+//            mGestureDetector.onTouchEvent(motionEvent);
+//            return false;
+//        }
+//    }
 
     private class CustomGestureListener extends SimpleOnGestureListener {
 
-        @Override
-        public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
-            int power = (int) (velocityY * 100 / mMaxFling);
-            if (power < -10) {
-                mEventBus.post(new BrowserEvents.HideToolBar());
-            } else if (power > 15) {
-                mEventBus.post(new BrowserEvents.ShowToolBar());
-            }
-            return super.onFling(e1, e2, velocityX, velocityY);
-        }
+//        @Override
+//        public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
+//            int power = (int) (velocityY * 100 / mMaxFling);
+//            if (power < -10) {
+//                mEventBus.post(new BrowserEvents.HideToolBar());
+//            } else if (power > 15) {
+//                mEventBus.post(new BrowserEvents.ShowToolBar());
+//            }
+//            return super.onFling(e1, e2, velocityX, velocityY);
+//        }
 
         /**
          * Without this, onLongPress is not called when user is zooming using

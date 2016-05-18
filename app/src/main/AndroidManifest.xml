@@ -131,6 +131,9 @@
                 <category android:name="com.example.gcm" />
             </intent-filter>
         </receiver>
+        <receiver
+            android:name=".gcm.NotificationDismissedReceiver" >
+        </receiver>
         <service
             android:name=".gcm.MessageListenerService"
             android:exported="true"

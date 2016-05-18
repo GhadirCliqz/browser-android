@@ -125,4 +125,9 @@ public class Timings {
     private long getCurrentTime() {
         return (long)Math.floor(System.currentTimeMillis());
     }
+
+    public long getAppStartUpTime() {
+        return getCurrentTime() - mAppStartTime;
+    }
+
 }

@@ -85,7 +85,7 @@ public class MessageListenerService extends GcmListenerService {
                 break;
             case NEWS_MESSAGE_TYPE:
                 sendNewsNotification(subType, title, url);
-				telemetry.sendNewsNotificationSignal(Telemetry.Action.RECEIVE);
+                telemetry.sendNewsNotificationSignal(Telemetry.Action.RECEIVE);
                 break;
             default:
                 Log.e(TAG, String.format("Unknown message with type %d and sub-type %d", mainType, subType));
@@ -113,6 +113,9 @@ public class MessageListenerService extends GcmListenerService {
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0 /* Request code */, intent,
                 PendingIntent.FLAG_ONE_SHOT);
 
+        Intent deleteIntent = new Intent(this, NotificationDismissedReceiver.class);
+        PendingIntent deletePendingIntent = PendingIntent.getBroadcast(this.getApplicationContext(), 0, deleteIntent, 0);
+
         final Uri uri = Uri.parse(url);
         final String host = uri.getHost();
         final String domain = UrlUtils.getTopDomain(url);
@@ -127,6 +130,7 @@ public class MessageListenerService extends GcmListenerService {
                 .setAutoCancel(true)
                 .setSound(defaultSoundUri)
                 .setContentIntent(pendingIntent)
+                .setDeleteIntent(deletePendingIntent)
                 .setStyle(style);
 
         NotificationManager notificationManager =
