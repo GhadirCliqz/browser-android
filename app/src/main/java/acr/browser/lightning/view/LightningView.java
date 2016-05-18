@@ -36,6 +36,7 @@ import com.cliqz.browser.antiphishing.AntiPhishing;
 import com.cliqz.browser.main.MainActivity;
 import com.cliqz.browser.utils.PasswordManager;
 import com.cliqz.browser.utils.Telemetry;
+import com.cliqz.browser.antitracking.CliqzAntiTracking;
 import com.squareup.otto.Bus;
 
 import java.io.File;
@@ -53,7 +54,6 @@ import acr.browser.lightning.database.HistoryDatabase;
 import acr.browser.lightning.dialog.LightningDialogBuilder;
 import acr.browser.lightning.download.LightningDownloadListener;
 import acr.browser.lightning.preference.PreferenceManager;
-import acr.browser.lightning.utils.AdBlock;
 import acr.browser.lightning.utils.ProxyUtils;
 import acr.browser.lightning.utils.ThemeUtils;
 import acr.browser.lightning.utils.Utils;
@@ -112,7 +112,7 @@ public class LightningView {
     LightningDialogBuilder bookmarksDialogBuilder;
 
     @Inject
-    AdBlock adBlock;
+    CliqzAntiTracking attrack;
 
     @Inject
     HistoryDatabase historyDatabase;
@@ -221,7 +221,7 @@ public class LightningView {
         }
 
         settings.setDefaultTextEncodingName(preferences.getTextEncoding());
-        adBlock.setEnabled(preferences.getAdBlockEnabled());
+        attrack.setEnabled(preferences.getAdBlockEnabled());
         mHomepage = preferences.getHomepage();
         setColorMode(preferences.getRenderingMode());
 
@@ -743,7 +743,7 @@ public class LightningView {
             return;
         }
 
-        mWebView.loadUrl(url, mRequestHeaders);
+            mWebView.loadUrl(url, mRequestHeaders);
     }
 
     public synchronized void invalidate() {

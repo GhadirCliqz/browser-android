@@ -33,6 +33,7 @@ import com.cliqz.browser.antiphishing.AntiPhishing;
 import com.cliqz.browser.main.Messages;
 
 import java.io.ByteArrayInputStream;
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
@@ -63,22 +64,24 @@ class LightningWebClient extends WebViewClient implements AntiPhishing.AntiPhish
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     @Override
     public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
-        final WebResourceResponse response = handleUrl(view, request.getUrl());
-        return response != null ? response : super.shouldInterceptRequest(view, request);
+        WebResourceResponse response = handleUrl(view, request.getUrl());
+        if (response == null) {
+            response = lightningView.attrack.shouldInterceptRequest(view, request);
+        }
+        return response;
     }
 
     @Override
     public WebResourceResponse shouldInterceptRequest(WebView view, String url) {
-        final WebResourceResponse response = handleUrl(view, Uri.parse(url));
-        return response != null ? response : super.shouldInterceptRequest(view, url);
+        final Uri uri = Uri.parse(url);
+        WebResourceResponse response = handleUrl(view, uri);
+        if (response == null) {
+            response = lightningView.attrack.shouldInterceptRequest(view, uri);
+        }
+        return response;
     }
 
     private WebResourceResponse handleUrl(final WebView view, Uri uri) {
-        // Check if this is ad
-        if (lightningView.adBlock.isAd(uri)) {
-            return new WebResourceResponse("text/html", "UTF-8",
-                    new ByteArrayInputStream("".getBytes()));
-        }
         final String cliqzPath = String.format("%s%d", CLIQZ_PATH, view.hashCode());
         final String path = uri.getPath();
         // We only handle urls that has the cliqz scheme or the cliqz path ("/CLIQZ+(webview hashcode)")
@@ -175,7 +178,7 @@ class LightningWebClient extends WebViewClient implements AntiPhishing.AntiPhish
             mLastUrl = url;
             if (url != null && !url.isEmpty() && !url.startsWith("cliqz://")) {
                 lightningView.antiPhishing.processUrl(url, this);
-            }
+        }
         }
         if(lightningView.telemetry.backPressed) {
             if(!url.contains(TrampolineConstants.CLIQZ_TRAMPOLINE_GOTO)) {
