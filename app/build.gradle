@@ -3,7 +3,7 @@ apply plugin: 'com.neenbedankt.android-apt'
 apply plugin: 'com.getkeepsafe.dexcount'
 apply plugin: 'com.google.gms.google-services'
 apply from: 'adhosts.gradle'
-apply from: 'signing.gradle'
+apply from: 'cliqz.gradle'
 
 android.metaClass.baseVersionCode = 43
 android.metaClass.baseVersionName = "0.7.0"
@@ -19,9 +19,6 @@ android {
 
         applicationId "com.cliqz.browser"
         testInstrumentationRunner "com.cliqz.browser.test.CustomTestRunner"
-
-        buildConfigField 'String', 'APPLICATION_ARN', '"arn:aws:sns:us-east-1:141047255820:app/GCM/CLIQZ_Browser_for_Android"'
-        buildConfigField 'String[]', 'TOPIC_ARNS', 'new String[] {"arn:aws:sns:us-east-1:141047255820:mobile_news"}'
     }
     buildTypes {
         debug {
