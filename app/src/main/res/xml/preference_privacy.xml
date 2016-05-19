@@ -10,8 +10,7 @@
             android:key="allow_cookies"
             android:summary="@string/recommended"
             android:title="@string/cookies" />
-        <!-- !!! We don't have incognito anymore !!!
-        <CheckBoxPreference
+        <!-- <CheckBoxPreference
             android:defaultValue="false"
             android:key="incognito_cookies"
             android:title="@string/incognito_cookies" /> -->
@@ -27,9 +26,11 @@
         <Preference
             android:key="clear_history"
             android:title="@string/clear_history" />
+        <!-- Temporary removed
         <Preference
             android:key="restore_top_sites"
             android:title="@string/restore_top_sites"/>
+        -->
         <CheckBoxPreference
             android:defaultValue="false"
             android:key="clear_cache_exit"
@@ -42,23 +43,5 @@
             android:defaultValue="false"
             android:key="clear_cookies_exit"
             android:title="@string/clear_cookies_exit" />
-
-        <!-- !!! Too many unuseful checkboxes !!!
-        <CheckBoxPreference
-            android:defaultValue="false"
-            android:key="clear_webstorage_exit"
-            android:title="@string/clear_web_storage_exit" />
-        <Preference
-            android:key="clear_cache"
-            android:title="@string/clear_cache" />
-        <Preference
-            android:key="clear_history"
-            android:title="@string/title_clear_history" />
-        <Preference
-            android:key="clear_cookies"
-            android:title="@string/clear_cookies" />
-        <Preference
-            android:key="clear_webstorage"
-            android:title="@string/clear_web_storage" /> -->
 
 </PreferenceScreen>

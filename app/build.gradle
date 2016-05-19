@@ -5,7 +5,7 @@ apply plugin: 'com.google.gms.google-services'
 apply from: 'adhosts.gradle'
 apply from: 'cliqz.gradle'
 
-android.metaClass.baseVersionCode = 43
+android.metaClass.baseVersionCode = 45
 android.metaClass.baseVersionName = "0.7.0"
 
 android {
