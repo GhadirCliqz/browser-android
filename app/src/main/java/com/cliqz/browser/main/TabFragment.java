@@ -339,7 +339,8 @@ public class TabFragment extends BaseFragment {
             mOverFlowMenu.setHistoryId(mLightningView.historyId);
             mOverFlowMenu.setState(state);
             mOverFlowMenu.show();
-    }
+            hideKeyboard();
+        }
     }
 
     @OnEditorAction(R.id.search_edit_text)

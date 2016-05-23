@@ -25,6 +25,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.util.Patterns;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -421,6 +422,11 @@ public class MainActivity extends AppCompatActivity {
     @Subscribe
     public void createNewTab(BrowserEvents.NewTab event) {
         createTab("", event.isIncognito);
+    }
+
+    @Subscribe
+    public void showTabManager(BrowserEvents.ShowTabManager event) {
+        drawerLayout.openDrawer(Gravity.LEFT);
     }
 
     private void createTab(Message msg, boolean isIncognito) {

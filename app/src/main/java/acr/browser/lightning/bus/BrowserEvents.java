@@ -227,4 +227,9 @@ public final class BrowserEvents {
         }
     }
 
+    /**
+     * Show the tab manager message
+     */
+    public static class ShowTabManager {
+    }
 }
