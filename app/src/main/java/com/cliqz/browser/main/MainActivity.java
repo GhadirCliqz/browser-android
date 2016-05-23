@@ -671,14 +671,14 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public void onDrawerSlide(View v, float arg) {
-            //update the drawer list when drawer is about to be opened
-            if (arg < 0.1) {
-                mTabsAdapter.notifyDataSetChanged();
-            }
+
         }
 
         @Override
-        public void onDrawerStateChanged(int arg) {
+        public void onDrawerStateChanged(int newState) {
+            if (newState == DrawerLayout.STATE_DRAGGING && !drawerLayout.isDrawerOpen(Gravity.LEFT)) {
+                mTabsAdapter.notifyDataSetChanged();
+            }
         }
 
     }
