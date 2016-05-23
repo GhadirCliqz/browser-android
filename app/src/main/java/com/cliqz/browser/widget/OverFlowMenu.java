@@ -81,6 +81,8 @@ public class OverFlowMenu extends FrameLayout {
     private static final Entries[] INCOGNITO_ENTRIES = new Entries[] {
             Entries.ACTIONS,
             Entries.TAB_MANAGER,
+            Entries.NEW_TAB,
+            Entries.NEW_INCOGNITO_TAB,
             Entries.SETTINGS,
             Entries.CONTACT_CLIQZ
     };
