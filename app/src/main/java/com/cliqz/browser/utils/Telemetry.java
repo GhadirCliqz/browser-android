@@ -106,6 +106,12 @@ public class Telemetry {
         private static final String NEWS_NOTIFICATION = "news_notification";
         private static final String STARTUP_TYPE = "startup_type";
         private static final String STARTUP_TIME = "startup_time";
+        private static final String TABS = "tabs";
+        private static final String TAB_COUNT = "tab_count";
+        private static final String TAB_INDEX = "tab_index";
+        private static final String MODE = "mode";
+        private static final String NORMAL = "normal";
+        private static final String PRIVATE = "private";
     }
 
     public static class Action {
@@ -131,6 +137,10 @@ public class Telemetry {
         public static final String DISABLE = "disable";
         public static final String RECEIVE = "receive";
         public static final String DISMISS = "dismiss";
+        public static final String OPEN_MENU = "open_menu";
+        public static final String NEW_TAB = "new_tab";
+        public static final String OPEN_TAB = "open_tab";
+        public static final String CLOSE_TAB = "close_tab";
     }
 
     private static final int BATCH_SIZE = 50;
@@ -542,6 +552,78 @@ public class Telemetry {
             e.printStackTrace();
         }
         saveSignal(signal, false);
+    }
+
+    /**
+     * Send signal whenever a new tab is opened
+     * @param count Number of open tabs
+     * @param isIncognito True if the new tab is incognito
+     */
+    public void sendNewTabSignal(int count, boolean isIncognito) {
+        JSONObject signal = new JSONObject();
+        try {
+            signal.put(Key.TYPE, Key.TABS);
+            signal.put(Key.ACTION, Action.NEW_TAB);
+            signal.put(Key.MODE, isIncognito ? Key.PRIVATE : Key.NORMAL);
+            signal.put(Key.TAB_COUNT, count);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        saveSignal(signal, false);
+    }
+
+    /**
+     * Send signal whenever a navigation drawer is opened
+     * @param count number of open tabs
+     */
+    public void sendTabsMenuOpen(int count) {
+        JSONObject signal = new JSONObject();
+        try {
+            signal.put(Key.TYPE, Key.TABS);
+            signal.put(Key.ACTION, Action.OPEN_MENU);
+            signal.put(Key.TAB_COUNT, count);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        saveSignal(signal, false);
+    }
+
+    /**
+     * Send singal when user clicks on a tab from the tabs list
+     * @param position 0 based position of the tab in the list
+     * @param count total number of tabs in the list
+     * @param isIncognito whether the tab is incognito or not
+     */
+    public void sendTabOpenSignal(int position, int count, boolean isIncognito) {
+        JSONObject signal = new JSONObject();
+        try {
+            signal.put(Key.TYPE, Key.TABS);
+            signal.put(Key.ACTION, Action.OPEN_TAB);
+            signal.put(Key.MODE, isIncognito ? Key.PRIVATE : Key.NORMAL);
+            signal.put(Key.TAB_INDEX, position);
+            signal.put(Key.TAB_COUNT, count);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        saveSignal(signal, false);
+    }
+
+    /**
+     * Send signal when user deletes a tab
+     * @param count number of tabs in the list after deleting
+     * @param isIncognito whether the tab is incognito or not
+     */
+    public void sendTabCloseSignal(int count, boolean isIncognito) {
+        JSONObject signal = new JSONObject();
+        try {
+            signal.put(Key.TYPE, Key.TABS);
+            signal.put(Key.ACTION, Action.CLOSE_TAB);
+            signal.put(Key.MODE, isIncognito ? Key.PRIVATE : Key.NORMAL);
+            signal.put(Key.TAB_COUNT, count);
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
     }
 
     /**

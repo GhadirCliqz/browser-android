@@ -131,12 +131,12 @@ public class HistoryFragment extends BaseFragment {
 
     @Subscribe
     public void onBackPressed(Messages.BackPressed event) {
-        MainFragment mainFragment = (MainFragment)getActivity()
+        TabFragment tabFragment = (TabFragment)getActivity()
                 .getSupportFragmentManager()
                 .findFragmentByTag(MainActivity.SEARCH_FRAGMENT_TAG);
-        if(mainFragment != null) {
-            final String s = state.getMode() == CliqzBrowserState.Mode.WEBPAGE ? "web" : "cards";
-            telemetry.sendBackPressedSignal("past", s, mainFragment.mAutocompleteEditText.length());
+        if(tabFragment != null) {
+            final String state = ((MainActivity)getActivity()).currentMode;
+            telemetry.sendBackPressedSignal("past", state, tabFragment.mAutocompleteEditText.length());
         }
         bus.post(new Messages.GoToSearch());
     }

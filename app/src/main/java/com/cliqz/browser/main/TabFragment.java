@@ -32,10 +32,10 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.cliqz.browser.app.BrowserApp;
-import com.cliqz.browser.main.CliqzBrowserState.Mode;
 import com.cliqz.browser.BuildConfig;
 import com.cliqz.browser.R;
+import com.cliqz.browser.app.BrowserApp;
+import com.cliqz.browser.main.CliqzBrowserState.Mode;
 import com.cliqz.browser.webview.CliqzMessages;
 import com.cliqz.browser.webview.SearchWebView;
 import com.cliqz.browser.widget.AutocompleteEditText;
@@ -60,9 +60,9 @@ import butterknife.OnEditorAction;
  * @author Stefano Pacifici
  * @date 2015/11/23
  */
-public class MainFragment extends BaseFragment {
+public class TabFragment extends BaseFragment {
 
-    private static final String TAG = MainFragment.class.getSimpleName();
+    private static final String TAG = TabFragment.class.getSimpleName();
     private static final String NAVIGATION_STATE_KEY = TAG + ".NAVIGATION_STATE";
     private static final int ICON_STATE_CLEAR = 0;
     //private static final int RELOAD = 1;
@@ -77,6 +77,7 @@ public class MainFragment extends BaseFragment {
     private String mSearchEngine;
     private Message newTabMessage = null;
     private String mExternalQuery = null;
+    protected CliqzBrowserState state = null;
 
     String lastQuery = "";
 
@@ -123,8 +124,10 @@ public class MainFragment extends BaseFragment {
         if (arguments.getBoolean(Constants.KEY_NEW_TAB_MESSAGE, false)) {
             newTabMessage = BrowserApp.popNewTabMessage();
         }
-        // We need to remove the key, otherwise the url get reloaded for each resume
+        // We need to remove the key, otherwise the url/query/msg gets reloaded for each resume
         arguments.remove(Constants.KEY_URL);
+        arguments.remove(Constants.KEY_NEW_TAB_MESSAGE);
+        arguments.remove(Constants.KEY_QUERY);
     }
 
     @Override
@@ -136,15 +139,18 @@ public class MainFragment extends BaseFragment {
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         ButterKnife.bind(this, view);
+        if (state == null) {
+            state = new CliqzBrowserState();
+            state.setIncognito(isIncognito);
+        }
         if (mSearchWebView == null || mLightningView == null) {
             // Must use activity due to Crosswalk webview
-            mSearchWebView = new SearchWebView(getActivity());
+            mSearchWebView = ((MainActivity)getActivity()).searchWebView;
             mLightningView = new LightningView(getActivity()/*, mUrl */, isIncognito, "1");
             mSearchWebView.setLayoutParams(
                     new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
         } else {
             final WebView webView = mLightningView.getWebView();
-            ((ViewGroup) mSearchWebView.getParent()).removeView(mSearchWebView);
             ((ViewGroup) webView.getParent()).removeView(webView);
         }
 
@@ -157,9 +163,20 @@ public class MainFragment extends BaseFragment {
                 webView.restoreState(webViewOutState);
             }
         }
+        if (mSearchWebView.getParent() != null) {
+            ((ViewGroup) mSearchWebView.getParent()).removeView(mSearchWebView);
+        }
+        mSearchWebView.setCurrentTabState(state);
         mLocalContainer.addView(webView);
         mLocalContainer.addView(mSearchWebView);
         titleBar.setOnTouchListener(onTouchListener);
+        mSearchWebView.initExtensionPreferences();
+        boolean isHomePageShown = mSearchWebView.shouldShowHomePage();
+        if (!isHomePageShown && state.getMode() == Mode.SEARCH) {
+            mSearchWebView.performSearch(state.getQuery());
+        } else if (!isHomePageShown && state.getMode() == Mode.WEBPAGE) {
+            bringWebViewToFront();
+        }
 
     }
 
@@ -249,6 +266,8 @@ public class MainFragment extends BaseFragment {
     @Override
     public void onDestroyView() {
         mLightningView.pauseTimers();
+        //should we do this? if tab isn't opened for 30mins it gets reset
+        state.setTimestamp(System.currentTimeMillis());
         super.onDestroyView();
     }
 
@@ -312,14 +331,16 @@ public class MainFragment extends BaseFragment {
         if (mOverFlowMenu != null && mOverFlowMenu.isShown()) {
             mOverFlowMenu.dismiss();
         } else {
-        mOverFlowMenu = new OverFlowMenu(getActivity());
-        // mOverFlowMenu.setBrowserState(state.getMode());
-        mOverFlowMenu.setCanGoForward(mLightningView.canGoForward());
-        mOverFlowMenu.setAnchorView(overflowMenuButton);
-        mOverFlowMenu.setIncognitoMode(isIncognito);
-        mOverFlowMenu.setHistoryId(mLightningView.historyId);
-        mOverFlowMenu.show();
-    }
+            mOverFlowMenu = new OverFlowMenu(getActivity());
+            // mOverFlowMenu.setBrowserState(state.getMode());
+            mOverFlowMenu.setCanGoForward(mLightningView.canGoForward());
+            mOverFlowMenu.setAnchorView(overflowMenuButton);
+            mOverFlowMenu.setIncognitoMode(isIncognito);
+            mOverFlowMenu.setHistoryId(mLightningView.historyId);
+            mOverFlowMenu.setState(state);
+            mOverFlowMenu.show();
+            hideKeyboard();
+        }
     }
 
     @OnEditorAction(R.id.search_edit_text)

@@ -2,6 +2,7 @@ package acr.browser.lightning.view;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 
 import com.cliqz.browser.R;
 
@@ -21,7 +22,7 @@ class LightningViewTitle {
 
     public LightningViewTitle(Context context, boolean darkTheme) {
         if (DEFAULT_ICON == null) {
-            DEFAULT_ICON = ThemeUtils.getThemedBitmap(context, R.drawable.ic_webpage, darkTheme);
+            DEFAULT_ICON = BitmapFactory.decodeResource(context.getResources(), R.drawable.ic_webpage);
         }
         mFavicon = DEFAULT_ICON;
         mTitle = "";

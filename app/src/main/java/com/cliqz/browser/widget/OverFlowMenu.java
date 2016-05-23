@@ -1,27 +1,22 @@
 package com.cliqz.browser.widget;
 
 import android.content.Context;
-import android.content.res.Resources;
-import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.IdRes;
 import android.support.annotation.StringRes;
 import android.support.v4.content.ContextCompat;
-import android.support.v4.graphics.drawable.DrawableCompat;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewParent;
-import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
-import android.widget.ListPopupWindow;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -29,7 +24,6 @@ import com.cliqz.browser.main.CliqzBrowserState;
 import com.cliqz.browser.main.CliqzBrowserState.Mode;
 import com.cliqz.browser.R;
 import com.cliqz.browser.main.MainActivity;
-import com.cliqz.browser.main.MainFragment;
 import com.cliqz.browser.main.Messages;
 import com.squareup.otto.Bus;
 
@@ -54,6 +48,7 @@ public class OverFlowMenu extends FrameLayout {
 
     private enum Entries {
         ACTIONS(-1, -1),
+        TAB_MANAGER(R.id.show_tab_manager_menu_button, R.string.action_show_tab_manager),
         NEW_TAB(R.id.new_tab_menu_button, R.string.action_new_tab),
         NEW_INCOGNITO_TAB(R.id.new_incognito_tab_menu_button, R.string.action_incognito),
         COPY_LINK(R.id.copy_link_menu_button, R.string.action_copy),
@@ -73,6 +68,7 @@ public class OverFlowMenu extends FrameLayout {
 
     private static final Entries[] ENTRIES = new Entries[] {
             Entries.ACTIONS,
+            Entries.TAB_MANAGER,
             Entries.NEW_TAB,
             Entries.NEW_INCOGNITO_TAB,
             Entries.COPY_LINK,
@@ -84,6 +80,7 @@ public class OverFlowMenu extends FrameLayout {
 
     private static final Entries[] INCOGNITO_ENTRIES = new Entries[] {
             Entries.ACTIONS,
+            Entries.TAB_MANAGER,
             Entries.SETTINGS,
             Entries.CONTACT_CLIQZ
     };
@@ -120,9 +117,7 @@ public class OverFlowMenu extends FrameLayout {
     @Bind(R.id.action_forward)
     ImageView actionForwardButton;
 
-    @Inject
-    CliqzBrowserState state;
-
+    private CliqzBrowserState state;
     private final ListView listView;
 
     public OverFlowMenu(Context context) {
@@ -233,6 +228,9 @@ public class OverFlowMenu extends FrameLayout {
         this.historyId = historyId;
     }
 
+    public void setState(CliqzBrowserState state) {
+        this.state = state;
+    }
     private class OverFlowMenuAdapter extends BaseAdapter {
 
         // private String[] menuItems;
@@ -400,6 +398,10 @@ public class OverFlowMenu extends FrameLayout {
                     break;
                 case NEW_TAB:
                     bus.post(new BrowserEvents.NewTab(false));
+                    OverFlowMenu.this.dismiss();
+                    break;
+                case TAB_MANAGER:
+                    bus.post(new BrowserEvents.ShowTabManager());
                     OverFlowMenu.this.dismiss();
                     break;
                 case ADD_TO_FAVOURITES:
