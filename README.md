@@ -4,23 +4,31 @@
 
 # CLIQZ Browser for Android
 
-The CLIQZ Browser for Android. Originally a fork of [Anthony Restaino](https://github.com/anthonycr)'s [Lightning Browser](https://github.com/anthonycr/Lightning-Browser).
+The CLIQZ Browser for Android. Originally a fork of [Anthony Restaino](https://github.com/anthonycr)'s [Lightning Browser](https://github.com/anthonycr/Lightning-Browser). We maintain two different repositories for the project: a [private one](https://github.com/cliqz/android-browser) for internal development (only accessible by CLIQZers) and a [public one](https://github.com/cliqz-oss/browser-android). The latter is updated every time we publish a new version and can be used to contribute to the project.
 
 ## How to clone and start hacking
 
 Run these commands in a shell:
 
 ```bash
-$> git clone git@github.com:cliqz/android-browser.git
-$> cd android-browser
+$> # CLIQZers use the private repository
+$> export CLIQZ_REPO=git@github.com:cliqz/android-browser.git
+$> # Contributors use the public one
+$> export CLIQZ_REPO=git@github.com:cliqz-oss/browser-android.git
+$> git clone "${CLIQZ_REPO}" browser-android
+$> cd browser-android
+```
+> __CLIQZers only__: Remember to init the extension submodule with the following commands.
+>
+> ```bash
 $> git submodule init
 $> git submodule update
-```
+```  
 
 You can compile the project using the the gradle wrapper on the command line:
 
 ```bash
-$> ./gradlew assembleStandardDebug
+$> ./gradlew :app:assembleStandardDebug
 ```
 
 Please notice you have to have the [Android SDK](http://developer.android.com/sdk/index.html). On Mac OSX, the latter can be installed using brew:
@@ -53,7 +61,7 @@ $> export ANDROID_HOME=<path_to_android>
 Replace *path_to_android* with the correct Android installation path (i.e. `/usr/local/opt/android-sdk/`). Alternately, a file called `local.properties` can be created in the project root. It should contain a single line containing the *sdk.dir* variable declaration. Below, an example of the file content:
 
 ```java
-sdk.dir=/usr/local/Cellar/android-sdk/24.4.1_1
+sdk.dir=/usr/local/opt/android-sdk/
 ```
 
 ### Cliqzers Notes
@@ -64,7 +72,7 @@ The extension must be built. To do so, run the following commands:
 $> cd <project_dir>/external/extension
 $> npm install
 $> bower install
-$> CLIQZ_BUILD_ENV=production ./fern.js build configs/mobile.json
+$> ./fern.js build configs/mobile.json
 ```
 
 ## Flavors
@@ -104,7 +112,7 @@ $> npm install -g mocha
 After that, you can configure the (download the tests dependencies) running the following commands:
 
 ```bash
-$> cd <project_dir>/external/extension
+$> cd <project_dir>/spec
 $> npm install
 ```
 
