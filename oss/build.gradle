@@ -1,0 +1,57 @@
+task deleteTemp(type:Delete) {
+  delete 'tmp'
+}
+
+task deleteDest(type:Delete) {
+  delete 'browser-android'
+}
+
+task clean {
+  dependsOn += [ 'deleteTemp', 'deleteDest' ]
+}
+
+task cloneOssRepo(type:Exec) {
+  dependsOn += [ 'deleteTemp' ]
+  commandLine "git", "clone", "git@github.com:cliqz-oss/browser-android.git", "tmp"
+}
+
+task clonePrivateRepo(type:Exec) {
+  dependsOn += [ 'deleteDest' ]
+  commandLine "git", "clone", "../", "browser-android"
+}
+
+task cleanPrivateRepo(type:Delete) {
+  dependsOn += [ 'clonePrivateRepo' ]
+  delete('browser-android/.git',
+    'browser-android/.gitmodules',
+    'browser-android/external/extesion/**',
+    'browser-android/app/google-services.json')
+}
+
+task copyOssGitFolder(type:Copy) {
+  def dest = file('browser-android/.git')
+  dest.mkdirs()
+
+  dependsOn += [ 'cloneOssRepo' , 'cleanPrivateRepo' ]
+  from 'tmp/.git'
+  into dest
+}
+
+task restoreExternal(type:Exec) {
+  dependsOn += [ 'copyOssGitFolder' ]
+  workingDir 'browser-android'
+  commandLine 'git', 'checkout', '--', 'external/extension'
+}
+
+task gitAddFiles(type:Exec) {
+  dependsOn += [ 'restoreExternal' ]
+  workingDir 'browser-android'
+  commandLine 'git', 'add', 'app/'
+}
+
+task exportOSS {
+  dependsOn += [ 'gitAddFiles' ]
+  doLast {
+    println('Check oss/browser-android')
+  }
+}
