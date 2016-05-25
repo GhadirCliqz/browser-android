@@ -10,12 +10,14 @@ import acr.browser.lightning.utils.ThemeUtils;
 import acr.browser.lightning.utils.Utils;
 
 /**
+ * TODO: Remove this class
  * @author Stefano Pacifici base on Anthony C. Restaino's code
  * @date 2015/09/21
  */
+@Deprecated
 class LightningViewTitle {
 
-    private static Bitmap DEFAULT_ICON = null;
+    public static Bitmap DEFAULT_ICON = null;
 
     private Bitmap mFavicon;
     private String mTitle;

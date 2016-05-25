@@ -10,6 +10,8 @@ import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Message;
@@ -390,7 +392,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void performExitCleanUp() {
         if (preferenceManager.getClearCacheExit()) {
-            WebUtils.clearCache(mFragmentsList.get(0).mLightningView.getWebView());
+            WebUtils.clearCache(this);
         }
         if (preferenceManager.getClearHistoryExitEnabled()) {
             //TODO reintroduce this
@@ -685,11 +687,14 @@ public class MainActivity extends AppCompatActivity {
 
     protected class TabsAdapter extends RecyclerView.Adapter<TabsAdapter.TabViewHolder> {
 
+        private final Bitmap defaultFavicon;
+
         private final Context context;
         private final int layoutResourceId;
         private List<TabFragment> data = null;
 
         public TabsAdapter(Context context, int layoutResourceId, List<TabFragment> data) {
+            this.defaultFavicon = BitmapFactory.decodeResource(context.getResources(), R.drawable.ic_webpage);
             this.context = context;
             this.layoutResourceId = layoutResourceId;
             this.data = data;
@@ -728,10 +733,11 @@ public class MainActivity extends AppCompatActivity {
             if (tabFragment.state.getMode() == CliqzBrowserState.Mode.SEARCH) {
                 title = tabFragment.state.getQuery();
             } else {
-                title = tabFragment.mLightningView.getTitle();
+                title = tabFragment.getPageTitle();
             }
-            holder.title.setText(title.isEmpty() ? "Home" : title);
-            holder.icon.setImageBitmap(tabFragment.mLightningView.getFavicon());
+            holder.title.setText(title.isEmpty() ? getString(R.string.home) : title);
+            final Bitmap favIcon = tabFragment.getFavicon();
+            holder.icon.setImageBitmap(favIcon != null ? favIcon : defaultFavicon);
             if (position == getCurrentTabPosition()) {
                 holder.layout.setBackgroundColor(ContextCompat.getColor(MainActivity.this, R.color.gray_list_bg));
             } else {

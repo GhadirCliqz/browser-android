@@ -40,7 +40,7 @@ class TabFragmentListener implements View.OnFocusChangeListener, TextWatcher {
             // TODO: The next two lines should be in a method
             fragment.mSearchWebView.bringToFront();
             fragment.inPageSearchBar.setVisibility(View.GONE);
-            fragment.mLightningView.find("");
+            fragment.findInPage("");
             fragment.state.setMode(CliqzBrowserState.Mode.SEARCH);
             fragment.telemetry.sendURLBarFocusSignal("cards");
         }

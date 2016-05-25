@@ -236,6 +236,6 @@ public final class BrowserEvents {
     /**
      * Search on page message
      */
-    public static class SearchOnPage {
+    public static class SearchInPage {
     }
 }
