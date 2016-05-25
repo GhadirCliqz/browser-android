@@ -5,7 +5,6 @@ import android.support.annotation.Nullable;
 import android.view.MotionEvent;
 import android.view.inputmethod.InputMethodManager;
 
-import com.cliqz.browser.main.CliqzBrowserState;
 import com.cliqz.browser.main.MainActivity;
 import com.cliqz.browser.utils.LocationCache;
 import com.cliqz.browser.utils.Telemetry;

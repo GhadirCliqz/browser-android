@@ -229,4 +229,27 @@ public class SearchWebView extends BaseWebView {
     public void requestCardUrl() {
         executeJS("jsAPI.getCardUrl()");
     }
+
+    //Disable scrolling the search web view
+    @Override
+    public boolean overScrollBy(int deltaX, int deltaY, int scrollX, int scrollY,
+                                int scrollRangeX, int scrollRangeY, int maxOverScrollX,
+                                int maxOverScrollY, boolean isTouchEvent) {
+        return false;
+    }
+
+    @Override
+    public void scrollTo(int x, int y) {
+        // Do nothing
+    }
+
+    @Override
+    public void computeScroll() {
+        // Do nothing
+    }
+
+    @Override
+    public void scrollBy(int x, int y) {
+        //do nothing
+    }
 }
