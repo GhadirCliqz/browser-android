@@ -5,6 +5,7 @@ import android.app.ActivityManager;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -15,6 +16,7 @@ import android.os.Bundle;
 import android.os.Message;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AlertDialog;
 import android.util.Patterns;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -27,6 +29,7 @@ import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.webkit.URLUtil;
 import android.webkit.WebView;
+import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -108,6 +111,9 @@ public class TabFragment extends BaseFragment {
     @Bind(R.id.overflow_menu)
     View overflowMenuButton;
 
+    @Bind(R.id.in_page_search_bar)
+    View inPageSearchBar;
+
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -139,6 +145,7 @@ public class TabFragment extends BaseFragment {
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         ButterKnife.bind(this, view);
+        inPageSearchBar.setVisibility(View.GONE);
         if (state == null) {
             state = new CliqzBrowserState();
             state.setIncognito(isIncognito);
@@ -154,7 +161,7 @@ public class TabFragment extends BaseFragment {
             ((ViewGroup) webView.getParent()).removeView(webView);
         }
 
-        MainFragmentListener.create(this);
+        TabFragmentListener.create(this);
         final WebView webView = mLightningView.getWebView();
         webView.setId(R.id.right_drawer_list);
         if (savedInstanceState != null) {
@@ -343,6 +350,22 @@ public class TabFragment extends BaseFragment {
         }
     }
 
+    @OnClick(R.id.in_page_search_cancel_button)
+    void closeInPageSearchClosed() {
+        inPageSearchBar.setVisibility(View.GONE);
+        mLightningView.find("");
+    }
+
+    @OnClick(R.id.in_page_search_up_button)
+    void previousResultInPageSearchClicked() {
+        mLightningView.findPrevious();
+    }
+
+    @OnClick(R.id.in_page_search_down_button)
+    void nextResultInPageSearchClicked() {
+        mLightningView.findNext();
+    }
+
     @OnEditorAction(R.id.search_edit_text)
     boolean onEditorAction(int actionId) {
         // Navigate to autocomplete url or search otherwise
@@ -447,6 +470,28 @@ public class TabFragment extends BaseFragment {
         historyDatabase.addToFavourites(event.id, true);
     }
 
+    @Subscribe
+    public void searchOnPage(BrowserEvents.SearchOnPage event) {
+        final Context context = getContext();
+        final AlertDialog.Builder finder = new AlertDialog.Builder(context);
+        finder.setTitle(getResources().getString(R.string.action_find));
+        final EditText getHome = new EditText(context);
+        getHome.setHint(getResources().getString(R.string.search_hint));
+        finder.setView(getHome);
+        finder.setPositiveButton(getResources().getString(R.string.search_hint),
+            new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    String query = getHome.getText().toString();
+                    if (!query.isEmpty()) {
+                        inPageSearchBar.setVisibility(View.VISIBLE);
+                        mLightningView.find(query);
+                    }
+                }
+            });
+        finder.show();
+    }
+
     private void openLink(String eventUrl, boolean reset, boolean fromHistory) {
         telemetry.resetNavigationVariables(eventUrl.length());
         new Uri.Builder();
@@ -548,6 +593,8 @@ public class TabFragment extends BaseFragment {
     public void showSearch(Messages.ShowSearch event) {
         searchBar.showSearchEditText();
         mSearchWebView.bringToFront();
+        inPageSearchBar.setVisibility(View.GONE);
+        mLightningView.find("");
         mAutocompleteEditText.requestFocus();
         if (event != null) {
             mAutocompleteEditText.setText(event.query);

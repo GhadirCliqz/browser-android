@@ -270,4 +270,8 @@
     <string name="message_restore_top_sites">Blocked topsites will be shown on the start page again.</string>
     <string name="descr_search_bar" translatable="false">Search Bar</string>
     <string name="action_show_tab_manager">Tab Manager</string>
+    <string name="action_search_on_page">Search on page</string>
+    <string name="in_page_search_next_result">In page search next result</string>
+    <string name="in_page_search_prev_result">In page search previous result</string>
+    <string name="close_in_page_search">Close in page search</string>
 </resources>

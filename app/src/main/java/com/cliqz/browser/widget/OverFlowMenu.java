@@ -53,6 +53,7 @@ public class OverFlowMenu extends FrameLayout {
         NEW_INCOGNITO_TAB(R.id.new_incognito_tab_menu_button, R.string.action_incognito),
         COPY_LINK(R.id.copy_link_menu_button, R.string.action_copy),
         ADD_TO_FAVOURITES(R.id.add_to_favourites_menu_button, R.string.add_to_favourites),
+        SEARCH_ON_PAGE(R.id.search_on_page_menu_button, R.string.action_search_on_page),
         SETTINGS(R.id.settings_menu_button, R.string.settings),
         CONTACT_CLIQZ(R.id.contact_cliqz_menu_button, R.string.contact_cliqz),
         SAVE_LINK(R.id.save_link_menu_button, R.string.save_link);
@@ -73,6 +74,7 @@ public class OverFlowMenu extends FrameLayout {
             Entries.NEW_INCOGNITO_TAB,
             Entries.COPY_LINK,
             Entries.SAVE_LINK,
+            Entries.SEARCH_ON_PAGE,
             Entries.ADD_TO_FAVOURITES,
             Entries.SETTINGS,
             Entries.CONTACT_CLIQZ
@@ -83,6 +85,7 @@ public class OverFlowMenu extends FrameLayout {
             Entries.TAB_MANAGER,
             Entries.NEW_TAB,
             Entries.NEW_INCOGNITO_TAB,
+            Entries.SEARCH_ON_PAGE,
             Entries.SETTINGS,
             Entries.CONTACT_CLIQZ
     };
@@ -384,36 +387,35 @@ public class OverFlowMenu extends FrameLayout {
             switch (tag) {
                 case COPY_LINK:
                     bus.post(new Messages.CopyUrl());
-                    OverFlowMenu.this.dismiss();
                     break;
                 case SETTINGS:
                     bus.post(new Messages.GoToSettings());
-                    OverFlowMenu.this.dismiss();
                     break;
                 case CONTACT_CLIQZ:
                     bus.post(new Messages.ContactCliqz());
-                    OverFlowMenu.this.dismiss();
                     break;
                 case NEW_INCOGNITO_TAB:
                     bus.post(new BrowserEvents.NewTab(true));
-                    OverFlowMenu.this.dismiss();
                     break;
                 case NEW_TAB:
                     bus.post(new BrowserEvents.NewTab(false));
-                    OverFlowMenu.this.dismiss();
                     break;
                 case TAB_MANAGER:
                     bus.post(new BrowserEvents.ShowTabManager());
-                    OverFlowMenu.this.dismiss();
+                    break;
+                case SEARCH_ON_PAGE:
+                    bus.post(new BrowserEvents.SearchOnPage());
                     break;
                 case ADD_TO_FAVOURITES:
                     bus.post(new Messages.AddToFavourites(historyId));
-                    OverFlowMenu.this.dismiss();
                     break;
                 case SAVE_LINK:
                     bus.post(new Messages.SaveLink());
-                    OverFlowMenu.this.dismiss();
+                    break;
+                default:
+                    break;
             }
+            OverFlowMenu.this.dismiss();
         }
     };
 

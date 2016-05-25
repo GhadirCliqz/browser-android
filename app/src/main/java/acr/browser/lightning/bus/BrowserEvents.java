@@ -232,4 +232,10 @@ public final class BrowserEvents {
      */
     public static class ShowTabManager {
     }
+
+    /**
+     * Search on page message
+     */
+    public static class SearchOnPage {
+    }
 }
