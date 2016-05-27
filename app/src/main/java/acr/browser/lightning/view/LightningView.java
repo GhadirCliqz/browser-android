@@ -588,7 +588,7 @@ public class LightningView implements ILightningTab {
     }
 
     @SuppressLint("NewApi")
-    public synchronized void find(String text) {
+    public synchronized void findInPage(String text) {
         if (mWebView != null) {
             if (API >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
                 mWebView.findAllAsync(text);

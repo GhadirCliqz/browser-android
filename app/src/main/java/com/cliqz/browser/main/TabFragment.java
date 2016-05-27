@@ -80,12 +80,12 @@ public class TabFragment extends BaseFragment {
     private String mSearchEngine;
     private Message newTabMessage = null;
     private String mExternalQuery = null;
-    protected CliqzBrowserState state = null;
+    protected final CliqzBrowserState state = new CliqzBrowserState();
 
     String lastQuery = "";
 
     SearchWebView mSearchWebView = null;
-    public LightningView mLightningView = null;
+    private LightningView mLightningView = null;
 
     // A flag used to handle back button on old phones
     private boolean mShowWebPageAgain = false;
@@ -146,10 +146,7 @@ public class TabFragment extends BaseFragment {
         super.onViewCreated(view, savedInstanceState);
         ButterKnife.bind(this, view);
         inPageSearchBar.setVisibility(View.GONE);
-        if (state == null) {
-            state = new CliqzBrowserState();
-            state.setIncognito(isIncognito);
-        }
+        state.setIncognito(isIncognito);
         if (mSearchWebView == null || mLightningView == null) {
             // Must use activity due to Crosswalk webview
             mSearchWebView = ((MainActivity)getActivity()).searchWebView;
@@ -353,7 +350,7 @@ public class TabFragment extends BaseFragment {
     @OnClick(R.id.in_page_search_cancel_button)
     void closeInPageSearchClosed() {
         inPageSearchBar.setVisibility(View.GONE);
-        mLightningView.find("");
+        mLightningView.findInPage("");
     }
 
     @OnClick(R.id.in_page_search_up_button)
@@ -471,7 +468,7 @@ public class TabFragment extends BaseFragment {
     }
 
     @Subscribe
-    public void searchOnPage(BrowserEvents.SearchOnPage event) {
+    public void searchOnPage(BrowserEvents.SearchInPage event) {
         final Context context = getContext();
         final AlertDialog.Builder finder = new AlertDialog.Builder(context);
         finder.setTitle(getResources().getString(R.string.action_find));
@@ -485,7 +482,7 @@ public class TabFragment extends BaseFragment {
                     String query = getHome.getText().toString();
                     if (!query.isEmpty()) {
                         inPageSearchBar.setVisibility(View.VISIBLE);
-                        mLightningView.find(query);
+                        mLightningView.findInPage(query);
                     }
                 }
             });
@@ -594,7 +591,7 @@ public class TabFragment extends BaseFragment {
         searchBar.showSearchEditText();
         mSearchWebView.bringToFront();
         inPageSearchBar.setVisibility(View.GONE);
-        mLightningView.find("");
+        mLightningView.findInPage("");
         mAutocompleteEditText.requestFocus();
         if (event != null) {
             mAutocompleteEditText.setText(event.query);
@@ -815,4 +812,18 @@ public class TabFragment extends BaseFragment {
         }
     };
 
+    @Nullable
+    public Bitmap getFavicon() {
+        return mLightningView != null ? mLightningView.getFavicon() : null;
+    }
+
+    public void findInPage(String query) {
+        if (mLightningView != null) {
+            mLightningView.findInPage(query);
+        }
+    }
+
+    public String getPageTitle() {
+        return mLightningView != null ? mLightningView.getTitle() : "";
+    }
 }

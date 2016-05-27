@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.PorterDuff;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.support.annotation.IdRes;
 import android.support.annotation.StringRes;
 import android.support.v4.content.ContextCompat;
@@ -26,6 +27,10 @@ import com.cliqz.browser.R;
 import com.cliqz.browser.main.MainActivity;
 import com.cliqz.browser.main.Messages;
 import com.squareup.otto.Bus;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import javax.inject.Inject;
 
@@ -53,7 +58,7 @@ public class OverFlowMenu extends FrameLayout {
         NEW_INCOGNITO_TAB(R.id.new_incognito_tab_menu_button, R.string.action_incognito),
         COPY_LINK(R.id.copy_link_menu_button, R.string.action_copy),
         ADD_TO_FAVOURITES(R.id.add_to_favourites_menu_button, R.string.add_to_favourites),
-        SEARCH_ON_PAGE(R.id.search_on_page_menu_button, R.string.action_search_on_page),
+        SEARCH_IN_PAGE(R.id.search_on_page_menu_button, R.string.action_search_on_page),
         SETTINGS(R.id.settings_menu_button, R.string.settings),
         CONTACT_CLIQZ(R.id.contact_cliqz_menu_button, R.string.contact_cliqz),
         SAVE_LINK(R.id.save_link_menu_button, R.string.save_link);
@@ -74,7 +79,7 @@ public class OverFlowMenu extends FrameLayout {
             Entries.NEW_INCOGNITO_TAB,
             Entries.COPY_LINK,
             Entries.SAVE_LINK,
-            Entries.SEARCH_ON_PAGE,
+            Entries.SEARCH_IN_PAGE,
             Entries.ADD_TO_FAVOURITES,
             Entries.SETTINGS,
             Entries.CONTACT_CLIQZ
@@ -85,7 +90,7 @@ public class OverFlowMenu extends FrameLayout {
             Entries.TAB_MANAGER,
             Entries.NEW_TAB,
             Entries.NEW_INCOGNITO_TAB,
-            Entries.SEARCH_ON_PAGE,
+            Entries.SEARCH_IN_PAGE,
             Entries.SETTINGS,
             Entries.CONTACT_CLIQZ
     };
@@ -106,7 +111,7 @@ public class OverFlowMenu extends FrameLayout {
 
     private View mAnchorView = null;
 
-    private Entries[] mEntries = ENTRIES;
+    private Entries[] mEntries = null;
 
     private int mListViewWidth, mListViewHeight, mListViewY;
 
@@ -128,6 +133,7 @@ public class OverFlowMenu extends FrameLayout {
     public OverFlowMenu(Context context) {
         super(context);
         this.context = context;
+        prepareEntries();
         listView = new ListView(context);
         this.addView(listView);
         ((MainActivity)context).mActivityComponent.inject(this);
@@ -225,8 +231,18 @@ public class OverFlowMenu extends FrameLayout {
 
     public void setIncognitoMode(boolean newValue) {
         mIncognitoMode = newValue;
-        mEntries = mIncognitoMode ? INCOGNITO_ENTRIES : ENTRIES;
+        prepareEntries();
         overFlowMenuAdapter.notifyDataSetInvalidated();
+    }
+
+    private void prepareEntries() {
+        List<Entries> entries = new ArrayList<>(
+                Arrays.asList(mIncognitoMode ? INCOGNITO_ENTRIES : ENTRIES));
+        // Filter unsupported entries
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR1) {
+            entries.remove(Entries.SEARCH_IN_PAGE);
+        }
+        mEntries = entries.toArray(new Entries[entries.size()]);
     }
 
     public void setHistoryId(long historyId) {
@@ -286,11 +302,13 @@ public class OverFlowMenu extends FrameLayout {
             final boolean isSaveLink = mEntries[position] == Entries.SAVE_LINK;
             final boolean hasValidId = historyId != -1;
             final boolean isShowingWebPage = state.getMode() == Mode.WEBPAGE;
+            final boolean isSearchInPage = mEntries[position] == Entries.SEARCH_IN_PAGE;
 
-            return (!isAddToFavourites && !isCopyLink && !isSaveLink) ||
+            return (!isAddToFavourites && !isCopyLink && !isSaveLink && !isSearchInPage) ||
                     (isAddToFavourites && hasValidId && isShowingWebPage) ||
                     (isCopyLink && isShowingWebPage) ||
-                    (isSaveLink && isShowingWebPage);
+                    (isSaveLink && isShowingWebPage) ||
+                    (isSearchInPage && isShowingWebPage);
         }
 
         @Override
@@ -403,8 +421,8 @@ public class OverFlowMenu extends FrameLayout {
                 case TAB_MANAGER:
                     bus.post(new BrowserEvents.ShowTabManager());
                     break;
-                case SEARCH_ON_PAGE:
-                    bus.post(new BrowserEvents.SearchOnPage());
+                case SEARCH_IN_PAGE:
+                    bus.post(new BrowserEvents.SearchInPage());
                     break;
                 case ADD_TO_FAVOURITES:
                     bus.post(new Messages.AddToFavourites(historyId));
