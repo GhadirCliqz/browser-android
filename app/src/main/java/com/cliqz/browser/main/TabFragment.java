@@ -39,12 +39,15 @@ import com.cliqz.browser.BuildConfig;
 import com.cliqz.browser.R;
 import com.cliqz.browser.app.BrowserApp;
 import com.cliqz.browser.main.CliqzBrowserState.Mode;
+import com.cliqz.browser.utils.CustomChooserIntent;
 import com.cliqz.browser.webview.CliqzMessages;
 import com.cliqz.browser.webview.SearchWebView;
 import com.cliqz.browser.widget.AutocompleteEditText;
 import com.cliqz.browser.widget.OverFlowMenu;
 import com.cliqz.browser.widget.SearchBar;
 import com.squareup.otto.Subscribe;
+
+import java.util.ArrayList;
 
 import acr.browser.lightning.bus.BrowserEvents;
 import acr.browser.lightning.constant.Constants;
@@ -636,10 +639,11 @@ public class TabFragment extends BaseFragment {
 
     @Subscribe
     public void contactCliqz(Messages.ContactCliqz event) {
-        final Uri to = Uri.parse(String.format("mailto:%s?subject=%s",
-                getString(R.string.feedback_at_cliqz_dot_com),
-                Uri.encode(getString(R.string.feedback_mail_subject))));
-        final Intent intent = new Intent(Intent.ACTION_SENDTO, to);
+        final Uri to = Uri.parse(String.format("mailto:%s",
+                getString(R.string.feedback_at_cliqz_dot_com)));
+        final Intent intent = new Intent(Intent.ACTION_SENDTO);
+        intent.setData(to);
+        intent.putExtra(Intent.EXTRA_SUBJECT, getString(R.string.feedback_mail_subject));
         intent.putExtra(Intent.EXTRA_TEXT, new StringBuilder()
                         .append("\n")
                         .append("Feedback für CLIQZ for Android (")
@@ -651,7 +655,12 @@ public class TabFragment extends BaseFragment {
                         .append(")")
                         .toString()
         );
-        startActivity(Intent.createChooser(intent, getString(R.string.contact_cliqz)));
+        //List of apps(package names) not to be shown in the chooser
+        final ArrayList<String> blackList = new ArrayList<>();
+        blackList.add("paypal");
+        Intent customChooserIntent = CustomChooserIntent.create(getActivity().getPackageManager(),
+                intent, getString(R.string.contact_cliqz), blackList);
+        startActivity(customChooserIntent);
     }
 
     @Subscribe
