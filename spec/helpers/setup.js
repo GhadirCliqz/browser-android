@@ -9,5 +9,5 @@ var should = chai.should();
 chaiAsPromised.transferPromiseness = wd.transferPromiseness;
 
 wd.addPromiseChainMethod('dismissGoogleServicesDialog', utils.dismissGoogleServicesDialog);
-
+wd.addPromiseChainMethod('findWindowWithTitle', utils.findWindowWithTitle);
 exports.should = should;

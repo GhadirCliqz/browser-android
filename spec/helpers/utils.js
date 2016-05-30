@@ -32,3 +32,31 @@ exports.dismissGoogleServicesDialog = function () {
       return driver;
     })
 };
+
+exports.findWindowWithTitle = function (desiredTitle) {
+  const driver = this;
+  return driver
+    .windowHandles()
+      .then(function(handles) {
+        return new Promise(function(resolve, reject) {
+          let call = function() {
+            if (handles.length == 0) {
+              reject("Can't find " + desiredTitle + " window");
+            } else {
+              let handle = handles.pop();
+              driver
+                .window(handle)
+                .title()
+                  .then(function(title) {
+                    if (title === desiredTitle) {
+                      resolve(driver);
+                    } else {
+                      call();
+                    }
+                  });
+            }
+          }
+          call();
+        });
+      });
+};
