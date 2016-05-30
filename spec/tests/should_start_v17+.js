@@ -2,6 +2,7 @@
 'api level: 17,18,19';
 
 const testpage = "https://cdn.cliqz.com/mobile/browser/tests/testpage.html";
+const cardPosScript = "(parseInt(document.getElementById('cliqz-results').style.marginLeft) -parseInt(document.getElementById('cliqz-results').getBoundingClientRect().left)) / parseInt(document.getElementsByClassName('frame')[0].style.width);";
 
 require("../helpers/setup");
 
@@ -81,4 +82,50 @@ describe("Browser", function () {
           return driver;
         });
   });
+
+  it("should scroll", function () {
+     const dimen = {height: 0, width: 0};
+     return driver
+     .getWindowSize()
+       .then(function(dimensions) {
+           dimen.height = dimensions.height;
+           dimen.width = dimensions.width;
+       })
+     .elementByAccessibilityId("Search Bar")
+       .sendKeys("pippo")
+     .sleep(1000)
+     .context("WEBVIEW_com.cliqz.browser")
+     .findWindowWithTitle("developer tool")
+     .eval(cardPosScript)
+       .then(function(pos) {
+           assert.equal(Math.floor(pos), 0, "Error in scrolling.");
+       })
+     .context("NATIVE_APP")
+       .then(function() {
+         return driver.swipe({
+           startX: 3*dimen.width/4, startY: dimen.height/2,
+           endX: dimen.width/4, endY: dimen.height/2,
+           duration: 100})
+       })
+     .context("WEBVIEW_com.cliqz.browser")
+     .findWindowWithTitle("developer tool")
+     .eval(cardPosScript)
+       .then(function(pos) {
+           assert.equal(Math.floor(pos), 1, "Error in scrolling.");
+       })
+     .context("NATIVE_APP")
+       .then(function() {
+          return driver.swipe({
+            startX: dimen.width/4, startY: dimen.height/2,
+            endX: 3*dimen.width/4, endY: dimen.height/2,
+            duration: 100})
+         })
+     .context("WEBVIEW_com.cliqz.browser")
+     .findWindowWithTitle("developer tool")
+     .eval(cardPosScript)
+       .then(function(pos) {
+         assert.equal(Math.floor(pos), 0, "Error in scrolling.");
+       })
+   });
+
 });
