@@ -33,6 +33,12 @@ describe("Browser", function () {
       .quit();
   });
 
+  beforeEach(function () {
+    return driver
+      .context('NATIVE_APP')
+      .setOrientation('PORTRAIT');
+  });
+
   it("should show onboarding", function () {
     return driver
       .dismissGoogleServicesDialog()
@@ -74,58 +80,83 @@ describe("Browser", function () {
       .eval("document.getElementsByClassName('frame')[2].style.left")
         .then(function (value) {
           storage.x = parseInt(value);
-          return driver;
-        })
-      .context("NATIVE_APP")
-        .then(function() {
           assert.isBelow(storage.x, storage.width, "The third card is not visible");
           return driver;
         });
   });
 
   it("should scroll", function () {
-     const dimen = {height: 0, width: 0};
-     return driver
-     .getWindowSize()
-       .then(function(dimensions) {
-           dimen.height = dimensions.height;
-           dimen.width = dimensions.width;
-       })
-     .elementByAccessibilityId("Search Bar")
-       .sendKeys("pippo")
-     .sleep(1000)
-     .context("WEBVIEW_com.cliqz.browser")
-     .findWindowWithTitle("developer tool")
-     .eval(cardPosScript)
-       .then(function(pos) {
-           assert.equal(Math.floor(pos), 0, "Error in scrolling.");
-       })
-     .context("NATIVE_APP")
-       .then(function() {
-         return driver.swipe({
-           startX: 3*dimen.width/4, startY: dimen.height/2,
-           endX: dimen.width/4, endY: dimen.height/2,
-           duration: 100})
-       })
-     .context("WEBVIEW_com.cliqz.browser")
-     .findWindowWithTitle("developer tool")
-     .eval(cardPosScript)
-       .then(function(pos) {
-           assert.equal(Math.floor(pos), 1, "Error in scrolling.");
-       })
-     .context("NATIVE_APP")
-       .then(function() {
+    const dimen = {height: 0, width: 0};
+    return driver
+      .getWindowSize()
+        .then(function(dimensions) {
+          dimen.height = dimensions.height;
+          dimen.width = dimensions.width;
+        })
+      .elementByAccessibilityId("Search Bar")
+        .clear()
+        .sendKeys("pippo")
+      .sleep(1000)
+      .context("WEBVIEW_com.cliqz.browser")
+      .findWindowWithTitle("developer tool")
+        .eval(cardPosScript)
+        .then(function(pos) {
+          assert.equal(Math.floor(pos), 0, "Error in scrolling.");
+        })
+      .context("NATIVE_APP")
+        .then(function() {
           return driver.swipe({
-            startX: dimen.width/4, startY: dimen.height/2,
-            endX: 3*dimen.width/4, endY: dimen.height/2,
-            duration: 100})
-         })
-     .context("WEBVIEW_com.cliqz.browser")
-     .findWindowWithTitle("developer tool")
-     .eval(cardPosScript)
-       .then(function(pos) {
-         assert.equal(Math.floor(pos), 0, "Error in scrolling.");
-       })
+           startX: 4*dimen.width/5, startY: dimen.height/2,
+           endX: dimen.width/5, endY: dimen.height/2,
+           duration: 500})
+        })
+      .context("WEBVIEW_com.cliqz.browser")
+      .findWindowWithTitle("developer tool")
+        .eval(cardPosScript)
+        .then(function(pos) {
+         assert.equal(Math.floor(pos), 1, "Error in scrolling.");
+        })
+      .context("NATIVE_APP")
+        .then(function() {
+          return driver.swipe({
+            startX: dimen.width/5, startY: dimen.height/2,
+            endX: 4*dimen.width/5, endY: dimen.height/2,
+            duration: 500})
+        })
+      .context("WEBVIEW_com.cliqz.browser")
+      .findWindowWithTitle("developer tool")
+        .eval(cardPosScript)
+        .then(function(pos) {
+          assert.equal(Math.floor(pos), 0, "Error in scrolling.");
+        });
+  });
+
+   it("should not reload the page when rotating", function() {
+    const storage = { value: "" };
+    return driver
+      .elementByAccessibilityId("Search Bar")
+        .clear()
+        .sendKeys(testpage)
+        .pressDeviceKey(66)
+      .context("WEBVIEW_com.cliqz.browser")
+      .findWindowWithTitle("CLIQZ Browser Test Page")
+      .sleep(1000) // Need to wait to let javascript been executed
+      .waitForElementById("datetime")
+        .text()
+        .then(function (text) {
+          storage.value = text;
+          return driver;
+        })
+      .context("NATIVE_APP")
+      .setOrientation('LANDSCAPE')
+      .sleep(1000) // Needed, to be sure it complete the animation
+      .context("WEBVIEW_com.cliqz.browser")
+      .waitForElementById("datetime")
+        .text()
+        .then(function (text) {
+          assert.equal(text, storage.value);
+          return driver;
+        })
    });
 
 });
