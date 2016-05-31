@@ -112,6 +112,8 @@ public class Telemetry {
         private static final String MODE = "mode";
         private static final String NORMAL = "normal";
         private static final String PRIVATE = "private";
+        private static final String DISTRIBUTION = "distribution";
+        private static final String ADVERT_ID = "advert_id";
     }
 
     public static class Action {
@@ -174,6 +176,9 @@ public class Telemetry {
         try {
             signal.put(Key.TYPE, Key.ACTIVITY);
             signal.put(Key.ACTION, action);
+            if (action == Action.INSTALL) {
+                signal.put(Key.ADVERT_ID, mPreferenceManager.getAdvertID());
+            }
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -376,6 +381,7 @@ public class Telemetry {
             signal.put(Key.DEFAULT_SEARCH_ENGINE, getDefaultSearchEngine());
             signal.put(Key.HISTORY_URLS, historySize);
             signal.put(Key.NEWS_NOTIFICATION, mPreferenceManager.getNewsNotificationEnabled());
+            signal.put(Key.DISTRIBUTION, mPreferenceManager.getReferrer());
         } catch (JSONException e) {
             e.printStackTrace();
         }
