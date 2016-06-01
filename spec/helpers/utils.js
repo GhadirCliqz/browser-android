@@ -1,6 +1,7 @@
 'use strict';
 
 let Promise = require('promise');
+let wd = require('wd');
 
 exports.dismissGoogleServicesDialog = function () {
   const resolveElementText = function(element) {
@@ -59,4 +60,32 @@ exports.findWindowWithTitle = function (desiredTitle) {
           call();
         });
       });
+};
+
+exports.clearSearchBar = function () {
+  const driver = this;
+  const dimen =  {height: 0, width: 0};
+  const loc = {x: 0, y: 0};
+  return driver
+    .elementByAccessibilityId("Search Bar")
+      .click()
+      .getSize()
+        .then(function (dimensions) {
+          dimen.height = dimensions.height;
+          dimen.width = dimensions.width;
+        })
+    .elementByAccessibilityId("Search Bar")
+      .getLocation()
+        .then(function (location) {
+          loc.x = location.x;
+          loc.y = location.y;
+        })
+    .then(function () {
+        var tapX = loc.x + dimen.width - 10;
+        var tapY = loc.y + dimen.height/2;
+        var touchAction = new wd.TouchAction(this);
+        touchAction.tap({x:tapX, y:tapY});
+        driver.performTouchAction(touchAction);
+    })
+    .elementByAccessibilityId("Search Bar");
 };
