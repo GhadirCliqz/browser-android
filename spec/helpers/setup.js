@@ -12,4 +12,5 @@ chaiAsPromised.transferPromiseness = wd.transferPromiseness;
 wd.addPromiseChainMethod('dismissGoogleServicesDialog', utils.dismissGoogleServicesDialog);
 wd.addPromiseChainMethod('findWindowWithTitle', utils.findWindowWithTitle);
 wd.addPromiseChainMethod('swipe', actions.swipe);
+wd.addPromiseChainMethod('clearSearchBar', utils.clearSearchBar);
 exports.should = should;

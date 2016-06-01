@@ -60,7 +60,7 @@ describe("Browser", function () {
         .should.eventually.exist
       .context("NATIVE_APP")
   });
-
+  
   it("should show multiple cards when in landscape", function() {
     const storage = { width: 0, x: 0 };
     return driver
@@ -94,7 +94,7 @@ describe("Browser", function () {
           dimen.width = dimensions.width;
         })
       .elementByAccessibilityId("Search Bar")
-        .clear()
+        .clearSearchBar()
         .sendKeys("pippo")
       .sleep(1000)
       .context("WEBVIEW_com.cliqz.browser")
@@ -110,6 +110,7 @@ describe("Browser", function () {
            endX: dimen.width/5, endY: dimen.height/2,
            duration: 500})
         })
+      .sleep(600)
       .context("WEBVIEW_com.cliqz.browser")
       .findWindowWithTitle("developer tool")
         .eval(cardPosScript)
@@ -123,6 +124,7 @@ describe("Browser", function () {
             endX: 4*dimen.width/5, endY: dimen.height/2,
             duration: 500})
         })
+      .sleep(600)
       .context("WEBVIEW_com.cliqz.browser")
       .findWindowWithTitle("developer tool")
         .eval(cardPosScript)
@@ -135,7 +137,7 @@ describe("Browser", function () {
     const storage = { value: "" };
     return driver
       .elementByAccessibilityId("Search Bar")
-        .clear()
+        .clearSearchBar()
         .sendKeys(testpage)
         .pressDeviceKey(66)
       .context("WEBVIEW_com.cliqz.browser")
