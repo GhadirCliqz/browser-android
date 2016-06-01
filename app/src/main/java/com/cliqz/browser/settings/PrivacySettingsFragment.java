@@ -109,8 +109,8 @@ public class PrivacySettingsFragment extends BaseSettingsFragment {
 
         final Preference prefClearHistory = (Preference) findPreference(SETTINGS_CLEARHISTORY);
         prefClearHistory.setOnPreferenceClickListener(this);
-//        final Preference restoreTopSites = findPreference(SETTINGS_RESTORETOPSITES);
-//        restoreTopSites.setOnPreferenceClickListener(this);
+        final Preference restoreTopSites = findPreference(SETTINGS_RESTORETOPSITES);
+        restoreTopSites.setOnPreferenceClickListener(this);
 
         messageHandler = new MessageHandler(mActivity);
     }
