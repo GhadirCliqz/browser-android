@@ -722,6 +722,7 @@ public class MainActivity extends AppCompatActivity {
                     final FragmentManager fm = getSupportFragmentManager();
                     fm.beginTransaction().replace(R.id.content_frame, mFragmentsList.get(position)
                                                     ,SEARCH_FRAGMENT_TAG).commit();
+                    fm.executePendingTransactions();
                     drawerLayout.closeDrawers();
                     telemetry.sendTabOpenSignal(position, mFragmentsList.size(),
                             mFragmentsList.get(position).state.isIncognito());
