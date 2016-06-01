@@ -258,6 +258,14 @@ public class CliqzBridge extends Bridge {
             }
         }),
 
+        notifyYoutubeVideoUrls(new IAction() {
+            @Override
+            public void execute(Bridge bridge, Object data, String callback) {
+                final JSONArray json = (data instanceof JSONArray) ? (JSONArray) data: new JSONArray();
+                bridge.bus.post(new Messages.DownloadYoutubeVideo(json));
+            }
+        }),
+
         none(new IAction() {
             @Override
             public void execute(Bridge bridge, Object data, String callback) {

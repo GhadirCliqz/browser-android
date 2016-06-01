@@ -77,6 +77,7 @@ public class AbstractionWebView extends WebView {
         webSettings.setJavaScriptEnabled(true);
         webSettings.setDomStorageEnabled(true);
         webSettings.setGeolocationEnabled(true);
+        webSettings.setUserAgentString("Mozilla/5.0 (Macintosh; Intel Mac OS X 10.10; rv:46.0) Gecko/20100101 Firefox/46.0");
         webSettings.setGeolocationDatabasePath(getContext().getCacheDir().getAbsolutePath());
 
         if (Build.VERSION.SDK_INT >= 16) {
