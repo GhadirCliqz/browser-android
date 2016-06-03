@@ -3,16 +3,12 @@ package acr.browser.lightning.view;
 import android.app.Activity;
 import android.os.Build;
 import android.util.AttributeSet;
-import android.view.MotionEvent;
-import android.view.View;
 import android.webkit.WebView;
 
 import com.cliqz.browser.main.MainActivity;
 import com.squareup.otto.Bus;
 
 import javax.inject.Inject;
-
-import acr.browser.lightning.bus.BrowserEvents;
 
 /**
  * General workaround container for old phones

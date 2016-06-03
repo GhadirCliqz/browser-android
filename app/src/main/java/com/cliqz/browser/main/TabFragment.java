@@ -88,7 +88,7 @@ public class TabFragment extends BaseFragment {
     String lastQuery = "";
 
     SearchWebView mSearchWebView = null;
-    private LightningView mLightningView = null;
+    protected LightningView mLightningView = null;
 
     // A flag used to handle back button on old phones
     private boolean mShowWebPageAgain = false;
@@ -263,7 +263,7 @@ public class TabFragment extends BaseFragment {
     public void onPause() {
         super.onPause();
         if (mSearchWebView != null) {
-            mSearchWebView.onPause();
+            //mSearchWebView.onPause();
         }
         if (mLightningView != null) {
             mLightningView.onPause();

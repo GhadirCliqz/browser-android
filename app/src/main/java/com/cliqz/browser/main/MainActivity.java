@@ -31,6 +31,7 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.webkit.WebView;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.FrameLayout;
@@ -260,6 +261,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         gcmReceiver.register();
+        resumeAllWebViews();
         final String name = getCurrentVisibleFragmentName();
         timings.setAppStartTime();
         if(!name.isEmpty()) {
@@ -355,6 +357,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onPause() {
         super.onPause();
         gcmReceiver.unregister();
+        pauseAllWebViews();
         String context = getCurrentVisibleFragmentName();
         timings.setAppStopTime();
         if(!context.isEmpty()) {
@@ -636,7 +639,7 @@ public class MainActivity extends AppCompatActivity {
         if (current > position) {
             mFragmentsList.remove(position);
             mTabsAdapter.notifyDataSetChanged();
-            //reference.onDestroy();
+            reference.mLightningView.onDestroy();
         } else if (mFragmentsList.size() > position + 1) {
             if (current == position) {
                 showTab(position + 1);
@@ -645,18 +648,70 @@ public class MainActivity extends AppCompatActivity {
                 mFragmentsList.remove(position);
             }
             mTabsAdapter.notifyDataSetChanged();
-            //reference.onDestroy();
+            reference.mLightningView.onDestroy();
         } else if (mFragmentsList.size() > 1) {
             if (current == position) {
                 showTab(position - 1);
             }
             mFragmentsList.remove(position);
             mTabsAdapter.notifyDataSetChanged();
-            //reference.onDestroy();
+            reference.mLightningView.onDestroy();
         } else {
             finish();
         }
         Log.d(Constants.TAG, "deleted tab");
+    }
+
+    private void pauseAllWebViews() {
+        if (mFragmentsList.size() == 0 || mFragmentsList.get(0).mLightningView == null) {
+            return;
+        }
+        //Any webview is enough. Calling pauseTimers() on any one webview will pause timers of all webviews
+        final WebView firstWebview = mFragmentsList.get(0).mLightningView.getWebView();
+        if (firstWebview != null) {
+            firstWebview.pauseTimers();
+        }
+        for (TabFragment tabFragment : mFragmentsList) {
+            if (tabFragment.mLightningView == null) {
+                continue;
+            }
+            final WebView webView = tabFragment.mLightningView.getWebView();
+            if (webView != null) {
+                webView.onPause();
+            }
+        }
+        if (searchWebView != null) {
+            searchWebView.onPause();
+        }
+        if (mHistoryFragment.mHistoryWebView != null) {
+            mHistoryFragment.mHistoryWebView.onPause();
+        }
+    }
+
+    private void resumeAllWebViews() {
+        if (mFragmentsList.size() == 0 || mFragmentsList.get(0).mLightningView == null) {
+            return;
+        }
+        //Any webview is enough. Calling resumeTimers() on any one webview will resume timers of all webviews
+        final WebView firstWebview = mFragmentsList.get(0).mLightningView.getWebView();
+        if (firstWebview != null) {
+            firstWebview.resumeTimers();
+        }
+        for (TabFragment tabFragment : mFragmentsList) {
+            if (tabFragment.mLightningView == null) {
+                continue;
+            }
+            final WebView webView = tabFragment.mLightningView.getWebView();
+            if (webView != null) {
+                webView.onResume();
+            }
+        }
+        if (searchWebView != null) {
+            searchWebView.onResume();
+        }
+        if (mHistoryFragment.mHistoryWebView != null) {
+            mHistoryFragment.mHistoryWebView.onResume();
+        }
     }
 
     private class DrawerListener implements DrawerLayout.DrawerListener {
