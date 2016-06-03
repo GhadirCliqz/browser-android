@@ -431,6 +431,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Subscribe
     public void showTabManager(BrowserEvents.ShowTabManager event) {
+        mTabsAdapter.notifyDataSetChanged();
         drawerLayout.openDrawer(Gravity.LEFT);
     }
 
