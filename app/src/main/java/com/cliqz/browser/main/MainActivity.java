@@ -279,6 +279,11 @@ public class MainActivity extends AppCompatActivity {
                 requestPermissions(permissions, requestCode);
             }
         }
+        //The idea is to reset all tabs if the app has been in background for 30mins
+        for (TabFragment tabFragment : mFragmentsList) {
+            tabFragment.state.setShouldReset(
+                    System.currentTimeMillis() - timings.getAppStopTime() >= Constants.HOME_RESET_DELAY);
+        }
         locationCache.start();
         //Asks for permission if GPS is not enabled on the device.
         // Note: Will ask for permission even if location is enabled, but not using GPS

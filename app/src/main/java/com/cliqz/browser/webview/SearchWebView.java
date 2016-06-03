@@ -174,16 +174,7 @@ public class SearchWebView extends BaseWebView {
         }
     }
 
-    public boolean shouldShowHomePage() {
-        if (System.currentTimeMillis() - currentTabState.getTimestamp() >= Constants.HOME_RESET_DELAY) {
-            showHomepage();
-            currentTabState.setTimestamp(System.currentTimeMillis());
-            return true;
-        }
-        return false;
-    }
-
-    private void showHomepage() {
+    public void showHomepage() {
         final JSONObject params = new JSONObject();
         try {
             switch (currentTabState.getMode()) {

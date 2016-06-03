@@ -57,6 +57,10 @@ class TabFragmentListener implements View.OnFocusChangeListener, TextWatcher {
             return;
         }
 
+        if (fragment.isHomePageShown) {
+            fragment.isHomePageShown = false;
+            return;
+        }
         // fragment.showSearch(null);
 
         final String q = s.toString();
