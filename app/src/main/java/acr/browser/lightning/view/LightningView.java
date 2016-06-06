@@ -25,6 +25,7 @@ import android.util.Log;
 import android.view.GestureDetector;
 import android.view.View;
 import android.view.ViewConfiguration;
+import android.view.ViewGroup;
 import android.view.ViewParent;
 import android.webkit.CookieManager;
 import android.webkit.WebSettings;
@@ -439,7 +440,7 @@ public class LightningView implements ILightningTab {
 
     public synchronized void onPause() {
         if (mWebView != null) {
-            mWebView.onPause();
+            //mWebView.onPause();
         }
     }
 
@@ -539,7 +540,7 @@ public class LightningView implements ILightningTab {
 
     public synchronized void pauseTimers() {
         if (mWebView != null) {
-            mWebView.onPause();
+           // mWebView.onPause();
         }
     }
 
@@ -601,7 +602,13 @@ public class LightningView implements ILightningTab {
 
     public synchronized void onDestroy() {
         if (mWebView != null) {
-            deletePreview();
+            //deletePreview();
+            // Check to make sure the WebView has been removed
+            // before calling destroy() so that a memory leak is not created
+            ViewGroup parent = (ViewGroup) mWebView.getParent();
+            if (parent != null) {
+                parent.removeView(mWebView);
+            }
             mWebView.stopLoading();
             mWebView.onPause();
             mWebView.clearHistory();

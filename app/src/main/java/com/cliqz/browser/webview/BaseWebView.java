@@ -95,13 +95,13 @@ public abstract class BaseWebView extends AbstractionWebView {
     @Override
     public void onPause() {
         super.onPause();
-        pauseTimers();
+        //pauseTimers();
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        resumeTimers();
+        //resumeTimers();
         // When created we call this twice (one here and one in extensionReady()
         // That should not be a problem
     }

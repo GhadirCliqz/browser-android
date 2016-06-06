@@ -25,7 +25,7 @@ import butterknife.OnClick;
  */
 public class HistoryFragment extends BaseFragment {
 
-    private HistoryWebView mHistoryWebView;
+    protected HistoryWebView mHistoryWebView;
 
     private boolean mJustCreated = false;
 
@@ -75,7 +75,7 @@ public class HistoryFragment extends BaseFragment {
     public void onPause() {
         super.onPause();
         if (mHistoryWebView != null) {
-            mHistoryWebView.onPause();
+            //mHistoryWebView.onPause();
         }
     }
 

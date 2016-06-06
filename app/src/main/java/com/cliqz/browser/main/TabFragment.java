@@ -84,11 +84,12 @@ public class TabFragment extends BaseFragment {
     private Message newTabMessage = null;
     private String mExternalQuery = null;
     protected final CliqzBrowserState state = new CliqzBrowserState();
+    protected boolean isHomePageShown = false;
 
     String lastQuery = "";
 
     SearchWebView mSearchWebView = null;
-    private LightningView mLightningView = null;
+    protected LightningView mLightningView = null;
 
     // A flag used to handle back button on old phones
     private boolean mShowWebPageAgain = false;
@@ -178,13 +179,6 @@ public class TabFragment extends BaseFragment {
         mLocalContainer.addView(mSearchWebView);
         titleBar.setOnTouchListener(onTouchListener);
         mSearchWebView.initExtensionPreferences();
-        boolean isHomePageShown = mSearchWebView.shouldShowHomePage();
-        if (!isHomePageShown && state.getMode() == Mode.SEARCH) {
-            mSearchWebView.performSearch(state.getQuery());
-        } else if (!isHomePageShown && state.getMode() == Mode.WEBPAGE) {
-            bringWebViewToFront();
-        }
-
     }
 
     @Override
@@ -224,7 +218,20 @@ public class TabFragment extends BaseFragment {
             webView = null;
         }
 
-        // The logic below should be in main activity
+        if (state.shouldReset()) {
+            isHomePageShown = true;
+            searchBar.showSearchEditText();
+            mAutocompleteEditText.setText("");
+            mSearchWebView.showHomepage();
+            state.setShouldReset(false);
+            return;
+        }
+        if (state.getMode() == Mode.SEARCH) {
+            mSearchWebView.performSearch(state.getQuery());
+        } else if (state.getMode() == Mode.WEBPAGE) {
+            bringWebViewToFront();
+        }
+        // The code below shouldn't be executed if app is reset
         if (mInitialUrl != null && !mInitialUrl.isEmpty()) {
             state.setMode(Mode.WEBPAGE);
             bus.post(new CliqzMessages.OpenLink(mInitialUrl, true));
@@ -263,7 +270,7 @@ public class TabFragment extends BaseFragment {
     public void onPause() {
         super.onPause();
         if (mSearchWebView != null) {
-            mSearchWebView.onPause();
+            //mSearchWebView.onPause();
         }
         if (mLightningView != null) {
             mLightningView.onPause();
@@ -274,7 +281,7 @@ public class TabFragment extends BaseFragment {
     public void onDestroyView() {
         mLightningView.pauseTimers();
         //should we do this? if tab isn't opened for 30mins it gets reset
-        state.setTimestamp(System.currentTimeMillis());
+        //state.setTimestamp(System.currentTimeMillis());
         super.onDestroyView();
     }
 
