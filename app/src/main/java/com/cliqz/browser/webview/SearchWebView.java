@@ -140,13 +140,21 @@ public class SearchWebView extends BaseWebView {
         super.onResume();
         initPreferences();
         if (isExtensionReady()) {
+            isVisible();
             // Apply settings here
+            //TODO: Look into optimising this call
             initExtensionPreferences();
             setDefaultSearchEngine();
 //            if (shouldShowHomePage()) {
 //                showHomepage();
 //            }
             }
+    }
+
+    @Override
+    public void bringToFront() {
+        super.bringToFront();
+        isVisible();
     }
 
     private void initPreferences() {
