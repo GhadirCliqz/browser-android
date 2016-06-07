@@ -51,4 +51,8 @@ public class CliqzWebView extends WebView {
             }
         }
     }
+
+    public int getVerticalScrollHeight() {
+        return computeVerticalScrollRange();
+    }
 }
