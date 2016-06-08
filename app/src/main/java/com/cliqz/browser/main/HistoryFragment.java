@@ -65,7 +65,8 @@ public class HistoryFragment extends BaseFragment {
         if (mHistoryWebView != null) {
             mHistoryWebView.onResume();
             if (!mJustCreated) {
-                mHistoryWebView.fourceUpdateHistory();
+                //mHistoryWebView.fourceUpdateHistory();
+                mHistoryWebView.isVisible();
             }
             mJustCreated = false;
         }

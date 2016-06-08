@@ -133,6 +133,13 @@ public abstract class BaseWebView extends AbstractionWebView {
         return super.dispatchTouchEvent(motionEvent);
     }
 
+    /**
+     * Should be called whenever the Cliqz related webViews become visible
+     */
+    public void isVisible() {
+        evaluateJavascript("jsAPI.onShow()", null);
+    }
+
     private void hideKeyboard() {
         InputMethodManager imm = (InputMethodManager)context
                 .getSystemService(Context.INPUT_METHOD_SERVICE);
