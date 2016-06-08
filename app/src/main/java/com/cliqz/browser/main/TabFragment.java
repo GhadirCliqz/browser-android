@@ -55,6 +55,7 @@ import acr.browser.lightning.utils.ThemeUtils;
 import acr.browser.lightning.utils.UrlUtils;
 import acr.browser.lightning.utils.Utils;
 import acr.browser.lightning.view.AnimatedProgressBar;
+import acr.browser.lightning.view.CliqzWebView;
 import acr.browser.lightning.view.LightningView;
 import acr.browser.lightning.view.TrampolineConstants;
 import butterknife.Bind;
@@ -699,8 +700,13 @@ public class TabFragment extends BaseFragment {
     @Subscribe
     public synchronized void hideToolBar(BrowserEvents.HideToolBar event) {
         if (mStatusBar.getTranslationY() >= 0.0f && !isAnimationInProgress) {
-            isAnimationInProgress = true;
             final int height = mStatusBar.getHeight();
+            //Don't hide the status bar if page is not long enough
+            if (((CliqzWebView)mLightningView.getWebView()).getVerticalScrollHeight() - mLocalContainer.getHeight()
+                    < 2*mStatusBar.getHeight()) {
+                return;
+            }
+            isAnimationInProgress = true;
             mStatusBar.animate().translationY(-height).setInterpolator(new AccelerateInterpolator()).start();
             mContentContainer.animate().translationY(-height).setInterpolator(new AccelerateInterpolator())
                     .setListener(new Animator.AnimatorListener() {
