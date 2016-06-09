@@ -264,9 +264,6 @@ public class MainActivity extends AppCompatActivity {
         resumeAllWebViews();
         final String name = getCurrentVisibleFragmentName();
         timings.setAppStartTime();
-        if(!name.isEmpty()) {
-            telemetry.sendStartingSignals(name, mIsColdStart ? "cold" : "warm");
-        }
         //Ask for "Dangerous Permissions" on runtime
         if(Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP_MR1) {
             if(preferenceManager.getLocationEnabled()
