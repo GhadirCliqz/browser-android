@@ -163,7 +163,7 @@ public class Telemetry {
     private String currentNetwork, currentLayer;
     private Context context;
     private int batteryLevel, forwardStep, backStep, urlLength, previousPage;
-
+    private boolean isFirstNetworkSignal = true;
     public boolean backPressed;
     public boolean showingCards;
 
@@ -431,7 +431,9 @@ public class Telemetry {
      */
     public void sendClosingSignals(String closeOrKill, String context) {
         currentLayer = "";
-        sendNetworkStatus();
+        if (closeOrKill == Action.CLOSE) {
+            sendNetworkStatus();
+        }
         sendAppCloseSignal(closeOrKill, context);
     }
 
@@ -869,6 +871,11 @@ public class Telemetry {
     private BroadcastReceiver mNetworkChangeReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
+            //Prevent sending a signal when the receiver is registered
+            if (isFirstNetworkSignal) {
+                isFirstNetworkSignal = false;
+                return;
+            }
             //check to make sure the app is in foreground
             if(timings.getAppUsageTime() < 0) {
                 sendNetworkStatus();
