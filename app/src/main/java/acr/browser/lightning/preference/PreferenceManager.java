@@ -14,8 +14,8 @@ public class PreferenceManager {
 
     public enum ClearQueriesOptions {
         NO,
-        CLEAR_QUERIES,
-        CLEAR_QUERIES_INCLUDING_FAVORITES;
+        CLEAR_HISTORY,
+        CLEAR_FAVORITES;
 
         public static ClearQueriesOptions safeValueOf(String name) {
             try {

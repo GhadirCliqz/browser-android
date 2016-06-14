@@ -85,6 +85,63 @@ public class CliqzBridge extends Bridge {
             }
         }),
 
+        getFavorites(new IAction() {
+            @Override
+            public void execute(Bridge bridge, Object data, String callback) {
+                if (callback == null || callback.isEmpty()) {
+                    Log.e(TAG, "Can't perform getFavorites without a callback");
+                    return;
+                }
+                final JsonArray items = bridge.historyDatabase.getFavorites();
+                final String callbackCode = buildItemsCallback(callback, "", items);
+                bridge.executeJavascript(String.format("%s(%s)", callback,items.toString()));
+            }
+        }),
+
+        setFavorites(new IAction() {
+            @Override
+            public void execute(Bridge bridge, Object data, String callback) {
+                final JSONObject jsonObject = (data instanceof JSONObject) ? (JSONObject) data : new JSONObject();
+                if (!jsonObject.has("favorites")) {
+                    Log.e(TAG, "Can't set favorites. Request is empty");
+                }
+                final JSONArray favoritesList = jsonObject.optJSONArray("favorites");
+                final boolean isFavorite = jsonObject.optBoolean("value", false);
+                if (favoritesList == null) {
+                    return;
+                }
+                for (int i = 0; i < favoritesList.length(); i++) {
+                    JSONObject favoriteItem = favoritesList.optJSONObject(i);
+                    if (favoriteItem != null) {
+                        final String url = favoriteItem.optString("url");
+                        final long favTime = favoriteItem.optLong("timestamp", -1);
+                        if (url == null) {
+                            continue;
+                        }
+                        bridge.historyDatabase.setFavorites(url, favTime, isFavorite);
+                    }
+                }
+            }
+        }),
+
+        getHistoryItems(new IAction() {
+            @Override
+            public void execute(Bridge bridge, Object data, String callback) {
+                final JSONObject jsonObject = (data instanceof JSONObject) ? (JSONObject) data : new JSONObject();
+                if (callback == null || callback.isEmpty()) {
+                    Log.e(TAG, "Can't perform getHistoryItems without a callback");
+                    return;
+                }
+
+                final int start = jsonObject.optInt("start", 0);
+                final int end = jsonObject.optInt("end", bridge.historyDatabase.getHistoryItemsCount());
+
+                final JsonArray items = bridge.historyDatabase.getHistoryItems(start, end);
+                final String callbackCode = buildItemsCallback(callback, "", items);
+                bridge.executeJavascript(String.format("%s(%s)", callback,items.toString()));
+            }
+        }),
+
         /**
          * Mark history entry as favorite or remove the favorite status
          */
@@ -109,7 +166,7 @@ public class CliqzBridge extends Bridge {
          * Remove multiple items from the history
          * Javascript example: removeHistory([id1, id2, id3, ...])
          */
-        removeHistory(new IAction() {
+        removeHistoryItems(new IAction() {
             @Override
             public void execute(Bridge bridge, Object data, String callback) {
                 final JSONArray json = (data instanceof JSONArray) ? (JSONArray) data : null;
