@@ -80,6 +80,7 @@
     <string name="title_clear_cookies">Cookies löschen</string>
     <string name="dialog_history">Möchten Sie den gesamten Verlauf sicher löschen?</string>
     <string name="dialog_cookies">Möchten Sie alle Cookies sicher löschen?</string>
+    <string name="dialog_favorites">Möchten Sie alle Favoriten sicher löschen?</string>
     <string name="action_yes">Ja</string>
     <string name="action_no">Nein</string>
     <string name="title_text_size">Textgröße</string>
@@ -244,7 +245,7 @@
     <string name="open_in_new_tab">In neuem Tab öffnen</string>
     <string name="open_in_incognito_tab">In Incognito-Tab öffnen</string>
     <string name="not_shareable">Diese Karte kann nicht geteilt werden.</string>
-    <string name="also_clear_favorites">Favoriten löschen</string>
+    <string name="clear_favorites">Favoriten löschen</string>
     <string name="also_clear_queries">Suchanfragen löschen</string>
     <string name="clear_history">Verlauf löschen</string>
     <string name="deleting_in_progress_message">Löschen</string>

@@ -119,7 +119,7 @@ public class HistoryFragment extends BaseFragment {
 
         final PreferenceManager.ClearQueriesOptions clear = preferenceManager.shouldClearQueries();
         if (clear != PreferenceManager.ClearQueriesOptions.NO) {
-            mHistoryWebView.cleanupQueries(clear == PreferenceManager.ClearQueriesOptions.CLEAR_QUERIES_INCLUDING_FAVORITES);
+            mHistoryWebView.cleanupQueries(clear);
             preferenceManager.setShouldClearQueries(PreferenceManager.ClearQueriesOptions.NO);
         }
     }

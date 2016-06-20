@@ -80,6 +80,7 @@
     <string name="title_clear_cookies">Cancella i cookies</string>
     <string name="dialog_history">Vorresti cancellare tutta la cronologia?</string>
     <string name="dialog_cookies">Vorresti cancellare tutti i cookies?</string>
+    <string name="dialog_favorites">Vorresti cancellare tutti i preferiti?</string>
     <string name="action_yes">Si</string>
     <string name="action_no">No</string>
     <string name="title_text_size">Dimensioni carattere</string>
@@ -244,7 +245,7 @@
     <string name="enable_human_web">Abilita Human Web</string>
     <string name="share_link">Condividi con</string>
     <string name="shared_using">Condiviso con CLIQZ per Android</string>
-    <string name="also_clear_favorites">Cancella favoriti</string>
+    <string name="clear_favorites">Cancella favoriti</string>
     <string name="also_clear_queries">Cancella le query</string>
     <string name="clear_history">Cancella cronologia</string>
     <string name="deleting_in_progress_message">Cancellando...</string>

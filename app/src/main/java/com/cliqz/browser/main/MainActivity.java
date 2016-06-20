@@ -1,7 +1,6 @@
 package com.cliqz.browser.main;
 
 import android.Manifest;
-import android.app.ActivityManager;
 import android.app.AlertDialog;
 import android.app.SearchManager;
 import android.content.Context;
@@ -393,7 +392,7 @@ public class MainActivity extends AppCompatActivity {
         if (preferenceManager.getClearHistoryExitEnabled()) {
             //TODO reintroduce this
             mFragmentsList.get(0).historyDatabase.clearHistory(false);
-            preferenceManager.setShouldClearQueries(PreferenceManager.ClearQueriesOptions.CLEAR_QUERIES);
+            preferenceManager.setShouldClearQueries(PreferenceManager.ClearQueriesOptions.CLEAR_HISTORY);
         }
         if (preferenceManager.getClearCookiesExitEnabled()) {
             WebUtils.clearCookies(this);
@@ -818,4 +817,5 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     }
+
 }
