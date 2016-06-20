@@ -149,7 +149,7 @@ public class MainActivity extends AppCompatActivity {
         mHistoryFragment = new HistoryFragment(this);
         firstFragment = new TabFragment();
         mFragmentsList.add(firstFragment);
-
+        performExitCleanUp();
         // Ignore intent if we are being recreated
         final Intent intent = savedInstanceState == null ? getIntent() : null;
         final String url;
@@ -382,7 +382,6 @@ public class MainActivity extends AppCompatActivity {
         if(!context.isEmpty()) {
             telemetry.sendClosingSignals(Telemetry.Action.KILL, context);
         }
-        performExitCleanUp();
     }
 
     private void performExitCleanUp() {
