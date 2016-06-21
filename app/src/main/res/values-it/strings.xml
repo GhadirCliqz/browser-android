@@ -259,5 +259,7 @@
     <string name="news_notification">Notifica Notizie</string>
     <string name="restore_top_sites">Resetta siti bloccati</string>
     <string name="message_restore_top_sites">I siti precedentemente bloccati verrano visualizzati in home page.</string>
-    <string name="action_show_tab_manager">Tab Manager</string>
+    <string name="action_show_tab_manager">Tab aperti</string>
+    <string name="action_search_on_page">Cerca nella pagina</string>
+    <string name="app_not_found">App non trovata</string>
 </resources>

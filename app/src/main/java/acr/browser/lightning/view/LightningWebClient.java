@@ -5,6 +5,8 @@ import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.net.MailTo;
@@ -25,6 +27,7 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.Toast;
 
 import com.cliqz.browser.R;
 import com.cliqz.browser.main.Messages;
@@ -355,6 +358,8 @@ class LightningWebClient extends WebViewClient {
 
     @Override
     public boolean shouldOverrideUrlLoading(WebView view, String url) {
+        final Uri uri = Uri.parse(url);
+        final String scheme = uri.getScheme();
         // Check if configured proxy is available
         if (!mLightningView.isProxyReady()) {
             // User has been notified
@@ -364,23 +369,12 @@ class LightningWebClient extends WebViewClient {
         if (mLightningView.mIsIncognitoTab) {
             return super.shouldOverrideUrlLoading(view, url);
         }
-        if (url.startsWith("tel:")) {
-            final Intent intent = new Intent(Intent.ACTION_DIAL, Uri.parse(url));
-            mActivity.startActivity(intent);
-            view.reload();
-            return true;
-        }
-        if (url.startsWith("about:")) {
+
+        if (scheme.equals("about")) {
             return super.shouldOverrideUrlLoading(view, url);
         }
-        if (url.contains("mailto:")) {
-            MailTo mailTo = MailTo.parse(url);
-            Intent i = Utils.newEmailIntent(mailTo.getTo(), mailTo.getSubject(),
-                    mailTo.getBody(), mailTo.getCc());
-            mActivity.startActivity(i);
-            view.reload();
-            return true;
-        } else if (url.startsWith("intent://")) {
+
+        if (scheme.equals("intent")) {
             Intent intent;
             try {
                 intent = Intent.parseUri(url, Intent.URI_INTENT_SCHEME);
@@ -400,22 +394,26 @@ class LightningWebClient extends WebViewClient {
                 }
                 return true;
             }
-        } else if (Uri.parse(url).getScheme().equals("market")) {
-            try {
-                final Intent intent = new Intent(Intent.ACTION_VIEW);
-                intent.setData(Uri.parse(url));
-                mActivity.startActivity(intent);
-                return true;
-            } catch (ActivityNotFoundException e) {
-                Log.e(Constants.TAG, "ActivityNotFoundException");
-            }
         }
+
+        if (!scheme.equals("http") && !scheme.equals("https")) {
+            Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+            PackageManager packageManager = mActivity.getPackageManager();
+            List<ResolveInfo> activites = packageManager.queryIntentActivities(intent, 0);
+            if (activites.size() > 0) {
+                mActivity.startActivity(intent);
+            } else {
+                Toast.makeText(mActivity, mActivity.getString(R.string.app_not_found), Toast.LENGTH_SHORT).show();
+            }
+            return true;
+        }
+
         // CLIQZ! We do not want to open external app from our browser, so we return false here
         // boolean startActivityForUrl = mIntentUtils.startActivityForUrl(view, url);
-         if(!url.contains(TrampolineConstants.CLIQZ_TRAMPOLINE_GOTO) && mLightningView.clicked) {
-             mLightningView.clicked = false;
-             mLightningView.telemetry.sendNavigationSignal(url.length());
-         }
+        if(!url.contains(TrampolineConstants.CLIQZ_TRAMPOLINE_GOTO) && mLightningView.clicked) {
+            mLightningView.clicked = false;
+            mLightningView.telemetry.sendNavigationSignal(url.length());
+        }
         // return startActivityForUrl;
         return false;
     }

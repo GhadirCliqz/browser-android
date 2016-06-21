@@ -254,5 +254,7 @@
     <string name="news_notification">Schlagzeilen Benachrichtigungen</string>
     <string name="restore_top_sites">Entfernte Topseiten wiederherstellen</string>
     <string name="message_restore_top_sites">Entfernte Topseiten werden wieder auf der Startseite angezeigt.</string>
-    <string name="action_show_tab_manager">Tab Manager</string>
+    <string name="action_show_tab_manager">Geöffnete Tabs</string>
+    <string name="action_search_on_page">Auf Seite suchen</string>
+    <string name="app_not_found">Keine passende App gefunden</string>
 </resources>
