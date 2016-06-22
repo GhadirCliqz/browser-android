@@ -54,34 +54,11 @@ public class CliqzBridge extends Bridge {
                     // TODO This fallback should be removed when the JS bridge will use pagination
                     try {
                         final JSONObject params = new JSONObject().put("start", 0).put("end", 50);
-                        getHistory.execute(bridge, params, callback);
+                        getHistoryItems.execute(bridge, params, callback);
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
                 }
-            }
-        }),
-
-        /**
-         * Return history (paged)
-         */
-        getHistory(new IAction() {
-            @Override
-            public void execute(Bridge bridge, Object data, String callback) {
-                final JSONObject jsonObject = (data instanceof JSONObject) ? (JSONObject) data: new JSONObject();
-                if (callback == null || callback.isEmpty()) {
-                    Log.e(TAG, "Can't perform getHistory without a callback");
-                    return; // Nothing to do without callback or data
-                }
-
-                final int start = jsonObject.optInt("start", 0);
-                final int end = jsonObject.optInt("end", 50);
-
-                final JsonArray items =
-                        bridge.historyDatabase.getHistoryItems(start, end);
-
-                final String callbackCode = buildItemsCallback(callback, "", items);
-                bridge.executeJavascript(callbackCode);
             }
         }),
 
@@ -139,26 +116,6 @@ public class CliqzBridge extends Bridge {
                 final JsonArray items = bridge.historyDatabase.getHistoryItems(start, end);
                 final String callbackCode = buildItemsCallback(callback, "", items);
                 bridge.executeJavascript(String.format("%s(%s)", callback,items.toString()));
-            }
-        }),
-
-        /**
-         * Mark history entry as favorite or remove the favorite status
-         */
-        setHistoryFavorite(new IAction() {
-            @Override
-            public void execute(Bridge bridge, Object data, String callback) {
-                final JSONObject json = (data instanceof JSONObject) ? (JSONObject) data : null;
-                if (json != null && json.has("ids") && json.has("value")) {
-                    final JSONArray ids = json.optJSONArray("ids");
-                    final boolean value = json.optBoolean("value");
-                    for (int i = 0; ids != null && i < ids.length(); i++) {
-                        final long id = ids.optLong(i, -1);
-                        if (id > -1) {
-                            bridge.historyDatabase.addToFavourites(id, value);
-                        }
-                    }
-                }
             }
         }),
 
