@@ -263,4 +263,5 @@
     <string name="what_does_optimized_mean">Was bedeutet \'optimiert\'?</string>
     <string name="action_show_tab_manager">Tab Manager</string>
     <string name="make_video_available_offline">Offline verfügbar machen</string>
+    <string name="dialog_youtube_video">Was möchten Sie mit diesem Video tun?</string>
 </resources>

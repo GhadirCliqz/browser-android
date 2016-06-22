@@ -774,7 +774,8 @@ public class TabFragment extends BaseFragment {
         } else {
             // To fetch the videos url we have to run the ytdownloader.getUrls script that is bundled
             // with the extension
-            final String url = mLightningView.getUrl();
+            final String url =
+                    event.videoPageUrl != null ? event.videoPageUrl : mLightningView.getUrl();
             final String script = String.format(Locale.US, "ytdownloader.getUrls('%s');", url);
             mSearchWebView.evaluateJavascript(script, null);
         }

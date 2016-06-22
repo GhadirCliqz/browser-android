@@ -98,13 +98,21 @@ public final class Messages {
 
     public static class DownloadYoutubeVideo {
         public final JSONArray urls;
+        public final String videoPageUrl;
 
         public DownloadYoutubeVideo() {
             this. urls = null;
+            this.videoPageUrl = null;
         }
 
         public DownloadYoutubeVideo(JSONArray urls) {
             this.urls = urls;
+            this.videoPageUrl = null;
+        }
+
+        public DownloadYoutubeVideo(String url) {
+            this.urls = null;
+            this.videoPageUrl = url;
         }
     }
 }
