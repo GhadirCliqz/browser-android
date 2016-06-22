@@ -3,13 +3,13 @@ package acr.browser.lightning.view;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
-import android.net.MailTo;
 import android.net.Uri;
 import android.net.http.SslError;
 import android.os.Build;
@@ -41,7 +41,6 @@ import java.util.List;
 
 import acr.browser.lightning.bus.BrowserEvents;
 import acr.browser.lightning.constant.Constants;
-import acr.browser.lightning.utils.Utils;
 
 /**
  * @author Stefano Pacifici based on Anthony C. Restaino's code
@@ -51,7 +50,7 @@ class LightningWebClient extends WebViewClient {
 
     private static final String CLIQZ_PATH = "/CLIQZ";
 
-    private final Activity mActivity;
+    private final Context context;
     private final LightningView mLightningView;
     private final Bus mEventBus;
     private final PasswordManager mPasswordManager;
@@ -59,8 +58,8 @@ class LightningWebClient extends WebViewClient {
 //    private final IntentUtils mIntentUtils;
 //    private final WebView mWebView;
 
-    LightningWebClient(Activity activity, LightningView lightningView) {
-        mActivity = activity;
+    LightningWebClient(Context context, LightningView lightningView) {
+        this.context = context;
         mLightningView = lightningView;
         mEventBus = lightningView.mEventBus;
         mPasswordManager = lightningView.passwordManager;
@@ -207,25 +206,25 @@ class LightningWebClient extends WebViewClient {
     public void onReceivedHttpAuthRequest(final WebView view, @NonNull final HttpAuthHandler handler,
                                           final String host, final String realm) {
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(mActivity);
-        final EditText name = new EditText(mActivity);
-        final EditText password = new EditText(mActivity);
-        LinearLayout passLayout = new LinearLayout(mActivity);
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        final EditText name = new EditText(context);
+        final EditText password = new EditText(context);
+        LinearLayout passLayout = new LinearLayout(context);
         passLayout.setOrientation(LinearLayout.VERTICAL);
 
         passLayout.addView(name);
         passLayout.addView(password);
 
-        name.setHint(mActivity.getString(R.string.hint_username));
+        name.setHint(context.getString(R.string.hint_username));
         name.setSingleLine();
         password.setInputType(InputType.TYPE_TEXT_VARIATION_PASSWORD);
         password.setSingleLine();
         password.setTransformationMethod(new PasswordTransformationMethod());
-        password.setHint(mActivity.getString(R.string.hint_password));
-        builder.setTitle(mActivity.getString(R.string.title_sign_in));
+        password.setHint(context.getString(R.string.hint_password));
+        builder.setTitle(context.getString(R.string.title_sign_in));
         builder.setView(passLayout);
         builder.setCancelable(true)
-                .setPositiveButton(mActivity.getString(R.string.title_sign_in),
+                .setPositiveButton(context.getString(R.string.title_sign_in),
                         new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int id) {
@@ -236,7 +235,7 @@ class LightningWebClient extends WebViewClient {
 
                             }
                         })
-                .setNegativeButton(mActivity.getString(R.string.action_cancel),
+                .setNegativeButton(context.getString(R.string.action_cancel),
                         new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int id) {
@@ -306,23 +305,23 @@ class LightningWebClient extends WebViewClient {
 
         StringBuilder stringBuilder = new StringBuilder();
         for (Integer messageCode : errorCodeMessageCodes) {
-            stringBuilder.append(" - ").append(mActivity.getString(messageCode)).append('\n');
+            stringBuilder.append(" - ").append(context.getString(messageCode)).append('\n');
         }
         String alertMessage =
-                mActivity.getString(R.string.message_insecure_connection, stringBuilder.toString());
+                context.getString(R.string.message_insecure_connection, stringBuilder.toString());
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(mActivity);
-        builder.setTitle(mActivity.getString(R.string.title_warning));
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        builder.setTitle(context.getString(R.string.title_warning));
         builder.setMessage(alertMessage)
                 .setCancelable(true)
-                .setPositiveButton(mActivity.getString(R.string.action_yes),
+                .setPositiveButton(context.getString(R.string.action_yes),
                         new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int id) {
                                 handler.proceed();
                             }
                         })
-                .setNegativeButton(mActivity.getString(R.string.action_no),
+                .setNegativeButton(context.getString(R.string.action_no),
                         new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int id) {
@@ -334,18 +333,18 @@ class LightningWebClient extends WebViewClient {
 
     @Override
     public void onFormResubmission(WebView view, @NonNull final Message dontResend, final Message resend) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(mActivity);
-        builder.setTitle(mActivity.getString(R.string.title_form_resubmission));
-        builder.setMessage(mActivity.getString(R.string.message_form_resubmission))
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        builder.setTitle(context.getString(R.string.title_form_resubmission));
+        builder.setMessage(context.getString(R.string.message_form_resubmission))
                 .setCancelable(true)
-                .setPositiveButton(mActivity.getString(R.string.action_yes),
+                .setPositiveButton(context.getString(R.string.action_yes),
                         new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int id) {
                                 resend.sendToTarget();
                             }
                         })
-                .setNegativeButton(mActivity.getString(R.string.action_no),
+                .setNegativeButton(context.getString(R.string.action_no),
                         new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int id) {
@@ -388,7 +387,7 @@ class LightningWebClient extends WebViewClient {
                     intent.setSelector(null);
                 }
                 try {
-                    mActivity.startActivity(intent);
+                    context.startActivity(intent);
                 } catch (ActivityNotFoundException e) {
                     Log.e(Constants.TAG, "ActivityNotFoundException");
                 }
@@ -398,12 +397,12 @@ class LightningWebClient extends WebViewClient {
 
         if (!scheme.equals("http") && !scheme.equals("https")) {
             Intent intent = new Intent(Intent.ACTION_VIEW, uri);
-            PackageManager packageManager = mActivity.getPackageManager();
+            PackageManager packageManager = context.getPackageManager();
             List<ResolveInfo> activites = packageManager.queryIntentActivities(intent, 0);
             if (activites.size() > 0) {
-                mActivity.startActivity(intent);
+                context.startActivity(intent);
             } else {
-                Toast.makeText(mActivity, mActivity.getString(R.string.app_not_found), Toast.LENGTH_SHORT).show();
+                Toast.makeText(context, context.getString(R.string.app_not_found), Toast.LENGTH_SHORT).show();
             }
             return true;
         }
