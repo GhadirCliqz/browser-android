@@ -275,5 +275,7 @@
     <string name="in_page_search_next_result">In page search next result</string>
     <string name="in_page_search_prev_result">In page search previous result</string>
     <string name="close_in_page_search">Close in page search</string>
+    <string name="download_successful">Download successful</string>
+    <string name="download_failed">Download failed</string>
     <string name="app_not_found">No suitable app found</string>
 </resources>

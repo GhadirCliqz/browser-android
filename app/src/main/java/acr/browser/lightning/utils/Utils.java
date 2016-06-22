@@ -97,16 +97,45 @@ public final class Utils {
         alert.show();
     }
 
+    /**
+     * Display a Snackbar with a message
+     * @param resource String resource of the message to be displayed
+     */
     public static void showSnackbar(@NonNull Activity activity, @StringRes int resource) {
         View view = activity.findViewById(android.R.id.content);
-        if (view == null) return;
+        if (view == null) {
+            return;
+        }
         Snackbar.make(view, resource, Snackbar.LENGTH_SHORT).show();
     }
 
+    /**
+     * Display a Snackbar with a message
+     * @param message Message to be displayed
+     */
     public static void showSnackbar(@NonNull Activity activity, String message) {
         View view = activity.findViewById(android.R.id.content);
-        if (view == null) return;
+        if (view == null) {
+            return;
+        }
         Snackbar.make(view, message, Snackbar.LENGTH_SHORT).show();
+    }
+
+    /**
+     * Display a SnackBar with a message and a action button
+     * @param message Message to be displayed
+     * @param action Name of the action
+     * @param eventListener Implementation of the OnClickListener for the action
+     */
+    public static void showSnackbar(@NonNull Activity activity, String message, String action,
+                                    View.OnClickListener eventListener) {
+        View view = activity.findViewById(android.R.id.content);
+        if (view == null) {
+            return;
+        }
+        Snackbar.make(view, message, Snackbar.LENGTH_SHORT)
+                .setAction(action, eventListener)
+                .show();
     }
 
     /**
