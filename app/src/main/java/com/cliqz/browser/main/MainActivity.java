@@ -2,15 +2,20 @@ package com.cliqz.browser.main;
 
 import android.Manifest;
 import android.app.AlertDialog;
+import android.app.DownloadManager;
 import android.app.SearchManager;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Message;
@@ -64,6 +69,7 @@ import acr.browser.lightning.activity.SettingsActivity;
 import acr.browser.lightning.bus.BrowserEvents;
 import acr.browser.lightning.constant.Constants;
 import acr.browser.lightning.preference.PreferenceManager;
+import acr.browser.lightning.utils.Utils;
 import acr.browser.lightning.utils.WebUtils;
 
 /**
@@ -260,6 +266,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         gcmReceiver.register();
+        registerReceiver(onComplete, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
         resumeAllWebViews();
         final String name = getCurrentVisibleFragmentName();
         timings.setAppStartTime();
@@ -358,6 +365,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onPause() {
         super.onPause();
         gcmReceiver.unregister();
+        unregisterReceiver(onComplete);
         pauseAllWebViews();
         String context = getCurrentVisibleFragmentName();
         timings.setAppStopTime();
@@ -705,6 +713,36 @@ public class MainActivity extends AppCompatActivity {
             mHistoryFragment.mHistoryWebView.onResume();
         }
     }
+
+    private final BroadcastReceiver onComplete = new BroadcastReceiver() {
+        public void onReceive(Context ctxt, final Intent intent) {
+            final long downloadId = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1L);
+            final DownloadManager downloadManager = (DownloadManager)
+                    getSystemService(Context.DOWNLOAD_SERVICE);
+            final DownloadManager.Query query = new DownloadManager.Query();
+            query.setFilterById(downloadId);
+            final Cursor cursor = downloadManager.query(query);
+            final int statusIndex = cursor.getColumnIndex(DownloadManager.COLUMN_STATUS);
+            final int localUriIndex = cursor.getColumnIndex(DownloadManager.COLUMN_LOCAL_URI);
+            final int mediaTypeIndex = cursor.getColumnIndex(DownloadManager.COLUMN_MEDIA_TYPE);
+            if (cursor.moveToFirst()) {
+                if (cursor.getInt(statusIndex) == DownloadManager.STATUS_SUCCESSFUL) {
+                    final View.OnClickListener onClickListener = new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            final Intent intent = new Intent();
+                            intent.setAction(Intent.ACTION_VIEW);
+                            intent.setDataAndType(Uri.parse(cursor.getString(localUriIndex)), cursor.getString(mediaTypeIndex));
+                            startActivity(intent);
+                        }
+                    };
+                    Utils.showSnackbar(MainActivity.this, "Download Successful", getString(R.string.action_open), onClickListener);
+                } else if (cursor.getInt(statusIndex) == DownloadManager.STATUS_FAILED) {
+                    Utils.showSnackbar(MainActivity.this, "Download Failed");
+                }
+            }
+        }
+    };
 
     private class DrawerListener implements DrawerLayout.DrawerListener {
 
