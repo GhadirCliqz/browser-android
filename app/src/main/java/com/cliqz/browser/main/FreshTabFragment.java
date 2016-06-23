@@ -96,7 +96,7 @@ public class FreshTabFragment extends BaseFragment {
     public void onBackPressed(Messages.BackPressed event) {
         TabFragment tabFragment = (TabFragment)getActivity()
                 .getSupportFragmentManager()
-                .findFragmentByTag(MainActivity.SEARCH_FRAGMENT_TAG);
+                .findFragmentByTag(MainActivity.TAB_FRAGMENT_TAG);
         if(tabFragment != null) {
 //            final String s = state.getMode() == CliqzBrowserState.Mode.WEBPAGE ? "web" : "cards";
 //            telemetry.sendBackPressedSignal("future", s, tabFragment.mAutocompleteEditText.length());
