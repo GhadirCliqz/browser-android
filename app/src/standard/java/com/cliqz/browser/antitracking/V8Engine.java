@@ -256,7 +256,7 @@ class V8Engine {
      * @param func        Callback function
      * @param timeoutMsec Milliseconds to wait
      */
-    void setTimeout(V8Function func, Integer timeoutMsec) {
+    public void setTimeout(V8Function func, Integer timeoutMsec) {
         final V8Function callback = (V8Function) func.twin();
         deferredFnExecutor.schedule(new Runnable() {
             @Override
@@ -284,7 +284,7 @@ class V8Engine {
      * @param interval Milliseconds between each call
      * @return Integer timerId which can be used to cancel this interval.
      */
-    Integer setInterval(V8Function func, Integer interval) {
+    public Integer setInterval(V8Function func, Integer interval) {
         final V8Function callback = (V8Function) func.twin();
         final int timerId = mTimerCtr++;
         ScheduledFuture future = deferredFnExecutor.scheduleWithFixedDelay(new Runnable() {
@@ -312,7 +312,7 @@ class V8Engine {
      *
      * @param timerId Integer id returned from setInterval
      */
-    void clearInterval(Integer timerId) {
+    public void clearInterval(Integer timerId) {
         Pair<V8Function, ScheduledFuture> timer = timers.get(timerId);
         if (timer != null) {
             V8Function callback = timer.first;
@@ -344,7 +344,7 @@ class V8Engine {
      * @param data         Data to sent (for POST request)
      * @return
      */
-    boolean httpHandler(final String method, final String requestedUrl, final V8Function callback, V8Function onerror, final Integer timeout, final String data) {
+    public boolean httpHandler(final String method, final String requestedUrl, final V8Function callback, V8Function onerror, final Integer timeout, final String data) {
         final V8Function successCallback = (V8Function) callback.twin();
         final V8Function errorCallback = (V8Function) onerror.twin();
         Log.d("v8", "httpHandler " + requestedUrl);
@@ -469,7 +469,7 @@ class V8Engine {
      * @param path     String file path to read
      * @param callback V8Function function to callback with data
      */
-    void readTempFile(final String path, final V8Function callback) {
+    public void readTempFile(final String path, final V8Function callback) {
         File f = new File(context.getCacheDir(), path);
         Log.d("fs", "Read " + f.getPath());
         FileInputStream inputStream;
@@ -504,7 +504,7 @@ class V8Engine {
      * @param path String file path to write
      * @param data String data to write into file
      */
-    void writeTempFile(final String path, final String data) {
+    public void writeTempFile(final String path, final String data) {
         File f = new File(context.getCacheDir(), path);
         Log.d("fs", "Write " + f.getPath());
         FileOutputStream outputStream;
@@ -526,7 +526,7 @@ class V8Engine {
      *
      * @param dir
      */
-    void mkTempDir(final String dir) {
+    public void mkTempDir(final String dir) {
         new File(context.getCacheDir(), dir).mkdir();
     }
 
@@ -536,7 +536,7 @@ class V8Engine {
      * @param path     String path to read
      * @param callback V8Function function to call back with file contents.
      */
-    void readFile(final String path, final V8Function callback) {
+    public void readFile(final String path, final V8Function callback) {
         StringBuilder fileData = new StringBuilder();
         V8Array respArgs = new V8Array(v8);
         try {
@@ -569,7 +569,7 @@ class V8Engine {
      * @param path String path to write
      * @param data String data to file to file.
      */
-    void writeFile(final String path, final String data) {
+    public void writeFile(final String path, final String data) {
         Log.d("fs", "Write: " + path + ", " + data.length() + "b");
         try {
             FileOutputStream fos = context.openFileOutput(path, Context.MODE_PRIVATE);
