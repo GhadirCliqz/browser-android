@@ -68,6 +68,7 @@ import javax.inject.Inject;
 import acr.browser.lightning.activity.SettingsActivity;
 import acr.browser.lightning.bus.BrowserEvents;
 import acr.browser.lightning.constant.Constants;
+import acr.browser.lightning.database.HistoryDatabase;
 import acr.browser.lightning.preference.PreferenceManager;
 import acr.browser.lightning.utils.Utils;
 import acr.browser.lightning.utils.WebUtils;
@@ -127,6 +128,9 @@ public class MainActivity extends AppCompatActivity {
 
     @Inject
     Timings timings;
+
+    @Inject
+    HistoryDatabase historyDatabase;
 
     @Inject
     GCMRegistrationBroadcastReceiver gcmReceiver;
@@ -398,7 +402,7 @@ public class MainActivity extends AppCompatActivity {
         }
         if (preferenceManager.getClearHistoryExitEnabled()) {
             //TODO reintroduce this
-            mFragmentsList.get(0).historyDatabase.clearHistory(false);
+            historyDatabase.clearHistory(false);
             preferenceManager.setShouldClearQueries(PreferenceManager.ClearQueriesOptions.CLEAR_HISTORY);
         }
         if (preferenceManager.getClearCookiesExitEnabled()) {
