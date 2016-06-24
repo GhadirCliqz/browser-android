@@ -95,7 +95,7 @@
     <string name="hint_url">URL</string>
     <string name="title_edit_bookmark">Lesezeichen bearbeiten</string>
     <string name="action_edit">Bearbeiten</string>
-    <string name="action_incognito">Neuer Inkognito-Tab</string>
+    <string name="action_incognito">Neuer Vergessen-Tab</string>
     <string name="action_homepage">Standard</string>
     <string name="action_back">Zurück</string>
     <string name="action_find">Auf Seite suchen</string>
@@ -249,7 +249,7 @@
     <string name="also_clear_queries">Suchanfragen löschen</string>
     <string name="clear_history">Verlauf löschen</string>
     <string name="deleting_in_progress_message">Löschen</string>
-    <string name="add_to_favourites">zu Favoriten hinzufügen</string>
+    <string name="add_to_favourites">Zu Favoriten hinzufügen</string>
     <string name="save_link">Link speichern</string>
     <string name="news_notification">Schlagzeilen Benachrichtigungen</string>
     <string name="restore_top_sites">Entfernte Topseiten wiederherstellen</string>

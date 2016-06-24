@@ -95,7 +95,7 @@
     <string name="hint_url">URL</string>
     <string name="title_edit_bookmark">Edita</string>
     <string name="action_edit">Edita</string>
-    <string name="action_incognito">Nuova scheda in incognito</string>
+    <string name="action_incognito">Nuovo Forget Tab</string>
     <string name="action_homepage">Default</string>
     <string name="action_back">Indietro</string>
     <string name="action_find">Trova nella pagina</string>

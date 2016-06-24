@@ -96,7 +96,7 @@
     <string name="hint_url">URL</string>
     <string name="title_edit_bookmark">Edit Bookmark</string>
     <string name="action_edit">Edit</string>
-    <string name="action_incognito">New Incognito Tab</string>
+    <string name="action_incognito">New Forget Tab</string>
     <string name="action_homepage">Default</string>
     <string name="action_back">Back</string>
     <string name="action_find">Find in Page</string>
