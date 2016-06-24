@@ -134,7 +134,7 @@ public class HistoryFragment extends BaseFragment {
     public void onBackPressed(Messages.BackPressed event) {
         TabFragment tabFragment = (TabFragment)getActivity()
                 .getSupportFragmentManager()
-                .findFragmentByTag(MainActivity.SEARCH_FRAGMENT_TAG);
+                .findFragmentByTag(MainActivity.TAB_FRAGMENT_TAG);
         if(tabFragment != null) {
             final String state = ((MainActivity)getActivity()).currentMode;
             telemetry.sendBackPressedSignal("past", state, tabFragment.mAutocompleteEditText.length());

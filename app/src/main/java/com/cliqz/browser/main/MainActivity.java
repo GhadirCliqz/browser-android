@@ -90,7 +90,7 @@ public class MainActivity extends AppCompatActivity {
 
     private static final String HISTORY_FRAGMENT_TAG = "history_fragment";
     private static final String SUGGESTIONS_FRAGMENT_TAG = "suggestions_fragment";
-    static final String SEARCH_FRAGMENT_TAG = "search_fragment";
+    static final String TAB_FRAGMENT_TAG = "tab_fragment";
     private static final String CUSTOM_VIEW_FRAGMENT_TAG = "custom_view_fragment";
     private static final String LOCATION_PERMISSION = Manifest.permission.ACCESS_FINE_LOCATION;
 
@@ -155,6 +155,7 @@ public class MainActivity extends AppCompatActivity {
 //        }
 
 //        mFreshTabFragment = new FreshTabFragment();
+        mFragmentsList.clear();
         searchWebView = new SearchWebView(this);
         mHistoryFragment = new HistoryFragment(this);
         firstFragment = new TabFragment();
@@ -247,7 +248,7 @@ public class MainActivity extends AppCompatActivity {
         mTabListView.setLayoutManager(layoutManager);
         mTabListView.setHasFixedSize(true);
         final FragmentManager fm = getSupportFragmentManager();
-        fm.beginTransaction().add(R.id.content_frame, firstFragment, SEARCH_FRAGMENT_TAG).commit();
+        fm.beginTransaction().replace(R.id.content_frame, firstFragment, TAB_FRAGMENT_TAG).commit();
     }
 
     @Override
@@ -624,7 +625,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void showTab(int position) {
         final FragmentManager fm = getSupportFragmentManager();
-        fm.beginTransaction().replace(R.id.content_frame, mFragmentsList.get(position), SEARCH_FRAGMENT_TAG).commit();
+        fm.beginTransaction().replace(R.id.content_frame, mFragmentsList.get(position), TAB_FRAGMENT_TAG).commit();
     }
 
     private synchronized void deleteTab(int position) {
@@ -808,10 +809,9 @@ public class MainActivity extends AppCompatActivity {
             holder.layout.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    final FragmentManager fm = getSupportFragmentManager();
-                    fm.beginTransaction().replace(R.id.content_frame, mFragmentsList.get(position)
-                                                    ,SEARCH_FRAGMENT_TAG).commit();
-                    fm.executePendingTransactions();
+                    if (getCurrentTabPosition() != position) {
+                        showTab(position);
+                    }
                     drawerLayout.closeDrawers();
                     telemetry.sendTabOpenSignal(position, mFragmentsList.size(),
                             mFragmentsList.get(position).state.isIncognito());
