@@ -46,17 +46,17 @@ public class RegistrationIntentService extends IntentService {
     @Inject
     AwsSNSManager awsSNSManager;
 
-    private final String gcm_defaultSenderId;
+    private final Integer gcm_defaultSenderId;
 
     public RegistrationIntentService() {
         super(TAG);
         BrowserApp.getAppComponent().inject(this);
 
         // We use reflection to get the sender id (fdroid flavour has no sender id)
-        String senderId = null;
+        Integer senderId = null;
         try {
             Field f = R.string.class.getField("gcm_defaultSenderId");
-            senderId = getString(f.getInt(null));
+            senderId = f.getInt(R.string.class);
         } catch (NoSuchFieldException e) {
             Log.i(TAG, "Can't find gcm default sender id");
         } catch (IllegalAccessException e) {
@@ -79,9 +79,9 @@ public class RegistrationIntentService extends IntentService {
             // R.string.gcm_defaultSenderId (the Sender ID) is typically derived from google-services.json.
             // See https://developers.google.com/cloud-messaging/android/start for details on this file.
             // [START get_token]
-            InstanceID instanceID = InstanceID.getInstance(this);
-            String token = instanceID.getToken(gcm_defaultSenderId,
-                    GoogleCloudMessaging.INSTANCE_ID_SCOPE, null);
+            final InstanceID instanceID = InstanceID.getInstance(this);
+            final String id = getString(gcm_defaultSenderId);
+            final String token = instanceID.getToken(id, GoogleCloudMessaging.INSTANCE_ID_SCOPE, null);
             // [END get_token]
             Log.i(TAG, "GCM Registration Token: " + token);
 
