@@ -29,19 +29,19 @@ def extZip = new File(extPath, 'extension_latest.zip')
 
 task downloadExtension {
     onlyIf {
-        file('../external/extension/.download').exists() && !extZip.exists()
+        downloadFile.exists() && !extZip.exists()
     }
     doLast {
-    def url = 'https://s3.amazonaws.com/cdn.cliqz.com/mobile/extension_stable/extension_latest.zip'
-    def f = extZip.newOutputStream()
-    f << new URL(url).openStream()
-    f.close()
+        def url = 'https://s3.amazonaws.com/cdn.cliqz.com/mobile/extension_stable/extension_latest.zip'
+        def f = extZip.newOutputStream()
+        f << new URL(url).openStream()
+        f.close()
     }
 }
 
 task installExtension(type: Copy) {
     onlyIf {
-        file('../external/extension/.download').exists() && !file('../external/extension/build').exists();
+        downloadFile.exists() && !file('../external/extension/build').exists();
     }
     dependsOn downloadExtension
     from zipTree(extZip)
@@ -76,7 +76,7 @@ afterEvaluate { project ->
         if (tazk.name =~ /assemble.*/) {
             tazk.dependsOn installExtension
         }
-        if (tazk.name =~ /processFdroidDebugGoogleServices/) {
+        if (tazk.name =~ /processFdroid.*GoogleServices/) {
             tazk.enabled = false
         }
     }
