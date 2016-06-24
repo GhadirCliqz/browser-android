@@ -292,7 +292,11 @@ public class MainActivity extends AppCompatActivity {
             tabFragment.state.setShouldReset(
                     System.currentTimeMillis() - timings.getAppStopTime() >= Constants.HOME_RESET_DELAY);
         }
-        locationCache.start();
+        if (preferenceManager.getLocationEnabled()) {
+            locationCache.start();
+        } else {
+            locationCache.stop();
+        }
         //Asks for permission if GPS is not enabled on the device.
         // Note: Will ask for permission even if location is enabled, but not using GPS
         if(!locationCache.isGPSEnabled()
