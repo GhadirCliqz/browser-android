@@ -32,10 +32,10 @@ task downloadExtension {
         downloadFile.exists() && !extZip.exists()
     }
     doLast {
-        def url = 'https://s3.amazonaws.com/cdn.cliqz.com/mobile/extension_stable/extension_latest.zip'
-        def f = extZip.newOutputStream()
-        f << new URL(url).openStream()
-        f.close()
+    def url = 'https://s3.amazonaws.com/cdn.cliqz.com/mobile/extension_stable/extension_latest.zip'
+    def f = extZip.newOutputStream()
+    f << new URL(url).openStream()
+    f.close()
     }
 }
 
@@ -75,9 +75,6 @@ afterEvaluate { project ->
         }
         if (tazk.name =~ /assemble.*/) {
             tazk.dependsOn installExtension
-        }
-        if (tazk.name =~ /processFdroid.*GoogleServices/) {
-            tazk.enabled = false
         }
     }
 }

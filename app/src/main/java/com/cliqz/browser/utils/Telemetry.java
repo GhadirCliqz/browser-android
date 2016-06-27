@@ -792,11 +792,10 @@ public class Telemetry {
      * @return A newly generated SessionID
      */
     public String generateSessionID() {
-        final String randomAlphaNumericString = generateRandomString(18, Key.ALPHA_NUMERIC_SPACE);
-        final String randomNumericString = generateRandomString(6, Key.NUMERIC_SPACE);
-        final String days = Long.toString(getUnixTimeStamp() / 86400000);
-        final String channel = BuildConfig.DEBUG ? BuildConfig.TELEMETRY_DEBUG_CHANNEL : BuildConfig.TELEMETRY_CHANNEL;
-        return randomAlphaNumericString + randomNumericString + "|" + days + "|" + channel;
+        String randomAlphaNumericString = generateRandomString(18, Key.ALPHA_NUMERIC_SPACE);
+        String randomNumericString = generateRandomString(6, Key.NUMERIC_SPACE);
+        String days = Long.toString(getUnixTimeStamp() / 86400000);
+        return randomAlphaNumericString + randomNumericString + "|" + days + "|" + BuildConfig.TELEMETRY_CHANNEL;
     }
 
     //Returns a random string of length 'length' using characters from the given 'space'
