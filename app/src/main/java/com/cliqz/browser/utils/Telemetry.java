@@ -178,6 +178,8 @@ public class Telemetry {
             signal.put(Key.ACTION, action);
             if (action == Action.INSTALL) {
                 signal.put(Key.ADVERT_ID, mPreferenceManager.getAdvertID());
+                signal.put(Key.DISTRIBUTION, mPreferenceManager.getReferrer());
+                sendEnvironmentSignal(true);
             }
         } catch (JSONException e) {
             e.printStackTrace();
@@ -359,14 +361,15 @@ public class Telemetry {
 
     /**
      *Sends a telemetry signal about the environment when the app starts.
-     *This signal is sent at most once an hour.
+     *This signal is sent at most once an hour unless force sent.
+     * @param forceSend If true the method will not respect the 1 hour rule for sending the signal
      */
-    private void sendEnvironmentSignal() {
-        long oneHour = 3600000;
-        long oneDay = 86400000;
+    private void sendEnvironmentSignal(boolean forceSend) {
+        final long oneHour = 3600000;
+        final long oneDay = 86400000;
         long days = 0;
-        long timeSinceLastSingal = timings.getTimeSinceLastEnvSignal();
-        if(timeSinceLastSingal < oneHour) {
+        final long timeSinceLastSingal = timings.getTimeSinceLastEnvSignal();
+        if(timeSinceLastSingal < oneHour && !forceSend) {
             return;
         }
         timings.setLastEnvSingalTime();
@@ -421,7 +424,7 @@ public class Telemetry {
     public void sendStartingSignals(String context, String startType) {
         timings.setNetworkStartTime();
         currentNetwork = getNetworkState();
-        sendEnvironmentSignal();
+        sendEnvironmentSignal(false);
         sendAppStartupSignal(context, startType);
     }
 
