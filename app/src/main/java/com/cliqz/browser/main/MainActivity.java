@@ -35,6 +35,7 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.webkit.WebView;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
@@ -255,6 +256,9 @@ public class MainActivity extends AppCompatActivity {
     public void onConfigurationChanged(Configuration newConfig) {
         // Handle configuration changes
         super.onConfigurationChanged(newConfig);
+        if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT) {
+            bus.post(new BrowserEvents.ShowToolBar());
+        }
     }
 
     @Override
@@ -561,6 +565,16 @@ public class MainActivity extends AppCompatActivity {
                 }
             });
         }
+    }
+
+    @Subscribe
+    public void setAdjustPan(Messages.AdjustPan event) {
+        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
+    }
+
+    @Subscribe
+    public void setAdjustResize(Messages.AdjustResize event) {
+        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
     }
 
     @Subscribe
