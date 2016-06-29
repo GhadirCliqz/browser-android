@@ -18,6 +18,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -34,14 +36,6 @@ import acr.browser.lightning.preference.PreferenceManager;
  * Created by Ravjit on 17/11/15.
  */
 public class Telemetry {
-
-    public Telemetry(Context context) {
-        BrowserApp.getAppComponent().inject(this);
-        this.context = context;
-        batteryLevel = -1;
-        context.registerReceiver(mBatteryInfoReceiver, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
-        context.registerReceiver(mNetworkChangeReceiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
-    }
     
     private static class Key {
 
@@ -53,6 +47,8 @@ public class Telemetry {
         private static final String ACTION = "action";
         private static final String TYPE = "type";
         private static final String VERSION = "version";
+        private static final String VERSION_DIST = "version_dist";
+        private static final String VERSION_HOST = "version_host";
         private static final String OS_VERSION = "os_version";
         private static final String DEVICE = "device";
         private static final String LANGUAGE = "language";
@@ -161,11 +157,22 @@ public class Telemetry {
     private final ExecutorService executorService = Executors.newSingleThreadExecutor();
 
     private String currentNetwork, currentLayer;
+    private String mExtensionVersion;
     private Context context;
     private int batteryLevel, forwardStep, backStep, urlLength, previousPage;
     private boolean isFirstNetworkSignal = true;
     public boolean backPressed;
     public boolean showingCards;
+
+
+    public Telemetry(Context context) {
+        BrowserApp.getAppComponent().inject(this);
+        this.context = context;
+        batteryLevel = -1;
+        context.registerReceiver(mBatteryInfoReceiver, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
+        context.registerReceiver(mNetworkChangeReceiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
+        mExtensionVersion = getExtensionVersion();
+    }
 
     /**
      * Sends a telemetry signal related to the application life cycle: install/update
@@ -379,7 +386,9 @@ public class Telemetry {
             signal.put(Key.TYPE, Key.ENVIRONMENT);
             signal.put(Key.DEVICE, Build.MODEL);
             signal.put(Key.LANGUAGE, getLanguage());
-            signal.put(Key.VERSION, BuildConfig.VERSION_NAME);
+            signal.put(Key.VERSION, mExtensionVersion);
+            signal.put(Key.VERSION_DIST, BuildConfig.VERSION_NAME);
+            signal.put(Key.VERSION_HOST, BuildConfig.LIGHTNING_VERSION_NAME);
             signal.put(Key.OS_VERSION, Integer.toString(Build.VERSION.SDK_INT));
             signal.put(Key.DEFAULT_SEARCH_ENGINE, getDefaultSearchEngine());
             signal.put(Key.HISTORY_URLS, historySize);
@@ -857,6 +866,25 @@ public class Telemetry {
             return pidMemoryInfo.getTotalPss() / 1024;
         }
         return -1;
+    }
+
+    private String getExtensionVersion() {
+        String extensionVersion = "";
+        try {
+            final InputStream inputStream = context.getAssets().open("search/cliqz.json");
+            final byte[] buffer = new byte[inputStream.available()];
+            inputStream.read(buffer);
+            inputStream.close();
+            final String contents = new String(buffer, "UTF-8");
+            final JSONObject jsonObject = new JSONObject(contents);
+            extensionVersion = jsonObject.getString("EXTENSION_VERSION");
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (JSONException e) {
+            e.printStackTrace();
+        } finally {
+            return extensionVersion;
+        }
     }
 
     //receiver listening to changes in battery levels
