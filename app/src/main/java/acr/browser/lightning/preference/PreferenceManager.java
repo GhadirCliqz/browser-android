@@ -93,6 +93,7 @@ public class PreferenceManager {
         public static final String RESETORE_TOP_SITES = "restore_top_sites";
         public static final String REFERRER = "referrer";
         public static final String ADVERT_ID = "advert_id";
+        public static final String OPTIMIZED_BLOCK_ADS = "optimized_block_ads";
     }
 
     private final SharedPreferences mPrefs;
@@ -105,6 +106,10 @@ public class PreferenceManager {
 
     public boolean getAdBlockEnabled() {
         return mPrefs.getBoolean(Name.BLOCK_ADS, true);
+    }
+
+    public boolean getOptimizedAdBlockEnabled() {
+        return mPrefs.getBoolean(Name.OPTIMIZED_BLOCK_ADS, true);
     }
 
     public boolean getBlockImagesEnabled() {
@@ -390,6 +395,10 @@ public class PreferenceManager {
 
     public void setAdBlockEnabled(boolean enable) {
         putBoolean(Name.BLOCK_ADS, enable);
+    }
+
+    public void setOptimizedAdBlockEnabled(boolean enable) {
+        putBoolean(Name.OPTIMIZED_BLOCK_ADS, enable);
     }
 
     public void setBlockImagesEnabled(boolean enable) {

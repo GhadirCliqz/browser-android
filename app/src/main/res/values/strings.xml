@@ -278,4 +278,7 @@
     <string name="download_successful">Download successful</string>
     <string name="download_failed">Download failed</string>
     <string name="app_not_found">No suitable app found</string>
+    <string name="settings_block_ads">Block Ads</string>
+    <string name="optimized_block_ads">Optimized Blocking</string>
+    <string name="what_does_optimized_mean">What is \'optmized\'?</string>
 </resources>

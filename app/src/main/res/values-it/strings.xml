@@ -264,4 +264,7 @@
     <string name="action_show_tab_manager">Tab aperti</string>
     <string name="action_search_on_page">Cerca nella pagina</string>
     <string name="app_not_found">App non trovata</string>
+    <string name="settings_block_ads">Blocca Pubblicità</string>
+    <string name="optimized_block_ads">Blocco Pubblicità Ottimizzato</string>
+    <string name="what_does_optimized_mean">Cosa significa \'optimizzato\'?</string>
 </resources>

@@ -9,15 +9,25 @@ android.metaClass.baseVersionName = "0.8.0"
 
 android {
     compileSdkVersion 23
-    buildToolsVersion "23.0.2"
+    buildToolsVersion "23.0.3"
     defaultConfig {
         targetSdkVersion 23
+        minSdkVersion 21
 
         buildConfigField 'String', 'LIGHTNING_VERSION_NAME', '"4.2.3.1"'
         buildConfigField "boolean", "FULL_VERSION", "true"
 
         applicationId "com.cliqz.browser"
         testInstrumentationRunner "com.cliqz.browser.test.CustomTestRunner"
+
+        splits {
+            abi {
+                enable true
+                reset()
+                include 'armeabi-v7a', 'x86'
+                universalApk true
+            }
+        }
     }
     buildTypes {
         debug {
@@ -55,28 +65,11 @@ android {
         standard {
             versionCode baseVersionCode+1
             versionName baseVersionName
-            minSdkVersion 21
-            splits {
-                abi {
-                    enable true
-                    reset()
-                    include 'armeabi-v7a', 'x86'
-                    universalApk true
-                }
-            }
         }
         xwalk {
             versionCode baseVersionCode
             versionName baseVersionName+"xw"
             minSdkVersion 16
-            splits {
-                abi {
-                    enable true
-                    reset()
-                    include 'armeabi-v7a', 'x86'
-                    universalApk true
-                }
-            }
         }
     }
 }
