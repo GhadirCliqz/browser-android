@@ -40,7 +40,7 @@
             android:label="@string/cliqz_app_name"
             android:theme="@style/Theme.LightTheme"
             android:configChanges="orientation|screenSize|keyboardHidden|keyboard"
-            android:windowSoftInputMode="adjustPan"
+            android:windowSoftInputMode="adjustResize"
             android:launchMode="singleTask">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

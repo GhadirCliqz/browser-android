@@ -89,4 +89,8 @@ public final class Messages {
     }
 
     public static class SaveLink {}
+
+    public static class AdjustPan {}
+
+    public static class AdjustResize {}
 }

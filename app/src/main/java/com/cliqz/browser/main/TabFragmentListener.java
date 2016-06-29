@@ -35,7 +35,7 @@ class TabFragmentListener implements View.OnFocusChangeListener, TextWatcher {
                 fragment.searchBar.showTitleBar();
             }
         } else {
-
+            fragment.bus.post(new Messages.AdjustPan());
             fragment.timings.setUrlBarFocusedTime();
             // TODO: The next two lines should be in a method
             fragment.mSearchWebView.bringToFront();

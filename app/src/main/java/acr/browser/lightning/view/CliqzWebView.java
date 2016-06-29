@@ -6,6 +6,7 @@ import android.util.AttributeSet;
 import android.webkit.WebView;
 
 import com.cliqz.browser.main.MainActivity;
+import com.cliqz.browser.main.Messages;
 import com.squareup.otto.Bus;
 
 import javax.inject.Inject;
@@ -37,6 +38,7 @@ public class CliqzWebView extends WebView {
     @Override
     public void bringToFront() {
         super.bringToFront();
+        bus.post(new Messages.AdjustResize());
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT) {
             requestLayout();
         }
