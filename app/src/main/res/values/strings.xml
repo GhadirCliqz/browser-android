@@ -281,4 +281,6 @@
     <string name="settings_block_ads">Block Ads</string>
     <string name="optimized_block_ads">Optimized Blocking</string>
     <string name="what_does_optimized_mean">What is \'optmized\'?</string>
+    <string name="make_video_available_offline">Make available offline</string>
+    <string name="dialog_youtube_video">What would you like to do with this video?</string>
 </resources>

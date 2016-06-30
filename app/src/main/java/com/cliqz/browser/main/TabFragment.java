@@ -48,6 +48,7 @@ import com.cliqz.browser.widget.SearchBar;
 import com.squareup.otto.Subscribe;
 
 import java.util.ArrayList;
+import java.util.Locale;
 
 import acr.browser.lightning.bus.BrowserEvents;
 import acr.browser.lightning.constant.Constants;
@@ -346,11 +347,12 @@ public class TabFragment extends BaseFragment {
         if (mOverFlowMenu != null && mOverFlowMenu.isShown()) {
             mOverFlowMenu.dismiss();
         } else {
+            final String url = mLightningView != null ? mLightningView.getUrl() : "";
             mOverFlowMenu = new OverFlowMenu(getActivity());
-            // mOverFlowMenu.setBrowserState(state.getMode());
             mOverFlowMenu.setCanGoForward(mLightningView.canGoForward());
             mOverFlowMenu.setAnchorView(overflowMenuButton);
             mOverFlowMenu.setIncognitoMode(isIncognito);
+            mOverFlowMenu.setIsYoutubeVideo(UrlUtils.isYoutubeVideo(url));
             mOverFlowMenu.setHistoryId(mLightningView.historyId);
             mOverFlowMenu.setState(state);
             mOverFlowMenu.show();
@@ -596,7 +598,6 @@ public class TabFragment extends BaseFragment {
         }
     }
 
-
     @Subscribe
     public void showSearch(Messages.ShowSearch event) {
         searchBar.showSearchEditText();
@@ -616,7 +617,6 @@ public class TabFragment extends BaseFragment {
     public void autocomplete(CliqzMessages.Autocomplete event) {
         mAutocompleteEditText.setAutocompleteText(event.completion);
     }
-
 
     @Subscribe
     public void reloadPage(Messages.ReloadPage event) {
@@ -763,6 +763,21 @@ public class TabFragment extends BaseFragment {
                             isAnimationInProgress = false;
                         }
                     }).start();
+        }
+    }
+
+    @Subscribe
+    public void downloadYoutubeVideo(Messages.DownloadYoutubeVideo event) {
+        // Two cases, the first: we have already urls
+        if (event.urls != null) {
+            YoutubeDownloadDialog.show(getActivity(), event.urls);
+        } else {
+            // To fetch the videos url we have to run the ytdownloader.getUrls script that is bundled
+            // with the extension
+            final String url =
+                    event.videoPageUrl != null ? event.videoPageUrl : mLightningView.getUrl();
+            final String script = String.format(Locale.US, "ytdownloader.getUrls('%s');", url);
+            mSearchWebView.evaluateJavascript(script, null);
         }
     }
 

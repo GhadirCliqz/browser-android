@@ -61,7 +61,8 @@ public class OverFlowMenu extends FrameLayout {
         SEARCH_IN_PAGE(R.id.search_on_page_menu_button, R.string.action_search_on_page),
         SETTINGS(R.id.settings_menu_button, R.string.settings),
         CONTACT_CLIQZ(R.id.contact_cliqz_menu_button, R.string.contact_cliqz),
-        SAVE_LINK(R.id.save_link_menu_button, R.string.save_link);
+        SAVE_LINK(R.id.save_link_menu_button, R.string.save_link),
+        DOWNLOAD_YOUTUBE_VIDEO(R.id.download_youtube_video_menu_button, R.string.make_video_available_offline);
 
         final int stringID;
         final int id;
@@ -79,6 +80,7 @@ public class OverFlowMenu extends FrameLayout {
             Entries.NEW_INCOGNITO_TAB,
             Entries.COPY_LINK,
             Entries.SAVE_LINK,
+            Entries.DOWNLOAD_YOUTUBE_VIDEO,
             Entries.SEARCH_IN_PAGE,
             Entries.ADD_TO_FAVOURITES,
             Entries.SETTINGS,
@@ -98,7 +100,10 @@ public class OverFlowMenu extends FrameLayout {
     private final Context context;
     private final OverFlowMenuAdapter overFlowMenuAdapter;
     private boolean mCanGoForward = false;
-    private boolean mIncognitoMode;
+    private boolean mIncognitoMode = false;
+
+    private boolean mIsYoutubeVideo = false;
+
     private long historyId;
 
     public View getAnchorView() {
@@ -235,12 +240,27 @@ public class OverFlowMenu extends FrameLayout {
         overFlowMenuAdapter.notifyDataSetInvalidated();
     }
 
+    public boolean isYoutubeVideo() {
+        return mIsYoutubeVideo;
+    }
+
+    public void setIsYoutubeVideo(boolean value) {
+        this.mIsYoutubeVideo = value;
+        prepareEntries();
+        overFlowMenuAdapter.notifyDataSetInvalidated();
+    }
+
     private void prepareEntries() {
         List<Entries> entries = new ArrayList<>(
                 Arrays.asList(mIncognitoMode ? INCOGNITO_ENTRIES : ENTRIES));
         // Filter unsupported entries
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR1) {
             entries.remove(Entries.SEARCH_IN_PAGE);
+        }
+        if (mIsYoutubeVideo) {
+            entries.remove(Entries.SAVE_LINK);
+        } else {
+            entries.remove(Entries.DOWNLOAD_YOUTUBE_VIDEO);
         }
         mEntries = entries.toArray(new Entries[entries.size()]);
     }
@@ -297,17 +317,19 @@ public class OverFlowMenu extends FrameLayout {
 
         @Override
         public boolean isEnabled(int position) {
-            final boolean isAddToFavourites = mEntries[position] == Entries.ADD_TO_FAVOURITES;
-            final boolean isCopyLink = mEntries[position] == Entries.COPY_LINK;
-            final boolean isSaveLink = mEntries[position] == Entries.SAVE_LINK;
+            final Entries entry = mEntries[position];
+            final boolean isAddToFavourites = entry == Entries.ADD_TO_FAVOURITES;
+            final boolean isCopyLink = entry == Entries.COPY_LINK;
+            final boolean isSaveLinkOrDownloadYoutube = entry == Entries.SAVE_LINK ||
+                    entry == Entries.DOWNLOAD_YOUTUBE_VIDEO;
             final boolean hasValidId = historyId != -1;
             final boolean isShowingWebPage = state.getMode() == Mode.WEBPAGE;
             final boolean isSearchInPage = mEntries[position] == Entries.SEARCH_IN_PAGE;
 
-            return (!isAddToFavourites && !isCopyLink && !isSaveLink && !isSearchInPage) ||
+            return (!isAddToFavourites && !isCopyLink && !isSaveLinkOrDownloadYoutube && !isSearchInPage) ||
                     (isAddToFavourites && hasValidId && isShowingWebPage) ||
                     (isCopyLink && isShowingWebPage) ||
-                    (isSaveLink && isShowingWebPage) ||
+                    (isSaveLinkOrDownloadYoutube && isShowingWebPage) ||
                     (isSearchInPage && isShowingWebPage);
         }
 
@@ -429,6 +451,9 @@ public class OverFlowMenu extends FrameLayout {
                     break;
                 case SAVE_LINK:
                     bus.post(new Messages.SaveLink());
+                    break;
+                case DOWNLOAD_YOUTUBE_VIDEO:
+                    bus.post(new Messages.DownloadYoutubeVideo());
                     break;
                 default:
                     break;

@@ -1,5 +1,7 @@
 package com.cliqz.browser.main;
 
+import org.json.JSONArray;
+
 /**
  * @author Stefano Pacifici
  * @date 2015/11/24
@@ -93,4 +95,24 @@ public final class Messages {
     public static class AdjustPan {}
 
     public static class AdjustResize {}
+
+    public static class DownloadYoutubeVideo {
+        public final JSONArray urls;
+        public final String videoPageUrl;
+
+        public DownloadYoutubeVideo() {
+            this. urls = null;
+            this.videoPageUrl = null;
+        }
+
+        public DownloadYoutubeVideo(JSONArray urls) {
+            this.urls = urls;
+            this.videoPageUrl = null;
+        }
+
+        public DownloadYoutubeVideo(String url) {
+            this.urls = null;
+            this.videoPageUrl = url;
+        }
+    }
 }

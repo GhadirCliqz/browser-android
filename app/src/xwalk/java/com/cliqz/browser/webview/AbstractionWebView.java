@@ -75,6 +75,7 @@ public class AbstractionWebView extends XWalkView {
     }
 
     protected void setup() {
+        setUserAgentString("Mozilla/5.0 (Macintosh; Intel Mac OS X 10.10; rv:46.0) Gecko/20100101 Firefox/46.0");
         setUIClient(new XWalkUIClient(this) {
             @Override
             public boolean onConsoleMessage(XWalkView view, String message, int lineNumber, String sourceId, ConsoleMessageType messageType) {

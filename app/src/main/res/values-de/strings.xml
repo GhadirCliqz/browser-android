@@ -256,10 +256,12 @@
     <string name="message_restore_top_sites">Entfernte Topseiten werden wieder auf der Startseite angezeigt.</string>
     <string name="download_successful">Download erfolgreich</string>
     <string name="download_failed">Download fehlgeschlagen</string>
-    <string name="action_show_tab_manager">Geöffnete Tabs</string>
     <string name="action_search_on_page">Auf Seite suchen</string>
     <string name="app_not_found">Keine passende App gefunden</string>
     <string name="settings_block_ads">Werbung blockieren</string>
     <string name="optimized_block_ads">Optimiertes Blockieren</string>
     <string name="what_does_optimized_mean">Was bedeutet \'optimiert\'?</string>
+    <string name="action_show_tab_manager">Tab Manager</string>
+    <string name="make_video_available_offline">Offline verfügbar machen</string>
+    <string name="dialog_youtube_video">Was möchten Sie mit diesem Video tun?</string>
 </resources>
