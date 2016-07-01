@@ -352,8 +352,8 @@ public class TabFragment extends BaseFragment {
             mOverFlowMenu.setCanGoForward(mLightningView.canGoForward());
             mOverFlowMenu.setAnchorView(overflowMenuButton);
             mOverFlowMenu.setIncognitoMode(isIncognito);
+            mOverFlowMenu.setUrl(mLightningView.getUrl());
             mOverFlowMenu.setIsYoutubeVideo(UrlUtils.isYoutubeVideo(url));
-            mOverFlowMenu.setHistoryId(mLightningView.historyId);
             mOverFlowMenu.setState(state);
             mOverFlowMenu.show();
             hideKeyboard();
@@ -477,7 +477,7 @@ public class TabFragment extends BaseFragment {
 
     @Subscribe
     public void addToFavourites(Messages.AddToFavourites event) {
-        historyDatabase.addToFavourites(event.id, true);
+        historyDatabase.setFavorites(event.url, System.currentTimeMillis(), true);
     }
 
     @Subscribe

@@ -104,7 +104,7 @@ public class OverFlowMenu extends FrameLayout {
 
     private boolean mIsYoutubeVideo = false;
 
-    private long historyId;
+    private String mUrl;
 
     public View getAnchorView() {
         return mAnchorView;
@@ -265,8 +265,8 @@ public class OverFlowMenu extends FrameLayout {
         mEntries = entries.toArray(new Entries[entries.size()]);
     }
 
-    public void setHistoryId(long historyId) {
-        this.historyId = historyId;
+    public void setUrl(String url) {
+        this.mUrl = url;
     }
 
     public void setState(CliqzBrowserState state) {
@@ -322,7 +322,7 @@ public class OverFlowMenu extends FrameLayout {
             final boolean isCopyLink = entry == Entries.COPY_LINK;
             final boolean isSaveLinkOrDownloadYoutube = entry == Entries.SAVE_LINK ||
                     entry == Entries.DOWNLOAD_YOUTUBE_VIDEO;
-            final boolean hasValidId = historyId != -1;
+            final boolean hasValidId = !mUrl.isEmpty() && mUrl != null;
             final boolean isShowingWebPage = state.getMode() == Mode.WEBPAGE;
             final boolean isSearchInPage = mEntries[position] == Entries.SEARCH_IN_PAGE;
 
@@ -447,7 +447,7 @@ public class OverFlowMenu extends FrameLayout {
                     bus.post(new BrowserEvents.SearchInPage());
                     break;
                 case ADD_TO_FAVOURITES:
-                    bus.post(new Messages.AddToFavourites(historyId));
+                    bus.post(new Messages.AddToFavourites(mUrl));
                     break;
                 case SAVE_LINK:
                     bus.post(new Messages.SaveLink());

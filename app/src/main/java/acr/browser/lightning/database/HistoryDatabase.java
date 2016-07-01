@@ -391,18 +391,6 @@ public class HistoryDatabase extends SQLiteOpenHelper {
     }
 
     /**
-     * Mark an history point as favorite or remove the favorite status
-     * @param id an History Table id
-     * @param favorite true to mark the history point as a favorite, false otherwise
-     */
-    public synchronized void addToFavourites(final long id, boolean favorite) {
-        final SQLiteDatabase db = dbHandler.getDatabase();
-        final ContentValues values = new ContentValues();
-        values.put(HistoryTable.FAVORITE, favorite);
-        db.update(HistoryTable.TABLE_NAME, values, "id = ?", new String[]{Long.toString(id)});
-    }
-
-    /**
      * Delete an history point. If the history point is the last one for a given url and the url is
      * not favorite, the method will delete the url from the urls table also
      * @param id the id of the history point

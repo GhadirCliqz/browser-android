@@ -83,10 +83,10 @@ public final class Messages {
     }
 
     public static class AddToFavourites {
-        public final long id;
+        public final String url;
 
-        public AddToFavourites(long id) {
-            this.id = id;
+        public AddToFavourites(String url) {
+            this.url = url;
         }
     }
 
