@@ -35,6 +35,9 @@
         android:icon="@mipmap/ic_launcher"
         android:label="@string/cliqz_app_name"
         tools:replace="android:label" >
+
+        <meta-data android:name="com.facebook.sdk.ApplicationId" android:value="@string/facebook_app_id"/>
+
         <activity
             android:name="com.cliqz.browser.main.MainActivity"
             android:label="@string/cliqz_app_name"

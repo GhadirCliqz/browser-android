@@ -1,3 +1,4 @@
+//noinspection GradleCompatible
 apply plugin: 'com.android.application'
 apply plugin: 'com.neenbedankt.android-apt'
 apply plugin: 'com.getkeepsafe.dexcount'
@@ -57,7 +58,7 @@ android {
     sourceSets {
         main {
             assets.srcDirs += [
-                    '../external/extension/build/mobile',
+                    '../external/extension/build',
             ]
         }
     }
@@ -84,10 +85,10 @@ dexcount {
 
 dependencies {
     // support libraries
-    compile 'com.android.support:palette-v7:23.0.1'
-    compile 'com.android.support:appcompat-v7:23.0.1'
-    compile 'com.android.support:design:23.0.1'
-    compile 'com.android.support:recyclerview-v7:23.0.1'
+    compile 'com.android.support:palette-v7:23.4.0'
+    compile 'com.android.support:appcompat-v7:23.4.0'
+    compile 'com.android.support:design:23.4.0'
+    compile 'com.android.support:recyclerview-v7:23.4.0'
     // Gson
     compile 'com.google.code.gson:gson:2.6.1'
     // html parsing fo reading mode
@@ -102,10 +103,6 @@ dependencies {
     compile 'com.jakewharton:butterknife:7.0.1'
     // proxy support
     compile 'net.i2p.android:client:0.7'
-    // Use the following code to update the libnetcipher submodule
-    // git submodule foreach git reset --hard
-    // git submodule update --remote
-    // compile project(':libnetcipher')
     compile 'info.guardianproject.netcipher:netcipher:1.2.+'
     // memory leak analysis
     debugCompile 'com.squareup.leakcanary:leakcanary-android:1.4-beta2'
@@ -117,8 +114,8 @@ dependencies {
 
     // Testing-only dependencies
     // Force usage of support annotations in the test app, since it is internally used by the runner module.
-    compile 'com.android.support:support-annotations:23.1.1'
-    androidTestCompile 'com.android.support:support-annotations:23.1.1'
+    compile 'com.android.support:support-annotations:23.4.0'
+    androidTestCompile 'com.android.support:support-annotations:23.4.0'
     androidTestCompile 'com.android.support.test:runner:0.4'
     androidTestCompile 'com.android.support.test:rules:0.4'
     androidTestCompile 'com.android.support.test.espresso:espresso-core:2.2.1'
@@ -130,4 +127,7 @@ dependencies {
     // AWS SNS SDK
     compile 'com.amazonaws:aws-android-sdk-sns:2.+'
     compile 'com.amazonaws:aws-android-sdk-cognito:2.+'
+
+    // Facebook SDK
+    compile 'com.facebook.android:facebook-android-sdk:4.+'
 }
