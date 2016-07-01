@@ -51,6 +51,7 @@ import com.cliqz.browser.di.components.ActivityComponent;
 import com.cliqz.browser.di.modules.MainActivityModule;
 import com.cliqz.browser.gcm.RegistrationIntentService;
 import com.cliqz.browser.utils.LocationCache;
+import com.cliqz.browser.utils.LookbackWrapper;
 import com.cliqz.browser.utils.Telemetry;
 import com.cliqz.browser.utils.Timings;
 import com.cliqz.browser.webview.CliqzMessages;
@@ -114,6 +115,7 @@ public class MainActivity extends AppCompatActivity {
     protected SearchWebView searchWebView;
     protected String currentMode;
     private boolean mIsColdStart = true;
+    private boolean mShouldShowLookbackDialog = true;
 
     @Inject
     Bus bus;
@@ -311,6 +313,8 @@ public class MainActivity extends AppCompatActivity {
                 && !askedGPSPermission) {
             askedGPSPermission = true;
             showGPSPermissionDialog();
+        } else {
+            showLookbackDialog();
         }
     }
 
@@ -343,9 +347,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void showGPSPermissionDialog() {
-        LayoutInflater inflater = LayoutInflater.from(this);
-        View dialogLayout = inflater.inflate(R.layout.dialog_gps_permission, null);
-        CheckBox dontShowAgain = (CheckBox) dialogLayout.findViewById(R.id.skip);
+        final LayoutInflater inflater = LayoutInflater.from(this);
+        final View dialogLayout = inflater.inflate(R.layout.dialog_gps_permission, null);
+        final CheckBox dontShowAgain = (CheckBox) dialogLayout.findViewById(R.id.skip);
         final AlertDialog.Builder builder = new AlertDialog.Builder(this);
         final String action = Settings.ACTION_LOCATION_SOURCE_SETTINGS;
         final String message = getResources().getString(R.string.gps_permission);
@@ -363,9 +367,15 @@ public class MainActivity extends AppCompatActivity {
                         new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                                dialog.cancel();
+                                dialog.dismiss();
                             }
-                        });
+                        })
+                .setOnDismissListener(new DialogInterface.OnDismissListener() {
+                    @Override
+                    public void onDismiss(DialogInterface dialog) {
+                        showLookbackDialog();
+                    }
+                });
         builder.create().show();
         dontShowAgain.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
@@ -373,6 +383,13 @@ public class MainActivity extends AppCompatActivity {
                 preferenceManager.setNeverAskGPSPermission(isChecked);
             }
         });
+    }
+
+    private void showLookbackDialog() {
+        if ("lookback".contentEquals(BuildConfig.FLAVOR) && mShouldShowLookbackDialog) {
+            mShouldShowLookbackDialog = false;
+            LookbackWrapper.show(this, preferenceManager.getSessionId());
+        }
     }
 
     @Override

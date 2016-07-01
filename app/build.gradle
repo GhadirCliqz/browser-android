@@ -61,6 +61,11 @@ android {
                     '../external/extension/build',
             ]
         }
+        lookback {
+            java.srcDirs += [
+                    'src/standard/java',
+            ]
+    }
     }
     productFlavors {
         standard {
@@ -69,10 +74,15 @@ android {
         }
         xwalk {
             versionCode baseVersionCode
-            versionName baseVersionName+"xw"
+            versionName baseVersionName+"_xw"
             minSdkVersion 16
         }
+        lookback {
+            targetSdkVersion 21
+            versionCode baseVersionCode+1
+            versionName baseVersionName+"_lb"
     }
+}
 }
 
 dexcount {
@@ -81,6 +91,12 @@ dexcount {
     printAsTree = true
     orderByMethodCount = true
     verbose = false
+}
+
+repositories {
+    flatDir {
+        dirs 'aars'
+    }
 }
 
 dependencies {
@@ -102,7 +118,7 @@ dependencies {
     // view binding
     compile 'com.jakewharton:butterknife:7.0.1'
     // proxy support
-    compile 'net.i2p.android:client:0.7'
+    compile 'net.i2p.android:client:0.9'
     compile 'info.guardianproject.netcipher:netcipher:1.2.+'
     // memory leak analysis
     debugCompile 'com.squareup.leakcanary:leakcanary-android:1.4-beta2'
@@ -130,4 +146,9 @@ dependencies {
 
     // Facebook SDK
     compile 'com.facebook.android:facebook-android-sdk:4.+'
+
+    // Loopback.io
+    lookbackCompile(name:'lookback-android-sdk-0.9.13', ext:'aar')
+    lookbackCompile 'com.squareup.okhttp:okhttp:2.6.0'
+    lookbackCompile 'com.squareup.retrofit:retrofit:1.9.0'
 }

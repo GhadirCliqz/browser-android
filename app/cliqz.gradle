@@ -90,6 +90,7 @@ android {
         buildConfigField 'String', 'AMAZON_IDENTITY_POOL_ID', "\"${props['Browser.amazonIdentityPoolID']}\""
         buildConfigField 'String', 'AMAZON_UNAUTH_ROLE_ARN', "\"${props['Browser.amazonUnauthRoleARN']}\""
         buildConfigField 'String', 'AMAZON_AUTH_ROLE_ARN', "\"${props['Browser.amazonAuthRoleARN']}\""
+        buildConfigField 'String', 'LOOKBACK_SDK_TOKEN', "\"${props['Browser.lookbackSdkToken']}\""
     }
 
     signingConfigs {
