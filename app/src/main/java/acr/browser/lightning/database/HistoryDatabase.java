@@ -212,7 +212,7 @@ public class HistoryDatabase extends SQLiteOpenHelper {
                 item.addProperty(JsonKeys.TITLE, cursor.getString(titleIndex));
                 itemList.add(item);
                 counter++;
-            } while (cursor.moveToNext() && counter < 100);
+            } while (cursor.moveToNext() && counter < limit);
         }
         cursor.close();
         return itemList;

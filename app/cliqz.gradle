@@ -68,7 +68,7 @@ def compileAdHostsList(File outputDir) {
 
 afterEvaluate { project ->
     project.tasks.each { tazk ->
-        if (tazk.name =~ /merge.*[^(Test)]Assets/) {
+        if (tazk.name =~ /merge.*Assets/ && !tazk.name.endsWith('TestAssets')) {
             tazk << {
                 compileAdHostsList(tazk.outputDir)
             }
