@@ -18,13 +18,12 @@ import javax.inject.Inject;
 
 import acr.browser.lightning.activity.TabsManager;
 import acr.browser.lightning.constant.Constants;
-import acr.browser.lightning.view.ILightningTab;
 import acr.browser.lightning.view.LightningView;
 
 /**
  * Created by Ravjit on 12/10/15.
  */
-public class TabsManagerView extends BaseWebView implements ILightningTab {
+public class TabsManagerView extends BaseWebView {
 
     private static final String TAG = TabsManagerView.class.getSimpleName();
     private static final String KEY_ID = "id";

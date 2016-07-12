@@ -75,16 +75,20 @@ public class ProxyTests {
 
     @Before
     public void before() {
-        final PreferenceManager preferenceManager =
-                BrowserApp.getAppComponent().getPreferenceManager();
-        preferenceManager.setProxyChoice(Constants.NO_PROXY);
+        resetProxySettings();
     }
 
     @After
     public void after() {
+        resetProxySettings();
+    }
+
+    private void resetProxySettings() {
         final PreferenceManager preferenceManager =
                 BrowserApp.getAppComponent().getPreferenceManager();
         preferenceManager.setProxyChoice(Constants.NO_PROXY);
+        preferenceManager.setProxyHost("localhost");
+        preferenceManager.setProxyPort(8118);
     }
 
     @Test
