@@ -310,7 +310,7 @@ public class PreferenceManager {
     }
 
     public int getVersionCode() {
-        return mPrefs.getInt(Name.VERSION_CODE, 1);
+        return mPrefs.getInt(Name.VERSION_CODE, 0);
     }
 
     public long getTimeOfLastEnvSignal() {

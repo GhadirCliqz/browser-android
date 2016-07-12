@@ -72,6 +72,7 @@ import acr.browser.lightning.bus.BrowserEvents;
 import acr.browser.lightning.constant.Constants;
 import acr.browser.lightning.database.HistoryDatabase;
 import acr.browser.lightning.preference.PreferenceManager;
+import acr.browser.lightning.utils.ProxyUtils;
 import acr.browser.lightning.utils.Utils;
 import acr.browser.lightning.utils.WebUtils;
 
@@ -137,6 +138,9 @@ public class MainActivity extends AppCompatActivity {
 
     @Inject
     GCMRegistrationBroadcastReceiver gcmReceiver;
+
+    @Inject
+    ProxyUtils proxyUtils;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -204,26 +208,34 @@ public class MainActivity extends AppCompatActivity {
 
         // File used to override the onboarding during UIAutomation tests
         final File onBoardingOverrideFile = new File(Constants.ONBOARDING_OVERRIDE_FILE);
-        final boolean shouldOverrideOnBoarding =
+        final boolean hasAProperOverrideOnBoardingFile =
                 onBoardingOverrideFile.exists() &&
                 onBoardingOverrideFile.length() > 0;
-        if (preferenceManager.getOnBoardingComplete() || shouldOverrideOnBoarding) {
-            setupContentView();
-        } else {
-            preferenceManager.setSessionId(telemetry.generateSessionID());
-            preferenceManager.setVersionCode(BuildConfig.VERSION_CODE);
+        final boolean hasBeenLaunchedWithNoOnboarding = intent != null &&
+                intent.getBooleanExtra(Constants.KEY_DO_NOT_SHOW_ONBOARDING, false);
+        final boolean shouldShowOnboarding = !preferenceManager.getOnBoardingComplete() &&
+                !hasAProperOverrideOnBoardingFile && !hasBeenLaunchedWithNoOnboarding;
+        if (shouldShowOnboarding) {
             setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
             setContentView(R.layout.activity_on_boarding);
             onBoardingAdapter = new OnBoardingAdapter(getSupportFragmentManager(), telemetry);
             pager = (ViewPager) findViewById(R.id.viewpager);
             pager.setAdapter(onBoardingAdapter);
             pager.addOnPageChangeListener(onBoardingAdapter.onPageChangeListener);
+        } else {
+            setupContentView();
+        }
+
+        if (preferenceManager.getSessionId() == null) {
+            preferenceManager.setSessionId(telemetry.generateSessionID());
         }
 
         // Telemetry (were we updated?)
-        int currentVersionCode = BuildConfig.VERSION_CODE;
-        int previousVersionCode = preferenceManager.getVersionCode();
-        if(currentVersionCode > previousVersionCode) {
+        final int currentVersionCode = BuildConfig.VERSION_CODE;
+        final int previousVersionCode = preferenceManager.getVersionCode();
+        if (previousVersionCode == 0) {
+            preferenceManager.setVersionCode(BuildConfig.VERSION_CODE);
+        } else if(currentVersionCode > previousVersionCode) {
             preferenceManager.setVersionCode(currentVersionCode);
             telemetry.sendLifeCycleSignal(Telemetry.Action.UPDATE);
         }
@@ -304,6 +316,9 @@ public class MainActivity extends AppCompatActivity {
         } else {
             locationCache.stop();
         }
+
+        proxyUtils.updateProxySettings(this);
+
         //Asks for permission if GPS is not enabled on the device.
         // Note: Will ask for permission even if location is enabled, but not using GPS
         if(!locationCache.isGPSEnabled()
@@ -321,7 +336,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
-        if (intent.getAction().equals(Intent.ACTION_MAIN)) {
+        if (Intent.ACTION_MAIN.equals(intent.getAction())) {
             return;
         }
         final Bundle bundle = intent.getExtras();
