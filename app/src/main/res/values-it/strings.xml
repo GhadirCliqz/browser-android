@@ -264,8 +264,9 @@
     <string name="action_search_on_page">Cerca nella pagina</string>
     <string name="app_not_found">App non trovata</string>
     <string name="settings_block_ads">Blocca Pubblicità</string>
-    <string name="optimized_block_ads">Blocco Pubblicità Ottimizzato</string>
-    <string name="what_does_optimized_mean">Cosa significa \'optimizzato\'?</string>
+    <string name="optimized_block_ads">Consenti le pubblicità non inopportune</string>
+    <string name="what_does_optimized_mean">Cosa significa \'non inopportune\'?</string>
+    <string name="optimized_block_ads_description">La funzione anti-pubblicità di CLIQZ è ancora in fase Beta. La versione definitiva permetterà all’utente di scegliere fra le seguenti opzioni: consenti le pubblicità non inopportune, blocca tutta la pubblicità, consenti tutta la pubblicità.\nPer saperne di più: https://cliqz.com/whycliqz/adblocking</string>
     <string name="action_show_tab_manager">Tab Manager</string>
     <string name="make_video_available_offline">Rendi disponibile offline</string>
     <string name="dialog_youtube_video">Che cosa vorresti fare con questo video?</string>

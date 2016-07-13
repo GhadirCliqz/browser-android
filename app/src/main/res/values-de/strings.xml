@@ -259,8 +259,9 @@
     <string name="action_search_on_page">Auf Seite suchen</string>
     <string name="app_not_found">Keine passende App gefunden</string>
     <string name="settings_block_ads">Werbung blockieren</string>
-    <string name="optimized_block_ads">Optimiertes Blockieren</string>
-    <string name="what_does_optimized_mean">Was bedeutet \'optimiert\'?</string>
+    <string name="optimized_block_ads">Faires Blockieren</string>
+    <string name="what_does_optimized_mean">Was bedeutet \'Faires\'?</string>
+    <string name="optimized_block_ads_description">Der Werbeblocker von CLIQZ ist noch in der Entwicklung (Beta). Die Wahlmöglichkeiten der fertigen Version werden sein: Faire Werbung Zulassen (Voreinstellung), Jegliche Werbung Blockieren, Jegliche Werbung Akzeptieren.\nMehr https://cliqz.com/whycliqz/adblocking</string>
     <string name="action_show_tab_manager">Tab Manager</string>
     <string name="make_video_available_offline">Offline verfügbar machen</string>
     <string name="dialog_youtube_video">Was möchten Sie mit diesem Video tun?</string>

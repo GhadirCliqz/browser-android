@@ -5,6 +5,10 @@ import android.os.Bundle;
 import android.preference.CheckBoxPreference;
 import android.preference.Preference;
 import android.support.v7.app.AlertDialog;
+import android.text.SpannableString;
+import android.text.method.LinkMovementMethod;
+import android.text.util.Linkify;
+import android.widget.TextView;
 
 import com.cliqz.browser.R;
 
@@ -61,18 +65,23 @@ public class AdBlockSettings extends BaseSettingsFragment {
     @Override
     public boolean onPreferenceClick(Preference preference) {
         if (preference == mWhatDoesOptimizedMean) {
+            final SpannableString dialogMessage = new SpannableString(getString(R.string.optimized_block_ads_description));
+            Linkify.addLinks(dialogMessage, Linkify.ALL);
             final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
             builder
                     .setTitle(R.string.what_does_optimized_mean)
-                    .setMessage(R.string.optimized_block_ads_description)
+                    .setMessage(dialogMessage)
                     .setCancelable(true)
                     .setPositiveButton(R.string.action_ok, new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
                             dialog.dismiss();
                         }
-                    })
-                    .show();
+                    });
+            final AlertDialog dialog = builder.create();
+            dialog.show();
+            //To make the link clickable
+            ((TextView)dialog.findViewById(android.R.id.message)).setMovementMethod(LinkMovementMethod.getInstance());
         }
         return false;
     }
