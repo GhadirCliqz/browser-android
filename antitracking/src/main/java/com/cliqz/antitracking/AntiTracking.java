@@ -1,14 +1,14 @@
-package com.cliqz.browser.antitracking;
+package com.cliqz.antitracking;
 
 import android.content.Context;
+import android.net.Uri;
+import android.os.Debug;
 import android.util.Log;
 import android.util.Pair;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebResourceResponse;
 import android.webkit.WebView;
-import android.net.Uri;
 
-import com.cliqz.browser.utils.Telemetry;
 import com.eclipsesource.v8.JavaCallback;
 import com.eclipsesource.v8.JavaVoidCallback;
 import com.eclipsesource.v8.V8;
@@ -39,15 +39,13 @@ import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
-
 /**
  * Created by sammacbeth on 18/05/16.
  */
-@Singleton
-public class CliqzAntiTracking {
+public class AntiTracking {
 
+    private final static String TAG = AntiTracking.class.getSimpleName();
+    
     private boolean mEnabled;
 
     private final Map<Integer, Pair<Uri, WeakReference<WebView>>> tabs = new HashMap<>();
@@ -58,8 +56,7 @@ public class CliqzAntiTracking {
 
     final private Set<String> TELEMETRY_WHITELIST = new HashSet<>(Arrays.asList("attrack.tokens", "attrack.FP", "attrack.tp_events"));
 
-    @Inject
-    public CliqzAntiTracking(final Context context, final Telemetry telemetry) {
+    public AntiTracking(final Context context, final AntiTrackingSupport support) {
         // Create a v8 javascript, then load native bindings and polyfill, and the antitracking module
         v8 = new V8Engine(context);
         try {
@@ -81,13 +78,13 @@ public class CliqzAntiTracking {
                             try {
                                 JSONObject obj = new JSONObject(msg);
                                 if (TELEMETRY_WHITELIST.contains(obj.getString("action"))) {
-                                    Log.d("attrack", "Save message with action "+ obj.getString("action"));
-                                    telemetry.saveExtSignal(obj);
+                                    Log.d(TAG, "Save message with action "+ obj.getString("action"));
+                                    support.sendSignal(obj);
                                 } else {
-                                    Log.d("attrack", "Drop message with action "+ obj.getString("action"));
+                                    Log.d(TAG, "Drop message with action "+ obj.getString("action"));
                                 }
                             } catch (JSONException e) {
-                                Log.e("attrack", "sendTelemetry: bad JSON string");
+                                Log.e(TAG, "sendTelemetry: bad JSON string");
                             }
                         }
                     }, "sendTelemetry");
@@ -119,7 +116,7 @@ public class CliqzAntiTracking {
                         script = "var __CONFIG__ = JSON.parse(\"" + script.replace("\"", "\\\"").replace("\n", "") + "\");";
                         runtime.executeVoidScript(script);
                     } catch (IOException e) {
-                        Log.e("attrack", "Error loading config file",  e);
+                        Log.e(TAG, "Error loading config file",  e);
                     }
 
                     // import base libs
@@ -130,10 +127,10 @@ public class CliqzAntiTracking {
                     runtime.executeVoidScript("var Components = {};");
 
                     // pref config
-                    runtime.executeVoidScript("CliqzUtils.setPref(\"antiTrackTest\", true);");
-                    runtime.executeVoidScript("CliqzUtils.setPref(\"attrackForceBlock\", false);");
-                    runtime.executeVoidScript("CliqzUtils.setPref(\"attrackBloomFilter\", true);");
-                    runtime.executeVoidScript("CliqzUtils.setPref(\"attrackDefaultAction\", \"placeholder\");");
+                    setPref(runtime, "antiTrackTest", support.isAntiTrackTestEnabled());
+                    setPref(runtime, "attrackForceBlock", support.isForceBlockEnabled());
+                    setPref(runtime, "attrackBloomFilter", support.isBloomFilterEnabled());
+                    setPref(runtime, "attrackDefaultAction", support.getDefaultAction());
 
                     // startup
                     runtime.executeVoidScript("System.import(\"platform/startup\").then(function(startup) { startup.default() }).catch(function(e) { logDebug(e, \"xxx\"); });");
@@ -142,9 +139,24 @@ public class CliqzAntiTracking {
                     mWebRequest = runtime.executeObjectScript("System.get(\"platform/webrequest\").default");
                     return null;
                 }
+
+                private void setPref(V8 runtime, String preference, Object value) {
+                    final String valueAsString;
+                    if (value == null) {
+                        valueAsString = "null";
+                    } else if (String.class.isInstance(value)) {
+                        valueAsString = String.format("\"%s\"", value);
+                    } else {
+                        valueAsString = value.toString();
+                    }
+                    final String javascript = String.format("CliqzUtils.setPref(\"%s\", %s);",
+                            preference, valueAsString);
+                    runtime.executeVoidScript(javascript);
+                }
+
             });
         } catch(InterruptedException | ExecutionException e) {
-            Log.e("attrack", Log.getStackTraceString(e));
+            Log.e(TAG, Log.getStackTraceString(e));
         }
     }
 
@@ -230,16 +242,16 @@ public class CliqzAntiTracking {
                 }
             }, 200);
         } catch(InterruptedException | ExecutionException e) {
-            Log.e("attrack", Log.getStackTraceString(e));
+            Log.e(TAG, Log.getStackTraceString(e));
         } catch(TimeoutException e) {
-            Log.e("attrack", "Query timeout: "+ requestUrl.toString());
+            Log.e(TAG, "Query timeout: "+ requestUrl.toString());
             block = "{}";
         }
 
         try {
             JSONObject blockResponse = new JSONObject(block);
-            if (blockResponse.has("block") && blockResponse.getBoolean("block")) {
-                Log.d("attrack", "Block request: " + requestUrl.toString());
+            if (blockResponse.has("cancel") && blockResponse.getBoolean("cancel")) {
+                Log.d(TAG, "Block request: " + requestUrl.toString());
                 return blockRequest();
             } else if(blockResponse.has("redirectUrl") || blockResponse.has("requestHeaders")) {
                 String newUrl;
@@ -256,12 +268,12 @@ public class CliqzAntiTracking {
                         modifiedHeaders.put(header.getString("name"), header.getString("value"));
                     }
                 }
-                Log.d("attrack", "Modify request from: " + requestUrl.toString());
-                //Log.d("attrack", "                 to: " + newUrl);
+                Log.d(TAG, "Modify request from: " + requestUrl.toString());
+                //Log.d(TAG, "                 to: " + newUrl);
                 return modifyRequest(request, newUrl, modifiedHeaders);
             }
         } catch(JSONException e) {
-            Log.e("attrack", "Bad data from JS: " + block, e);
+            Log.e(TAG, "Bad data from JS: " + block, e);
         }
 
         return null;
@@ -288,7 +300,7 @@ public class CliqzAntiTracking {
             connection.setRequestMethod(request.getMethod());
 
 
-            Log.d("attrack", "Redirect to: "+ newUrlString);
+            Log.d(TAG, "Redirect to: "+ newUrlString);
             connection.connect();
             final WebResourceResponse response = new WebResourceResponse(connection.getContentType(), connection.getContentEncoding(), connection.getInputStream());
             response.setStatusCodeAndReasonPhrase(connection.getResponseCode(), connection.getResponseMessage());
@@ -302,10 +314,10 @@ public class CliqzAntiTracking {
             response.setResponseHeaders(responseHeaders);
             return response;
         } catch (MalformedURLException e) {
-            Log.e("attrack", "Bad redirect url: " + e.getMessage());
+            Log.e(TAG, "Bad redirect url: " + e.getMessage());
             return blockRequest();
         } catch (IllegalArgumentException | IOException e) {
-            Log.e("attrack", "Could not redirect: " + e.getMessage());
+            Log.e(TAG, "Could not redirect: " + e.getMessage());
             return blockRequest();
         }
     }

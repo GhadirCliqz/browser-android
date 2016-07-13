@@ -1,4 +1,4 @@
-package com.cliqz.browser.antitracking;
+package com.cliqz.antitracking;
 
 import android.content.Context;
 import android.net.ConnectivityManager;
@@ -47,9 +47,11 @@ import java.util.concurrent.TimeoutException;
  */
 class V8Engine {
 
+    private static final String TAG = V8Engine.class.getSimpleName();
+
     private V8 v8;
     private final BlockingQueue<FutureTask<?>> queries = new LinkedBlockingQueue<>();
-    private final android.content.Context context;
+    private final Context context;
     private static final String MODULE_ROOT = "v8/modules";
     private final Thread v8Thread;
 
@@ -57,7 +59,7 @@ class V8Engine {
     private final Map<Integer, Pair<V8Function, ScheduledFuture>> timers = new HashMap<>();
     private int mTimerCtr = 0;
 
-    V8Engine(final android.content.Context context) {
+    V8Engine(final Context context) {
         this.context = context.getApplicationContext();
 
         // create a thread which will run tasks on the javascript engine. All calls to V8 must be
@@ -65,7 +67,7 @@ class V8Engine {
         v8Thread = new Thread(new Runnable() {
             @Override
             public void run() {
-                Log.d("v8", "start runtime");
+                Log.d(TAG, "start runtime");
                 v8 = V8.createV8Runtime();
 
                 // Provide some core expected functions to the plain JS engine (e.g. setTimeout/setInterval)
@@ -84,7 +86,7 @@ class V8Engine {
                     @Override
                     public void invoke(V8Object v8Object, V8Array v8Array) {
                         String path = v8Array.get(0).toString();
-                        Log.d("v8", path);
+                        Log.d(TAG, path);
                         loadJavascriptSource(MODULE_ROOT + path);
                     }
                 }, "loadSubScript");
@@ -95,7 +97,7 @@ class V8Engine {
                     public void invoke(V8Object v8Object, V8Array v8Array) {
                         final String msg = v8Array.get(0).toString();
                         final String key = v8Array.get(1).toString();
-                        Log.d(key, msg);
+                        Log.d(TAG, msg);
                     }
                 }, "logDebug");
 
@@ -118,7 +120,7 @@ class V8Engine {
 
                             return hexString.toString();
                         } catch (NoSuchAlgorithmException e) {
-                            Log.e("v8", "no md5", e);
+                            Log.e(TAG, "no md5", e);
                         }
                         return "";
                     }
@@ -130,7 +132,7 @@ class V8Engine {
                         FutureTask<?> task = queries.take();
                         task.run();
                     } catch (InterruptedException e) {
-                        Log.e("v8", "Task timeout", e);
+                        Log.e(TAG, "Task timeout", e);
                     }
                 }
 
@@ -160,7 +162,7 @@ class V8Engine {
      */
     protected void loadJavascriptSource(String assetPath) {
         InputStream stream = null;
-        Log.d("v8", "Load script " + assetPath);
+        Log.d(TAG, "Load script " + assetPath);
         try {
             stream = context.getAssets().open(assetPath);
             BufferedReader srcReader = new BufferedReader(new InputStreamReader(stream));
@@ -171,7 +173,7 @@ class V8Engine {
             }
             v8.executeScript(script, assetPath, 0);
         } catch (IOException e) {
-            Log.e("attrack", Log.getStackTraceString(e));
+            Log.e(TAG, Log.getStackTraceString(e));
         } finally {
             try {
                 if (stream != null) {
@@ -271,7 +273,7 @@ class V8Engine {
                         }
                     });
                 } catch (InterruptedException | ExecutionException | TimeoutException e) {
-                    Log.e("attrack", Log.getStackTraceString(e));
+                    Log.e(TAG, Log.getStackTraceString(e));
                 }
             }
         }, timeoutMsec, TimeUnit.MILLISECONDS);
@@ -299,7 +301,7 @@ class V8Engine {
                         }
                     });
                 } catch (InterruptedException | ExecutionException | TimeoutException e) {
-                    Log.e("attrack", Log.getStackTraceString(e));
+                    Log.e(TAG, Log.getStackTraceString(e));
                 }
             }
         }, interval, interval, TimeUnit.MILLISECONDS);
@@ -347,13 +349,13 @@ class V8Engine {
     public boolean httpHandler(final String method, final String requestedUrl, final V8Function callback, V8Function onerror, final Integer timeout, final String data) {
         final V8Function successCallback = (V8Function) callback.twin();
         final V8Function errorCallback = (V8Function) onerror.twin();
-        Log.d("v8", "httpHandler " + requestedUrl);
+        Log.d(TAG, "httpHandler " + requestedUrl);
 
         // do http request in deferred thread
         deferredFnExecutor.schedule(new Runnable() {
             @Override
             public void run() {
-                Log.d("v8", "fetch " + requestedUrl);
+                Log.d(TAG, "fetch " + requestedUrl);
 
                 // make http request
                 final StringBuilder responseData = new StringBuilder();
@@ -374,7 +376,7 @@ class V8Engine {
                             }
                         }
                     } catch (IOException e) {
-                        Log.e("http", Log.getStackTraceString(e));
+                        Log.e(TAG, Log.getStackTraceString(e));
                         error = true;
                     }
                 } else {
@@ -382,7 +384,7 @@ class V8Engine {
                     NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
                     if (activeNetwork == null || !activeNetwork.isConnectedOrConnecting() || activeNetwork.getType() != ConnectivityManager.TYPE_WIFI) {
                         // drop requests when not on wifi
-                        Log.d("v8", "httpHandler: not on Wifi connection");
+                        Log.d(TAG, "httpHandler: not on Wifi connection");
                         error = true;
                     } else {
                         HttpURLConnection httpURLConnection = null;
@@ -420,7 +422,7 @@ class V8Engine {
                             responseCode = httpURLConnection.getResponseCode();
 
                         } catch (IOException e) {
-                            Log.e("http", Log.getStackTraceString(e));
+                            Log.e(TAG, Log.getStackTraceString(e));
                             error = true;
                         }
                     }
@@ -454,7 +456,7 @@ class V8Engine {
                         }
                     });
                 } catch (ExecutionException | InterruptedException | TimeoutException e) {
-                    Log.e("http", Log.getStackTraceString(e));
+                    Log.e(TAG, Log.getStackTraceString(e));
                 }
 
 
@@ -471,7 +473,7 @@ class V8Engine {
      */
     public void readTempFile(final String path, final V8Function callback) {
         File f = new File(context.getCacheDir(), path);
-        Log.d("fs", "Read " + f.getPath());
+        Log.d(TAG, "Read " + f.getPath());
         FileInputStream inputStream;
         StringBuilder fileData = new StringBuilder();
         V8Array respArgs = new V8Array(v8);
@@ -489,7 +491,7 @@ class V8Engine {
                 }
                 inputStream.close();
             } catch (IOException e) {
-                Log.e("fs", Log.getStackTraceString(e));
+                Log.e(TAG, Log.getStackTraceString(e));
             }
             callback.call(callback, respArgs.push(fileData.toString()));
         } else {
@@ -506,7 +508,7 @@ class V8Engine {
      */
     public void writeTempFile(final String path, final String data) {
         File f = new File(context.getCacheDir(), path);
-        Log.d("fs", "Write " + f.getPath());
+        Log.d(TAG, "Write " + f.getPath());
         FileOutputStream outputStream;
 
         try {
@@ -517,7 +519,7 @@ class V8Engine {
             outputStream.write(data.getBytes());
             outputStream.close();
         } catch (IOException e) {
-            Log.e("fs", Log.getStackTraceString(e));
+            Log.e(TAG, Log.getStackTraceString(e));
         }
     }
 
@@ -551,12 +553,12 @@ class V8Engine {
                 }
             }
             fin.close();
-            Log.d("fs", "Read: " + path + ", " + fileData.length() + "b");
+            Log.d(TAG, "Read: " + path + ", " + fileData.length() + "b");
             callback.call(callback, respArgs.push(fileData.toString()));
         } catch (FileNotFoundException e) {
             callback.call(callback, respArgs);
         } catch (IOException e) {
-            Log.e("fs", Log.getStackTraceString(e));
+            Log.e(TAG, Log.getStackTraceString(e));
             callback.call(callback, respArgs);
         } finally {
             respArgs.release();
@@ -570,13 +572,13 @@ class V8Engine {
      * @param data String data to file to file.
      */
     public void writeFile(final String path, final String data) {
-        Log.d("fs", "Write: " + path + ", " + data.length() + "b");
+        Log.d(TAG, "Write: " + path + ", " + data.length() + "b");
         try {
             FileOutputStream fos = context.openFileOutput(path, Context.MODE_PRIVATE);
             fos.write(data.getBytes());
             fos.close();
         } catch (IOException e) {
-            Log.e("fs", Log.getStackTraceString(e));
+            Log.e(TAG, Log.getStackTraceString(e));
         }
     }
 }

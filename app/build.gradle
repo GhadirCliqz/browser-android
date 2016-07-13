@@ -27,7 +27,7 @@ android {
                 include 'armeabi-v7a', 'x86'
                 universalApk true
             }
-        }
+    }
     }
     buildTypes {
         debug {
@@ -121,6 +121,9 @@ dependencies {
     // proxy support
     compile 'net.i2p.android:client:0.9'
     compile 'info.guardianproject.netcipher:netcipher:1.2.+'
+    // Anti-tracking
+    standardCompile project(':antitracking')
+    lookbackCompile project(':antitracking')
     // memory leak analysis
     debugCompile 'com.squareup.leakcanary:leakcanary-android:1.4-beta2'
     releaseCompile 'com.squareup.leakcanary:leakcanary-android-no-op:1.4-beta2'
@@ -128,9 +131,6 @@ dependencies {
     provided 'javax.annotation:jsr250-api:1.0'
     // Google Play Services
     compile "com.google.android.gms:play-services-gcm:8.3.0"
-
-    // Embedded V8 engine
-    standardCompile "com.eclipsesource.j2v8:j2v8:4.1.0@aar"
 
     // xwalk webview
     xwalkCompile 'org.xwalk:xwalk_core_library:14.43.343.25'

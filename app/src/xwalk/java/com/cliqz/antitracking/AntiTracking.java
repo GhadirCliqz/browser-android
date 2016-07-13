@@ -1,4 +1,4 @@
-package com.cliqz.browser.antitracking;
+package com.cliqz.antitracking;
 
 import android.annotation.TargetApi;
 import android.content.Context;
@@ -18,15 +18,14 @@ import acr.browser.lightning.utils.AdBlock;
 /**
  * Created by sammacbeth on 22/06/16.
  */
-@Singleton
-public class CliqzAntiTracking {
+public class AntiTracking {
 
     private boolean mEnabled = false;
 
     private final AdBlock adBlock;
 
     @Inject
-    public CliqzAntiTracking(final Context context) {
+    public AntiTracking(final Context context, final Object unused) {
         adBlock = new AdBlock(context);
     }
 

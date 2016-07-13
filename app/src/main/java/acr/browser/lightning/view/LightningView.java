@@ -36,7 +36,7 @@ import com.cliqz.browser.antiphishing.AntiPhishing;
 import com.cliqz.browser.main.MainActivity;
 import com.cliqz.browser.utils.PasswordManager;
 import com.cliqz.browser.utils.Telemetry;
-import com.cliqz.browser.antitracking.CliqzAntiTracking;
+import com.cliqz.antitracking.AntiTracking;
 import com.squareup.otto.Bus;
 
 import java.io.File;
@@ -112,7 +112,7 @@ public class LightningView {
     LightningDialogBuilder bookmarksDialogBuilder;
 
     @Inject
-    CliqzAntiTracking attrack;
+    AntiTracking attrack;
 
     @Inject
     HistoryDatabase historyDatabase;
