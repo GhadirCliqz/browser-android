@@ -96,7 +96,7 @@ class YoutubeDownloadDialog {
             final String url = obj.optString("url", "");
             if (!url.isEmpty()) {
                 Utils.downloadFile(activity, url,
-                        Constants.DESKTOP_USER_AGENT, "attachment");
+                        Constants.DESKTOP_USER_AGENT, "attachment", true);
             }
         }
     }

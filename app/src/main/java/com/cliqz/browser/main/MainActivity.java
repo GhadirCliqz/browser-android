@@ -63,6 +63,7 @@ import com.squareup.otto.Subscribe;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -117,6 +118,7 @@ public class MainActivity extends AppCompatActivity {
     protected String currentMode;
     private boolean mIsColdStart = true;
     private boolean mShouldShowLookbackDialog = true;
+    private final HashSet<Long> downloadIds = new HashSet<>();
 
     @Inject
     Bus bus;
@@ -611,6 +613,11 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Subscribe
+    public void saveDownloadId(Messages.SaveId event) {
+        downloadIds.add(event.downloadId);
+    }
+
+    @Subscribe
     public void exit(Messages.Exit event) {
         deleteTab(getCurrentTabPosition());
     }
@@ -773,6 +780,10 @@ public class MainActivity extends AppCompatActivity {
     private final BroadcastReceiver onComplete = new BroadcastReceiver() {
         public void onReceive(Context ctxt, final Intent intent) {
             final long downloadId = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1L);
+            final boolean isYouTubeVideo = downloadIds.contains(downloadId);
+            if (isYouTubeVideo) {
+                downloadIds.remove(downloadId);
+            }
             final DownloadManager downloadManager = (DownloadManager)
                     getSystemService(Context.DOWNLOAD_SERVICE);
             final DownloadManager.Query query = new DownloadManager.Query();
@@ -783,18 +794,26 @@ public class MainActivity extends AppCompatActivity {
             final int mediaTypeIndex = cursor.getColumnIndex(DownloadManager.COLUMN_MEDIA_TYPE);
             if (cursor.moveToFirst()) {
                 if (cursor.getInt(statusIndex) == DownloadManager.STATUS_SUCCESSFUL) {
+                    if (isYouTubeVideo) {
+                        telemetry.sendVideoDownloadedSignal(true);
+                    }
                     final View.OnClickListener onClickListener = new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
                             final Intent intent = new Intent();
                             intent.setAction(Intent.ACTION_VIEW);
-                            intent.setDataAndType(Uri.parse(cursor.getString(localUriIndex)), cursor.getString(mediaTypeIndex));
+                            intent.setDataAndType(Uri.parse(cursor.getString(localUriIndex)),
+                                    cursor.getString(mediaTypeIndex));
                             startActivity(intent);
                         }
                     };
-                    Utils.showSnackbar(MainActivity.this, "Download Successful", getString(R.string.action_open), onClickListener);
+                    Utils.showSnackbar(MainActivity.this, getString(R.string.download_successful),
+                            getString(R.string.action_open), onClickListener);
                 } else if (cursor.getInt(statusIndex) == DownloadManager.STATUS_FAILED) {
-                    Utils.showSnackbar(MainActivity.this, "Download Failed");
+                    if (isYouTubeVideo) {
+                        telemetry.sendVideoDownloadedSignal(false);
+                    }
+                    Utils.showSnackbar(MainActivity.this, getString(R.string.download_failed));
                 }
             }
         }

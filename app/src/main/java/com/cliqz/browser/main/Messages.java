@@ -96,23 +96,48 @@ public final class Messages {
 
     public static class AdjustResize {}
 
-    public static class DownloadYoutubeVideo {
+    public static class FetchYoutubeVideoUrls {
         public final JSONArray urls;
         public final String videoPageUrl;
+        //public final boolean instantDownload;
 
-        public DownloadYoutubeVideo() {
+        public FetchYoutubeVideoUrls() {
             this. urls = null;
             this.videoPageUrl = null;
         }
 
-        public DownloadYoutubeVideo(JSONArray urls) {
+        public FetchYoutubeVideoUrls(JSONArray urls) {
             this.urls = urls;
             this.videoPageUrl = null;
         }
 
-        public DownloadYoutubeVideo(String url) {
+        public FetchYoutubeVideoUrls(String url) {
             this.urls = null;
             this.videoPageUrl = url;
+        }
+    }
+
+    public static class SetVideoUrls {
+        public final JSONArray urls;
+
+        public SetVideoUrls(JSONArray urls) {
+            this.urls = urls;
+        }
+    }
+
+    public static class DownloadYoutubeVideo {
+        public final String targetType;
+
+        public DownloadYoutubeVideo(String targetType) {
+            this.targetType = targetType;
+        }
+    }
+
+    public static class SaveId {
+        public final long downloadId;
+
+        public SaveId(long downloadId) {
+            this.downloadId = downloadId;
         }
     }
 }
