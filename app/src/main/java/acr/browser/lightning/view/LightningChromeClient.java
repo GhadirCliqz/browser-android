@@ -40,8 +40,8 @@ class LightningChromeClient extends WebChromeClient {
 
     private static final String[] PERMISSIONS = new String[]{Manifest.permission.ACCESS_FINE_LOCATION};
 
-    private final Activity mActivity;
-    private final LightningView mLightningView;
+    private final Activity activity;
+    private final LightningView lightningView;
     private final Bus eventBus;
 
     // These fields are used to avoid multiple history point creation when we receive multiple
@@ -49,21 +49,21 @@ class LightningChromeClient extends WebChromeClient {
     private String mLastUrl = null;
 
     LightningChromeClient(Activity activity, LightningView lightningView) {
-        mActivity = activity;
-        mLightningView = lightningView;
-        eventBus = lightningView.mEventBus;
+        this.activity = activity;
+        this.lightningView = lightningView;
+        eventBus = lightningView.eventBus;
     }
 
     @Override
     public void onProgressChanged(WebView view, int newProgress) {
-        if (mLightningView.isShown()) {
+        if (lightningView.isShown()) {
             eventBus.post(new BrowserEvents.UpdateProgress(newProgress));
         }
     }
 
     @Override
     public void onReceivedIcon(WebView view, Bitmap icon) {
-        mLightningView.mTitle.setFavicon(icon);
+        lightningView.mTitle.setFavicon(icon);
         eventBus.post(new BrowserEvents.TabsChanged());
         cacheFavicon(view.getUrl(), icon);
     }
@@ -105,45 +105,45 @@ class LightningChromeClient extends WebChromeClient {
         final String url = view != null ? view.getUrl() : null;
         if (title != null && !title.isEmpty() &&
                 !TrampolineConstants.CLIQZ_TRAMPOLINE_GOTO.equals(url)) {
-            mLightningView.mTitle.setTitle(title);
+            lightningView.mTitle.setTitle(title);
             eventBus.post(new Messages.UpdateTitle());
         }
         eventBus.post(new BrowserEvents.TabsChanged());
         if (url != null
                 && !url.startsWith("cliqz://")
-                && !mLightningView.mIsIncognitoTab
+                && !lightningView.mIsIncognitoTab
                 && !url.equals(mLastUrl)) {
-            mLightningView.addItemToHistory(title, url);
+            lightningView.addItemToHistory(title, url);
             mLastUrl = url;
         }
-        mLightningView.isHistoryItemCreationEnabled = true;
+        lightningView.isHistoryItemCreationEnabled = true;
     }
 
     @Override
     public void onGeolocationPermissionsShowPrompt(final String origin,
                                                    final GeolocationPermissions.Callback callback) {
-        PermissionsManager.getInstance().requestPermissionsIfNecessaryForResult(mActivity, PERMISSIONS, new PermissionsResultAction() {
+        PermissionsManager.getInstance().requestPermissionsIfNecessaryForResult(activity, PERMISSIONS, new PermissionsResultAction() {
             @Override
             public void onGranted() {
                 final boolean remember = true;
-                AlertDialog.Builder builder = new AlertDialog.Builder(mActivity);
-                builder.setTitle(mActivity.getString(R.string.location));
+                AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+                builder.setTitle(activity.getString(R.string.location));
                 String org;
                 if (origin.length() > 50) {
                     org = origin.subSequence(0, 50) + "...";
                 } else {
                     org = origin;
                 }
-                builder.setMessage(org + mActivity.getString(R.string.message_location))
+                builder.setMessage(org + activity.getString(R.string.message_location))
                         .setCancelable(true)
-                        .setPositiveButton(mActivity.getString(R.string.action_allow),
+                        .setPositiveButton(activity.getString(R.string.action_allow),
                                 new DialogInterface.OnClickListener() {
                                     @Override
                                     public void onClick(DialogInterface dialog, int id) {
                                         callback.invoke(origin, true, remember);
                                     }
                                 })
-                        .setNegativeButton(mActivity.getString(R.string.action_dont_allow),
+                        .setNegativeButton(activity.getString(R.string.action_dont_allow),
                                 new DialogInterface.OnClickListener() {
                                     @Override
                                     public void onClick(DialogInterface dialog, int id) {
@@ -170,7 +170,7 @@ class LightningChromeClient extends WebChromeClient {
 
     @Override
     public void onCloseWindow(WebView window) {
-        eventBus.post(new BrowserEvents.CloseWindow(mLightningView));
+        eventBus.post(new BrowserEvents.CloseWindow(lightningView));
     }
 
     @SuppressWarnings("unused")
@@ -202,10 +202,10 @@ class LightningChromeClient extends WebChromeClient {
      */
     @Override
     public Bitmap getDefaultVideoPoster() {
-        if (mActivity == null) {
+        if (activity == null) {
             return null;
         }
-        final Resources resources = mActivity.getResources();
+        final Resources resources = activity.getResources();
         return BitmapFactory.decodeResource(resources, android.R.drawable.spinner_background);
     }
 
@@ -218,7 +218,7 @@ class LightningChromeClient extends WebChromeClient {
      */
     @Override
     public View getVideoLoadingProgressView() {
-        LayoutInflater inflater = LayoutInflater.from(mActivity);
+        LayoutInflater inflater = LayoutInflater.from(activity);
         return inflater.inflate(R.layout.video_loading_progress, null);
     }
 

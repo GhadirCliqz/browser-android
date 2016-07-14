@@ -284,4 +284,8 @@
     <string name="optimized_block_ads_description">The CLIQZ Ad Blocker is in beta at the moment. The final version will provide the following options: Allow Fair Ads (default setting), Block All Ads, Allow All Ads.\nMore https://cliqz.com/whycliqz/adblocking</string>
     <string name="make_video_available_offline">Make available offline</string>
     <string name="dialog_youtube_video">What would you like to do with this video?</string>
+    <string name="antiphishing_dialog_title">Antiphishing Title</string>
+    <string name="antiphishing_message">Antiphishing Message</string>
+    <string name="antiphishing_walk_away">Walk Away</string>
+    <string name="antiphishing_ignore_danger">Ignore and continue</string>
 </resources>

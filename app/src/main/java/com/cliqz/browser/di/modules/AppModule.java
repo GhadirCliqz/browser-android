@@ -2,6 +2,7 @@ package com.cliqz.browser.di.modules;
 
 import android.content.Context;
 
+import com.cliqz.browser.antiphishing.AntiPhishing;
 import com.cliqz.browser.app.BrowserApp;
 import com.cliqz.browser.gcm.AwsSNSManager;
 import com.cliqz.browser.utils.PasswordManager;
@@ -93,4 +94,9 @@ public class AppModule {
         return new AwsSNSManager(preferenceManager, context);
     }
 
+    @Provides
+    @Singleton
+    public AntiPhishing provideAntiPhishing() {
+        return new AntiPhishing();
+    }
 }
