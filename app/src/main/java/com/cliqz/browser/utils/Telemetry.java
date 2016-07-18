@@ -36,7 +36,7 @@ import acr.browser.lightning.preference.PreferenceManager;
  * Created by Ravjit on 17/11/15.
  */
 public class Telemetry {
-    
+
     private static class Key {
 
         private static final String ALPHA_NUMERIC_SPACE = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
@@ -110,6 +110,12 @@ public class Telemetry {
         private static final String PRIVATE = "private";
         private static final String DISTRIBUTION = "distribution";
         private static final String ADVERT_ID = "advert_id";
+        private static final String VIDEO_DOWNLOADER = "video_downloader";
+        private static final String IS_DOWNLOADABLE = "is_downloadable";
+        private static final String DOWNLOAD_PAGE = "download_page";
+        private static final String DOWNLOAD_LINK = "download_link";
+        private static final String IS_SUCCESS = "is_success";
+
     }
 
     public static class Action {
@@ -139,6 +145,8 @@ public class Telemetry {
         public static final String NEW_TAB = "new_tab";
         public static final String OPEN_TAB = "open_tab";
         public static final String CLOSE_TAB = "close_tab";
+        public static final String DOWNLOAD = "download";
+        public static final String PAGE_LOAD = "page_load";
     }
 
     private static final int BATCH_SIZE = 50;
@@ -644,6 +652,43 @@ public class Telemetry {
         } catch (JSONException e) {
             e.printStackTrace();
         }
+        saveSignal(signal, false);
+    }
+
+    public void sendVideoPageSignal(boolean isDownloadable) {
+        JSONObject signal = new JSONObject();
+        try {
+            signal.put(Key.TYPE, Key.VIDEO_DOWNLOADER);
+            signal.put(Key.ACTION, Action.PAGE_LOAD);
+            signal.put(Key.IS_DOWNLOADABLE, isDownloadable);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        saveSignal(signal, false);
+    }
+
+    public void sendVideoDownloadSignal(String targetType) {
+        JSONObject signal = new JSONObject();
+        try {
+            signal.put(Key.TYPE, Key.VIDEO_DOWNLOADER);
+            signal.put(Key.ACTION, Action.CLICK);
+            signal.put(Key.TARGET_TYPE, targetType);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        saveSignal(signal, false);
+    }
+
+    public void sendVideoDownloadedSignal(boolean success) {
+        JSONObject signal = new JSONObject();
+        try {
+            signal.put(Key.TYPE, Key.VIDEO_DOWNLOADER);
+            signal.put(Key.ACTION, Action.DOWNLOAD);
+            signal.put(Key.IS_SUCCESS, success);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        saveSignal(signal, false);
     }
 
     /**

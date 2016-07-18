@@ -258,12 +258,7 @@ public class LightningDialogBuilder {
                         eventBus.post(new BrowserEvents.OpenUrlInCurrentTab(url));
                         break;
                     case DialogInterface.BUTTON_NEUTRAL:
-                        if (isYoutubeVideo) {
-                            eventBus.post(new Messages.DownloadYoutubeVideo(url));
-                        } else {
-                            Utils.downloadFile(activity, url,
-                                    userAgent, "attachment");
-                        }
+                        Utils.downloadFile(activity, url, userAgent, "attachment", false);
                         break;
                 }
             }
@@ -275,9 +270,7 @@ public class LightningDialogBuilder {
                 .setMessage(isYoutubeVideo ? R.string.dialog_youtube_video : R.string.dialog_image)
                 .setPositiveButton(R.string.action_new_tab, dialogClickListener)
                 .setNegativeButton(R.string.action_open, dialogClickListener)
-                .setNeutralButton(isYoutubeVideo ?
-                        R.string.make_video_available_offline : R.string.action_download,
-                        dialogClickListener)
+                .setNeutralButton(R.string.action_download, dialogClickListener)
                 .show();
     }
 
@@ -287,8 +280,7 @@ public class LightningDialogBuilder {
                 activity.getString(R.string.action_copy),
                 activity.getString(R.string.open_in_new_tab),
                 activity.getString(R.string.open_in_incognito_tab),
-                isYoutubeVideo ? activity.getString(R.string.make_video_available_offline)
-                        :activity.getString(R.string.save_link)
+                activity.getString(R.string.save_link)
         };
         final AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(activity);
         dialogBuilder.setTitle(url)
@@ -309,11 +301,7 @@ public class LightningDialogBuilder {
                                 eventBus.post(new BrowserEvents.OpenUrlInNewTab(url, true));
                                 break;
                             case 3:
-                                if (isYoutubeVideo) {
-                                    eventBus.post(new Messages.DownloadYoutubeVideo(url));
-                                } else {
-                                    Utils.downloadFile(activity, url, userAgent, "attachment");
-                                }
+                                Utils.downloadFile(activity, url, userAgent, "attachment", false);
                                 break;
                         }
                     }

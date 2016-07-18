@@ -453,7 +453,7 @@ public class OverFlowMenu extends FrameLayout {
                     bus.post(new Messages.SaveLink());
                     break;
                 case DOWNLOAD_YOUTUBE_VIDEO:
-                    bus.post(new Messages.DownloadYoutubeVideo());
+                    bus.post(new Messages.DownloadYoutubeVideo("download_page"));
                     break;
                 default:
                     break;

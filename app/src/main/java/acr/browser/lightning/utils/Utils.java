@@ -52,14 +52,14 @@ import acr.browser.lightning.download.DownloadHandler;
 public final class Utils {
 
     public static void downloadFile(final Activity activity, final String url,
-                                    final String userAgent, final String contentDisposition) {
+                                    final String userAgent, final String contentDisposition, final boolean isYouTubeVideo) {
         PermissionsManager.getInstance().requestPermissionsIfNecessaryForResult(activity, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE,
                 Manifest.permission.WRITE_EXTERNAL_STORAGE}, new PermissionsResultAction() {
             @Override
             public void onGranted() {
                 String fileName = URLUtil.guessFileName(url, null, null);
-                DownloadHandler.onDownloadStart(activity, url, userAgent, contentDisposition, null
-                );
+                DownloadHandler.onDownloadStart(activity, url, userAgent, contentDisposition, null,
+                        isYouTubeVideo);
                 Log.i(Constants.TAG, "Downloading" + fileName);
             }
 

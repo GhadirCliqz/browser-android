@@ -47,6 +47,8 @@ import com.cliqz.browser.widget.OverFlowMenu;
 import com.cliqz.browser.widget.SearchBar;
 import com.squareup.otto.Subscribe;
 
+import org.json.JSONArray;
+
 import java.util.ArrayList;
 import java.util.Locale;
 
@@ -87,6 +89,7 @@ public class TabFragment extends BaseFragment {
     private String mExternalQuery = null;
     protected final CliqzBrowserState state = new CliqzBrowserState();
     protected boolean isHomePageShown = false;
+    private JSONArray videoUrls = null;
 
     String lastQuery = "";
 
@@ -353,7 +356,7 @@ public class TabFragment extends BaseFragment {
             mOverFlowMenu.setAnchorView(overflowMenuButton);
             mOverFlowMenu.setIncognitoMode(isIncognito);
             mOverFlowMenu.setUrl(mLightningView.getUrl());
-            mOverFlowMenu.setIsYoutubeVideo(UrlUtils.isYoutubeVideo(url));
+            mOverFlowMenu.setIsYoutubeVideo(videoUrls != null && videoUrls.length() > 0);
             mOverFlowMenu.setState(state);
             mOverFlowMenu.show();
             hideKeyboard();
@@ -684,7 +687,7 @@ public class TabFragment extends BaseFragment {
     @Subscribe
     public void saveLink(Messages.SaveLink event) {
         Utils.downloadFile(getActivity(), mLightningView.getUrl(),
-                mLightningView.getWebView().getSettings().getUserAgentString(), "attachment");
+                mLightningView.getWebView().getSettings().getUserAgentString(), "attachment", false);
     }
 
     @Subscribe
@@ -767,17 +770,34 @@ public class TabFragment extends BaseFragment {
     }
 
     @Subscribe
-    public void downloadYoutubeVideo(Messages.DownloadYoutubeVideo event) {
-        // Two cases, the first: we have already urls
-        if (event.urls != null) {
-            YoutubeDownloadDialog.show(getActivity(), event.urls);
+    public void setYoutubeUrls(Messages.SetVideoUrls event) {
+        videoUrls = event.urls;
+        if (videoUrls == null) {
+            return;
+        }
+        if (videoUrls.length() == 0) {
+            telemetry.sendVideoPageSignal(false);
         } else {
-            // To fetch the videos url we have to run the ytdownloader.getUrls script that is bundled
-            // with the extension
-            final String url =
-                    event.videoPageUrl != null ? event.videoPageUrl : mLightningView.getUrl();
-            final String script = String.format(Locale.US, "ytdownloader.getUrls('%s');", url);
-            mSearchWebView.evaluateJavascript(script, null);
+            telemetry.sendVideoPageSignal(true);
+        }
+    }
+
+    @Subscribe
+    public void fetchYoutubeVideo(Messages.FetchYoutubeVideoUrls event) {
+        videoUrls = null;
+        // To fetch the videos url we have to run the ytdownloader.getUrls script that is bundled
+        // with the extension
+        final String url =
+                event.videoPageUrl != null ? event.videoPageUrl : mLightningView.getUrl();
+        final String script = String.format(Locale.US, "ytdownloader.getUrls('%s');", url);
+        mSearchWebView.evaluateJavascript(script, null);
+    }
+
+    @Subscribe
+    public void downloadYoutubeVideo(Messages.DownloadYoutubeVideo event) {
+        if (videoUrls != null) {
+            YoutubeDownloadDialog.show(getActivity(), videoUrls);
+            telemetry.sendVideoDownloadSignal(event.targetType);
         }
     }
 

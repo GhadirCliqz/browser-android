@@ -39,6 +39,7 @@ import java.util.List;
 
 import acr.browser.lightning.bus.BrowserEvents;
 import acr.browser.lightning.constant.Constants;
+import acr.browser.lightning.utils.UrlUtils;
 
 /**
  * @author Stefano Pacifici based on Anthony C. Restaino's code
@@ -164,7 +165,9 @@ class LightningWebClient extends WebViewClient implements AntiPhishing.AntiPhish
             lightningView.passwordManager.injectJavascript(view);
         }
         ((CliqzWebView)view).executeJS(Constants.JAVASCRIPT_COLLAPSE_SECTIONS);
-
+        if (UrlUtils.isYoutubeVideo(url)) {
+            lightningView.eventBus.post(new Messages.FetchYoutubeVideoUrls());
+        }
         lightningView.eventBus.post(new BrowserEvents.TabsChanged());
     }
 
@@ -194,6 +197,8 @@ class LightningWebClient extends WebViewClient implements AntiPhishing.AntiPhish
             lightningView.eventBus.post(new BrowserEvents.ShowToolBar());
         }
         lightningView.eventBus.post(new BrowserEvents.TabsChanged());
+        lightningView.eventBus.post(new Messages.SetVideoUrls(null));
+
     }
 
     @Override
