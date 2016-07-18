@@ -8,8 +8,6 @@ import com.cliqz.browser.di.components.AppComponent;
 import com.cliqz.browser.di.components.DaggerAppComponent;
 import com.cliqz.browser.di.modules.AppModule;
 import com.cliqz.browser.utils.LookbackWrapper;
-import com.facebook.FacebookSdk;
-import com.facebook.appevents.AppEventsLogger;
 import com.squareup.leakcanary.LeakCanary;
 
 public class BrowserApp extends Application {
@@ -21,9 +19,6 @@ public class BrowserApp extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-        FacebookSdk.sdkInitialize(getApplicationContext());
-        AppEventsLogger.activateApp(this);
-
         LeakCanary.install(this);
         LookbackWrapper.init(this);
         buildDepencyGraph();
