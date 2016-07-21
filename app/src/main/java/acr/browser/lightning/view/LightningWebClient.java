@@ -41,7 +41,6 @@ import java.util.List;
 
 import acr.browser.lightning.bus.BrowserEvents;
 import acr.browser.lightning.constant.Constants;
-import acr.browser.lightning.utils.UrlUtils;
 
 /**
  * @author Stefano Pacifici based on Anthony C. Restaino's code
@@ -119,7 +118,7 @@ class LightningWebClient extends WebViewClient implements AntiPhishing.AntiPhish
                 view.post(new Runnable() {
                     @Override
                     public void run() {
-                        lightningView.eventBus.post(new Messages.GoToHistory());
+                        lightningView.eventBus.post(new Messages.GoToOverview());
                         if (lightningView.canGoBack()) {
                             lightningView.goBack();
                         }

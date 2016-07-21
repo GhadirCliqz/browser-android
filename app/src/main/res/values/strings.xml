@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--
   Copyright 2013 The Android Open Source Project
 
   Licensed under the Apache License, Version 2.0 (the "License");
@@ -104,10 +103,10 @@
     <string name="cannot_download">Can only download \"http\" or \"https\" URLs.</string>
     <string name="problem_download">Invalid URL encountered, cannot download</string>
     <string name="problem_location_download">Cannot download to the specified location</string>
-    <string name="download_no_sdcard_dlg_title" >No SD card</string>
-    <string name="download_no_sdcard_dlg_msg" >USB storage is required to download the file.</string>
+    <string name="download_no_sdcard_dlg_title">No SD card</string>
+    <string name="download_no_sdcard_dlg_msg">USB storage is required to download the file.</string>
     <string name="download_sdcard_busy_dlg_title">USB storage unavailable</string>
-    <string name="download_sdcard_busy_dlg_msg" >The storage is busy. To allow downloads, touch Turn Off USB Storage in the notification.</string>
+    <string name="download_sdcard_busy_dlg_msg">The storage is busy. To allow downloads, touch Turn Off USB Storage in the notification.</string>
     <string name="incognito_cookies">Enable Cookies in Incognito Mode</string>
     <string name="title_flash">Adobe Flash</string>
     <string name="action_manual">Manual</string>
@@ -204,13 +203,13 @@
     <string name="url_contents">URL Box Contents</string>
     <string name="text_encoding">Text Encoding</string>
     <string-array name="url_content_array">
-        <item >Domain (default)</item>
-        <item >URL</item>
-        <item >Title</item>
+        <item>Domain (default)</item>
+        <item>URL</item>
+        <item>Title</item>
     </string-array>
-        <string name="invert_color">Invert color</string>
-        <string name="dark_theme">Dark Theme</string>
-        <string name="tabs">Tabs</string>
+    <string name="invert_color">Invert color</string>
+    <string name="dark_theme">Dark Theme</string>
+    <string name="tabs">Tabs</string>
     <string name="enable_orbot">Enable Orbot</string>
     <string name="cliqz_app_name" translatable="false">CLIQZ Browser</string>
     <string name="contact_cliqz">Contact CLIQZ</string>
@@ -284,6 +283,9 @@
     <string name="optimized_block_ads_description">The CLIQZ Ad Blocker is in beta at the moment. The final version will provide the following options: Allow Fair Ads (default setting), Block All Ads, Allow All Ads.\nMore https://cliqz.com/whycliqz/adblocking</string>
     <string name="make_video_available_offline">Make available offline</string>
     <string name="dialog_youtube_video">What would you like to do with this video?</string>
+    <string name="overview">Overview</string>
+    <string name="open_tabs">Open Tabs</string>
+    <string name="favorites">Favorites</string>
     <string name="antiphishing_dialog_title">Antiphishing Title</string>
     <string name="antiphishing_message">Antiphishing Message</string>
     <string name="antiphishing_walk_away">Walk Away</string>

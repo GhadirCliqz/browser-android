@@ -24,12 +24,6 @@ public class MainActivityModule {
     }
 
     @Provides
-    @PerActivity
-    Bus provideBus() {
-        return new Bus();
-    }
-
-    @Provides
     CliqzBridge provideCliqzBridge() {
         return new CliqzBridge(activity);
     }

@@ -13,11 +13,14 @@
         android:layout_height="48dp"
         android:background="?attr/actionBarItemBackground">
 
-        <ImageView
+        <TextView
+            android:id="@+id/open_tabs_count"
             android:layout_width="24dp"
             android:layout_height="24dp"
             android:layout_gravity="center"
-            android:src="@drawable/ic_action_cliqz_past"/>
+            android:textColor="@color/white"
+            android:gravity="center"
+            android:background="@drawable/tab_counter"/>
     </FrameLayout>
 
     <com.cliqz.browser.widget.SearchBar

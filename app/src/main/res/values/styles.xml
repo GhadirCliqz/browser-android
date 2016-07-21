@@ -131,6 +131,12 @@
         <item name="colorPrimary">#55B046</item>
     </style>
 
+    <style name="Theme.Cliqz.Overview" parent="Theme.AppCompat.Light">
+        <item name="colorPrimary">@color/white</item>
+        <item name="colorPrimaryDark">@color/gray_medium</item>
+        <item name="android:textColorPrimary">@color/black</item>
+    </style>
+
     <style name="overFlowButtonStyle" parent="@style/Widget.AppCompat.ActionButton.Overflow">
         <item name="android:minWidth">48dp</item>
         <item name="android:padding">0dp</item>

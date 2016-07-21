@@ -53,7 +53,6 @@ public class OverFlowMenu extends FrameLayout {
 
     private enum Entries {
         ACTIONS(-1, -1),
-        TAB_MANAGER(R.id.show_tab_manager_menu_button, R.string.action_show_tab_manager),
         NEW_TAB(R.id.new_tab_menu_button, R.string.action_new_tab),
         NEW_INCOGNITO_TAB(R.id.new_incognito_tab_menu_button, R.string.action_incognito),
         COPY_LINK(R.id.copy_link_menu_button, R.string.action_copy),
@@ -75,7 +74,6 @@ public class OverFlowMenu extends FrameLayout {
 
     private static final Entries[] ENTRIES = new Entries[] {
             Entries.ACTIONS,
-            Entries.TAB_MANAGER,
             Entries.NEW_TAB,
             Entries.NEW_INCOGNITO_TAB,
             Entries.COPY_LINK,
@@ -89,7 +87,6 @@ public class OverFlowMenu extends FrameLayout {
 
     private static final Entries[] INCOGNITO_ENTRIES = new Entries[] {
             Entries.ACTIONS,
-            Entries.TAB_MANAGER,
             Entries.NEW_TAB,
             Entries.NEW_INCOGNITO_TAB,
             Entries.SEARCH_IN_PAGE,
@@ -439,9 +436,6 @@ public class OverFlowMenu extends FrameLayout {
                     break;
                 case NEW_TAB:
                     bus.post(new BrowserEvents.NewTab(false));
-                    break;
-                case TAB_MANAGER:
-                    bus.post(new BrowserEvents.ShowTabManager());
                     break;
                 case SEARCH_IN_PAGE:
                     bus.post(new BrowserEvents.SearchInPage());

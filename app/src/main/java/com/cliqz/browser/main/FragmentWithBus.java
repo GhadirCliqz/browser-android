@@ -20,7 +20,7 @@ import acr.browser.lightning.preference.PreferenceManager;
 public abstract class FragmentWithBus extends Fragment {
 
     @Inject
-    Bus bus;
+    public Bus bus;
 
     @Inject
     Telemetry telemetry;

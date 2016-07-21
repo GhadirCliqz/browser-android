@@ -15,7 +15,6 @@ public class HistoryWebView extends BaseWebView {
 
     private static final String FRESHTAB_URL = "file:///android_asset/search/history.html";
     private static final String FRESHTAB_MANIFEST_URL = "file:///android_asset/search/history.json";
-
     public HistoryWebView(Context context) {
         super(context);
         bridge.setWebView(this);
@@ -33,7 +32,8 @@ public class HistoryWebView extends BaseWebView {
         if ("xwalk".equals(BuildConfig.FLAVOR)) {
             return FRESHTAB_MANIFEST_URL;
         } else {
-            return FRESHTAB_URL;
+                return FRESHTAB_URL;
+
         }
     }
 
