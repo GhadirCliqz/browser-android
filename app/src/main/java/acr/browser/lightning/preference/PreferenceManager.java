@@ -15,7 +15,8 @@ public class PreferenceManager {
     public enum ClearQueriesOptions {
         NO,
         CLEAR_HISTORY,
-        CLEAR_FAVORITES;
+        CLEAR_FAVORITES,
+        CLEAR_BOTH;
 
         public static ClearQueriesOptions safeValueOf(String name) {
             try {
@@ -610,7 +611,13 @@ public class PreferenceManager {
     }
 
     public void setShouldClearQueries(ClearQueriesOptions value) {
-        putString(Name.CLEAR_QUERIES, value.name());
+        if (value == ClearQueriesOptions.NO || shouldClearQueries() == ClearQueriesOptions.NO) {
+            putString(Name.CLEAR_QUERIES, value.name());
+        } else if (shouldClearQueries() != value) {
+            putString(Name.CLEAR_QUERIES, ClearQueriesOptions.CLEAR_BOTH.name());
+        } else {
+            putString(Name.CLEAR_QUERIES, value.name());
+        }
     }
 
     public void setGCMTokenSent(boolean value) {

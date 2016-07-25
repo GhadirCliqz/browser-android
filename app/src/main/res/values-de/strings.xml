@@ -224,7 +224,6 @@
     <string name="next">Weiter</string>
     <string name="contact_cliqz">Feedback geben</string>
     <string name="go">Los</string>
-    <string name="about_version_format">%1$s basierend auf Lightning %2$s</string>
     <string name="action_refresh">Seite neu laden</string>
     <string name="default_page_title">Ohne Titel</string>
     <string name="enable_orbot">Orbot aktivieren</string>
@@ -265,4 +264,7 @@
     <string name="action_show_tab_manager">Tab Manager</string>
     <string name="make_video_available_offline">Offline verfügbar machen</string>
     <string name="dialog_youtube_video">Was möchten Sie mit diesem Video tun?</string>
+    <string name="in_page_search_next_result">Seitensuche nächstes Ergebnis</string>
+    <string name="in_page_search_prev_result">Seitensuche vorheriges Ergebnis</string>
+    <string name="close_in_page_search">Seitensuche schließen</string>
 </resources>

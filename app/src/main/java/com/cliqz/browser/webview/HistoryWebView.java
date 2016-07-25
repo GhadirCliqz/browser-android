@@ -51,6 +51,9 @@ public class HistoryWebView extends BaseWebView {
             executeJS("jsAPI.clearFavorites()");
         } else if (clearQueriesOption == PreferenceManager.ClearQueriesOptions.CLEAR_HISTORY) {
             executeJS("jsAPI.clearHistory()");
+        } else if (clearQueriesOption == PreferenceManager.ClearQueriesOptions.CLEAR_BOTH) {
+            executeJS("jsAPI.clearFavorites()");
+            executeJS("jsAPI.clearHistory()");
         }
     }
 }

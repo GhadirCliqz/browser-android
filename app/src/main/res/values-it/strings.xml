@@ -213,7 +213,6 @@
     <string name="message_web_storage_cleared">Web Storage Cleared</string>
     <string name="complementary_search_engine">Motore di ricerca complementare</string>
     <string name="go">Vai</string>
-    <string name="about_version_format">%1$s basato su Lightning %2$s</string>
     <string name="action_refresh">Ricarica la pagina </string>
     <string name="contact_cliqz">Contatta CLIQZ</string>
     <string name="default_page_title">Nessun Titolo</string>
@@ -270,4 +269,7 @@
     <string name="action_show_tab_manager">Tab Manager</string>
     <string name="make_video_available_offline">Rendi disponibile offline</string>
     <string name="dialog_youtube_video">Che cosa vorresti fare con questo video?</string>
+    <string name="close_in_page_search">Chiudi ricerca nella pagina</string>
+    <string name="in_page_search_next_result">Prossimo risultato nella pagina</string>
+    <string name="in_page_search_prev_result">Precedente risultato nella pagina</string>
 </resources>

@@ -165,9 +165,6 @@ class LightningWebClient extends WebViewClient implements AntiPhishing.AntiPhish
             lightningView.passwordManager.injectJavascript(view);
         }
         ((CliqzWebView)view).executeJS(Constants.JAVASCRIPT_COLLAPSE_SECTIONS);
-        if (UrlUtils.isYoutubeVideo(url)) {
-            lightningView.eventBus.post(new Messages.FetchYoutubeVideoUrls());
-        }
         lightningView.eventBus.post(new BrowserEvents.TabsChanged());
     }
 
@@ -197,8 +194,6 @@ class LightningWebClient extends WebViewClient implements AntiPhishing.AntiPhish
             lightningView.eventBus.post(new BrowserEvents.ShowToolBar());
         }
         lightningView.eventBus.post(new BrowserEvents.TabsChanged());
-        lightningView.eventBus.post(new Messages.SetVideoUrls(null));
-
     }
 
     @Override

@@ -2,6 +2,7 @@ package com.cliqz.browser.main;
 
 import android.app.Activity;
 import android.content.DialogInterface;
+import android.net.Uri;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -15,8 +16,12 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
+
 import acr.browser.lightning.constant.Constants;
-import acr.browser.lightning.download.DownloadHandler;
 import acr.browser.lightning.utils.Utils;
 
 /**
@@ -93,10 +98,20 @@ class YoutubeDownloadDialog {
             }
 
             dialog.dismiss();
-            final String url = obj.optString("url", "");
-            if (!url.isEmpty()) {
-                Utils.downloadFile(activity, url,
-                        Constants.DESKTOP_USER_AGENT, "attachment", true);
+            String urlStr = obj.optString("url", "");
+            urlStr = Uri.decode(urlStr);
+            final URI uri;
+            try {
+                final URL url = new URL(urlStr);
+                uri = new URI(url.getProtocol(), url.getUserInfo(), url.getHost(), url.getPort(), url.getPath(), url.getQuery(), url.getRef());
+                if (!uri.toString().isEmpty()) {
+                    Utils.downloadFile(activity, uri.toString(),
+                            Constants.DESKTOP_USER_AGENT, "attachment", true);
+                }
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+            } catch (URISyntaxException e) {
+                e.printStackTrace();
             }
         }
     }
