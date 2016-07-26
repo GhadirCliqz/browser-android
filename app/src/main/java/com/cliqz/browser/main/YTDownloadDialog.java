@@ -28,15 +28,15 @@ import acr.browser.lightning.utils.Utils;
  * @author Stefano Pacifici
  * @date 2016/06/01
  */
-class YoutubeDownloadDialog {
-    private static final String TAG = YoutubeDownloadDialog.class.getSimpleName();
+class YTDownloadDialog {
+    private static final String TAG = YTDownloadDialog.class.getSimpleName();
 
     private final Activity activity;
     private final JSONArray urls;
     private final ListAdapter adapter;
     private final DialogInterface.OnClickListener clickListener;
 
-    private YoutubeDownloadDialog(Activity activity, JSONArray urls) {
+    private YTDownloadDialog(Activity activity, JSONArray urls) {
         this.activity = activity;
         this.urls = urls;
         this.adapter = new UrlsAdapter();
@@ -44,7 +44,7 @@ class YoutubeDownloadDialog {
     }
 
     public static void show(Activity activity, JSONArray urls) {
-        final YoutubeDownloadDialog ytdialog = new YoutubeDownloadDialog(activity, urls);
+        final YTDownloadDialog ytdialog = new YTDownloadDialog(activity, urls);
         final AlertDialog.Builder builder = new AlertDialog.Builder(activity);
         builder.setAdapter(ytdialog.adapter, ytdialog.clickListener).show();
     }
