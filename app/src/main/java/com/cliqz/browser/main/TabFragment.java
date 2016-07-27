@@ -789,14 +789,13 @@ public class TabFragment extends BaseFragment {
         // with the extension
         final String url =
                 event.videoPageUrl != null ? event.videoPageUrl : mLightningView.getUrl();
-        final String script = String.format(Locale.US, "ytdownloader.getUrls('%s');", url);
-        mSearchWebView.evaluateJavascript(script, null);
+        YTPageFetcher.asyncGetYoutubeVideoUrls(mSearchWebView, url);
     }
 
     @Subscribe
     public void downloadYoutubeVideo(Messages.DownloadYoutubeVideo event) {
         if (videoUrls != null) {
-            YoutubeDownloadDialog.show(getActivity(), videoUrls);
+            YTDownloadDialog.show(getActivity(), videoUrls);
             telemetry.sendVideoDownloadSignal(event.targetType);
         }
     }

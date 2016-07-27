@@ -30,6 +30,7 @@ import java.io.IOException;
 
 import acr.browser.lightning.bus.BrowserEvents;
 import acr.browser.lightning.constant.Constants;
+import acr.browser.lightning.utils.UrlUtils;
 import acr.browser.lightning.utils.Utils;
 
 /**
@@ -117,6 +118,11 @@ class LightningChromeClient extends WebChromeClient {
             mLastUrl = url;
         }
         lightningView.isHistoryItemCreationEnabled = true;
+        if (UrlUtils.isYoutubeVideo(url)) {
+            eventBus.post(new Messages.FetchYoutubeVideoUrls());
+        } else {
+            eventBus.post(new Messages.SetVideoUrls(null));
+        }
     }
 
     @Override
