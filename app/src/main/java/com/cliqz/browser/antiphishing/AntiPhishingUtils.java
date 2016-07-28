@@ -49,31 +49,4 @@ final class AntiPhishingUtils {
             new String(bytes, HALF_MD5_LENGHT, HALF_MD5_LENGHT)
         };
     }
-
-    /**
-     * Given a message (a string) will compute the hex representation of its MD5 hash.
-     *
-     * @param message a non-null string
-     * @return the hexadecimal string representation of the message md5 hash, or a string with 32
-     * in the case we do not have the MD5 algorithm available thought the JVM.
-     */
-    static @NonNull  String calculateMD5(@NonNull String message) {
-        try {
-            final MessageDigest md = MessageDigest.getInstance("MD5");
-            md.reset();
-            final byte[] digest = md.digest(message.getBytes());
-            final byte[] hexDigest = new byte[digest.length * 2];
-            for (int i = 0; i < digest.length; i++) {
-                final byte high = (byte) ((digest[i] & 0xf0) >> 4);
-                final byte low = (byte) (digest[i] & 0x0f);
-                final int hi = i * 2;
-                hexDigest[hi] = (byte) (high < 0x0a ? 0x30 + high : 0x57 + high);
-                hexDigest[hi + 1] = (byte) (low < 0x0a ? 0x30 + low : 0x57 + low);
-            }
-            return new String(hexDigest);
-        } catch (NoSuchAlgorithmException e) {
-            Log.e(TAG, "Can't find MD5 digest algorithm", e);
-            return "00000000000000000000000000000000";
-        }
-    }
 }

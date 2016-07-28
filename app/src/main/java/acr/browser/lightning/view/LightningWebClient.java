@@ -31,6 +31,7 @@ import android.widget.Toast;
 import com.cliqz.browser.R;
 import com.cliqz.browser.antiphishing.AntiPhishing;
 import com.cliqz.browser.main.Messages;
+import com.cliqz.utils.StreamUtils;
 
 import java.io.ByteArrayInputStream;
 import java.net.URI;
@@ -75,9 +76,6 @@ class LightningWebClient extends WebViewClient implements AntiPhishing.AntiPhish
     public WebResourceResponse shouldInterceptRequest(WebView view, String url) {
         final Uri uri = Uri.parse(url);
         WebResourceResponse response = handleUrl(view, uri);
-        if (response == null) {
-            response = lightningView.attrack.shouldInterceptRequest(view, uri);
-        }
         return response;
     }
 
@@ -132,6 +130,8 @@ class LightningWebClient extends WebViewClient implements AntiPhishing.AntiPhish
         } else if (cliqzPath.equals(path)) {
             lightningView.passwordManager.provideOrSavePassword(uri, view);
             return createOKResponse();
+        } else if (lightningView.adblock.isAd(uri)) {
+            return new WebResourceResponse("text/html", "UTF-8", StreamUtils.createEmptyStream());
         }
         return null;
     }

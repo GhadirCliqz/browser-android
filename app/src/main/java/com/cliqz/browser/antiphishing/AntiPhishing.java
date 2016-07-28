@@ -3,6 +3,7 @@ package com.cliqz.browser.antiphishing;
 import android.support.annotation.VisibleForTesting;
 import android.util.Log;
 
+import com.cliqz.utils.StringUtils;
 import com.google.gson.Gson;
 import com.google.gson.stream.JsonReader;
 
@@ -60,17 +61,22 @@ public class AntiPhishing {
             Log.w(TAG, "processUrl called whit empty or null string");
             callback.onUrlProcessed("", false);
         }
-        final String md5Hash = AntiPhishingUtils.calculateMD5(host);
-        final Cache.Result result = cache.check(md5Hash);
-        switch (result) {
-            case BLACKLIST:
-                callback.onUrlProcessed(url, true);
-                break;
-            case FAULT:
-                fetchHash(url, md5Hash, callback);
-                break;
-            default:
-                callback.onUrlProcessed(url, false);
+        try {
+            final String md5Hash = StringUtils.calculateMD5(host);
+            final Cache.Result result = cache.check(md5Hash);
+            switch (result) {
+                case BLACKLIST:
+                    callback.onUrlProcessed(url, true);
+                    break;
+                case FAULT:
+                    fetchHash(url, md5Hash, callback);
+                    break;
+                default:
+                    callback.onUrlProcessed(url, false);
+            }
+        } catch (StringUtils.MD5Exception e) {
+            Log.e(TAG, e.getMessage(), e.getCause());
+            callback.onUrlProcessed(url, false);
         }
     }
 

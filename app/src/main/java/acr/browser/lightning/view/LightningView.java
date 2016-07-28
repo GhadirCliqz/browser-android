@@ -54,6 +54,7 @@ import acr.browser.lightning.database.HistoryDatabase;
 import acr.browser.lightning.dialog.LightningDialogBuilder;
 import acr.browser.lightning.download.LightningDownloadListener;
 import acr.browser.lightning.preference.PreferenceManager;
+import acr.browser.lightning.utils.AdBlock;
 import acr.browser.lightning.utils.ProxyUtils;
 import acr.browser.lightning.utils.ThemeUtils;
 import acr.browser.lightning.utils.Utils;
@@ -111,6 +112,9 @@ public class LightningView {
     @Inject
     LightningDialogBuilder bookmarksDialogBuilder;
 
+    @Inject
+    AdBlock adblock;
+    
     @Inject
     AntiTracking attrack;
 
@@ -221,7 +225,9 @@ public class LightningView {
         }
 
         settings.setDefaultTextEncodingName(preferences.getTextEncoding());
-        attrack.setEnabled(preferences.getAdBlockEnabled());
+        //This should be replaced with regular preferences
+        adblock.setEnabled(preferences.getAdBlockEnabled());
+        attrack.setEnabled(true);
         mHomepage = preferences.getHomepage();
         setColorMode(preferences.getRenderingMode());
 
@@ -265,19 +271,10 @@ public class LightningView {
 
         setUserAgent(context, preferences.getUserAgentChoice());
 
-//        if (preferences.getSavePasswordsEnabled() && !mIsIncognitoTab) {
-//            if (API < Build.VERSION_CODES.JELLY_BEAN_MR2) {
-//                //noinspection deprecation
-//                settings.setSavePassword(true);
-//            }
-//            settings.setSaveFormData(true);
-//        } else {
         if (API <= Build.VERSION_CODES.JELLY_BEAN_MR2) {
             //noinspection deprecation
             settings.setSavePassword(false);
         }
-//            settings.setSaveFormData(false);
-//        }
 
         if (preferences.getJavaScriptEnabled()) {
             settings.setJavaScriptEnabled(true);

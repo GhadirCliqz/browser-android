@@ -9,6 +9,7 @@ import android.webkit.WebResourceRequest;
 import android.webkit.WebResourceResponse;
 import android.webkit.WebView;
 
+import com.cliqz.utils.StreamUtils;
 import com.eclipsesource.v8.JavaCallback;
 import com.eclipsesource.v8.JavaVoidCallback;
 import com.eclipsesource.v8.V8;
@@ -323,11 +324,6 @@ public class AntiTracking {
     }
 
     WebResourceResponse blockRequest() {
-        return new WebResourceResponse("text/html", "UTF-8", emptyStream());
+        return new WebResourceResponse("text/html", "UTF-8", StreamUtils.createEmptyStream());
     }
-
-    static InputStream emptyStream() {
-        return new ByteArrayInputStream("".getBytes());
-    }
-
 }

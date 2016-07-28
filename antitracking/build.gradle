@@ -24,4 +24,5 @@ dependencies {
     compile 'com.android.support:appcompat-v7:23.0.1'
     // Embedded V8 engine
     compile "com.eclipsesource.j2v8:j2v8:4.1.0@aar"
+    compile project(':utils')
 }
