@@ -3,6 +3,7 @@ package com.cliqz.browser.main;
 import android.util.Log;
 
 import com.cliqz.browser.webview.SearchWebView;
+import com.cliqz.utils.StringUtils;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
@@ -49,10 +50,7 @@ final class YTPageFetcher {
                     connection.addRequestProperty("User-Agent", USER_AGENT);
                     if (connection.getResponseCode() == 200) {
                         final String response = readResponse(connection.getInputStream());
-                        callScriptWithResponse(response
-                                .replace("\\", "\\\\")
-                                .replace("\n", "\\n")
-                                .replace("\"", "\\\""));
+                        callScriptWithResponse(StringUtils.escapeHTML(response));
                     }
                     connection.disconnect();
                 } catch (IOException e) {

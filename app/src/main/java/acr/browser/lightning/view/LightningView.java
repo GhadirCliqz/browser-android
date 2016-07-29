@@ -36,6 +36,7 @@ import com.cliqz.browser.antiphishing.AntiPhishing;
 import com.cliqz.browser.main.MainActivity;
 import com.cliqz.browser.utils.PasswordManager;
 import com.cliqz.browser.utils.Telemetry;
+import com.cliqz.antitracking.AntiTracking;
 import com.squareup.otto.Bus;
 
 import java.io.File;
@@ -112,7 +113,10 @@ public class LightningView {
     LightningDialogBuilder bookmarksDialogBuilder;
 
     @Inject
-    AdBlock adBlock;
+    AdBlock adblock;
+    
+    @Inject
+    AntiTracking attrack;
 
     @Inject
     HistoryDatabase historyDatabase;
@@ -221,7 +225,9 @@ public class LightningView {
         }
 
         settings.setDefaultTextEncodingName(preferences.getTextEncoding());
-        adBlock.setEnabled(preferences.getAdBlockEnabled());
+        //This should be replaced with regular preferences
+        adblock.setEnabled(preferences.getAdBlockEnabled());
+        attrack.setEnabled(true);
         mHomepage = preferences.getHomepage();
         setColorMode(preferences.getRenderingMode());
 
@@ -265,19 +271,10 @@ public class LightningView {
 
         setUserAgent(context, preferences.getUserAgentChoice());
 
-//        if (preferences.getSavePasswordsEnabled() && !mIsIncognitoTab) {
-//            if (API < Build.VERSION_CODES.JELLY_BEAN_MR2) {
-//                //noinspection deprecation
-//                settings.setSavePassword(true);
-//            }
-//            settings.setSaveFormData(true);
-//        } else {
         if (API <= Build.VERSION_CODES.JELLY_BEAN_MR2) {
             //noinspection deprecation
             settings.setSavePassword(false);
         }
-//            settings.setSaveFormData(false);
-//        }
 
         if (preferences.getJavaScriptEnabled()) {
             settings.setJavaScriptEnabled(true);
@@ -743,7 +740,7 @@ public class LightningView {
             return;
         }
 
-        mWebView.loadUrl(url, mRequestHeaders);
+            mWebView.loadUrl(url, mRequestHeaders);
     }
 
     public synchronized void invalidate() {
