@@ -9,6 +9,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
@@ -17,6 +18,8 @@ import android.os.Message;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Patterns;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -24,14 +27,17 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
+import android.view.WindowManager;
 import android.view.animation.AccelerateInterpolator;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.webkit.URLUtil;
 import android.webkit.WebView;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
+import android.widget.PopupWindow;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -50,6 +56,7 @@ import com.squareup.otto.Subscribe;
 import org.json.JSONArray;
 
 import java.util.ArrayList;
+import java.util.Locale;
 
 import acr.browser.lightning.bus.BrowserEvents;
 import acr.browser.lightning.constant.Constants;
@@ -71,6 +78,8 @@ import butterknife.OnEditorAction;
  */
 public class TabFragment extends BaseFragment {
 
+    private static final String antiTrackingHelpUrlDe = "https://cliqz.com/whycliqz/anti-tracking";
+    private static final String antiTrackingHelpUrlEn = "https://cliqz.com/en/whycliqz/anti-tracking";
     private static final String TAG = TabFragment.class.getSimpleName();
     private static final String NAVIGATION_STATE_KEY = TAG + ".NAVIGATION_STATE";
     private static final int ICON_STATE_CLEAR = 0;
@@ -90,6 +99,7 @@ public class TabFragment extends BaseFragment {
     public final CliqzBrowserState state = new CliqzBrowserState();
     protected boolean isHomePageShown = false;
     private JSONArray videoUrls = null;
+    private int mTrackerCount = 0;
 
     String lastQuery = "";
 
@@ -122,6 +132,14 @@ public class TabFragment extends BaseFragment {
 
     @Bind(R.id.in_page_search_bar)
     View inPageSearchBar;
+
+    @Nullable
+    @Bind(R.id.tracker_counter)
+    TextView trackerCounter;
+
+    @Nullable
+    @Bind(R.id.anti_tracking_details)
+    LinearLayout antiTrackingDetails;
 
     @Bind(R.id.open_tabs_count)
     TextView openTabsCounter;
@@ -188,6 +206,9 @@ public class TabFragment extends BaseFragment {
         mLocalContainer.addView(mSearchWebView);
         titleBar.setOnTouchListener(onTouchListener);
         mSearchWebView.initExtensionPreferences();
+        if (trackerCounter != null) {
+            trackerCounter.setText(Integer.toString(mTrackerCount));
+        }
     }
 
     @Override
@@ -269,6 +290,7 @@ public class TabFragment extends BaseFragment {
             } else {
                 mLightningView.getWebView().bringToFront();
                 searchBar.showTitleBar();
+                antiTrackingDetails.setVisibility(View.VISIBLE);
                 searchBar.setTitle(mLightningView.getTitle());
                 switchIcon(ICON_STATE_NONE);
             }
@@ -324,7 +346,7 @@ public class TabFragment extends BaseFragment {
         if(isIncognito) {
             return R.style.Theme_Cliqz_Present_Incognito;
         } else {
-            return R.style.Theme_Cliqz_Present;
+            return R.style.Theme_Cliqz_Overview;
         }
     }
 
@@ -342,6 +364,9 @@ public class TabFragment extends BaseFragment {
 
     @OnClick(R.id.title_bar)
     void titleClicked() {
+        if (antiTrackingDetails != null) {
+            antiTrackingDetails.setVisibility(View.GONE);
+        }
         searchBar.showSearchEditText();
         mAutocompleteEditText.setText(mLightningView.getUrl());
         mAutocompleteEditText.requestFocus();
@@ -381,6 +406,40 @@ public class TabFragment extends BaseFragment {
     @OnClick(R.id.in_page_search_down_button)
     void nextResultInPageSearchClicked() {
         mLightningView.findNext();
+    }
+
+    @Nullable
+    @OnClick(R.id.anti_tracking_details)
+    void showAntiTrackingDialog() {
+        final ArrayList<TrackerDetailsModel> details = mLightningView.getTrackerDetails();
+        if (details == null || details.isEmpty()) {
+            //probably should show a toast here?
+            return;
+        }
+        final View popupView = getActivity().getLayoutInflater().inflate(R.layout.anti_tracking_dialog, null);
+        final PopupWindow antiTrackindDialog = new PopupWindow(popupView, WindowManager.LayoutParams.MATCH_PARENT,
+                WindowManager.LayoutParams.MATCH_PARENT);
+        final TextView counter = (TextView) popupView.findViewById(R.id.counter);
+        final RecyclerView trackersList = (RecyclerView) popupView.findViewById(R.id.trackers_list);
+        final Button button = (Button) popupView.findViewById(R.id.help);
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                final Bundle args = new Bundle();
+                final String helpUrl = Locale.getDefault().getLanguage().equals("de") ?
+                        antiTrackingHelpUrlDe : antiTrackingHelpUrlEn;
+                args.putString(Constants.KEY_URL, helpUrl);
+                ((MainActivity)getActivity()).tabsManager.addNewTab(args);
+                antiTrackindDialog.dismiss();
+            }
+        });
+        counter.setText(Integer.toString(mTrackerCount));
+        trackersList.setLayoutManager(new LinearLayoutManager(getContext()));
+        trackersList.setAdapter(new TrackersListAdapter(details));
+        antiTrackindDialog.setBackgroundDrawable(new ColorDrawable());
+        antiTrackindDialog.setOutsideTouchable(true);
+        antiTrackindDialog.setFocusable(true);
+        antiTrackindDialog.showAsDropDown(searchBar);
     }
 
     @OnEditorAction(R.id.search_edit_text)
@@ -440,9 +499,6 @@ public class TabFragment extends BaseFragment {
     public void updateProgress(BrowserEvents.UpdateProgress event) {
         mProgressBar.setProgress(event.progress);
         if (!mLightningView.getUrl().contains(TrampolineConstants.CLIQZ_TRAMPOLINE_GOTO)) {
-            if(event.progress > 30) {
-                // mLightningContainer.setRefreshing(false); //Dismiss the refreshing spinner
-            }
             if (event.progress == 100) {
                 switchIcon(ICON_STATE_NONE);
             } else {
@@ -467,6 +523,9 @@ public class TabFragment extends BaseFragment {
     private void bringWebViewToFront() {
         final WebView webView = mLightningView.getWebView();
         searchBar.showTitleBar();
+        if (antiTrackingDetails != null) {
+            antiTrackingDetails.setVisibility(View.VISIBLE);
+        }
         mLightningView.getWebView().bringToFront();
         state.setMode(Mode.WEBPAGE);
     }
@@ -568,7 +627,7 @@ public class TabFragment extends BaseFragment {
         final Mode mode = state.getMode();
         if (hideOverFlowMenu()) {
             return;
-        } else if (mode == CliqzBrowserState.Mode.SEARCH &&
+        } else if (mode == Mode.SEARCH &&
                 !"".equals(url) &&
                 !TrampolineConstants.CLIQZ_TRAMPOLINE_GOTO.equals(url)) {
             bringWebViewToFront();
@@ -804,6 +863,18 @@ public class TabFragment extends BaseFragment {
         }
     }
 
+    @Subscribe
+    public void updateTrackerCount(Messages.UpdateTrackerCount event) {
+        mTrackerCount++;
+        trackerCounter.setText(Integer.toString(mTrackerCount));
+    }
+
+    @Subscribe
+    public void resetTrackerCount(Messages.ResetTrackerCount event) {
+        mTrackerCount = 0;
+        trackerCounter.setText(Integer.toString(mTrackerCount));
+    }
+
     void updateTitle() {
         final String title = mLightningView.getTitle();
         searchBar.setTitle(title);
@@ -826,13 +897,13 @@ public class TabFragment extends BaseFragment {
         Drawable icon;
         switch (type) {
             case ICON_STATE_CLEAR:
-                icon = ThemeUtils.getLightThemedDrawable(getContext(), R.drawable.ic_action_delete);
+                icon = ThemeUtils.getThemedDrawable(getContext(), R.drawable.ic_action_delete, true);
                 break;
 //            case RELOAD:
 //                icon = ThemeUtils.getLightThemedDrawable(getContext(), R.drawable.ic_action_refresh);
 //                break;
             case ICON_STATE_STOP:
-                icon = ThemeUtils.getLightThemedDrawable(getContext(), R.drawable.ic_action_delete);
+                icon = ThemeUtils.getThemedDrawable(getContext(), R.drawable.ic_action_delete, true);
                 break;
             case ICON_STATE_NONE:
                 icon = null;
@@ -841,7 +912,7 @@ public class TabFragment extends BaseFragment {
                 titleBar.setHeight(height);
                 break;
             default:
-                icon = ThemeUtils.getLightThemedDrawable(getContext(), R.drawable.ic_action_delete);
+                icon = ThemeUtils.getThemedDrawable(getContext(), R.drawable.ic_action_delete, true);
         }
         titleBar.setCompoundDrawablesWithIntrinsicBounds(null, null, icon, null);
 

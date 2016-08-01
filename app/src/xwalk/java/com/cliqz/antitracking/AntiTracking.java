@@ -8,6 +8,8 @@ import android.webkit.WebResourceRequest;
 import android.webkit.WebResourceResponse;
 import android.webkit.WebView;
 
+import org.json.JSONObject;
+
 import java.io.ByteArrayInputStream;
 
 import javax.inject.Inject;
@@ -49,4 +51,8 @@ public class AntiTracking {
         return null;
     }
 
+    //dummy method to suppress the error
+    public JSONObject getTabBlockingInfo(int i) {
+        return null;
+    }
 }

@@ -140,4 +140,10 @@ public final class Messages {
             this.downloadId = downloadId;
         }
     }
+
+    public static class UpdateTrackerCount {
+    }
+
+    public static class ResetTrackerCount {
+    }
 }

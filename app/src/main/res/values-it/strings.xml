@@ -276,4 +276,9 @@
     <string name="antiphishing_message">CLIQZ ha bloccato  %1$s perchè il dominio é stato segnalato come phishing.\nIl phishing é la pratica di apparire come altri siti di cui ti potresti fidare in modo di estorcerti lo username, la password o altre informazioni sensibili.\nClicca [qui|https://cliqz.com/en/whycliqz/anti-phishing] per maggiori informazioni</string>
     <string name="antiphishing_walk_away">Allontanati</string>
     <string name="antiphishing_ignore_danger">Continua comunque</string>
+    <string name="antitracking_header">Le tue informazioni sono al sicuro</string>
+    <string name="antitracking_datapoints">Le informazioni sensibili sono state rimosse</string>
+    <string name="antitracking_tracking_companies">Società di tracking</string>
+    <string name="antitracking_datapoints_count">Informazioni sensibili</string>
+    <string name="help">Aiuto</string>
 </resources>

@@ -1,5 +1,7 @@
 package com.cliqz.browser.main;
 
+import android.annotation.SuppressLint;
+import android.os.Build;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
@@ -33,6 +35,9 @@ class TabFragmentListener implements View.OnFocusChangeListener, TextWatcher {
             fragment.hideKeyboard();
             if(mode == Mode.WEBPAGE) {
                 fragment.searchBar.showTitleBar();
+                if (fragment.antiTrackingDetails != null) {
+                    fragment.antiTrackingDetails.setVisibility(View.VISIBLE);
+                }
             }
         } else {
             fragment.bus.post(new Messages.AdjustPan());

@@ -35,7 +35,6 @@ import com.cliqz.browser.main.Messages;
 import com.cliqz.utils.StreamUtils;
 
 import java.io.ByteArrayInputStream;
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
@@ -69,6 +68,14 @@ class LightningWebClient extends WebViewClient implements AntiPhishing.AntiPhish
         WebResourceResponse response = handleUrl(view, request.getUrl());
         if (response == null) {
             response = lightningView.attrack.shouldInterceptRequest(view, request);
+            if (response != null) {
+                view.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        lightningView.eventBus.post(new Messages.UpdateTrackerCount());
+                    }
+                });
+            }
         }
         return response;
     }
@@ -198,6 +205,7 @@ class LightningWebClient extends WebViewClient implements AntiPhishing.AntiPhish
             lightningView.eventBus.post(new BrowserEvents.UpdateUrl(url, false));
             lightningView.eventBus.post(new BrowserEvents.ShowToolBar());
         }
+        lightningView.eventBus.post(new Messages.ResetTrackerCount());
         lightningView.eventBus.post(new BrowserEvents.TabsChanged());
     }
 

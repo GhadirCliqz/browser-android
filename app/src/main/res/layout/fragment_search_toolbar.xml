@@ -18,7 +18,7 @@
             android:layout_width="24dp"
             android:layout_height="24dp"
             android:layout_gravity="center"
-            android:textColor="@color/white"
+            android:textColor="@color/black"
             android:gravity="center"
             android:background="@drawable/tab_counter"/>
     </FrameLayout>

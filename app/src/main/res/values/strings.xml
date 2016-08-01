@@ -291,4 +291,9 @@
     <string name="antiphishing_message">CLIQZ has blocked access to %1$s because it has been reported as a phishing website.\nPhishing websites disguise as other sites you may trust in order to trick you into disclosing your login, password or other sensitive information.\n[Learn more|https://cliqz.com/en/whycliqz/anti-phishing]</string>
     <string name="antiphishing_walk_away">Back to safe site</string>
     <string name="antiphishing_ignore_danger">Continue despite warning</string>
+    <string name="antitracking_header">Your data is protected</string>
+    <string name="antitracking_datapoints">Private data points have been removed</string>
+    <string name="antitracking_tracking_companies">Tracking companies</string>
+    <string name="antitracking_datapoints_count">Private data points</string>
+    <string name="help">Help</string>
 </resources>

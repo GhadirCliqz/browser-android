@@ -34,17 +34,25 @@ import android.webkit.WebView;
 import com.cliqz.antitracking.AntiTracking;
 import com.cliqz.browser.R;
 import com.cliqz.browser.antiphishing.AntiPhishing;
+import com.cliqz.browser.main.MainActivity;
+import com.cliqz.browser.main.TrackerDetailsModel;
+import com.cliqz.browser.main.TrackersListAdapter;
 import com.cliqz.browser.app.BrowserApp;
 import com.cliqz.browser.di.components.ActivityComponent;
 import com.cliqz.browser.utils.PasswordManager;
 import com.cliqz.browser.utils.Telemetry;
 import com.squareup.otto.Bus;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
+import java.util.ArrayList;
 import java.util.Map;
 
 import javax.inject.Inject;
@@ -860,5 +868,37 @@ public class LightningView {
             new Thread(update).start();
         }
     }
+
+    /**
+     * Gets a JSONObject containing info about the trackers from the Antitracking module and processes
+     * it and returns an ArrayList of Trackers
+     * @return ArrayList of TrackerDetailsModel objects. TrackerDetailsModel has the name of the trackers and no of
+     * data points blocked for each tracker
+     * This method is not called in the xwalk build variant
+     */
+    public ArrayList<TrackerDetailsModel> getTrackerDetails() {
+        final ArrayList<TrackerDetailsModel> trackerDetails = new ArrayList<>();
+        try {
+            final JSONObject jsonObject = attrack.getTabBlockingInfo(mWebView.hashCode());
+            final JSONArray companies = jsonObject.getJSONObject("companies").names();
+            for (int i = 0; i < companies.length(); i++) {
+                final String key = companies.getString(i);
+                final JSONArray domains = jsonObject.getJSONObject("companies").getJSONArray(key);
+                int trackersCount = 0;
+                for (int j = 0; j < domains.length(); j++) {
+                    final JSONObject trackers = jsonObject.getJSONObject("trackers").getJSONObject(domains.optString(j));
+                    trackersCount += trackers.getInt("bad_qs");
+                }
+                if (trackersCount > 0) {
+                    trackerDetails.add(new TrackerDetailsModel(key, trackersCount));
+                }
+            }
+            return trackerDetails;
+        } catch (JSONException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
 
 }

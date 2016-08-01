@@ -132,7 +132,7 @@
     </style>
 
     <style name="Theme.Cliqz.Overview" parent="Theme.AppCompat.Light">
-        <item name="colorPrimary">@color/white</item>
+        <item name="colorPrimary">#efefef</item>
         <item name="colorPrimaryDark">@color/gray_medium</item>
         <item name="android:textColorPrimary">@color/black</item>
     </style>

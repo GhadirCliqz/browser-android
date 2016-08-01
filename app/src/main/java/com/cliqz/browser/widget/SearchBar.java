@@ -44,7 +44,7 @@ public class SearchBar extends FrameLayout {
     private void init() {
         inflate(getContext(), R.layout.search_bar_widget, this);
         ButterKnife.bind(this);
-        final Drawable icon = ThemeUtils.getLightThemedDrawable(getContext(), R.drawable.ic_action_delete);
+        final Drawable icon = ThemeUtils.getThemedDrawable(getContext(), R.drawable.ic_action_delete, true);
         searchEditText.setCompoundDrawablesWithIntrinsicBounds(null, null, icon, null);
         titleBar.setCompoundDrawablesWithIntrinsicBounds(null, null, icon, null);
         searchEditText.setOnTouchListener(onTouchListener);
