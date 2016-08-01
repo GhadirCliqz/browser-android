@@ -97,7 +97,7 @@ class V8Engine {
                     public void invoke(V8Object v8Object, V8Array v8Array) {
                         final String msg = v8Array.get(0).toString();
                         final String key = v8Array.get(1).toString();
-                        Log.d(TAG, msg);
+                        Log.d(TAG +':'+ key, msg);
                     }
                 }, "logDebug");
 
@@ -273,7 +273,7 @@ class V8Engine {
                         }
                     });
                 } catch (InterruptedException | ExecutionException | TimeoutException e) {
-                    Log.e(TAG, Log.getStackTraceString(e));
+                    Log.e(TAG, Log.getStackTraceString(e), e);
                 }
             }
         }, timeoutMsec, TimeUnit.MILLISECONDS);
@@ -301,7 +301,7 @@ class V8Engine {
                         }
                     });
                 } catch (InterruptedException | ExecutionException | TimeoutException e) {
-                    Log.e(TAG, Log.getStackTraceString(e));
+                    Log.e(TAG, Log.getStackTraceString(e), e);
                 }
             }
         }, interval, interval, TimeUnit.MILLISECONDS);
@@ -424,7 +424,7 @@ class V8Engine {
                             responseCode = httpURLConnection.getResponseCode();
 
                         } catch (IOException e) {
-                            Log.e(TAG, Log.getStackTraceString(e));
+                            Log.e(TAG, Log.getStackTraceString(e), e);
                             error = true;
                         }
                     }
