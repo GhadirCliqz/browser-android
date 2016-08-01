@@ -115,7 +115,8 @@ public class Telemetry {
         private static final String DOWNLOAD_PAGE = "download_page";
         private static final String DOWNLOAD_LINK = "download_link";
         private static final String IS_SUCCESS = "is_success";
-
+        private static final String ENCODING_EXCEPTION = "referrer_encoding_exception";
+        private static final String REFERRER_URL = "referrer_url";
     }
 
     public static class Action {
@@ -193,7 +194,9 @@ public class Telemetry {
             signal.put(Key.ACTION, action);
             if (action == Action.INSTALL) {
                 signal.put(Key.ADVERT_ID, mPreferenceManager.getAdvertID());
-                signal.put(Key.DISTRIBUTION, mPreferenceManager.getReferrer());
+                signal.put(Key.DISTRIBUTION, mPreferenceManager.getDistribution());
+                signal.put(Key.ENCODING_EXCEPTION, mPreferenceManager.getDistributionException());
+                signal.put(Key.REFERRER_URL, mPreferenceManager.getReferrerUrl());
                 sendEnvironmentSignal(true);
             }
         } catch (JSONException e) {
@@ -401,7 +404,7 @@ public class Telemetry {
             signal.put(Key.DEFAULT_SEARCH_ENGINE, getDefaultSearchEngine());
             signal.put(Key.HISTORY_URLS, historySize);
             signal.put(Key.NEWS_NOTIFICATION, mPreferenceManager.getNewsNotificationEnabled());
-            signal.put(Key.DISTRIBUTION, mPreferenceManager.getReferrer());
+            signal.put(Key.DISTRIBUTION, mPreferenceManager.getDistribution());
         } catch (JSONException e) {
             e.printStackTrace();
         }

@@ -633,7 +633,7 @@ public class MainActivity extends AppCompatActivity {
         telemetry.sendOnBoardingHideSignal(curTime - onBoardingAdapter.startTime);
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_FULL_USER);
         // Send telemetry "installed" signal
-        telemetry.sendLifeCycleSignal(Telemetry.Action.INSTALL);
+        // telemetry.sendLifeCycleSignal(Telemetry.Action.INSTALL);
         setupContentView();
     }
 
