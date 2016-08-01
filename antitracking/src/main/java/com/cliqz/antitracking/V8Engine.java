@@ -373,6 +373,7 @@ class V8Engine {
                                 break;
                             } else {
                                 responseData.append(line);
+                                responseData.append("\n");
                             }
                         }
                     } catch (IOException e) {
@@ -413,6 +414,7 @@ class V8Engine {
                                         break;
                                     } else {
                                         responseData.append(line);
+                                        responseData.append("\n");
                                     }
                                 }
                             } finally {
@@ -487,6 +489,7 @@ class V8Engine {
                         break;
                     } else {
                         fileData.append(line);
+                        fileData.append("\n");
                     }
                 }
                 inputStream.close();
@@ -550,6 +553,7 @@ class V8Engine {
                     break;
                 } else {
                     fileData.append(line);
+                    fileData.append("\n");
                 }
             }
             fin.close();
