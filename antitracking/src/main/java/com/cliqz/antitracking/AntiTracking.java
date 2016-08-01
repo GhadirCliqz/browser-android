@@ -326,4 +326,27 @@ public class AntiTracking {
     WebResourceResponse blockRequest() {
         return new WebResourceResponse("text/html", "UTF-8", StreamUtils.createEmptyStream());
     }
+
+    /**
+     * Get information about requests blocked/redirected for a tab.
+     * @param tabId ID of the tab to get information about (equals hashcode of webview)
+     * @return  JSONObject containing blocking metadata
+     */
+    public JSONObject getTabBlockingInfo(final int tabId) {
+        try {
+            final String tabInfoJson = v8.queryEngine(new V8Engine.Query<String>() {
+                public String query(V8 runtime) {
+                    return runtime.executeStringScript("JSON.stringify(System.get('antitracking/attrack').default.getTabBlockingInfo(" + tabId + "));");
+                }
+            });
+            return new JSONObject(tabInfoJson);
+        } catch (InterruptedException | ExecutionException | TimeoutException e) {
+            Log.e("attrack", "getTabBlockingInfo error", e);
+        } catch (JSONException e) {
+            // shouldn't happen - the parsed json comes directly from JSON.stringify in JS
+            throw new RuntimeException(e);
+        }
+        // on failure return empty object
+        return new JSONObject();
+    }
 }
