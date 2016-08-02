@@ -55,7 +55,7 @@ public class AntiTracking {
 
     private V8Object mWebRequest = null;
 
-    final private Set<String> TELEMETRY_WHITELIST = new HashSet<>(Arrays.asList("attrack.tokens", "attrack.FP", "attrack.tp_events"));
+    final private Set<String> TELEMETRY_WHITELIST = new HashSet<>(Arrays.asList("attrack.FP", "attrack.tp_events"));
 
     public AntiTracking(final Context context, final AntiTrackingSupport support) {
         // Create a v8 javascript, then load native bindings and polyfill, and the antitracking module
