@@ -30,7 +30,7 @@ public class HistoryWebView extends BaseWebView {
     @Nullable
     @Override
     protected String getExtensionUrl() {
-        if ("xwalk".equals(BuildConfig.FLAVOR)) {
+        if ("xwalk".equals(BuildConfig.FLAVOR_api)) {
             return FRESHTAB_MANIFEST_URL;
         } else {
             return FRESHTAB_URL;

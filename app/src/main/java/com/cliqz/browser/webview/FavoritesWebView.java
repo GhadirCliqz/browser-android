@@ -21,7 +21,7 @@ public class FavoritesWebView extends HistoryWebView {
     @Nullable
     @Override
     protected String getExtensionUrl() {
-        if ("xwalk".equals(BuildConfig.FLAVOR)) {
+        if ("xwalk".equals(BuildConfig.FLAVOR_api)) {
             return FRESHTAB_MANIFEST_URL_FAV;
         } else {
             return FRESHTAB_URL_FAV;

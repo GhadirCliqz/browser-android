@@ -8,6 +8,9 @@ android.metaClass.baseVersionCode = 90
 android.metaClass.baseVersionName = "1.0.0r1"
 
 android {
+    defaultConfig.versionCode = 1
+    defaultConfig.versionName = "1.0.0r1"
+
     compileSdkVersion 23
     buildToolsVersion "23.0.3"
     defaultConfig {
@@ -19,15 +22,6 @@ android {
 
         applicationId "com.cliqz.browser"
         testInstrumentationRunner "com.cliqz.browser.test.CustomTestRunner"
-
-        splits {
-            abi {
-                enable true
-                reset()
-                include 'armeabi-v7a', 'x86'
-                universalApk true
-            }
-    }
     }
     buildTypes {
         debug {
@@ -64,25 +58,46 @@ android {
             java.srcDirs += [
                     'src/standard/java',
             ]
-    }
-    }
-    productFlavors {
-        standard {
-            versionCode baseVersionCode+1
-            versionName baseVersionName
-                }
-        xwalk {
-            versionCode baseVersionCode
-            versionName baseVersionName+"_xw"
-            minSdkVersion 16
-                }
-        lookback {
-            targetSdkVersion 21
-            versionCode baseVersionCode+1
-            versionName baseVersionName+"_lb"
-            }
         }
     }
+
+    flavorDimensions "api", "abi"
+
+    productFlavors {
+        standard {
+            dimension "api"
+            versionCode = 5
+        }
+        xwalk {
+            dimension "api"
+            minSdkVersion 16
+            versionCode = 1
+        }
+        lookback {
+            dimension "api"
+            targetSdkVersion 21
+            versionCode = 9
+        }
+        x86 {
+            dimension "abi"
+            ndk {
+                abiFilter "x86"
+            }
+            versionCode = 5
+        }
+        arm {
+            dimension "abi"
+            ndk {
+                abiFilter "armeabi-v7a"
+            }
+            versionCode = 3
+        }
+        fat {
+            dimension "abi"
+            versionCode = 1
+        }
+    }
+}
 
 dexcount {
     includeClasses = false
@@ -155,5 +170,14 @@ dependencies {
     androidTestCompile 'com.android.support.test:rules:0.5'
     androidTestCompile 'com.android.support.test.espresso:espresso-core:2.2.2'
     androidTestCompile 'com.android.support.test.espresso:espresso-web:2.2.2'
-	androidTestCompile 'org.eclipse.jetty:jetty-server:9.2.17.v20160517'
+    androidTestCompile 'org.eclipse.jetty:jetty-server:9.2.17.v20160517'
+}
+
+preBuild << {
+    android.applicationVariants.each { variant ->
+        def apiVersion = variant.productFlavors.get(0).versionCode
+        def abiVersion = variant.productFlavors.get(1).versionCode
+        // set the composite code
+        variant.mergedFlavor.versionCode = android.defaultConfig.versionCode * 100 + apiVersion * 10 + abiVersion
+    }
 }

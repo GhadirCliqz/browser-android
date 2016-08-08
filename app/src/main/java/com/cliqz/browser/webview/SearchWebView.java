@@ -53,7 +53,7 @@ public class SearchWebView extends BaseWebView {
     @Nullable
     @Override
     protected String getExtensionUrl() {
-        if ("xwalk".equals(BuildConfig.FLAVOR)) {
+        if ("xwalk".equals(BuildConfig.FLAVOR_api)) {
             return CLIQZ_MANIFEST_URL;
         } else {
             return CLIQZ_URL;
