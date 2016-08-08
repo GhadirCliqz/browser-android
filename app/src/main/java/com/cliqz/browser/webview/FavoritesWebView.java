@@ -3,12 +3,16 @@ package com.cliqz.browser.webview;
 import android.content.Context;
 import android.support.annotation.Nullable;
 
+import com.cliqz.browser.BuildConfig;
+
 /**
  * Created by Ravjit on 04/08/16.
  */
 public class FavoritesWebView extends HistoryWebView {
 
-    private static final String FRESHTAB_URL_FAV = "file:///android_asset/search/history.html#favorites";
+    private static final String FRESHTAB_URL_FAV = "file:///android_asset/search/favorites.html";
+    private static final String FRESHTAB_MANIFEST_URL_FAV = "file:///android_asset/search/favorites.json";
+
 
     public FavoritesWebView(Context context) {
         super(context);
@@ -17,7 +21,11 @@ public class FavoritesWebView extends HistoryWebView {
     @Nullable
     @Override
     protected String getExtensionUrl() {
-        return FRESHTAB_URL_FAV;
+        if ("xwalk".equals(BuildConfig.FLAVOR)) {
+            return FRESHTAB_MANIFEST_URL_FAV;
+        } else {
+            return FRESHTAB_URL_FAV;
+        }
     }
 }
 
