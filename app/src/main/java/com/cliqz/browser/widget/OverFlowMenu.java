@@ -21,6 +21,8 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.cliqz.browser.app.BrowserApp;
+import com.cliqz.browser.di.components.ActivityComponent;
 import com.cliqz.browser.main.CliqzBrowserState;
 import com.cliqz.browser.main.CliqzBrowserState.Mode;
 import com.cliqz.browser.R;
@@ -138,7 +140,10 @@ public class OverFlowMenu extends FrameLayout {
         prepareEntries();
         listView = new ListView(context);
         this.addView(listView);
-        ((MainActivity)context).mActivityComponent.inject(this);
+        final ActivityComponent component = BrowserApp.getActivityComponent(context);
+        if (component != null) {
+            component.inject(this);
+        }
         overFlowMenuAdapter = new OverFlowMenuAdapter();
         listView.setAdapter(overFlowMenuAdapter);
         listView.setOnItemClickListener(itemClickListener);

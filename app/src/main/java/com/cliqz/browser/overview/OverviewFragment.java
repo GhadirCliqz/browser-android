@@ -1,6 +1,5 @@
 package com.cliqz.browser.overview;
 
-import android.content.Context;
 import android.content.res.TypedArray;
 import android.os.Build;
 import android.os.Bundle;
@@ -10,27 +9,36 @@ import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.cliqz.browser.R;
-import com.cliqz.browser.main.FragmentWithBus;
+import com.cliqz.browser.app.BrowserApp;
+import com.cliqz.browser.di.components.ActivityComponent;
 import com.cliqz.browser.main.MainActivity;
 import com.cliqz.browser.main.Messages;
+import com.cliqz.browser.main.TabsManager;
+import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
 
-public class OverviewFragment extends FragmentWithBus {
+import javax.inject.Inject;
+
+public class OverviewFragment extends Fragment {
 
     private Toolbar mToolbar;
     private TabLayout mTabLayout;
     private ViewPager mViewPager;
     private OverviewPagerAdapter mOverviewPagerAdapter;
+
+    @Inject
+    Bus bus;
+
+    @Inject
+    TabsManager tabsManager;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -70,13 +78,15 @@ public class OverviewFragment extends FragmentWithBus {
         final int id = item.getItemId();
         switch (id) {
             case R.id.action_new_tab:
-                ((MainActivity)getActivity()).tabsManager.addNewTab(false);
+                tabsManager.addNewTab(false);
                 return true;
             case R.id.action_new_forget_tab:
-                ((MainActivity)getActivity()).tabsManager.addNewTab(true);
+                tabsManager.addNewTab(true);
                 return true;
             case R.id.action_settings:
-                bus.post(new Messages.GoToSettings());
+                if (bus != null) {
+                    bus.post(new Messages.GoToSettings());
+                }
                 return true;
             default:
                 return false;
@@ -85,6 +95,24 @@ public class OverviewFragment extends FragmentWithBus {
 
     @Subscribe
     public void onBackPressed(Messages.BackPressed event) {
-        ((MainActivity)getActivity()).tabsManager.showTab(((MainActivity)getActivity()).tabsManager.getCurrentTabPosition());
+        tabsManager.showTab(tabsManager.getCurrentTabPosition());
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        final ActivityComponent component = BrowserApp.getActivityComponent(getActivity());
+        if (component != null) {
+            component.inject(this);
+            bus.register(this);
+        }
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        if (bus != null) {
+            bus.unregister(this);
+        }
     }
 }

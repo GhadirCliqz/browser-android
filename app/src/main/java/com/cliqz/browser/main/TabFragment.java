@@ -50,7 +50,6 @@ import com.squareup.otto.Subscribe;
 import org.json.JSONArray;
 
 import java.util.ArrayList;
-import java.util.Locale;
 
 import acr.browser.lightning.bus.BrowserEvents;
 import acr.browser.lightning.constant.Constants;
@@ -87,6 +86,7 @@ public class TabFragment extends BaseFragment {
     private String mSearchEngine;
     private Message newTabMessage = null;
     private String mExternalQuery = null;
+    // TODO: @Ravjit this should not be public (avoid public members)
     public final CliqzBrowserState state = new CliqzBrowserState();
     protected boolean isHomePageShown = false;
     private JSONArray videoUrls = null;

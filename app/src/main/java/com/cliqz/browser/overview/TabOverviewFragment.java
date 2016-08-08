@@ -13,8 +13,12 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.cliqz.browser.R;
+import com.cliqz.browser.app.BrowserApp;
+import com.cliqz.browser.di.components.ActivityComponent;
 import com.cliqz.browser.main.MainActivity;
 import com.cliqz.browser.main.TabsManager;
+
+import javax.inject.Inject;
 
 /**
  * Created by Ravjit on 20/07/16.
@@ -25,15 +29,15 @@ public class TabOverviewFragment extends Fragment {
     private TabsOverviewAdapter mTabsOverviewAdapter;
     private FloatingActionButton mNewTabButton;
 
+    @Inject
+    TabsManager tabsManager;
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         final View view = inflater.inflate(R.layout.tabs_overview, container, false);
         mTabsListView = (RecyclerView) view.findViewById(R.id.tabs_list_view);
         mTabsListView.setLayoutManager(new LinearLayoutManager(getActivity()));
-        final TabsManager tabsManager = ((MainActivity)getActivity()).tabsManager;
-        mTabsOverviewAdapter = new TabsOverviewAdapter(getContext(), R.layout.tab_list_item, tabsManager);
-        mTabsListView.setAdapter(mTabsOverviewAdapter);
         mNewTabButton = (FloatingActionButton) view.findViewById(R.id.new_tab_button);
         mNewTabButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -57,5 +61,16 @@ public class TabOverviewFragment extends Fragment {
         ItemTouchHelper itemTouchHelper = new ItemTouchHelper(swipeCallback);
         itemTouchHelper.attachToRecyclerView(mTabsListView);
         return view;
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        final ActivityComponent component = BrowserApp.getActivityComponent(getActivity());
+        if (component != null) {
+            component.inject(this);
+        }
+        mTabsOverviewAdapter = new TabsOverviewAdapter(getContext(), R.layout.tab_list_item, tabsManager);
+        mTabsListView.setAdapter(mTabsOverviewAdapter);
     }
 }

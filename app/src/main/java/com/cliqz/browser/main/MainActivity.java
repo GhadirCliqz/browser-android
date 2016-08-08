@@ -18,6 +18,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Message;
 import android.provider.Settings;
+import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewPager;
@@ -34,6 +35,7 @@ import android.widget.CompoundButton;
 
 import com.cliqz.browser.BuildConfig;
 import com.cliqz.browser.R;
+import com.cliqz.browser.app.ActivityComponentProvider;
 import com.cliqz.browser.app.BrowserApp;
 import com.cliqz.browser.di.components.ActivityComponent;
 import com.cliqz.browser.di.modules.MainActivityModule;
@@ -70,14 +72,14 @@ import acr.browser.lightning.utils.WebUtils;
  * @author Stefano Pacifici
  * @date 2015/11/23
  */
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements ActivityComponentProvider {
 
     private final static String TAG = MainActivity.class.getSimpleName();
     private static final int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
 
     private static final String NEW_TAB_MSG = "new_tab_message_extra";
 
-    public ActivityComponent mActivityComponent;
+    private ActivityComponent mActivityComponent;
 
     private static final String HISTORY_FRAGMENT_TAG = "history_fragment";
     private static final String OVERVIEW_FRAGMENT_TAG = "overview_fragment";
@@ -101,10 +103,12 @@ public class MainActivity extends AppCompatActivity {
     private boolean mIsColdStart = true;
     private boolean mShouldShowLookbackDialog = true;
     private final HashSet<Long> downloadIds = new HashSet<>();
-    public TabsManager tabsManager;
 
     @Inject
     Bus bus;
+
+    @Inject
+    TabsManager tabsManager;
 
     @Inject
     PreferenceManager preferenceManager;
@@ -149,7 +153,6 @@ public class MainActivity extends AppCompatActivity {
 //        mFreshTabFragment = new FreshTabFragment();
         searchWebView = new SearchWebView(this);
         mOverViewFragment = new OverviewFragment();
-        tabsManager = new TabsManager(this, getSupportFragmentManager());
         performExitCleanUp();
         // Ignore intent if we are being recreated
         final Intent intent = savedInstanceState == null ? getIntent() : null;
@@ -482,43 +485,12 @@ public class MainActivity extends AppCompatActivity {
         telemetry.resetBackNavigationVariables(-1);
         final FragmentManager fm = getSupportFragmentManager();
         final FragmentTransaction transaction = fm.beginTransaction();
-/*
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            transaction.
-                    setCustomAnimations(R.anim.enter_slide_down, R.anim.exit_slide_down,
-                            R.anim.enter_slide_up, R.anim.exit_slide_up);
-        } else {
-            transaction.setCustomAnimations(R.anim.fade_in, R.anim.fade_out,
-                    R.anim.fade_in, R.anim.fade_out);
-        }
-*/
         //workaround for getting the mode in hitroy fragment
         currentMode = tabsManager.getCurrentTab()
                 .state.getMode() == CliqzBrowserState.Mode.SEARCH ? "cards" : "web";
         transaction.replace(R.id.content_frame, mOverViewFragment, OVERVIEW_FRAGMENT_TAG)
                 .addToBackStack(null)
                 .commit();
-    }
-
-    @Subscribe
-    public void goToSuggestions(Messages.GoToSuggestions event) {
-        telemetry.resetBackNavigationVariables(-1);
-        final FragmentManager fm = getSupportFragmentManager();
-        final FragmentTransaction transaction = fm.beginTransaction();
-/*
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            transaction.
-                    setCustomAnimations(R.anim.enter_slide_down, R.anim.exit_slide_down,
-                            R.anim.enter_slide_up, R.anim.exit_slide_up);
-        } else {
-            transaction.setCustomAnimations(R.anim.fade_in, R.anim.fade_out,
-                    R.anim.fade_in, R.anim.fade_out);
-        }
-*/
-//        transaction.replace(R.id.content_frame
-//                , mFreshTabFragment, SUGGESTIONS_FRAGMENT_TAG)
-//                .addToBackStack(null)
-//                .commit();
     }
 
     @Subscribe
@@ -678,5 +650,11 @@ public class MainActivity extends AppCompatActivity {
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+
+    @Nullable
+    @Override
+    public ActivityComponent getActivityComponent() {
+        return mActivityComponent;
     }
 }
