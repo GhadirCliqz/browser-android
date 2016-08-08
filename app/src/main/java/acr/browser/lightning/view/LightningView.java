@@ -31,12 +31,13 @@ import android.webkit.WebSettings.LayoutAlgorithm;
 import android.webkit.WebSettings.PluginState;
 import android.webkit.WebView;
 
+import com.cliqz.antitracking.AntiTracking;
 import com.cliqz.browser.R;
 import com.cliqz.browser.antiphishing.AntiPhishing;
-import com.cliqz.browser.main.MainActivity;
+import com.cliqz.browser.app.BrowserApp;
+import com.cliqz.browser.di.components.ActivityComponent;
 import com.cliqz.browser.utils.PasswordManager;
 import com.cliqz.browser.utils.Telemetry;
-import com.cliqz.antitracking.AntiTracking;
 import com.squareup.otto.Bus;
 
 import java.io.File;
@@ -135,7 +136,10 @@ public class LightningView {
 
     @SuppressLint("NewApi")
     public LightningView(final Activity activity, boolean isIncognito, String uniqueId) {
-        ((MainActivity)activity).mActivityComponent.inject(this);
+        final ActivityComponent component = BrowserApp.getActivityComponent(activity);
+        if (component != null) {
+            component.inject(this);
+        }
         this.activity = activity;
         mId = uniqueId;
         mWebView = /* overrideWebView != null ? overrideWebView : */new CliqzWebView(activity);

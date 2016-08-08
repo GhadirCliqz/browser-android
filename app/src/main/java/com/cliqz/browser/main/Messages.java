@@ -12,7 +12,7 @@ public final class Messages {
 
     public static class Exit {}
 
-    public static class GoToHistory {}
+    public static class GoToOverview {}
 
     public static class GoToSuggestions {}
 

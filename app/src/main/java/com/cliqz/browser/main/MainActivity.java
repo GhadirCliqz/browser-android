@@ -13,43 +13,34 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.database.Cursor;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Message;
 import android.provider.Settings;
+import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
-import android.support.v4.content.ContextCompat;
-import android.support.v4.view.ViewCompat;
 import android.support.v4.view.ViewPager;
-import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.util.Patterns;
-import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
-import android.webkit.WebView;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
-import android.widget.FrameLayout;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.TextView;
 
 import com.cliqz.browser.BuildConfig;
 import com.cliqz.browser.R;
+import com.cliqz.browser.app.ActivityComponentProvider;
 import com.cliqz.browser.app.BrowserApp;
 import com.cliqz.browser.di.components.ActivityComponent;
 import com.cliqz.browser.di.modules.MainActivityModule;
 import com.cliqz.browser.gcm.RegistrationIntentService;
+import com.cliqz.browser.overview.OverviewFragment;
 import com.cliqz.browser.utils.LocationCache;
 import com.cliqz.browser.utils.LookbackWrapper;
 import com.cliqz.browser.utils.Telemetry;
@@ -62,9 +53,7 @@ import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 
 import javax.inject.Inject;
 
@@ -83,16 +72,17 @@ import acr.browser.lightning.utils.WebUtils;
  * @author Stefano Pacifici
  * @date 2015/11/23
  */
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements ActivityComponentProvider {
 
     private final static String TAG = MainActivity.class.getSimpleName();
     private static final int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
 
     private static final String NEW_TAB_MSG = "new_tab_message_extra";
 
-    public ActivityComponent mActivityComponent;
+    private ActivityComponent mActivityComponent;
 
     private static final String HISTORY_FRAGMENT_TAG = "history_fragment";
+    private static final String OVERVIEW_FRAGMENT_TAG = "overview_fragment";
     private static final String SUGGESTIONS_FRAGMENT_TAG = "suggestions_fragment";
     static final String TAB_FRAGMENT_TAG = "tab_fragment";
     private static final String CUSTOM_VIEW_FRAGMENT_TAG = "custom_view_fragment";
@@ -101,19 +91,13 @@ public class MainActivity extends AppCompatActivity {
     private static final int CONTENT_VIEW_ID = R.id.main_activity_content;
 
     private static final String SAVED_STATE = TAG + ".SAVED_STATE";
-
-    private TabFragment firstFragment;
-    private FreshTabFragment mFreshTabFragment;
-    private HistoryFragment mHistoryFragment;
+    private Bundle firstTabArgs;
+    private OverviewFragment mOverViewFragment;
     private OnBoardingAdapter onBoardingAdapter;
     private ViewPager pager;
     private boolean askedGPSPermission = false;
     private CustomViewHandler mCustomViewHandler;
     // private boolean mIsIncognito;
-    private final List<TabFragment> mFragmentsList = new ArrayList<>();
-    private RecyclerView mTabListView;
-    protected TabsAdapter mTabsAdapter;
-    private DrawerLayout drawerLayout;
     protected SearchWebView searchWebView;
     protected String currentMode;
     private boolean mIsColdStart = true;
@@ -122,6 +106,9 @@ public class MainActivity extends AppCompatActivity {
 
     @Inject
     Bus bus;
+
+    @Inject
+    TabsManager tabsManager;
 
     @Inject
     PreferenceManager preferenceManager;
@@ -164,11 +151,8 @@ public class MainActivity extends AppCompatActivity {
 //        }
 
 //        mFreshTabFragment = new FreshTabFragment();
-        mFragmentsList.clear();
         searchWebView = new SearchWebView(this);
-        mHistoryFragment = new HistoryFragment(this);
-        firstFragment = new TabFragment();
-        mFragmentsList.add(firstFragment);
+        mOverViewFragment = new OverviewFragment();
         performExitCleanUp();
         // Ignore intent if we are being recreated
         final Intent intent = savedInstanceState == null ? getIntent() : null;
@@ -194,19 +178,18 @@ public class MainActivity extends AppCompatActivity {
         if(isNotificationClicked) {
             telemetry.sendNewsNotificationSignal(Telemetry.Action.CLICK);
         }
-        final Bundle args = new Bundle();
-        args.putBoolean(Constants.KEY_IS_INCOGNITO, isIncognito);
+        firstTabArgs = new Bundle();
+        firstTabArgs.putBoolean(Constants.KEY_IS_INCOGNITO, isIncognito);
         if (url != null && Patterns.WEB_URL.matcher(url).matches()) {
             setIntent(null);
-            args.putString(Constants.KEY_URL, url);
+            firstTabArgs.putString(Constants.KEY_URL, url);
         } else if (message) {
             setIntent(null);
-            args.putBoolean(Constants.KEY_NEW_TAB_MESSAGE, true);
+            firstTabArgs.putBoolean(Constants.KEY_NEW_TAB_MESSAGE, true);
         } else if (query != null) {
             setIntent(null);
-            args.putString(Constants.KEY_QUERY, query);
+            firstTabArgs.putString(Constants.KEY_QUERY, query);
         }
-        firstFragment.setArguments(args);
 
         // File used to override the onboarding during UIAutomation tests
         final File onBoardingOverrideFile = new File(Constants.ONBOARDING_OVERRIDE_FILE);
@@ -256,16 +239,7 @@ public class MainActivity extends AppCompatActivity {
         //content.setId(CONTENT_VIEW_ID);
         //setContentView(content, params);
         setContentView(R.layout.activity_main);
-        drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
-        drawerLayout.setDrawerListener(new DrawerListener());
-        mTabListView = (RecyclerView) findViewById(R.id.tabs_list);
-        mTabsAdapter = new TabsAdapter(this, R.layout.tab_list_item, mFragmentsList);
-        mTabListView.setAdapter(mTabsAdapter);
-        final RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
-        mTabListView.setLayoutManager(layoutManager);
-        mTabListView.setHasFixedSize(true);
-        final FragmentManager fm = getSupportFragmentManager();
-        fm.beginTransaction().replace(R.id.content_frame, firstFragment, TAB_FRAGMENT_TAG).commit();
+        tabsManager.addNewTab(firstTabArgs);
     }
 
     @Override
@@ -292,7 +266,7 @@ public class MainActivity extends AppCompatActivity {
         super.onResume();
         gcmReceiver.register();
         registerReceiver(onComplete, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
-        resumeAllWebViews();
+        tabsManager.resumeAllTabs();
         final String name = getCurrentVisibleFragmentName();
         timings.setAppStartTime();
         //Ask for "Dangerous Permissions" on runtime
@@ -308,7 +282,7 @@ public class MainActivity extends AppCompatActivity {
             }
         }
         //The idea is to reset all tabs if the app has been in background for 30mins
-        for (TabFragment tabFragment : mFragmentsList) {
+        for (TabFragment tabFragment : tabsManager.getTabsList()) {
             tabFragment.state.setShouldReset(
                     System.currentTimeMillis() - timings.getAppStopTime() >= Constants.HOME_RESET_DELAY);
         }
@@ -344,7 +318,6 @@ public class MainActivity extends AppCompatActivity {
         final String url = Intent.ACTION_VIEW.equals(intent.getAction()) ? intent.getDataString() : null;
         final String query = Intent.ACTION_WEB_SEARCH.equals(intent.getAction()) ? intent.getStringExtra(SearchManager.QUERY) : null;
         final boolean isNotificationClicked = bundle != null ? bundle.getBoolean(Constants.NOTIFICATION_CLICKED) : false;
-        final TabFragment newTab = new TabFragment();
         final Bundle args = new Bundle();
         args.putBoolean(Constants.KEY_IS_INCOGNITO, false);
         if(url != null && Patterns.WEB_URL.matcher(url).matches()) {
@@ -356,10 +329,8 @@ public class MainActivity extends AppCompatActivity {
         if(isNotificationClicked) {
             telemetry.sendNewsNotificationSignal(Telemetry.Action.CLICK);
         }
-        newTab.setArguments(args);
-        mFragmentsList.add(newTab);
-        telemetry.sendNewTabSignal(mFragmentsList.size(), false);
-        showTab(mFragmentsList.size()-1);
+        tabsManager.addNewTab(args);
+        telemetry.sendNewTabSignal(tabsManager.getTabCount(), false);
     }
 
     private void showGPSPermissionDialog() {
@@ -413,7 +384,7 @@ public class MainActivity extends AppCompatActivity {
         super.onPause();
         gcmReceiver.unregister();
         unregisterReceiver(onComplete);
-        pauseAllWebViews();
+        tabsManager.pauseAllTabs();
         String context = getCurrentVisibleFragmentName();
         timings.setAppStopTime();
         if(!context.isEmpty()) {
@@ -444,7 +415,6 @@ public class MainActivity extends AppCompatActivity {
             WebUtils.clearCache(this);
         }
         if (preferenceManager.getClearHistoryExitEnabled()) {
-            //TODO reintroduce this
             historyDatabase.clearHistory(false);
             preferenceManager.setShouldClearQueries(PreferenceManager.ClearQueriesOptions.CLEAR_HISTORY);
         }
@@ -465,7 +435,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Subscribe
     public void createWindow(BrowserEvents.CreateWindow event) {
-        createTab(event.msg, mFragmentsList.get(getCurrentTabPosition()).state.isIncognito());
+        createTab(event.msg, tabsManager.getCurrentTab().state.isIncognito());
 //        // TODO: Temporary workaround, we want to open a new activity!
 //        bus.post(new CliqzMessages.OpenLink(event.url));
     }
@@ -475,35 +445,23 @@ public class MainActivity extends AppCompatActivity {
         createTab("", event.isIncognito);
     }
 
-    @Subscribe
-    public void showTabManager(BrowserEvents.ShowTabManager event) {
-        mTabsAdapter.notifyDataSetChanged();
-        drawerLayout.openDrawer(Gravity.LEFT);
-    }
-
     private void createTab(Message msg, boolean isIncognito) {
-        final TabFragment newTab = new TabFragment();
         final Bundle args = new Bundle();
         args.putBoolean(Constants.KEY_IS_INCOGNITO, isIncognito);
         args.putBoolean(Constants.KEY_NEW_TAB_MESSAGE, true);
         BrowserApp.pushNewTabMessage(msg);
-        newTab.setArguments(args);
-        mFragmentsList.add(newTab);
-        telemetry.sendNewTabSignal(mFragmentsList.size(), isIncognito);
-        showTab(mFragmentsList.size()-1);
+        tabsManager.addNewTab(args);
+        telemetry.sendNewTabSignal(tabsManager.getTabCount(), isIncognito);
     }
 
     private void createTab(String url, boolean isIncognito) {
-        final TabFragment newTab = new TabFragment();
         final Bundle args = new Bundle();
         args.putBoolean(Constants.KEY_IS_INCOGNITO, isIncognito);
         if(url != null && Patterns.WEB_URL.matcher(url).matches()) {
             args.putString(Constants.KEY_URL, url);
         }
-        newTab.setArguments(args);
-        mFragmentsList.add(newTab);
-        telemetry.sendNewTabSignal(mFragmentsList.size(), isIncognito);
-        showTab(mFragmentsList.size()-1);
+        tabsManager.addNewTab(args);
+        telemetry.sendNewTabSignal(tabsManager.getTabCount(), isIncognito);
     }
 
     @Subscribe
@@ -523,45 +481,14 @@ public class MainActivity extends AppCompatActivity {
         }
     }
     @Subscribe
-    public void goToHistory(Messages.GoToHistory event) {
+    public void goToOverView(Messages.GoToOverview event) {
         telemetry.resetBackNavigationVariables(-1);
         final FragmentManager fm = getSupportFragmentManager();
         final FragmentTransaction transaction = fm.beginTransaction();
-/*
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            transaction.
-                    setCustomAnimations(R.anim.enter_slide_down, R.anim.exit_slide_down,
-                            R.anim.enter_slide_up, R.anim.exit_slide_up);
-        } else {
-            transaction.setCustomAnimations(R.anim.fade_in, R.anim.fade_out,
-                    R.anim.fade_in, R.anim.fade_out);
-        }
-*/
         //workaround for getting the mode in hitroy fragment
-        currentMode = mFragmentsList.get(getCurrentTabPosition())
+        currentMode = tabsManager.getCurrentTab()
                 .state.getMode() == CliqzBrowserState.Mode.SEARCH ? "cards" : "web";
-        transaction.replace(R.id.content_frame, mHistoryFragment, HISTORY_FRAGMENT_TAG)
-                .addToBackStack(null)
-                .commit();
-    }
-
-    @Subscribe
-    public void goToSuggestions(Messages.GoToSuggestions event) {
-        telemetry.resetBackNavigationVariables(-1);
-        final FragmentManager fm = getSupportFragmentManager();
-        final FragmentTransaction transaction = fm.beginTransaction();
-/*
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            transaction.
-                    setCustomAnimations(R.anim.enter_slide_down, R.anim.exit_slide_down,
-                            R.anim.enter_slide_up, R.anim.exit_slide_up);
-        } else {
-            transaction.setCustomAnimations(R.anim.fade_in, R.anim.fade_out,
-                    R.anim.fade_in, R.anim.fade_out);
-        }
-*/
-        transaction.replace(R.id.content_frame
-                , mFreshTabFragment, SUGGESTIONS_FRAGMENT_TAG)
+        transaction.replace(R.id.content_frame, mOverViewFragment, OVERVIEW_FRAGMENT_TAG)
                 .addToBackStack(null)
                 .commit();
     }
@@ -618,7 +545,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Subscribe
     public void exit(Messages.Exit event) {
-        deleteTab(getCurrentTabPosition());
+        finish();
     }
 
     public void nextScreen(View view) {
@@ -640,11 +567,11 @@ public class MainActivity extends AppCompatActivity {
     //returns screen that is visible
     private String getCurrentVisibleFragmentName() {
         String name = "";
-        final int currentTabPos = getCurrentTabPosition();
-        if (mHistoryFragment != null && mHistoryFragment.isVisible()) {
+        final TabFragment currentTab = tabsManager.getCurrentTab();
+        if (mOverViewFragment != null && mOverViewFragment.isVisible()) {
             name = "past";
-        } else if (currentTabPos != -1){
-            name = mFragmentsList.get(getCurrentTabPosition()).state.getMode() == CliqzBrowserState.Mode.SEARCH ? "cards" : "web";
+        } else if (currentTab != null){
+            name = currentTab.state.getMode() == CliqzBrowserState.Mode.SEARCH ? "cards" : "web";
         } else {
             name = "cards";
         }
@@ -669,111 +596,6 @@ public class MainActivity extends AppCompatActivity {
             return false;
         }
         return true;
-    }
-
-    private int getCurrentTabPosition() {
-        for(TabFragment tabFragment : mFragmentsList) {
-            if (tabFragment.isVisible()) {
-                return mFragmentsList.indexOf(tabFragment);
-            }
-        }
-        return -1;
-    }
-
-    private void showTab(int position) {
-        final FragmentManager fm = getSupportFragmentManager();
-        fm.beginTransaction().replace(R.id.content_frame, mFragmentsList.get(position), TAB_FRAGMENT_TAG).commit();
-    }
-
-    private synchronized void deleteTab(int position) {
-        if (position >= mFragmentsList.size()) {
-            return;
-        }
-        int current = getCurrentTabPosition();
-        if (current < 0) {
-            return;
-        }
-        TabFragment reference = mFragmentsList.get(position);
-        telemetry.sendTabCloseSignal(mFragmentsList.size() - 1, reference.state.isIncognito());
-        if (reference == null) {
-            return;
-        }
-        if (current > position) {
-            mFragmentsList.remove(position);
-            mTabsAdapter.notifyDataSetChanged();
-            reference.mLightningView.onDestroy();
-        } else if (mFragmentsList.size() > position + 1) {
-            if (current == position) {
-                showTab(position + 1);
-                mFragmentsList.remove(position);
-            } else {
-                mFragmentsList.remove(position);
-            }
-            mTabsAdapter.notifyDataSetChanged();
-            reference.mLightningView.onDestroy();
-        } else if (mFragmentsList.size() > 1) {
-            if (current == position) {
-                showTab(position - 1);
-            }
-            mFragmentsList.remove(position);
-            mTabsAdapter.notifyDataSetChanged();
-            reference.mLightningView.onDestroy();
-        } else {
-            finish();
-        }
-        Log.d(Constants.TAG, "deleted tab");
-    }
-
-    private void pauseAllWebViews() {
-        if (mFragmentsList.size() == 0 || mFragmentsList.get(0).mLightningView == null) {
-            return;
-        }
-        //Any webview is enough. Calling pauseTimers() on any one webview will pause timers of all webviews
-        final WebView firstWebview = mFragmentsList.get(0).mLightningView.getWebView();
-        if (firstWebview != null) {
-            firstWebview.pauseTimers();
-        }
-        for (TabFragment tabFragment : mFragmentsList) {
-            if (tabFragment.mLightningView == null) {
-                continue;
-            }
-            final WebView webView = tabFragment.mLightningView.getWebView();
-            if (webView != null) {
-                webView.onPause();
-            }
-        }
-        if (searchWebView != null) {
-            searchWebView.onPause();
-        }
-        if (mHistoryFragment.mHistoryWebView != null) {
-            mHistoryFragment.mHistoryWebView.onPause();
-        }
-    }
-
-    private void resumeAllWebViews() {
-        if (mFragmentsList.size() == 0 || mFragmentsList.get(0).mLightningView == null) {
-            return;
-        }
-        //Any webview is enough. Calling resumeTimers() on any one webview will resume timers of all webviews
-        final WebView firstWebview = mFragmentsList.get(0).mLightningView.getWebView();
-        if (firstWebview != null) {
-            firstWebview.resumeTimers();
-        }
-        for (TabFragment tabFragment : mFragmentsList) {
-            if (tabFragment.mLightningView == null) {
-                continue;
-            }
-            final WebView webView = tabFragment.mLightningView.getWebView();
-            if (webView != null) {
-                webView.onResume();
-            }
-        }
-        if (searchWebView != null) {
-            searchWebView.onResume();
-        }
-        if (mHistoryFragment.mHistoryWebView != null) {
-            mHistoryFragment.mHistoryWebView.onResume();
-        }
     }
 
     private final BroadcastReceiver onComplete = new BroadcastReceiver() {
@@ -818,114 +640,21 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
-    private class DrawerListener implements DrawerLayout.DrawerListener {
-
-        @Override
-        public void onDrawerOpened(View v) {
-            telemetry.sendTabsMenuOpen(mFragmentsList.size());
-        }
-
-        @Override
-        public void onDrawerClosed(View drawerView) {
-
-        }
-
-        @Override
-        public void onDrawerSlide(View v, float arg) {
-
-        }
-
-        @Override
-        public void onDrawerStateChanged(int newState) {
-            if (newState == DrawerLayout.STATE_DRAGGING && !drawerLayout.isDrawerOpen(Gravity.LEFT)) {
-                mTabsAdapter.notifyDataSetChanged();
-            }
-        }
-
-    }
-
-    protected class TabsAdapter extends RecyclerView.Adapter<TabsAdapter.TabViewHolder> {
-
-        private final Bitmap defaultFavicon;
-
-        private final Context context;
-        private final int layoutResourceId;
-        private List<TabFragment> data = null;
-
-        public TabsAdapter(Context context, int layoutResourceId, List<TabFragment> data) {
-            this.defaultFavicon = BitmapFactory.decodeResource(context.getResources(), R.drawable.ic_webpage);
-            this.context = context;
-            this.layoutResourceId = layoutResourceId;
-            this.data = data;
-        }
-
-        @Override
-        public TabViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-            final LayoutInflater inflater = LayoutInflater.from(parent.getContext());
-            final View view = inflater.inflate(layoutResourceId, parent, false);
-            return new TabViewHolder(view);
-        }
-
-        @Override
-        public void onBindViewHolder(TabViewHolder holder, final int position) {
-            holder.layout.setTag(position);
-            holder.exitButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    deleteTab(position);
-                }
-            });
-            holder.layout.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if (getCurrentTabPosition() != position) {
-                        showTab(position);
-                    }
-                    drawerLayout.closeDrawers();
-                    telemetry.sendTabOpenSignal(position, mFragmentsList.size(),
-                            mFragmentsList.get(position).state.isIncognito());
-                }
-            });
-            ViewCompat.jumpDrawablesToCurrentState(holder.exitButton);
-            TabFragment tabFragment = data.get(position);
-            final String title;
-            if (tabFragment.state.getMode() == CliqzBrowserState.Mode.SEARCH) {
-                title = tabFragment.state.getQuery();
-            } else {
-                title = tabFragment.getPageTitle();
-            }
-            holder.title.setText(title.isEmpty() ? getString(R.string.home) : title);
-            final Bitmap favIcon = tabFragment.getFavicon();
-            holder.icon.setImageBitmap(favIcon != null ? favIcon : defaultFavicon);
-            if (position == getCurrentTabPosition()) {
-                holder.layout.setBackgroundColor(ContextCompat.getColor(MainActivity.this, R.color.gray_list_bg));
-            } else {
-                holder.layout.setBackgroundColor(ContextCompat.getColor(MainActivity.this, R.color.white));
-            }
-        }
-
-        @Override
-        public int getItemCount() {
-            return data != null ? data.size() : 0;
-        }
-
-        public class TabViewHolder extends RecyclerView.ViewHolder {
-
-            final TextView title;
-            final ImageView icon;
-            final ImageView exit;
-            final FrameLayout exitButton;
-            final LinearLayout layout;
-
-            public TabViewHolder(View view) {
-                super(view);
-                title = (TextView) view.findViewById(R.id.textTab);
-                icon = (ImageView) view.findViewById(R.id.faviconTab);
-                exit = (ImageView) view.findViewById(R.id.deleteButton);
-                layout = (LinearLayout) view.findViewById(R.id.tab_item_background);
-                exitButton = (FrameLayout) view.findViewById(R.id.deleteAction);
-            }
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        final int id = item.getItemId();
+        switch(id) {
+            case android.R.id.home:
+                onBackPressed();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
         }
     }
 
+    @Nullable
+    @Override
+    public ActivityComponent getActivityComponent() {
+        return mActivityComponent;
+    }
 }

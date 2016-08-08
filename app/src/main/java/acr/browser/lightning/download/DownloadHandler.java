@@ -22,6 +22,7 @@ import android.webkit.URLUtil;
 import com.cliqz.browser.BuildConfig;
 import com.cliqz.browser.R;
 import com.cliqz.browser.app.BrowserApp;
+import com.cliqz.browser.di.components.ActivityComponent;
 import com.cliqz.browser.main.Messages;
 import com.squareup.otto.Bus;
 
@@ -135,7 +136,8 @@ public class DownloadHandler {
     /* package */
     private static void onDownloadStartNoStream(final Activity activity, String url, String userAgent,
                                                 String contentDisposition, String mimetype, final boolean isYouTubeVideo) {
-        final Bus eventBus = ((com.cliqz.browser.main.MainActivity)activity).mActivityComponent.getBus();
+        final ActivityComponent component = BrowserApp.getActivityComponent(activity);
+        final Bus eventBus = component != null ? component.getBus() : new Bus();
         final String filename = URLUtil.guessFileName(url, contentDisposition, mimetype);
 
         // Check to see if we have an SDCard
@@ -149,7 +151,7 @@ public class DownloadHandler {
                 msg = activity.getString(R.string.download_sdcard_busy_dlg_msg);
                 title = R.string.download_sdcard_busy_dlg_title;
             } else {
-                msg = activity.getString(R.string.download_no_sdcard_dlg_msg, filename);
+                msg = activity.getString(R.string.download_no_sdcard_dlg_msg);
                 title = R.string.download_no_sdcard_dlg_title;
             }
 

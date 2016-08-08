@@ -50,7 +50,6 @@ import com.squareup.otto.Subscribe;
 import org.json.JSONArray;
 
 import java.util.ArrayList;
-import java.util.Locale;
 
 import acr.browser.lightning.bus.BrowserEvents;
 import acr.browser.lightning.constant.Constants;
@@ -87,7 +86,8 @@ public class TabFragment extends BaseFragment {
     private String mSearchEngine;
     private Message newTabMessage = null;
     private String mExternalQuery = null;
-    protected final CliqzBrowserState state = new CliqzBrowserState();
+    // TODO: @Ravjit this should not be public (avoid public members)
+    public final CliqzBrowserState state = new CliqzBrowserState();
     protected boolean isHomePageShown = false;
     private JSONArray videoUrls = null;
 
@@ -123,6 +123,9 @@ public class TabFragment extends BaseFragment {
     @Bind(R.id.in_page_search_bar)
     View inPageSearchBar;
 
+    @Bind(R.id.open_tabs_count)
+    TextView openTabsCounter;
+
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -154,6 +157,7 @@ public class TabFragment extends BaseFragment {
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         ButterKnife.bind(this, view);
+        openTabsCounter.setText(Integer.toString(((MainActivity)getActivity()).tabsManager.getTabCount()));
         inPageSearchBar.setVisibility(View.GONE);
         state.setIncognito(isIncognito);
         if (mSearchWebView == null || mLightningView == null) {
@@ -333,7 +337,7 @@ public class TabFragment extends BaseFragment {
     @OnClick(R.id.menu_history)
     void historyClicked() {
         hideKeyboard();
-        delayedPostOnBus(new Messages.GoToHistory());
+        delayedPostOnBus(new Messages.GoToOverview());
     }
 
     @OnClick(R.id.title_bar)

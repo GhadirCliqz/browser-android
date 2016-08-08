@@ -264,6 +264,9 @@
     <string name="action_show_tab_manager">Tab Manager</string>
     <string name="make_video_available_offline">Offline verfügbar machen</string>
     <string name="dialog_youtube_video">Was möchten Sie mit diesem Video tun?</string>
+    <string name="overview">Überblick</string>
+    <string name="open_tabs">Offene Tabs</string>
+    <string name="favorites">Favoriten</string>
     <string name="in_page_search_next_result">Seitensuche nächstes Ergebnis</string>
     <string name="in_page_search_prev_result">Seitensuche vorheriges Ergebnis</string>
     <string name="close_in_page_search">Seitensuche schließen</string>

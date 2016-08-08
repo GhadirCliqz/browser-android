@@ -2,14 +2,15 @@ package com.cliqz.browser.di.modules;
 
 import android.content.Context;
 
+import com.cliqz.antitracking.AntiTracking;
 import com.cliqz.antitracking.AntiTrackingSupport;
 import com.cliqz.browser.antiphishing.AntiPhishing;
-import com.cliqz.antitracking.AntiTracking;
 import com.cliqz.browser.app.BrowserApp;
 import com.cliqz.browser.gcm.AwsSNSManager;
 import com.cliqz.browser.utils.PasswordManager;
 import com.cliqz.browser.utils.Telemetry;
 import com.google.gson.Gson;
+import com.squareup.otto.Bus;
 
 import net.i2p.android.ui.I2PAndroidHelper;
 
@@ -100,6 +101,12 @@ public class AppModule {
 
     @Provides
     @Singleton
+    Bus provideBus() {
+        return new Bus();
+    }
+
+    @Provides
+    @Singleton
     public AntiPhishing provideAntiPhishing() {
         return new AntiPhishing();
 	}
@@ -134,4 +141,5 @@ public class AppModule {
             }
         });
     }
+
 }

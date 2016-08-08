@@ -13,6 +13,8 @@ import android.webkit.MimeTypeMap;
 import android.webkit.URLUtil;
 
 import com.cliqz.browser.R;
+import com.cliqz.browser.app.BrowserApp;
+import com.cliqz.browser.di.components.ActivityComponent;
 import com.cliqz.browser.main.MainActivity;
 import com.cliqz.browser.main.Messages;
 import com.squareup.otto.Bus;
@@ -59,7 +61,8 @@ class FetchUrlMimeType extends Thread {
     public void run() {
         // User agent is likely to be null, though the AndroidHttpClient
         // seems ok with that.
-        final Bus eventBus = ((MainActivity)mActivity).mActivityComponent.getBus();
+        final ActivityComponent component = BrowserApp.getActivityComponent(mActivity);
+        final Bus eventBus = component != null ? component.getBus() : new Bus();
         String mimeType = null;
         String contentDisposition = null;
         HttpURLConnection connection = null;

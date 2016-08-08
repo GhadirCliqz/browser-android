@@ -41,7 +41,6 @@ import java.util.List;
 
 import acr.browser.lightning.bus.BrowserEvents;
 import acr.browser.lightning.constant.Constants;
-import acr.browser.lightning.utils.UrlUtils;
 
 /**
  * @author Stefano Pacifici based on Anthony C. Restaino's code
@@ -82,55 +81,56 @@ class LightningWebClient extends WebViewClient implements AntiPhishing.AntiPhish
     private WebResourceResponse handleUrl(final WebView view, Uri uri) {
         final String cliqzPath = String.format("%s%d", CLIQZ_PATH, view.hashCode());
         final String path = uri.getPath();
-        // We only handle urls that has the cliqz scheme or the cliqz path ("/CLIQZ+(webview hashcode)")
-        if (!TrampolineConstants.CLIQZ_SCHEME.equals(uri.getScheme()) && !cliqzPath.equals(path)) {
-            return null;
-        }
 
-        if (TrampolineConstants.CLIQZ_TRAMPOLINE_AUTHORITY.equals(uri.getAuthority())) {
-            if (TrampolineConstants.CLIQZ_TRAMPOLINE_GOTO_PATH.equals(path)) {
-                final Resources resources = view.getResources();
-                final WebResourceResponse response =
-                        new WebResourceResponse("text/html", "UTF-8",
-                                resources.openRawResource(R.raw.trampoline_forward));
-                return response;
-            }
-            if (TrampolineConstants.CLIQZ_TRAMPOLINE_SEARCH_PATH.equals(path)) {
-                final String query = uri.getQueryParameter("q");
-                lightningView.telemetry.sendBackPressedSignal("web", "cards", query.length());
-                view.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        lightningView.eventBus.post(new Messages.ShowSearch(query));
-                    }
-                });
-                return createOKResponse();
-            }
-            if (TrampolineConstants.CLIQZ_TRAMPOLINE_CLOSE_PATH.equals(path)) {
-                view.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        lightningView.eventBus.post(new Messages.Exit());
-                    }
-                });
-            }
-            if (TrampolineConstants.CLIQZ_TRAMPOLINE_HISTORY_PATH.equals(path)) {
-                lightningView.telemetry.sendBackPressedSignal("web", "history", 0);
-                view.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        lightningView.eventBus.post(new Messages.GoToHistory());
-                        if (lightningView.canGoBack()) {
-                            lightningView.goBack();
+        if (TrampolineConstants.CLIQZ_SCHEME.equals(uri.getScheme())) {
+            // Urls with the cliqz scheme
+            if (TrampolineConstants.CLIQZ_TRAMPOLINE_AUTHORITY.equals(uri.getAuthority())) {
+                if (TrampolineConstants.CLIQZ_TRAMPOLINE_GOTO_PATH.equals(path)) {
+                    final Resources resources = view.getResources();
+                    final WebResourceResponse response =
+                            new WebResourceResponse("text/html", "UTF-8",
+                                    resources.openRawResource(R.raw.trampoline_forward));
+                    return response;
+                }
+                if (TrampolineConstants.CLIQZ_TRAMPOLINE_SEARCH_PATH.equals(path)) {
+                    final String query = uri.getQueryParameter("q");
+                    lightningView.telemetry.sendBackPressedSignal("web", "cards", query.length());
+                    view.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            lightningView.eventBus.post(new Messages.ShowSearch(query));
                         }
-                    }
-                });
-                return createOKResponse();
+                    });
+                    return createOKResponse();
+                }
+                if (TrampolineConstants.CLIQZ_TRAMPOLINE_CLOSE_PATH.equals(path)) {
+                    view.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            lightningView.eventBus.post(new Messages.Exit());
+                        }
+                    });
+                }
+                if (TrampolineConstants.CLIQZ_TRAMPOLINE_HISTORY_PATH.equals(path)) {
+                    lightningView.telemetry.sendBackPressedSignal("web", "history", 0);
+                    view.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            lightningView.eventBus.post(new Messages.GoToOverview());
+                            if (lightningView.canGoBack()) {
+                                lightningView.goBack();
+                            }
+                        }
+                    });
+                    return createOKResponse();
+                }
             }
         } else if (cliqzPath.equals(path)) {
+            // Urls with the special CLIQZ Path
             lightningView.passwordManager.provideOrSavePassword(uri, view);
             return createOKResponse();
         } else if (lightningView.adblock.isAd(uri)) {
+            // Every thing else
             return new WebResourceResponse("text/html", "UTF-8", StreamUtils.createEmptyStream());
         }
         return null;
