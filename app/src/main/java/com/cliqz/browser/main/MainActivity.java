@@ -90,7 +90,7 @@ public class MainActivity extends AppCompatActivity {
 
     private static final String SAVED_STATE = TAG + ".SAVED_STATE";
     private Bundle firstTabArgs;
-    private HistoryFragment mHistoryFragment;
+    private OverviewFragment mOverViewFragment;
     private OnBoardingAdapter onBoardingAdapter;
     private ViewPager pager;
     private boolean askedGPSPermission = false;
@@ -148,7 +148,7 @@ public class MainActivity extends AppCompatActivity {
 
 //        mFreshTabFragment = new FreshTabFragment();
         searchWebView = new SearchWebView(this);
-        mHistoryFragment = new HistoryFragment(this);
+        mOverViewFragment = new OverviewFragment();
         tabsManager = new TabsManager(this, getSupportFragmentManager());
         performExitCleanUp();
         // Ignore intent if we are being recreated
@@ -495,7 +495,7 @@ public class MainActivity extends AppCompatActivity {
         //workaround for getting the mode in hitroy fragment
         currentMode = tabsManager.getCurrentTab()
                 .state.getMode() == CliqzBrowserState.Mode.SEARCH ? "cards" : "web";
-        transaction.replace(R.id.content_frame, new OverviewFragment(), OVERVIEW_FRAGMENT_TAG)
+        transaction.replace(R.id.content_frame, mOverViewFragment, OVERVIEW_FRAGMENT_TAG)
                 .addToBackStack(null)
                 .commit();
     }
@@ -596,7 +596,7 @@ public class MainActivity extends AppCompatActivity {
     private String getCurrentVisibleFragmentName() {
         String name = "";
         final TabFragment currentTab = tabsManager.getCurrentTab();
-        if (mHistoryFragment != null && mHistoryFragment.isVisible()) {
+        if (mOverViewFragment != null && mOverViewFragment.isVisible()) {
             name = "past";
         } else if (currentTab != null){
             name = currentTab.state.getMode() == CliqzBrowserState.Mode.SEARCH ? "cards" : "web";

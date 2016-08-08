@@ -67,6 +67,9 @@ public class TabsManager {
         }
     }
 
+    /**
+     * @return Returns the tabfragment at the required position
+     */
     public TabFragment getTab(int position) {
         return mFragmentsList.get(position);
     }
@@ -127,11 +130,6 @@ public class TabsManager {
         Log.d(Constants.TAG, "deleted tab");
     }
 
-    /**
-     * Notify the Adapter that the Tabs' data has changed
-     */
-    public void notifyDataSetChanged() {
-    }
 
     public void pauseAllTabs() {
         if (mFragmentsList.size() == 0 || mFragmentsList.get(0).mLightningView == null) {
