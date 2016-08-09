@@ -1,9 +1,12 @@
 package com.cliqz.browser.overview;
 
 import android.content.res.Resources;
+import android.os.Bundle;
+import android.support.annotation.StringRes;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
+import android.util.Pair;
 
 import com.cliqz.browser.R;
 import com.cliqz.browser.app.BrowserApp;
@@ -14,45 +17,50 @@ import com.cliqz.browser.main.HistoryFragment;
  */
 public class OverviewPagerAdapter extends FragmentPagerAdapter {
 
-    private static final int NUM_OF_TABS = 3;
-    private TabOverviewFragment tabOverviewFragment = new TabOverviewFragment();
-    private HistoryFragment historyOverviewFragment = new HistoryFragment(false);
-    private HistoryFragment favoritesFragment = new HistoryFragment(true);
+    private final TabOverviewFragment tabOverviewFragment;
+    private final HistoryFragment historyOverviewFragment;
+    private final HistoryFragment favoritesFragment;
+    private final FragmentEntry[] fragments;
+
     private final Resources resources = BrowserApp.getAppContext().getResources();
+
+    private final static class FragmentEntry {
+        private final @StringRes int title;
+        private final Fragment fragment;
+
+        FragmentEntry(@StringRes int title, Fragment fragment) {
+            this.title = title;
+            this.fragment = fragment;
+        }
+    }
 
     public OverviewPagerAdapter(FragmentManager fragmentManager) {
         super(fragmentManager);
+        tabOverviewFragment = new TabOverviewFragment();
+        historyOverviewFragment = new HistoryFragment();
+        favoritesFragment = new HistoryFragment();
+        final Bundle favoritesBundle = new Bundle();
+        favoritesBundle.putBoolean(HistoryFragment.SHOW_FAVORITES_ONLY, true);
+        favoritesFragment.setArguments(favoritesBundle);
+        fragments = new FragmentEntry[] {
+                new FragmentEntry(R.string.open_tabs, tabOverviewFragment),
+                new FragmentEntry(R.string.history, historyOverviewFragment),
+                new FragmentEntry(R.string.favorites, favoritesFragment)
+        };
     }
+
     @Override
     public Fragment getItem(int position) {
-        switch (position) {
-            case 0:
-                return tabOverviewFragment;
-            case 1:
-                return historyOverviewFragment;
-            case 2:
-                return favoritesFragment;
-            default:
-                return null;
-        }
+        return fragments[position].fragment;
     }
 
     @Override
     public int getCount() {
-        return NUM_OF_TABS;
+        return fragments.length;
     }
 
     @Override
     public CharSequence getPageTitle(int position) {
-        switch (position) {
-            case 0:
-                return resources.getString(R.string.open_tabs);
-            case 1:
-                return resources.getString(R.string.history);
-            case 2:
-                return resources.getString(R.string.favorites);
-            default:
-                return null;
-        }
+        return resources.getString(fragments[position].title);
     }
 }

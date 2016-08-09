@@ -270,4 +270,8 @@
     <string name="in_page_search_next_result">Seitensuche nächstes Ergebnis</string>
     <string name="in_page_search_prev_result">Seitensuche vorheriges Ergebnis</string>
     <string name="close_in_page_search">Seitensuche schließen</string>
+    <string name="antiphishing_dialog_title">Warnung: betrügerische Website!</string>
+    <string name="antiphishing_message">CLIQZ hat den Zugriff auf %1$s blockiert, weil diese Seite als Phishing-Website gemeldet wurde.\nPhishing-Websites geben vor, vertrauenswürdig zu sein, damit du deine Anmeldedaten, dein Passwort oder andere vertrauliche Informationen preisgibst.\n[Mehr erfahren|Link to https://cliqz.com/whycliqz/anti-phishing]</string>
+    <string name="antiphishing_walk_away">Zurück zu sicherer</string>
+    <string name="antiphishing_ignore_danger">Trotz der Warnung fortfahren</string>
 </resources>

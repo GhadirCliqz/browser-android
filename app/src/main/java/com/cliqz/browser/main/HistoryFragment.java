@@ -21,29 +21,18 @@ import acr.browser.lightning.preference.PreferenceManager;
  */
 public class HistoryFragment extends FragmentWithBus {
 
+    private static final String TAG = HistoryFragment.class.getSimpleName();
+    public static final String SHOW_FAVORITES_ONLY = TAG + ".show_favorites_only";
+
     protected HistoryWebView mHistoryWebView;
 
     private boolean mJustCreated = false;
-    private boolean isFav;
-
-    @SuppressLint("ValidFragment")
-    public HistoryFragment(Activity activity) {
-        super();
-        createWebView(activity);
-    }
-
-    public HistoryFragment() {
-        super();
-    }
-
-    public HistoryFragment(boolean isFav) {
-        super();
-        this.isFav = isFav;
-    }
 
     private void createWebView(Activity activity) {
         // Must use activity due to Crosswalk webview
-        mHistoryWebView = isFav ? new FavoritesWebView(activity) : new HistoryWebView(activity);
+        final Bundle args = getArguments();
+        final boolean showFavorites = args != null ? args.getBoolean(SHOW_FAVORITES_ONLY, false): false;
+        mHistoryWebView = showFavorites ? new FavoritesWebView(activity) : new HistoryWebView(activity);
         mHistoryWebView.setLayoutParams(
                 new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
     }

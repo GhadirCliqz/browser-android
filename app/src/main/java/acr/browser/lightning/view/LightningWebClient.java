@@ -20,6 +20,7 @@ import android.text.method.PasswordTransformationMethod;
 import android.util.Log;
 import android.webkit.HttpAuthHandler;
 import android.webkit.SslErrorHandler;
+import android.webkit.URLUtil;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebResourceResponse;
 import android.webkit.WebView;
@@ -41,6 +42,7 @@ import java.util.List;
 
 import acr.browser.lightning.bus.BrowserEvents;
 import acr.browser.lightning.constant.Constants;
+import acr.browser.lightning.utils.UrlUtils;
 
 /**
  * @author Stefano Pacifici based on Anthony C. Restaino's code
@@ -178,7 +180,7 @@ class LightningWebClient extends WebViewClient implements AntiPhishing.AntiPhish
             mLastUrl = url;
             if (url != null && !url.isEmpty() && !url.startsWith("cliqz://")) {
                 lightningView.antiPhishing.processUrl(url, this);
-        }
+            }
         }
         if(lightningView.telemetry.backPressed) {
             if(!url.contains(TrampolineConstants.CLIQZ_TRAMPOLINE_GOTO)) {
@@ -418,6 +420,7 @@ class LightningWebClient extends WebViewClient implements AntiPhishing.AntiPhish
             @Override
             public void run() {
                 if (!url.equals(mLastUrl)|| antiPhishingDialog.isShowing()) { return; }
+                antiPhishingDialog.setUrl(UrlUtils.getDomain(url));
                 antiPhishingDialog.show();
             }
         });

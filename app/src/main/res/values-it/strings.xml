@@ -272,4 +272,8 @@
     <string name="close_in_page_search">Chiudi ricerca nella pagina</string>
     <string name="in_page_search_next_result">Prossimo risultato nella pagina</string>
     <string name="in_page_search_prev_result">Precedente risultato nella pagina</string>
+    <string name="antiphishing_dialog_title">Attenzione: sito ingannevole!</string>
+    <string name="antiphishing_message">CLIQZ ha bloccato  %1$s perchè il dominio é stato segnalato come phishing.\nIl phishing é la pratica di apparire come altri siti di cui ti potresti fidare in modo di estorcerti lo username, la password o altre informazioni sensibili.\nClicca [qui|https://cliqz.com/en/whycliqz/anti-phishing] per maggiori informazioni</string>
+    <string name="antiphishing_walk_away">Allontanati</string>
+    <string name="antiphishing_ignore_danger">Continua comunque</string>
 </resources>
