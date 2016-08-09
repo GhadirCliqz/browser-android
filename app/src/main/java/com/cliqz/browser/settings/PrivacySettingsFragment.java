@@ -43,7 +43,7 @@ public class PrivacySettingsFragment extends BaseSettingsFragment {
 
     private static final int API = Build.VERSION.SDK_INT;
     private Activity mActivity;
-    private CheckBoxPreference cblocation, cbenablecookies, cb3cookies, cbsavepasswords, cbcacheexit,
+    private CheckBoxPreference cblocation, cbenablecookies, cbsavepasswords, cbcacheexit,
             cbhistoryexit, cbcookiesexit; //cbcookiesInkognito, cbwebstorageexit
     // private boolean mSystemBrowser;
     private Handler messageHandler;
@@ -72,7 +72,6 @@ public class PrivacySettingsFragment extends BaseSettingsFragment {
         cblocation = (CheckBoxPreference) findPreference(SETTINGS_LOCATION);
         cbenablecookies = (CheckBoxPreference) findPreference(SETTINGS_ENABLECOOKIES);
         // cbcookiesInkognito = (CheckBoxPreference) findPreference(SETTINGS_COOKIESINKOGNITO);
-        cb3cookies = (CheckBoxPreference) findPreference(SETTINGS_THIRDPCOOKIES);
         cbsavepasswords = (CheckBoxPreference) findPreference(SETTINGS_SAVEPASSWORD);
         cbcacheexit = (CheckBoxPreference) findPreference(SETTINGS_CACHEEXIT);
         cbhistoryexit = (CheckBoxPreference) findPreference(SETTINGS_HISTORYEXIT);
@@ -101,12 +100,6 @@ public class PrivacySettingsFragment extends BaseSettingsFragment {
         cbhistoryexit.setChecked(mPreferenceManager.getClearHistoryExitEnabled());
         cbcookiesexit.setChecked(mPreferenceManager.getClearCookiesExitEnabled());
         // cbwebstorageexit.setChecked(mPreferenceManager.getClearWebStorageExitEnabled());
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            cb3cookies.setOnPreferenceChangeListener(this);
-            cb3cookies.setChecked(mPreferenceManager.getBlockThirdPartyCookiesEnabled());
-        } else {
-            getPreferenceScreen().removePreference(cb3cookies);
-        }
 
         final Preference prefClearHistory = findPreference(SETTINGS_CLEARHISTORY);
         prefClearHistory.setOnPreferenceClickListener(this);
@@ -333,10 +326,6 @@ public class PrivacySettingsFragment extends BaseSettingsFragment {
 //                mPreferenceManager.setIncognitoCookiesEnabled((Boolean) newValue);
 //                cbcookiesInkognito.setChecked((Boolean) newValue);
 //                return true;
-            case SETTINGS_THIRDPCOOKIES:
-                mPreferenceManager.setBlockThirdPartyCookiesEnabled((Boolean) newValue);
-                cb3cookies.setChecked((Boolean) newValue);
-                return true;
             case SETTINGS_SAVEPASSWORD:
                 mPreferenceManager.setSavePasswordsEnabled((Boolean) newValue);
                 cbsavepasswords.setChecked((Boolean) newValue);

@@ -336,9 +336,9 @@ public class LightningView {
                 settings.setTextZoom(50);
                 break;
         }
+        CookieManager.getInstance().setAcceptCookie(preferences.getCookiesEnabled());
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            CookieManager.getInstance().setAcceptThirdPartyCookies(mWebView,
-                    !preferences.getBlockThirdPartyCookiesEnabled());
+            CookieManager.getInstance().setAcceptThirdPartyCookies(mWebView, false);
         }
     }
 
