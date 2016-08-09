@@ -120,7 +120,7 @@ public class PreferenceManager {
     }
 
     public boolean getBlockThirdPartyCookiesEnabled() {
-        return mPrefs.getBoolean(Name.BLOCK_THIRD_PARTY, false);
+        return mPrefs.getBoolean(Name.BLOCK_THIRD_PARTY, true);
     }
 
     public boolean getCheckedForTor() {
