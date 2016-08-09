@@ -48,6 +48,8 @@ import java.util.concurrent.TimeoutException;
 class V8Engine {
 
     private static final String TAG = V8Engine.class.getSimpleName();
+    private static final String HEADER_CONTENT_TYPE = "Content-Type";
+    private static final String TYPE_JSON = "application/json";
 
     private V8 v8;
     private final BlockingQueue<FutureTask<?>> queries = new LinkedBlockingQueue<>();
@@ -78,8 +80,8 @@ class V8Engine {
                 v8.registerJavaMethod(V8Engine.this, "readTempFile", "readTempFile", new Class<?>[]{String.class, V8Function.class});
                 v8.registerJavaMethod(V8Engine.this, "writeTempFile", "writeTempFile", new Class<?>[]{String.class, String.class});
                 v8.registerJavaMethod(V8Engine.this, "mkTempDir", "mkTempDir", new Class<?>[]{String.class});
-                v8.registerJavaMethod(V8Engine.this, "readFile", "readFile", new Class<?>[]{String.class, V8Function.class});
-                v8.registerJavaMethod(V8Engine.this, "writeFile", "writeFile", new Class<?>[]{String.class, String.class});
+                v8.registerJavaMethod(V8Engine.this, "readFile", "readFileNative", new Class<?>[]{String.class, V8Function.class});
+                v8.registerJavaMethod(V8Engine.this, "writeFile", "writeFileNative", new Class<?>[]{String.class, String.class});
 
                 // loadSubScript function: to allow the extension to dynamically load libraries
                 v8.registerJavaMethod(new JavaVoidCallback() {
@@ -188,6 +190,10 @@ class V8Engine {
         return queryEngine(q, 0);
     }
 
+    public <V> V queryEngine(final Query<V> q, final int msTimeout)  throws InterruptedException, ExecutionException, TimeoutException {
+        return queryEngine(q, msTimeout, false);
+    }
+
     /**
      * Send a Query to the javascript engine.
      * <p/>
@@ -202,7 +208,7 @@ class V8Engine {
      * @throws ExecutionException
      * @throws TimeoutException     if the query blocks for more than msTimeout ms.
      */
-    public <V> V queryEngine(final Query<V> q, final int msTimeout) throws InterruptedException, ExecutionException, TimeoutException {
+    public <V> V queryEngine(final Query<V> q, final int msTimeout, final boolean async) throws InterruptedException, ExecutionException, TimeoutException {
         FutureTask<V> future = new FutureTask<V>(new Callable<V>() {
             @Override
             public V call() throws Exception {
@@ -210,6 +216,9 @@ class V8Engine {
             }
         });
         queries.add(future);
+        if (async) {
+            return null;
+        }
         if (msTimeout > 0) {
             try {
                 return future.get(msTimeout, TimeUnit.MILLISECONDS);
@@ -231,7 +240,7 @@ class V8Engine {
      */
     public void asyncQuery(final Query<?> q) throws InterruptedException, ExecutionException {
         try {
-            queryEngine(q, 0);
+            queryEngine(q, 0, true);
         } catch (TimeoutException e) {
             // this shouldn't be possible
         }
@@ -397,7 +406,9 @@ class V8Engine {
                             httpURLConnection.setReadTimeout(timeout);
 
                             if (data != null && data.length() > 0) {
+                                httpURLConnection.setRequestProperty(HEADER_CONTENT_TYPE, TYPE_JSON);
                                 httpURLConnection.setDoOutput(true);
+                                httpURLConnection.setUseCaches(false);
                                 DataOutputStream dataOutputStream = new DataOutputStream(httpURLConnection.getOutputStream());
                                 dataOutputStream.writeBytes(data);
                                 dataOutputStream.close();
@@ -406,6 +417,7 @@ class V8Engine {
                             try {
                                 httpURLConnection.connect();
 
+                                Log.d(TAG, method +": " + requestedUrl +" ("+ httpURLConnection.getResponseCode() +") ");
                                 DataInputStream in = new DataInputStream(httpURLConnection.getInputStream());
                                 BufferedReader lines = new BufferedReader(new InputStreamReader(in, "UTF-8"));
                                 while (true) {
@@ -545,7 +557,7 @@ class V8Engine {
         StringBuilder fileData = new StringBuilder();
         V8Array respArgs = new V8Array(v8);
         try {
-            FileInputStream fin = context.openFileInput(path);
+            FileInputStream fin = context.openFileInput(safePath(path));
             BufferedReader lines = new BufferedReader(new InputStreamReader(fin));
             while (true) {
                 String line = lines.readLine();
@@ -564,6 +576,8 @@ class V8Engine {
         } catch (IOException e) {
             Log.e(TAG, Log.getStackTraceString(e));
             callback.call(callback, respArgs);
+        } catch (Exception e) {
+            Log.e(TAG, Log.getStackTraceString(e));
         } finally {
             respArgs.release();
         }
@@ -578,11 +592,15 @@ class V8Engine {
     public void writeFile(final String path, final String data) {
         Log.d(TAG, "Write: " + path + ", " + data.length() + "b");
         try {
-            FileOutputStream fos = context.openFileOutput(path, Context.MODE_PRIVATE);
+            FileOutputStream fos = context.openFileOutput(safePath(path), Context.MODE_PRIVATE);
             fos.write(data.getBytes());
             fos.close();
         } catch (IOException e) {
             Log.e(TAG, Log.getStackTraceString(e));
         }
+    }
+
+    private static String safePath(String path) {
+        return path.replace('/', '_');
     }
 }

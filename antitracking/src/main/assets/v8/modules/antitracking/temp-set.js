@@ -1,16 +1,19 @@
-System.register("antitracking/temp-set", [], function (_export) {
+System.register('antitracking/temp-set', ['core/cliqz'], function (_export) {
+
   /** Set like class whose members are removed after a specifie
   */
-  "use strict";
+  'use strict';
 
-  var _default;
+  var utils, _default;
 
-  var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+  var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
 
-  function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+  function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
 
   return {
-    setters: [],
+    setters: [function (_coreCliqz) {
+      utils = _coreCliqz.utils;
+    }],
     execute: function () {
       _default = (function () {
         function _default() {
@@ -21,32 +24,32 @@ System.register("antitracking/temp-set", [], function (_export) {
         }
 
         _createClass(_default, [{
-          key: "contains",
+          key: 'contains',
           value: function contains(item) {
             return this._items.has(item);
           }
         }, {
-          key: "has",
+          key: 'has',
           value: function has(item) {
             return this.contains(item);
           }
         }, {
-          key: "add",
+          key: 'add',
           value: function add(item, ttl) {
             this._items.add(item);
-            var timeout = CliqzUtils.setTimeout((function () {
-              this["delete"](item);
-              this._timeouts["delete"](timeout);
+            var timeout = utils.setTimeout((function () {
+              this['delete'](item);
+              this._timeouts['delete'](timeout);
             }).bind(this), ttl || 0);
             this._timeouts.add(timeout);
           }
         }, {
-          key: "delete",
+          key: 'delete',
           value: function _delete(item) {
-            this._items["delete"](item);
+            this._items['delete'](item);
           }
         }, {
-          key: "clear",
+          key: 'clear',
           value: function clear() {
             var _iteratorNormalCompletion = true;
             var _didIteratorError = false;
@@ -56,15 +59,15 @@ System.register("antitracking/temp-set", [], function (_export) {
               for (var _iterator = this._timeouts[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
                 var t = _step.value;
 
-                CliqzUtils.clearTimeout(t);
+                utils.clearTimeout(t);
               }
             } catch (err) {
               _didIteratorError = true;
               _iteratorError = err;
             } finally {
               try {
-                if (!_iteratorNormalCompletion && _iterator["return"]) {
-                  _iterator["return"]();
+                if (!_iteratorNormalCompletion && _iterator['return']) {
+                  _iterator['return']();
                 }
               } finally {
                 if (_didIteratorError) {
@@ -81,10 +84,10 @@ System.register("antitracking/temp-set", [], function (_export) {
         return _default;
       })();
 
-      _export("default", _default);
+      _export('default', _default);
 
       ;
     }
   };
 });
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbImFudGl0cmFja2luZy90ZW1wLXNldC5lcyJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiOzs7Ozs7Ozs7Ozs7Ozs7QUFJYSw0QkFBRzs7O0FBQ1osY0FBSSxDQUFDLE1BQU0sR0FBRyxJQUFJLEdBQUcsRUFBRSxDQUFDO0FBQ3hCLGNBQUksQ0FBQyxTQUFTLEdBQUcsSUFBSSxHQUFHLEVBQUUsQ0FBQztTQUM1Qjs7OztpQkFFTyxrQkFBQyxJQUFJLEVBQUU7QUFDYixtQkFBTyxJQUFJLENBQUMsTUFBTSxDQUFDLEdBQUcsQ0FBQyxJQUFJLENBQUMsQ0FBQztXQUM5Qjs7O2lCQUVFLGFBQUMsSUFBSSxFQUFFO0FBQ1IsbUJBQU8sSUFBSSxDQUFDLFFBQVEsQ0FBQyxJQUFJLENBQUMsQ0FBQztXQUM1Qjs7O2lCQUVFLGFBQUMsSUFBSSxFQUFFLEdBQUcsRUFBRTtBQUNiLGdCQUFJLENBQUMsTUFBTSxDQUFDLEdBQUcsQ0FBQyxJQUFJLENBQUMsQ0FBQztBQUN0QixnQkFBSSxPQUFPLEdBQUcsVUFBVSxDQUFDLFVBQVUsQ0FBQyxDQUFBLFlBQVc7QUFDM0Msa0JBQUksVUFBTyxDQUFDLElBQUksQ0FBQyxDQUFDO0FBQ2xCLGtCQUFJLENBQUMsU0FBUyxVQUFPLENBQUMsT0FBTyxDQUFDLENBQUM7YUFDbEMsQ0FBQSxDQUFDLElBQUksQ0FBQyxJQUFJLENBQUMsRUFBRSxHQUFHLElBQUksQ0FBQyxDQUFDLENBQUM7QUFDeEIsZ0JBQUksQ0FBQyxTQUFTLENBQUMsR0FBRyxDQUFDLE9BQU8sQ0FBQyxDQUFDO1dBQzdCOzs7aUJBRUssaUJBQUMsSUFBSSxFQUFFO0FBQ1gsZ0JBQUksQ0FBQyxNQUFNLFVBQU8sQ0FBQyxJQUFJLENBQUMsQ0FBQztXQUMxQjs7O2lCQUVJLGlCQUFHOzs7Ozs7QUFDTixtQ0FBYyxJQUFJLENBQUMsU0FBUyw4SEFBRTtvQkFBckIsQ0FBQzs7QUFDUiwwQkFBVSxDQUFDLFlBQVksQ0FBQyxDQUFDLENBQUMsQ0FBQztlQUM1Qjs7Ozs7Ozs7Ozs7Ozs7OztBQUNELGdCQUFJLENBQUMsU0FBUyxDQUFDLEtBQUssRUFBRSxDQUFDO0FBQ3ZCLGdCQUFJLENBQUMsTUFBTSxDQUFDLEtBQUssRUFBRSxDQUFDO1dBQ3JCOzs7Ozs7OztBQUVGLE9BQUMiLCJmaWxlIjoiYW50aXRyYWNraW5nL3RlbXAtc2V0LmVzIiwic291cmNlc0NvbnRlbnQiOlsiLyoqIFNldCBsaWtlIGNsYXNzIHdob3NlIG1lbWJlcnMgYXJlIHJlbW92ZWQgYWZ0ZXIgYSBzcGVjaWZpZVxuKi9cbmV4cG9ydCBkZWZhdWx0IGNsYXNzIHtcblxuICBjb25zdHJ1Y3RvcigpIHtcbiAgICB0aGlzLl9pdGVtcyA9IG5ldyBTZXQoKTtcbiAgICB0aGlzLl90aW1lb3V0cyA9IG5ldyBTZXQoKTtcbiAgfVxuXG4gIGNvbnRhaW5zKGl0ZW0pIHtcbiAgICByZXR1cm4gdGhpcy5faXRlbXMuaGFzKGl0ZW0pO1xuICB9XG5cbiAgaGFzKGl0ZW0pIHtcbiAgICByZXR1cm4gdGhpcy5jb250YWlucyhpdGVtKTtcbiAgfVxuXG4gIGFkZChpdGVtLCB0dGwpIHtcbiAgICB0aGlzLl9pdGVtcy5hZGQoaXRlbSk7XG4gICAgdmFyIHRpbWVvdXQgPSBDbGlxelV0aWxzLnNldFRpbWVvdXQoZnVuY3Rpb24oKSB7XG4gICAgICAgIHRoaXMuZGVsZXRlKGl0ZW0pO1xuICAgICAgICB0aGlzLl90aW1lb3V0cy5kZWxldGUodGltZW91dCk7XG4gICAgfS5iaW5kKHRoaXMpLCB0dGwgfHwgMCk7XG4gICAgdGhpcy5fdGltZW91dHMuYWRkKHRpbWVvdXQpO1xuICB9XG5cbiAgZGVsZXRlKGl0ZW0pIHtcbiAgICB0aGlzLl9pdGVtcy5kZWxldGUoaXRlbSk7XG4gIH1cblxuICBjbGVhcigpIHtcbiAgICBmb3IgKGxldCB0IG9mIHRoaXMuX3RpbWVvdXRzKSB7XG4gICAgICBDbGlxelV0aWxzLmNsZWFyVGltZW91dCh0KTtcbiAgICB9XG4gICAgdGhpcy5fdGltZW91dHMuY2xlYXIoKTtcbiAgICB0aGlzLl9pdGVtcy5jbGVhcigpO1xuICB9XG5cbn07XG4iXX0=
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbImFudGl0cmFja2luZy90ZW1wLXNldC5qcyJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiOzs7Ozs7Ozs7Ozs7Ozt5QkFBUyxLQUFLOzs7O0FBTUQsNEJBQUc7OztBQUNaLGNBQUksQ0FBQyxNQUFNLEdBQUcsSUFBSSxHQUFHLEVBQUUsQ0FBQztBQUN4QixjQUFJLENBQUMsU0FBUyxHQUFHLElBQUksR0FBRyxFQUFFLENBQUM7U0FDNUI7Ozs7aUJBRU8sa0JBQUMsSUFBSSxFQUFFO0FBQ2IsbUJBQU8sSUFBSSxDQUFDLE1BQU0sQ0FBQyxHQUFHLENBQUMsSUFBSSxDQUFDLENBQUM7V0FDOUI7OztpQkFFRSxhQUFDLElBQUksRUFBRTtBQUNSLG1CQUFPLElBQUksQ0FBQyxRQUFRLENBQUMsSUFBSSxDQUFDLENBQUM7V0FDNUI7OztpQkFFRSxhQUFDLElBQUksRUFBRSxHQUFHLEVBQUU7QUFDYixnQkFBSSxDQUFDLE1BQU0sQ0FBQyxHQUFHLENBQUMsSUFBSSxDQUFDLENBQUM7QUFDdEIsZ0JBQUksT0FBTyxHQUFHLEtBQUssQ0FBQyxVQUFVLENBQUMsQ0FBQSxZQUFXO0FBQ3RDLGtCQUFJLFVBQU8sQ0FBQyxJQUFJLENBQUMsQ0FBQztBQUNsQixrQkFBSSxDQUFDLFNBQVMsVUFBTyxDQUFDLE9BQU8sQ0FBQyxDQUFDO2FBQ2xDLENBQUEsQ0FBQyxJQUFJLENBQUMsSUFBSSxDQUFDLEVBQUUsR0FBRyxJQUFJLENBQUMsQ0FBQyxDQUFDO0FBQ3hCLGdCQUFJLENBQUMsU0FBUyxDQUFDLEdBQUcsQ0FBQyxPQUFPLENBQUMsQ0FBQztXQUM3Qjs7O2lCQUVLLGlCQUFDLElBQUksRUFBRTtBQUNYLGdCQUFJLENBQUMsTUFBTSxVQUFPLENBQUMsSUFBSSxDQUFDLENBQUM7V0FDMUI7OztpQkFFSSxpQkFBRzs7Ozs7O0FBQ04sbUNBQWMsSUFBSSxDQUFDLFNBQVMsOEhBQUU7b0JBQXJCLENBQUM7O0FBQ1IscUJBQUssQ0FBQyxZQUFZLENBQUMsQ0FBQyxDQUFDLENBQUM7ZUFDdkI7Ozs7Ozs7Ozs7Ozs7Ozs7QUFDRCxnQkFBSSxDQUFDLFNBQVMsQ0FBQyxLQUFLLEVBQUUsQ0FBQztBQUN2QixnQkFBSSxDQUFDLE1BQU0sQ0FBQyxLQUFLLEVBQUUsQ0FBQztXQUNyQjs7Ozs7Ozs7QUFFRixPQUFDIiwiZmlsZSI6ImFudGl0cmFja2luZy90ZW1wLXNldC5qcyIsInNvdXJjZXNDb250ZW50IjpbImltcG9ydCB7IHV0aWxzIH0gZnJvbSAnY29yZS9jbGlxeic7XG5cbi8qKiBTZXQgbGlrZSBjbGFzcyB3aG9zZSBtZW1iZXJzIGFyZSByZW1vdmVkIGFmdGVyIGEgc3BlY2lmaWVcbiovXG5leHBvcnQgZGVmYXVsdCBjbGFzcyB7XG5cbiAgY29uc3RydWN0b3IoKSB7XG4gICAgdGhpcy5faXRlbXMgPSBuZXcgU2V0KCk7XG4gICAgdGhpcy5fdGltZW91dHMgPSBuZXcgU2V0KCk7XG4gIH1cblxuICBjb250YWlucyhpdGVtKSB7XG4gICAgcmV0dXJuIHRoaXMuX2l0ZW1zLmhhcyhpdGVtKTtcbiAgfVxuXG4gIGhhcyhpdGVtKSB7XG4gICAgcmV0dXJuIHRoaXMuY29udGFpbnMoaXRlbSk7XG4gIH1cblxuICBhZGQoaXRlbSwgdHRsKSB7XG4gICAgdGhpcy5faXRlbXMuYWRkKGl0ZW0pO1xuICAgIHZhciB0aW1lb3V0ID0gdXRpbHMuc2V0VGltZW91dChmdW5jdGlvbigpIHtcbiAgICAgICAgdGhpcy5kZWxldGUoaXRlbSk7XG4gICAgICAgIHRoaXMuX3RpbWVvdXRzLmRlbGV0ZSh0aW1lb3V0KTtcbiAgICB9LmJpbmQodGhpcyksIHR0bCB8fCAwKTtcbiAgICB0aGlzLl90aW1lb3V0cy5hZGQodGltZW91dCk7XG4gIH1cblxuICBkZWxldGUoaXRlbSkge1xuICAgIHRoaXMuX2l0ZW1zLmRlbGV0ZShpdGVtKTtcbiAgfVxuXG4gIGNsZWFyKCkge1xuICAgIGZvciAobGV0IHQgb2YgdGhpcy5fdGltZW91dHMpIHtcbiAgICAgIHV0aWxzLmNsZWFyVGltZW91dCh0KTtcbiAgICB9XG4gICAgdGhpcy5fdGltZW91dHMuY2xlYXIoKTtcbiAgICB0aGlzLl9pdGVtcy5jbGVhcigpO1xuICB9XG5cbn07XG4iXX0=

@@ -6,6 +6,8 @@ var { classes: Cc, interfaces: Ci, utils: Cu } = Components;
 
 Cu.import('resource://gre/modules/Services.jsm');
 
+Services.scriptloader.loadSubScript("chrome://cliqz/content/core/content-scripts.js");
+
 var config = {{CONFIG}};
 
 var whitelist = [
@@ -164,7 +166,15 @@ function onDOMWindowCreated(ev) {
       );
     },
     getCookie: function () {
-      return window.document.cookie;
+      try {
+        return window.document.cookie;
+      } catch (e) {
+        if (e instanceof DOMException && e.name == "SecurityError") {
+          return null;
+        } else {
+          throw e; // let others bubble up
+        }
+      }
     }
   };
 
@@ -192,6 +202,9 @@ function onDOMWindowCreated(ev) {
 
     try {
       payload = fns[msg.data.action].apply(null, msg.data.args || []);
+      if (payload === null){
+        return
+      }
     } catch (e) {
       window.console.error("cliqz framescript:", e);
     }
@@ -244,12 +257,14 @@ function onDOMWindowCreated(ev) {
     });
   };
 
-  var onReady = function () {
+  var onReady = function (event) {
     // ReportLang
     var lang = window.document.getElementsByTagName('html')
       .item(0).getAttribute('lang');
+    // don't analyse language for (i)frames
+    var isTopWindow = !event.originalTarget.defaultView.frameElement;
 
-    if (lang) {
+    if (isTopWindow && lang) {
       send({
         windowId: windowId,
         payload: {
@@ -288,6 +303,22 @@ function onDOMWindowCreated(ev) {
       }
     });
   };
+
+
+  var contentScript = getContentScript(window, currentURL());
+  if (contentScript) {
+    contentScript(window, function (msg) {
+      send({
+        windowId: windowId,
+        payload: {
+          module: "core",
+          action: msg.action,
+          args: msg.args
+        }
+      });
+    });
+  }
+
 
   var onKeyPress = throttle(proxyWindowEvent("recordKeyPress"), 250);
   var onMouseMove = throttle(proxyWindowEvent("recordMouseMove"), 250);

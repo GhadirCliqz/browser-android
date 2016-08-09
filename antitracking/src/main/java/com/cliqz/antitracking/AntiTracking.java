@@ -2,7 +2,6 @@ package com.cliqz.antitracking;
 
 import android.content.Context;
 import android.net.Uri;
-import android.os.Debug;
 import android.util.Log;
 import android.util.Pair;
 import android.webkit.WebResourceRequest;
@@ -16,13 +15,13 @@ import com.eclipsesource.v8.V8;
 import com.eclipsesource.v8.V8Array;
 import com.eclipsesource.v8.V8Object;
 import com.eclipsesource.v8.V8ResultUndefined;
+import com.eclipsesource.v8.V8ScriptExecutionException;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -30,6 +29,7 @@ import java.lang.ref.WeakReference;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.sql.Time;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -46,8 +46,14 @@ import java.util.concurrent.TimeoutException;
 public class AntiTracking {
 
     private final static String TAG = AntiTracking.class.getSimpleName();
+
+    private final static String ADBLOCK_ABTEST_PREF_NAME = "cliqz-adb-abtest";
+    private final static String ADBLOCK_PREF_NAME = "cliqz-adb";
+    private final static boolean ADBLOCK_ABTEST_DEFAULT = true;
+    private final static int ADBLOCK_PREF_DEFAULT = 1;
     
     private boolean mEnabled;
+    private boolean mAdblockEnabled = true;
 
     private final Map<Integer, Pair<Uri, WeakReference<WebView>>> tabs = new HashMap<>();
 
@@ -58,6 +64,8 @@ public class AntiTracking {
     final private Set<String> TELEMETRY_WHITELIST = new HashSet<>(Arrays.asList("attrack.FP", "attrack.tp_events"));
 
     public AntiTracking(final Context context, final AntiTrackingSupport support) {
+        mEnabled = support.isAntiTrackTestEnabled();
+        mAdblockEnabled = false;
         // Create a v8 javascript, then load native bindings and polyfill, and the antitracking module
         v8 = new V8Engine(context);
         try {
@@ -120,18 +128,23 @@ public class AntiTracking {
                         Log.e(TAG, "Error loading config file",  e);
                     }
 
-                    // import base libs
-                    v8.loadJavascriptSource("v8/CliqzUtils.js");
-                    v8.loadJavascriptSource("v8/CliqzEvents.js");
-                    runtime.executeVoidScript("var CLIQZEnvironment = {};");
-                    runtime.executeVoidScript("var CliqzLanguage = {};");
-                    runtime.executeVoidScript("var Components = {};");
+                    // create legacy CliqzUtils global
+                    runtime.executeVoidScript("var CliqzUtils = {}; System.import(\"core/utils\").then(function(mod) { CliqzUtils = mod.default; });");
 
                     // pref config
                     setPref(runtime, "antiTrackTest", support.isAntiTrackTestEnabled());
                     setPref(runtime, "attrackForceBlock", support.isForceBlockEnabled());
                     setPref(runtime, "attrackBloomFilter", support.isBloomFilterEnabled());
                     setPref(runtime, "attrackDefaultAction", support.getDefaultAction());
+
+                    // enable adblock by default
+                    try {
+                        runtime.executeBooleanScript(String.format("CliqzUtils.getPref(\"%s\");", ADBLOCK_ABTEST_PREF_NAME));
+                    } catch (V8ResultUndefined e) {
+                        // no value set for pref: set default
+                        setPref(runtime, ADBLOCK_ABTEST_PREF_NAME, ADBLOCK_ABTEST_DEFAULT);
+                        setPref(runtime, ADBLOCK_PREF_NAME, ADBLOCK_PREF_DEFAULT);
+                    }
 
                     // startup
                     runtime.executeVoidScript("System.import(\"platform/startup\").then(function(startup) { startup.default() }).catch(function(e) { logDebug(e, \"xxx\"); });");
@@ -141,20 +154,6 @@ public class AntiTracking {
                     return null;
                 }
 
-                private void setPref(V8 runtime, String preference, Object value) {
-                    final String valueAsString;
-                    if (value == null) {
-                        valueAsString = "null";
-                    } else if (String.class.isInstance(value)) {
-                        valueAsString = String.format("\"%s\"", value);
-                    } else {
-                        valueAsString = value.toString();
-                    }
-                    final String javascript = String.format("CliqzUtils.setPref(\"%s\", %s);",
-                            preference, valueAsString);
-                    runtime.executeVoidScript(javascript);
-                }
-
             });
         } catch(InterruptedException | ExecutionException e) {
             Log.e(TAG, Log.getStackTraceString(e));
@@ -162,11 +161,50 @@ public class AntiTracking {
     }
 
     public boolean isEnabled() {
-        return mEnabled;
+        return mEnabled || mAdblockEnabled;
     }
 
-    public void setEnabled(boolean value) {
+    public void setEnabled(final boolean value) {
         this.mEnabled = value;
+        try {
+            v8.asyncQuery(new V8Engine.Query<Object>() {
+                public Object query(V8 runtime) {
+                    setPref(runtime, "antiTrackTest", value);
+                    return null;
+                }
+            });
+        } catch (InterruptedException | ExecutionException e) {
+            Log.e(TAG, "Failed to toggle anti-tracking on/off", e);
+        }
+    }
+
+    public void setAdblockEnabled(final boolean value) {
+        this.mAdblockEnabled = value;
+        try {
+            v8.asyncQuery(new V8Engine.Query<Object>() {
+                public Object query(V8 runtime) {
+                    setPref(runtime, ADBLOCK_ABTEST_PREF_NAME, value);
+                    setPref(runtime, ADBLOCK_PREF_NAME, value ? 1 : 0);
+                    return null;
+                }
+            });
+        } catch (InterruptedException | ExecutionException e) {
+            Log.e(TAG, "Failed to toggle adblock on/off", e);
+        }
+    }
+
+    private void setPref(V8 runtime, String preference, Object value) {
+        final String valueAsString;
+        if (value == null) {
+            valueAsString = "null";
+        } else if (String.class.isInstance(value)) {
+            valueAsString = String.format("\"%s\"", value);
+        } else {
+            valueAsString = value.toString();
+        }
+        final String javascript = String.format("CliqzUtils.setPref(\"%s\", %s);",
+                preference, valueAsString);
+        runtime.executeVoidScript(javascript);
     }
 
     public WebResourceResponse shouldInterceptRequest(final WebView view, final WebResourceRequest request) {
@@ -208,10 +246,20 @@ public class AntiTracking {
                     requestInfo.add("method", request.getMethod());
                     requestInfo.add("tabId", view.hashCode());
                     requestInfo.add("parentFrameId", -1);
-                    requestInfo.add("frameId", -1);
-                    requestInfo.add("type", isMainDocument ? 6 : 11);
+                    requestInfo.add("frameId", view.hashCode());
                     requestInfo.add("isPrivate", false);
                     requestInfo.add("originUrl", isMainDocument ? requestUrl.toString() : tabs.get(view.hashCode()).first.toString());
+
+                    // simple content type detection
+                    int contentPolicyType = 11; // default is XMLHttpRequest
+                    if (isMainDocument) {
+                        contentPolicyType = 6;
+                    } else if (requestUrl.toString().endsWith(".js")) {
+                        contentPolicyType = 2;
+                    }
+
+                    requestInfo.add("type", contentPolicyType);
+
                     V8Object requestHeaders = new V8Object(runtime);
                     for(Map.Entry<String, String> e : request.getRequestHeaders().entrySet()) {
                         requestHeaders.add(e.getKey(), e.getValue());
@@ -229,6 +277,9 @@ public class AntiTracking {
                         // stringify response object
                         return json.executeStringFunction("stringify", stringifyArgs.push(blockingResponse));
                     } catch(V8ResultUndefined e) {
+                        return "{}";
+                    } catch(V8ScriptExecutionException e) {
+                        Log.e("CliqzAntiTracking", "error in webrequests", e);
                         return "{}";
                     } finally {
                         // release handles for V8 objects we created

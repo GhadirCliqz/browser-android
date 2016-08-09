@@ -138,9 +138,6 @@ class LightningWebClient extends WebViewClient implements AntiPhishing.AntiPhish
             // Urls with the special CLIQZ Path
             lightningView.passwordManager.provideOrSavePassword(uri, view);
             return createOKResponse();
-        } else if (lightningView.adblock.isAd(uri)) {
-            // Every thing else
-            return new WebResourceResponse("text/html", "UTF-8", StreamUtils.createEmptyStream());
         }
         return null;
     }

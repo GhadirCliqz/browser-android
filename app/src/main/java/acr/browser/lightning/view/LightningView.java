@@ -122,9 +122,6 @@ public class LightningView {
     LightningDialogBuilder bookmarksDialogBuilder;
 
     @Inject
-    AdBlock adblock;
-    
-    @Inject
     AntiTracking attrack;
 
     @Inject
@@ -238,8 +235,8 @@ public class LightningView {
 
         settings.setDefaultTextEncodingName(preferences.getTextEncoding());
         //This should be replaced with regular preferences
-        adblock.setEnabled(preferences.getAdBlockEnabled());
         attrack.setEnabled(true);
+        attrack.setAdblockEnabled(preferences.getAdBlockEnabled());
         mHomepage = preferences.getHomepage();
         setColorMode(preferences.getRenderingMode());
 

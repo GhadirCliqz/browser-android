@@ -24,8 +24,8 @@ public class FavoritesWebView extends HistoryWebView {
         if ("xwalk".equals(BuildConfig.FLAVOR_api)) {
             return FRESHTAB_MANIFEST_URL_FAV;
         } else {
-            return FRESHTAB_URL_FAV;
-        }
+        return FRESHTAB_URL_FAV;
     }
+}
 }
 

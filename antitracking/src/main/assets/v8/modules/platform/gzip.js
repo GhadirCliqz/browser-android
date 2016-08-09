@@ -1,4 +1,4 @@
-System.register([], function (_export) {
+System.register("platform/gzip", [], function (_export) {
   "use strict";
 
   var compress, uncompress;
@@ -15,4 +15,4 @@ System.register([], function (_export) {
     }
   };
 });
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbImd6aXAuZXMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6Ijs7O01BQ1csUUFBUSxFQUNSLFVBQVU7Ozs7QUFEVixjQUFRLEdBQUcsS0FBSzs7OztBQUNoQixnQkFBVSxHQUFHLEtBQUsiLCJmaWxlIjoiZ3ppcC5lcyIsInNvdXJjZVJvb3QiOiJwbGF0Zm9ybSIsInNvdXJjZXNDb250ZW50IjpbIlxuZXhwb3J0IGxldCBjb21wcmVzcyA9IGZhbHNlO1xuZXhwb3J0IGxldCB1bmNvbXByZXNzID0gZmFsc2U7XG4iXX0=
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbImd6aXAuZXMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6Ijs7O01BQ1csUUFBUSxFQUNSLFVBQVU7Ozs7QUFEVixjQUFRLEdBQUcsS0FBSzs7OztBQUNoQixnQkFBVSxHQUFHLEtBQUsiLCJmaWxlIjoiZ3ppcC5lcyIsInNvdXJjZXNDb250ZW50IjpbIlxuZXhwb3J0IGxldCBjb21wcmVzcyA9IGZhbHNlO1xuZXhwb3J0IGxldCB1bmNvbXByZXNzID0gZmFsc2U7XG4iXX0=

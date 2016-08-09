@@ -1,4 +1,4 @@
-System.register(['platform/storage'], function (_export) {
+System.register('platform/antitracking/storage', ['platform/storage'], function (_export) {
   'use strict';
 
   var sto;
@@ -11,4 +11,4 @@ System.register(['platform/storage'], function (_export) {
     }
   };
 });
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbImFudGl0cmFja2luZy9zdG9yYWdlLmVzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiI7Ozs7Ozs7Ozt5QkFFZSxHQUFHIiwiZmlsZSI6ImFudGl0cmFja2luZy9zdG9yYWdlLmVzIiwic291cmNlUm9vdCI6InBsYXRmb3JtIiwic291cmNlc0NvbnRlbnQiOlsiaW1wb3J0IHN0byBmcm9tICdwbGF0Zm9ybS9zdG9yYWdlJztcblxuZXhwb3J0IGRlZmF1bHQgc3RvO1xuIl19
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbImFudGl0cmFja2luZy9zdG9yYWdlLmVzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiI7Ozs7Ozs7Ozt5QkFFZSxHQUFHIiwiZmlsZSI6ImFudGl0cmFja2luZy9zdG9yYWdlLmVzIiwic291cmNlc0NvbnRlbnQiOlsiaW1wb3J0IHN0byBmcm9tICdwbGF0Zm9ybS9zdG9yYWdlJztcblxuZXhwb3J0IGRlZmF1bHQgc3RvO1xuIl19
