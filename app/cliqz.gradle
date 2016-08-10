@@ -69,7 +69,6 @@ def compileAdHostsList(File outputDir) {
 afterEvaluate { project ->
     project.tasks.each { tazk ->
         if (tazk.name =~ /mergeXwalk.*Assets/ && !tazk.name.endsWith('TestAssets')) {
-            println tazk.name
             tazk << {
                 compileAdHostsList(tazk.outputDir)
             }
