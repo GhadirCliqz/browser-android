@@ -76,11 +76,6 @@ public class HistoryFragment extends FragmentWithBus {
     }
 
     @Subscribe
-    public void onOpenLink(CliqzMessages.OpenLink event) {
-        bus.post(new Messages.GoToLink(event.url));
-    }
-
-    @Subscribe
     public void onNotifyQuery(CliqzMessages.NotifyQuery event) {
         bus.post(new Messages.GoToSearch(event.query));
     }

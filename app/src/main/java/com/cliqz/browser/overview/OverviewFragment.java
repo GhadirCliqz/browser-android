@@ -22,6 +22,7 @@ import com.cliqz.browser.di.components.ActivityComponent;
 import com.cliqz.browser.main.MainActivity;
 import com.cliqz.browser.main.Messages;
 import com.cliqz.browser.main.TabsManager;
+import com.cliqz.browser.webview.CliqzMessages;
 import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
 
@@ -96,6 +97,12 @@ public class OverviewFragment extends Fragment {
     @Subscribe
     public void onBackPressed(Messages.BackPressed event) {
         tabsManager.showTab(tabsManager.getCurrentTabPosition());
+    }
+
+    @Subscribe
+    public void openLink(CliqzMessages.OpenLink event) {
+        tabsManager.showTab(tabsManager.getCurrentTabPosition());
+        tabsManager.getCurrentTab().openLink(event.url, false, true);
     }
 
     @Override
