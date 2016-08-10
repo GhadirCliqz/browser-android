@@ -536,11 +536,6 @@ public class TabFragment extends BaseFragment {
     }
 
     @Subscribe
-    public void openHistoryLink(CliqzMessages.OpenHistoryLink event) {
-        openLink(event.url, false, true);
-    }
-
-    @Subscribe
     public void addToFavourites(Messages.AddToFavourites event) {
         historyDatabase.setFavorites(event.url, System.currentTimeMillis(), true);
     }
@@ -567,7 +562,7 @@ public class TabFragment extends BaseFragment {
         finder.show();
     }
 
-    private void openLink(String eventUrl, boolean reset, boolean fromHistory) {
+    public void openLink(String eventUrl, boolean reset, boolean fromHistory) {
         telemetry.resetNavigationVariables(eventUrl.length());
         new Uri.Builder();
         final Uri.Builder builder = new Uri.Builder();

@@ -55,7 +55,7 @@ public class TabOverviewFragment extends Fragment {
             @Override
             public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
                 tabsManager.deleteTab(viewHolder.getAdapterPosition());
-                mTabsOverviewAdapter.notifyItemRemoved(viewHolder.getAdapterPosition());
+                mTabsOverviewAdapter.notifyDataSetChanged();
             }
         };
         ItemTouchHelper itemTouchHelper = new ItemTouchHelper(swipeCallback);
