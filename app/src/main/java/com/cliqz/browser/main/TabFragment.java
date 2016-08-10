@@ -408,10 +408,10 @@ public class TabFragment extends BaseFragment {
     @OnClick(R.id.anti_tracking_details)
     void showAntiTrackingDialog() {
         final ArrayList<TrackerDetailsModel> details = mLightningView.getTrackerDetails();
-        if (details == null || details.isEmpty()) {
-            //probably should show a toast here?
-            return;
-        }
+//        if (details == null || details.isEmpty()) {
+//            //probably should show a toast here?
+//            return;
+//        }
         final View popupView = getActivity().getLayoutInflater().inflate(R.layout.anti_tracking_dialog, null);
         final PopupWindow antiTrackindDialog = new PopupWindow(popupView, WindowManager.LayoutParams.MATCH_PARENT,
                 WindowManager.LayoutParams.MATCH_PARENT);

@@ -72,6 +72,7 @@ public class LightningView {
     public static final String HEADER_REQUESTED_WITH = "X-Requested-With";
     public static final String HEADER_WAP_PROFILE = "X-Wap-Profile";
     public static final String HEADER_DNT = "DNT";
+    private static final String TAG = LightningView.class.getSimpleName();
 
     final LightningViewTitle mTitle;
     private CliqzWebView mWebView;
@@ -872,13 +873,13 @@ public class LightningView {
      * data points blocked for each tracker
      * This method is not called in the xwalk build variant
      */
-    public ArrayList<TrackerDetailsModel> getTrackerDetails() {
+    public @NonNull ArrayList<TrackerDetailsModel> getTrackerDetails() {
         final ArrayList<TrackerDetailsModel> trackerDetails = new ArrayList<>();
         try {
             final JSONObject jsonObject = attrack.getTabBlockingInfo(mWebView.hashCode());
             final JSONArray companies = jsonObject.getJSONObject("companies").names();
             if (companies == null) {
-                return null;
+                return trackerDetails;
             }
             for (int i = 0; i < companies.length(); i++) {
                 final String key = companies.getString(i);
@@ -886,7 +887,7 @@ public class LightningView {
                 int trackersCount = 0;
                 for (int j = 0; j < domains.length(); j++) {
                     final JSONObject trackers = jsonObject.getJSONObject("trackers").getJSONObject(domains.optString(j));
-                    trackersCount += trackers.getInt("bad_qs");
+                    trackersCount += trackers.optInt("bad_qs",0) + trackers.optInt("adblock_block",0);
                 }
                 if (trackersCount > 0) {
                     trackerDetails.add(new TrackerDetailsModel(key, trackersCount));
@@ -894,8 +895,8 @@ public class LightningView {
             }
             return trackerDetails;
         } catch (JSONException e) {
-            e.printStackTrace();
-            return null;
+            Log.e(TAG, "Can't parse json from antitracking module", e);
+            return trackerDetails;
         }
     }
 
