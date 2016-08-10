@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="#eeffffff"
+    android:background="#eee8e8e8"
     android:padding="15dp">
 
     <TextView
@@ -11,13 +11,14 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:text="@string/antitracking_header"
-        android:textColor="#008000"
+        android:textColor="#2CBA64"
         android:textSize="22sp"
         android:textStyle="bold" />
 
     <ImageView
-        android:layout_width="80dp"
-        android:layout_height="80dp"
+        android:layout_width="74dp"
+        android:layout_height="88dp"
+        android:scaleType="fitXY"
         android:layout_gravity="center"
         android:padding="10dp"
         android:src="@drawable/shield_green" />
@@ -37,7 +38,7 @@
         android:layout_gravity="center"
         android:paddingBottom="10dp"
         android:text="@string/antitracking_datapoints"
-        android:textColor="#008000"
+        android:textColor="#2CBA64"
         android:textSize="18sp" />
 
     <LinearLayout
@@ -47,6 +48,7 @@
         android:padding="10dp">
 
         <TextView
+            android:id="@+id/companies_header"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -56,6 +58,7 @@
             android:textSize="12sp" />
 
         <TextView
+            android:id="@+id/counter_header"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -70,11 +73,27 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
+        <View
+            android:id="@+id/upperLine"
+            android:layout_height="1dp"
+            android:layout_width="match_parent"
+            android:padding="10dp"
+            android:background="#333333" />
+
         <android.support.v7.widget.RecyclerView
             android:id="@+id/trackers_list"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:padding="10dp"
             android:scrollbars="vertical" />
+
+        <View
+            android:id="@+id/lowerLine"
+            android:layout_height="1dp"
+            android:layout_width="match_parent"
+            android:padding="10dp"
+            android:background="#333333" />
 
         <Button
             android:id="@+id/help"
@@ -83,10 +102,11 @@
             android:layout_gravity="center"
             android:layout_marginTop="10dp"
             android:background="@drawable/rounded_rectangle_bg"
-            android:paddingLeft="70dp"
-            android:paddingRight="70dp"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp"
             android:text="@string/help"
             android:textColor="@color/white"
+            android:textAllCaps="false"
             android:textSize="14sp" />
     </LinearLayout>
 </LinearLayout>

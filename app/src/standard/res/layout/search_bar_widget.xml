@@ -5,19 +5,19 @@
     android:orientation="horizontal">
 
     <FrameLayout
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
+        android:layout_width="fill_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
         android:layout_centerVertical="true"
-        android:layout_weight="4"
         android:contentDescription="@string/descr_search_bar"
         android:focusable="true"
         android:focusableInTouchMode="true">
 
         <com.cliqz.browser.widget.AutocompleteEditText
             android:id="@+id/search_edit_text"
+            style="@style/editTextNormal"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="@color/gray_medium"
             android:drawableRight="@drawable/ic_action_delete"
             android:focusable="true"
             android:focusableInTouchMode="true"
@@ -30,49 +30,46 @@
             android:paddingStart="8dp"
             android:selectAllOnFocus="true"
             android:singleLine="true"
-            android:textColor="@android:color/black"
             android:textColorHint="#aaaaaa"
             android:textCursorDrawable="@null" />
 
         <TextView
             android:id="@+id/title_bar"
+            style="@style/editTextNormal"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="@color/gray_medium"
             android:drawableRight="@drawable/ic_action_delete"
             android:gravity="left|center_vertical"
             android:paddingEnd="8dp"
             android:paddingStart="8dp"
             android:singleLine="true"
-            android:textColor="@android:color/black"
             android:visibility="gone" />
 
     </FrameLayout>
 
     <LinearLayout
         android:id="@+id/anti_tracking_details"
-        android:layout_width="0dp"
+        android:layout_width="50dp"
         android:layout_height="match_parent"
-        android:layout_weight="1"
-        android:background="#008000"
+        android:layout_weight="0"
+        android:background="#2CBA64"
         android:orientation="horizontal"
         android:visibility="gone">
 
         <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="28dp"
+            android:layout_height="18dp"
+            android:paddingLeft="10dp"
+            android:paddingRight="5dp"
             android:layout_gravity="center"
-            android:paddingBottom="10dp"
-            android:paddingLeft="5dp"
-            android:paddingRight="2dp"
-            android:paddingTop="10dp"
+            android:scaleType="fitXY"
             android:src="@drawable/shield" />
 
         <TextView
             android:id="@+id/tracker_counter"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
+            android:layout_gravity="right|center_vertical"
             android:paddingRight="5dp"
             android:text="0"
             android:textColor="@color/white"
