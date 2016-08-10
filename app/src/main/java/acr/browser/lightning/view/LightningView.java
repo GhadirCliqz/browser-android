@@ -877,6 +877,9 @@ public class LightningView {
         try {
             final JSONObject jsonObject = attrack.getTabBlockingInfo(mWebView.hashCode());
             final JSONArray companies = jsonObject.getJSONObject("companies").names();
+            if (companies == null) {
+                return null;
+            }
             for (int i = 0; i < companies.length(); i++) {
                 final String key = companies.getString(i);
                 final JSONArray domains = jsonObject.getJSONObject("companies").getJSONArray(key);
