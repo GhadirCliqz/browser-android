@@ -373,7 +373,7 @@ public class MainActivity extends AppCompatActivity implements ActivityComponent
     }
 
     private void showLookbackDialog() {
-        if ("lookback".contentEquals(BuildConfig.FLAVOR) && mShouldShowLookbackDialog) {
+        if ("lookback".contentEquals(BuildConfig.FLAVOR_api) && mShouldShowLookbackDialog) {
             mShouldShowLookbackDialog = false;
             LookbackWrapper.show(this, preferenceManager.getSessionId());
         }

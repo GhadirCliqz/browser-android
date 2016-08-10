@@ -46,7 +46,7 @@ public class LookbackWrapper {
     static {
         if (BuildConfig.LOOKBACK_SDK_TOKEN != null &&
                 !BuildConfig.LOOKBACK_SDK_TOKEN.isEmpty() &&
-                "lookback".contentEquals(BuildConfig.FLAVOR)) {
+                "lookback".contentEquals(BuildConfig.FLAVOR_api)) {
             try {
                 sLookbackClazz = Class.forName("io.lookback.sdk.Lookback");
                 sInitMethod = sLookbackClazz.getDeclaredMethod("init", Application.class, String.class);
