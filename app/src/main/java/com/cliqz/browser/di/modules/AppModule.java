@@ -21,7 +21,6 @@ import javax.inject.Singleton;
 import acr.browser.lightning.database.HistoryDatabase;
 import acr.browser.lightning.database.PasswordDatabase;
 import acr.browser.lightning.preference.PreferenceManager;
-import acr.browser.lightning.utils.AdBlock;
 import acr.browser.lightning.utils.ProxyUtils;
 import dagger.Module;
 import dagger.Provides;
@@ -58,12 +57,6 @@ public class AppModule {
     @Singleton
     public PreferenceManager providePreferenceManager() {
         return new PreferenceManager(app);
-    }
-
-    @Provides
-    @Singleton
-    public AdBlock provideAdBlock() {
-        return new AdBlock(app.getApplicationContext());
     }
 
     @Provides
