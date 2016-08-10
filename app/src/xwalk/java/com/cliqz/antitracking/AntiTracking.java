@@ -8,6 +8,8 @@ import android.webkit.WebResourceRequest;
 import android.webkit.WebResourceResponse;
 import android.webkit.WebView;
 
+import com.cliqz.utils.StreamUtils;
+
 import org.json.JSONObject;
 
 import java.io.ByteArrayInputStream;
@@ -23,6 +25,7 @@ import acr.browser.lightning.utils.AdBlock;
 public class AntiTracking {
 
     private boolean mEnabled = false;
+    private boolean mAdBlockEnabled = true;
 
     private final AdBlock adBlock;
 
@@ -45,8 +48,8 @@ public class AntiTracking {
     }
 
     public WebResourceResponse shouldInterceptRequest(final WebView view, Uri uri) {
-        if (isEnabled() && adBlock.isAd(uri)) {
-            return new WebResourceResponse("text/html", "UTF-8", new ByteArrayInputStream("".getBytes()));
+        if (mAdBlockEnabled && adBlock.isAd(uri)) {
+            return new WebResourceResponse("text/html", "UTF-8", StreamUtils.createEmptyStream());
         }
         return null;
     }
@@ -54,5 +57,13 @@ public class AntiTracking {
     //dummy method to suppress the error
     public JSONObject getTabBlockingInfo(int i) {
         return null;
+    }
+
+    public void setAdblockEnabled(boolean value) {
+        mAdBlockEnabled = value;
+    }
+
+    public boolean isAdBlockEnabled() {
+        return mAdBlockEnabled;
     }
 }

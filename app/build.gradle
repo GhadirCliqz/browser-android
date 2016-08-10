@@ -4,18 +4,14 @@ apply plugin: 'com.getkeepsafe.dexcount'
 apply plugin: 'com.google.gms.google-services'
 apply from: 'cliqz.gradle'
 
-android.metaClass.baseVersionCode = 90
-android.metaClass.baseVersionName = "1.0.0r1"
-
 android {
-    defaultConfig.versionCode = 1
-    defaultConfig.versionName = "1.0.0r1"
-
     compileSdkVersion 23
     buildToolsVersion "23.0.3"
     defaultConfig {
         targetSdkVersion 23
         minSdkVersion 21
+        versionCode = 2
+        versionName = "1.0.0r2"
 
         buildConfigField 'String', 'LIGHTNING_VERSION_NAME', '"4.2.3.1"'
         buildConfigField "boolean", "FULL_VERSION", "true"
@@ -57,6 +53,9 @@ android {
         lookback {
             java.srcDirs += [
                     'src/standard/java',
+            ]
+            res.srcDirs += [
+                    'src/standard/res',
             ]
         }
     }

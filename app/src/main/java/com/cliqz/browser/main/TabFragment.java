@@ -206,9 +206,7 @@ public class TabFragment extends BaseFragment {
         mLocalContainer.addView(mSearchWebView);
         titleBar.setOnTouchListener(onTouchListener);
         mSearchWebView.initExtensionPreferences();
-        if (trackerCounter != null) {
-            trackerCounter.setText(Integer.toString(mTrackerCount));
-        }
+        setTrackerCountText(Integer.toString(mTrackerCount));
     }
 
     @Override
@@ -866,13 +864,19 @@ public class TabFragment extends BaseFragment {
     @Subscribe
     public void updateTrackerCount(Messages.UpdateTrackerCount event) {
         mTrackerCount++;
-        trackerCounter.setText(Integer.toString(mTrackerCount));
+        setTrackerCountText(Integer.toString(mTrackerCount));
     }
 
     @Subscribe
     public void resetTrackerCount(Messages.ResetTrackerCount event) {
         mTrackerCount = 0;
-        trackerCounter.setText(Integer.toString(mTrackerCount));
+        setTrackerCountText(Integer.toString(mTrackerCount));
+    }
+
+    private void setTrackerCountText(String text) {
+        if (trackerCounter != null) {
+            trackerCounter.setText(text);
+        }
     }
 
     void updateTitle() {
