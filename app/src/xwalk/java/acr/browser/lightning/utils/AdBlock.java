@@ -19,18 +19,8 @@ public class AdBlock {
     private final Set<String> mBlockedDomainsList = new HashSet<>();
     private static final Locale mLocale = Locale.getDefault();
 
-    private boolean mEnabled;
-
     public AdBlock(Context context) {
         loadHostsFile(context);
-    }
-
-    public boolean isEnabled() {
-        return mEnabled;
-    }
-
-    public void setEnabled(boolean value) {
-        this.mEnabled = value;
     }
 
     /**
@@ -40,7 +30,7 @@ public class AdBlock {
      * @return true if it is an ad, false if it is not an ad
      */
     public boolean isAd(Uri uri) {
-        if (!mEnabled || uri == null || mBlockedDomainsList == null) {
+        if (uri == null || mBlockedDomainsList == null) {
             return false;
         }
 

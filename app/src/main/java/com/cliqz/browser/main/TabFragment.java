@@ -288,7 +288,7 @@ public class TabFragment extends BaseFragment {
             } else {
                 mLightningView.getWebView().bringToFront();
                 searchBar.showTitleBar();
-                antiTrackingDetails.setVisibility(View.VISIBLE);
+                setAntiTrackingDetailsVisibility(View.VISIBLE);
                 searchBar.setTitle(mLightningView.getTitle());
                 switchIcon(ICON_STATE_NONE);
             }
@@ -362,9 +362,7 @@ public class TabFragment extends BaseFragment {
 
     @OnClick(R.id.title_bar)
     void titleClicked() {
-        if (antiTrackingDetails != null) {
-            antiTrackingDetails.setVisibility(View.GONE);
-        }
+        setAntiTrackingDetailsVisibility(View.GONE);
         searchBar.showSearchEditText();
         mAutocompleteEditText.setText(mLightningView.getUrl());
         mAutocompleteEditText.requestFocus();
@@ -521,13 +519,16 @@ public class TabFragment extends BaseFragment {
     private void bringWebViewToFront() {
         final WebView webView = mLightningView.getWebView();
         searchBar.showTitleBar();
-        if (antiTrackingDetails != null) {
-            antiTrackingDetails.setVisibility(View.VISIBLE);
-        }
+        setAntiTrackingDetailsVisibility(View.VISIBLE);
         mLightningView.getWebView().bringToFront();
         state.setMode(Mode.WEBPAGE);
     }
 
+    private void setAntiTrackingDetailsVisibility(int visibility) {
+        if (antiTrackingDetails != null) {
+            antiTrackingDetails.setVisibility(visibility);
+        }
+    }
     @Subscribe
     public void openLink(CliqzMessages.OpenLink event) {
         openLink(event.url, event.reset, false);
