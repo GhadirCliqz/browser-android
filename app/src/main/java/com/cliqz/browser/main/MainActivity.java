@@ -21,6 +21,7 @@ import android.provider.Settings;
 import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -152,6 +153,7 @@ public class MainActivity extends AppCompatActivity implements ActivityComponent
 
 //        mFreshTabFragment = new FreshTabFragment();
         searchWebView = new SearchWebView(this);
+        searchWebView.setBackgroundColor(ContextCompat.getColor(this, R.color.normal_tab_primary_color));
         mOverViewFragment = new OverviewFragment();
         performExitCleanUp();
         // Ignore intent if we are being recreated

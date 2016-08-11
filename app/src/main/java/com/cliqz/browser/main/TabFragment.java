@@ -9,6 +9,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.PorterDuff;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
@@ -36,6 +37,7 @@ import android.webkit.WebView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 import android.widget.TextView;
@@ -54,6 +56,7 @@ import com.cliqz.browser.widget.SearchBar;
 import com.squareup.otto.Subscribe;
 
 import org.json.JSONArray;
+import org.w3c.dom.Text;
 
 import java.util.ArrayList;
 import java.util.Locale;
@@ -130,6 +133,9 @@ public class TabFragment extends BaseFragment {
     @Bind(R.id.overflow_menu)
     View overflowMenuButton;
 
+    @Bind(R.id.overflow_menu_icon)
+    ImageView overflowMenuIcon;
+
     @Bind(R.id.in_page_search_bar)
     View inPageSearchBar;
 
@@ -176,8 +182,14 @@ public class TabFragment extends BaseFragment {
         super.onViewCreated(view, savedInstanceState);
         ButterKnife.bind(this, view);
         openTabsCounter.setText(Integer.toString(((MainActivity)getActivity()).tabsManager.getTabCount()));
+        final int iconColor = isIncognito ? R.color.toolbar_icon_color_incognito : R.color.toolbar_icon_color_normal;
+        openTabsCounter.getBackground().setColorFilter(ContextCompat.getColor(getContext(), iconColor), PorterDuff.Mode.SRC_ATOP);
+        overflowMenuIcon.getDrawable().setColorFilter(ContextCompat.getColor(getContext(), iconColor), PorterDuff.Mode.SRC_ATOP);
+        openTabsCounter.setTextColor(ContextCompat.getColor(getContext(), iconColor));
         inPageSearchBar.setVisibility(View.GONE);
         state.setIncognito(isIncognito);
+        searchBar.setStyle(isIncognito);
+        //openTabsCounter.setBa
         if (mSearchWebView == null || mLightningView == null) {
             // Must use activity due to Crosswalk webview
             mSearchWebView = ((MainActivity)getActivity()).searchWebView;
@@ -413,12 +425,20 @@ public class TabFragment extends BaseFragment {
 //            return;
 //        }
         final View popupView = getActivity().getLayoutInflater().inflate(R.layout.anti_tracking_dialog, null);
+        final int popupBgColor = isIncognito ? R.color.incognito_tab_primary_color : R.color.normal_tab_primary_color;
+        final int popupTextColor = isIncognito ? R.color.normal_tab_primary_color : R.color.incognito_tab_primary_color;
+        popupView.setBackgroundColor(ContextCompat.getColor(getContext(), popupBgColor));
+        popupView.setAlpha(0.95f);
         final PopupWindow antiTrackindDialog = new PopupWindow(popupView, WindowManager.LayoutParams.MATCH_PARENT,
                 WindowManager.LayoutParams.MATCH_PARENT);
         final TextView counter = (TextView) popupView.findViewById(R.id.counter);
         final RecyclerView trackersList = (RecyclerView) popupView.findViewById(R.id.trackers_list);
-        final Button button = (Button) popupView.findViewById(R.id.help);
-        button.setOnClickListener(new View.OnClickListener() {
+        final Button helpButton = (Button) popupView.findViewById(R.id.help);
+        final TextView companiesHeader = (TextView) popupView.findViewById(R.id.companies_header);
+        final TextView counterHeader = (TextView) popupView.findViewById(R.id.counter_header);
+        final View upperLine = popupView.findViewById(R.id.upperLine);
+        final View lowerLine = popupView.findViewById(R.id.lowerLine);
+        helpButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 final Bundle args = new Bundle();
@@ -429,9 +449,16 @@ public class TabFragment extends BaseFragment {
                 antiTrackindDialog.dismiss();
             }
         });
+        companiesHeader.setTextColor(ContextCompat.getColor(getContext(), popupTextColor));
+        counterHeader.setTextColor(ContextCompat.getColor(getContext(), popupTextColor));
+        counter.setTextColor(ContextCompat.getColor(getContext(), popupTextColor));
+        helpButton.setTextColor(ContextCompat.getColor(getContext(), popupBgColor));
+        helpButton.getBackground().setColorFilter(ContextCompat.getColor(getContext(), popupTextColor), PorterDuff.Mode.SRC_ATOP);
+        upperLine.getBackground().setColorFilter(ContextCompat.getColor(getContext(), popupTextColor), PorterDuff.Mode.SRC_ATOP);
+        lowerLine.getBackground().setColorFilter(ContextCompat.getColor(getContext(), popupTextColor), PorterDuff.Mode.SRC_ATOP);
         counter.setText(Integer.toString(mTrackerCount));
         trackersList.setLayoutManager(new LinearLayoutManager(getContext()));
-        trackersList.setAdapter(new TrackersListAdapter(details));
+        trackersList.setAdapter(new TrackersListAdapter(details, isIncognito, getContext()));
         antiTrackindDialog.setBackgroundDrawable(new ColorDrawable());
         antiTrackindDialog.setOutsideTouchable(true);
         antiTrackindDialog.setFocusable(true);
