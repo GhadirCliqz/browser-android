@@ -78,27 +78,18 @@ public class MainActivity extends AppCompatActivity implements ActivityComponent
     private final static String TAG = MainActivity.class.getSimpleName();
     private static final int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
 
-    private static final String NEW_TAB_MSG = "new_tab_message_extra";
-
     private ActivityComponent mActivityComponent;
 
-    private static final String HISTORY_FRAGMENT_TAG = "history_fragment";
     private static final String OVERVIEW_FRAGMENT_TAG = "overview_fragment";
-    private static final String SUGGESTIONS_FRAGMENT_TAG = "suggestions_fragment";
     static final String TAB_FRAGMENT_TAG = "tab_fragment";
-    private static final String CUSTOM_VIEW_FRAGMENT_TAG = "custom_view_fragment";
     private static final String LOCATION_PERMISSION = Manifest.permission.ACCESS_FINE_LOCATION;
 
-    private static final int CONTENT_VIEW_ID = R.id.main_activity_content;
-
-    private static final String SAVED_STATE = TAG + ".SAVED_STATE";
     private Bundle firstTabArgs;
     private OverviewFragment mOverViewFragment;
     private OnBoardingAdapter onBoardingAdapter;
     private ViewPager pager;
     private boolean askedGPSPermission = false;
     private CustomViewHandler mCustomViewHandler;
-    // private boolean mIsIncognito;
     protected SearchWebView searchWebView;
     protected String currentMode;
     private boolean mIsColdStart = true;
@@ -566,7 +557,7 @@ public class MainActivity extends AppCompatActivity implements ActivityComponent
         setupContentView();
     }
 
-    //returns screen that is visible
+    // returns screen that is visible
     private String getCurrentVisibleFragmentName() {
         String name = "";
         final TabFragment currentTab = tabsManager.getCurrentTab();
@@ -581,23 +572,14 @@ public class MainActivity extends AppCompatActivity implements ActivityComponent
     }
 
     /**
-     * Fully copied from the code at https://github.com/googlesamples/google-services/blob/master/android/gcm/app/src/main/java/gcm/play/android/samples/com/gcmquickstart/MainActivity.java
-     * It checks form Google Play Services APK.
+     * We check for Google Play Services availability, but we do not rely on them so much so we
+     * do not show any error message if they are not installed.
+     * See https://github.com/googlesamples/google-services/blob/master/android/gcm/app/src/main/java/gcm/play/android/samples/com/gcmquickstart/MainActivity.java
      */
     private boolean checkPlayServices() {
         GoogleApiAvailability apiAvailability = GoogleApiAvailability.getInstance();
         int resultCode = apiAvailability.isGooglePlayServicesAvailable(this);
-        if (resultCode != ConnectionResult.SUCCESS) {
-            if (apiAvailability.isUserResolvableError(resultCode)) {
-                apiAvailability.getErrorDialog(this, resultCode, PLAY_SERVICES_RESOLUTION_REQUEST)
-                        .show();
-            } else {
-                Log.i(TAG, "This device is not supported.");
-                // finish(); do not finish the app
-            }
-            return false;
-        }
-        return true;
+        return resultCode == ConnectionResult.SUCCESS;
     }
 
     private final BroadcastReceiver onComplete = new BroadcastReceiver() {

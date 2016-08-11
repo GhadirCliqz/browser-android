@@ -94,7 +94,7 @@
 
             <meta-data
                 android:name="com.android.systemui.action_assist_icon"
-                android:resource="@mipmap/ic_launcher" />
+                android:resource="@drawable/assist_icon" />
         </activity>
         <activity
             android:name="acr.browser.lightning.activity.SettingsActivity"
@@ -111,11 +111,7 @@
             android:name=".main.OnBoardingActivity"
             android:label="@string/onboarding"
             android:screenOrientation="portrait"
-            android:theme="@style/Theme.LightTheme"></activity>
-        <activity
-            android:name=".overview.OverviewFragment"
-            android:label="@string/overview"
-            android:theme="@style/Theme.LightTheme"></activity>
+            android:theme="@style/Theme.LightTheme"/>
         <activity
             android:name="acr.browser.lightning.activity.ReadingActivity"
             android:configChanges="orientation|screenSize|keyboardHidden|keyboard"
@@ -148,7 +144,7 @@
                 <category android:name="com.example.gcm" />
             </intent-filter>
         </receiver>
-        <receiver android:name=".gcm.NotificationDismissedReceiver"></receiver>
+        <receiver android:name=".gcm.NotificationDismissedReceiver" />
 
         <service
             android:name=".gcm.MessageListenerService"
@@ -167,7 +163,7 @@
         </service>
         <service
             android:name=".gcm.RegistrationIntentService"
-            android:exported="false"></service>
+            android:exported="false"/>
         <!-- GCM End -->
 
         <uses-library

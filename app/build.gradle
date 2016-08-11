@@ -76,6 +76,7 @@ android {
             dimension "api"
             targetSdkVersion 21
             versionCode = 9
+            applicationId "com.cliqz.browser.ut"
         }
         x86 {
             dimension "abi"
