@@ -1,7 +1,5 @@
 package com.cliqz.browser.main;
 
-import android.annotation.SuppressLint;
-import android.os.Build;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;

@@ -5,7 +5,6 @@ import android.util.Log;
 import com.cliqz.browser.webview.SearchWebView;
 import com.cliqz.utils.StringUtils;
 
-import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -13,7 +12,6 @@ import java.io.Reader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.nio.CharBuffer;
 import java.util.Locale;
 
 /**

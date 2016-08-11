@@ -56,7 +56,6 @@ import com.cliqz.browser.widget.SearchBar;
 import com.squareup.otto.Subscribe;
 
 import org.json.JSONArray;
-import org.w3c.dom.Text;
 
 import java.util.ArrayList;
 import java.util.Locale;
