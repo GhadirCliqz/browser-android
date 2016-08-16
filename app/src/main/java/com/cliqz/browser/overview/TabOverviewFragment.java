@@ -16,7 +16,10 @@ import com.cliqz.browser.R;
 import com.cliqz.browser.app.BrowserApp;
 import com.cliqz.browser.di.components.ActivityComponent;
 import com.cliqz.browser.main.MainActivity;
+import com.cliqz.browser.main.Messages;
 import com.cliqz.browser.main.TabsManager;
+import com.squareup.otto.Bus;
+import com.squareup.otto.Subscribe;
 
 import javax.inject.Inject;
 
@@ -31,6 +34,9 @@ public class TabOverviewFragment extends Fragment {
 
     @Inject
     TabsManager tabsManager;
+
+    @Inject
+    Bus bus;
 
     @Nullable
     @Override
@@ -63,14 +69,28 @@ public class TabOverviewFragment extends Fragment {
         return view;
     }
 
+    @Subscribe
+    public void updateTahsOverview(Messages.UpdateTabsOverview event) {
+        mTabsOverviewAdapter.notifyDataSetChanged();
+    }
+
     @Override
     public void onStart() {
         super.onStart();
         final ActivityComponent component = BrowserApp.getActivityComponent(getActivity());
         if (component != null) {
             component.inject(this);
+            bus.register(this);
         }
         mTabsOverviewAdapter = new TabsOverviewAdapter(getContext(), R.layout.tab_list_item, tabsManager);
         mTabsListView.setAdapter(mTabsOverviewAdapter);
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        if (bus != null) {
+            bus.unregister(this);
+        }
     }
 }

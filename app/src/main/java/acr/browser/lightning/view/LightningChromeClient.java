@@ -65,7 +65,9 @@ class LightningChromeClient extends WebChromeClient {
     @Override
     public void onReceivedIcon(WebView view, Bitmap icon) {
         lightningView.mTitle.setFavicon(icon);
+        //TODO it's probably irrelevant now
         eventBus.post(new BrowserEvents.TabsChanged());
+        eventBus.post(new Messages.UpdateTabsOverview());
         cacheFavicon(view.getUrl(), icon);
     }
 
@@ -108,6 +110,7 @@ class LightningChromeClient extends WebChromeClient {
                 !TrampolineConstants.CLIQZ_TRAMPOLINE_GOTO.equals(url)) {
             lightningView.mTitle.setTitle(title);
             eventBus.post(new Messages.UpdateTitle());
+            eventBus.post(new Messages.UpdateTabsOverview());
         }
         eventBus.post(new BrowserEvents.TabsChanged());
         if (url != null
