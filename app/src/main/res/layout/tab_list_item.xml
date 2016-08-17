@@ -11,11 +11,11 @@
 
     <ImageView
         android:id="@+id/faviconTab"
-        android:layout_width="32dp"
+        android:layout_width="38dp"
         android:layout_height="32dp"
         android:layout_alignParentTop="true"
         android:paddingLeft="12dp"
-        android:scaleType="centerInside" />
+        android:scaleType="centerCrop" />
 
     <TextView
         android:id="@+id/page_domain"
@@ -27,7 +27,7 @@
         android:paddingTop="8dp"
         android:paddingLeft="10dp"
         android:singleLine="true"
-        android:textColor="@color/gray_medium"
+        android:textColor="#aaaaaa"
         android:textSize="12sp" />
 
     <TextView
@@ -39,7 +39,7 @@
         android:paddingTop="4dp"
         android:paddingLeft="12dp"
         android:singleLine="true"
-        android:textColor="@color/black"
+        android:textColor="#333333"
         android:textSize="16sp" />
 
 </RelativeLayout>
