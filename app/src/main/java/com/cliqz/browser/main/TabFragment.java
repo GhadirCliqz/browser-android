@@ -696,6 +696,7 @@ public class TabFragment extends BaseFragment {
             mAutocompleteEditText.setSelection(event.query.length());
         }
         state.setMode(Mode.SEARCH);
+        setAntiTrackingDetailsVisibility(View.GONE);
         showKeyBoard();
     }
 
