@@ -149,4 +149,7 @@ public final class Messages {
 
     public static class UpdateTabsOverview {
     }
+
+    public static class HideLoadingScreen {
+    }
 }

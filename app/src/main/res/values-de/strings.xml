@@ -279,4 +279,5 @@
     <string name="antitracking_tracking_companies">Tracking Unternehmen</string>
     <string name="antitracking_datapoints_count">Persönliche Daten</string>
     <string name="help">Hilfe</string>
+    <string name="loading_screen">Top-News werden geladen</string>
 </resources>

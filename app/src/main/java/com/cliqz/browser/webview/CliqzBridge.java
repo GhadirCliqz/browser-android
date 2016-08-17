@@ -143,6 +143,7 @@ public class CliqzBridge extends Bridge {
         isReady(new IAction() {
             @Override
             public void execute(Bridge bridge, Object data, String callback) {
+                bridge.bus.post(new Messages.HideLoadingScreen());
                 bridge.getWebView().extensionReady();
                 bridge.executeJavascript(String.format(Locale.US,  "%s(-1)", callback));
             }

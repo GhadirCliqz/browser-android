@@ -22,6 +22,7 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Patterns;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
@@ -102,6 +103,7 @@ public class TabFragment extends BaseFragment {
     protected boolean isHomePageShown = false;
     private JSONArray videoUrls = null;
     private int mTrackerCount = 0;
+    private View loadingScreen;
 
     String lastQuery = "";
 
@@ -229,6 +231,13 @@ public class TabFragment extends BaseFragment {
     public void onStart() {
         super.onStart();
         telemetry.sendLayerChangeSignal("present");
+        if (!mSearchWebView.isExtensionReady()) {
+            final LayoutInflater inflater = LayoutInflater.from(getContext());
+            loadingScreen = inflater.inflate(R.layout.loading_screen, null, false);
+            mLocalContainer.addView(loadingScreen);
+            mSearchWebView.setVisibility(View.INVISIBLE);
+            mLightningView.getWebView().setVisibility(View.INVISIBLE);
+        }
     }
 
     @Override
@@ -622,6 +631,17 @@ public class TabFragment extends BaseFragment {
             onBackPressedV16();
         } else {
             onBackPressedV21();
+        }
+    }
+
+    @Subscribe
+    public void hideLoadingScreen(Messages.HideLoadingScreen event) {
+        if (loadingScreen != null) {
+            loadingScreen.setVisibility(View.GONE);
+            mSearchWebView.setVisibility(View.VISIBLE);
+            mLightningView.getWebView().setVisibility(View.VISIBLE);
+            mAutocompleteEditText.requestFocus();
+            showKeyBoard();
         }
     }
 
