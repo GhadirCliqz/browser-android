@@ -537,6 +537,15 @@ public class MainActivity extends AppCompatActivity implements ActivityComponent
 
     @Subscribe
     public void exit(Messages.Exit event) {
+        tabsManager.deleteTab(tabsManager.getCurrentTabPosition());
+        final int currentPos = tabsManager.getCurrentTabPosition();
+        if (currentPos != -1) {
+            tabsManager.showTab(tabsManager.getCurrentTabPosition());
+        }
+    }
+
+    @Subscribe
+    public void finish(Messages.KillApp event) {
         finish();
     }
 

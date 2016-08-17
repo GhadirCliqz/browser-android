@@ -123,7 +123,7 @@ public class TabsManager {
         reference.mLightningView.onDestroy();
         if (mFragmentsList.size() == 0) {
             currentVisibleTab = -1;
-            bus.post(new Messages.Exit());
+            bus.post(new Messages.KillApp());
         } else if (currentVisibleTab == mFragmentsList.size()) {
             currentVisibleTab-=1;
         }
