@@ -10,8 +10,8 @@ android {
     defaultConfig {
         targetSdkVersion 23
         minSdkVersion 21
-        versionCode = 2
-        versionName = "1.0.0r3"
+        versionCode = 3
+        versionName = "1.0.0r4"
 
         buildConfigField 'String', 'LIGHTNING_VERSION_NAME', '"4.2.3.1"'
         buildConfigField "boolean", "FULL_VERSION", "true"
