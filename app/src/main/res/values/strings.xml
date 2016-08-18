@@ -297,4 +297,5 @@
     <string name="antitracking_datapoints_count">Private data points</string>
     <string name="help">Help</string>
     <string name="loading_screen">Top-News are being loaded</string>
+    <string name="others">Others</string>
 </resources>

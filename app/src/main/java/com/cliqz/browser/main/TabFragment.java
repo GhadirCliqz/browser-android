@@ -427,10 +427,11 @@ public class TabFragment extends BaseFragment {
     @OnClick(R.id.anti_tracking_details)
     void showAntiTrackingDialog() {
         final ArrayList<TrackerDetailsModel> details = mLightningView.getTrackerDetails();
-//        if (details == null || details.isEmpty()) {
-//            //probably should show a toast here?
-//            return;
-//        }
+        final int othersCount = mTrackerCount - details.size();
+        if (othersCount > 0) {
+            final TrackerDetailsModel othersEntry = new TrackerDetailsModel(getString(R.string.others), othersCount);
+            details.add(othersEntry);
+        }
         final View popupView = getActivity().getLayoutInflater().inflate(R.layout.anti_tracking_dialog, null);
         final int popupBgColor = isIncognito ? R.color.incognito_tab_primary_color : R.color.normal_tab_primary_color;
         final int popupTextColor = isIncognito ? R.color.normal_tab_primary_color : R.color.incognito_tab_primary_color;

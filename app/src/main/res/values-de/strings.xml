@@ -280,4 +280,5 @@
     <string name="antitracking_datapoints_count">Persönliche Daten</string>
     <string name="help">Hilfe</string>
     <string name="loading_screen">Top-News werden geladen</string>
+    <string name="others">Andere</string>
 </resources>
