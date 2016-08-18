@@ -139,8 +139,5 @@ public final class Messages {
     }
 
     public static class HideLoadingScreen {
-	}
-
-    public static class KillApp {
     }
 }

@@ -89,20 +89,27 @@ public class TabsManager {
      * Create a new Tab and add it to the TabsList and switches the view to it
      * @param bundle Arguments for the newly created Tab
      */
-    public void addNewTab(Bundle bundle) {
+    public void addNewTab(Bundle bundle, boolean showImmediately) {
         final TabFragment newTab = new TabFragment();
         newTab.setArguments(bundle);
         mFragmentsList.add(newTab);
-        showTab(mFragmentsList.size()-1);
+        if (showImmediately) {
+            showTab(mFragmentsList.size()-1);
+        }
+    }
+
+    public void addNewTab(boolean isIncognito, boolean showImmediately) {
+        final Bundle args = new Bundle();
+        args.putBoolean(Constants.KEY_IS_INCOGNITO, isIncognito);
+        addNewTab(args, showImmediately);
+    }
+
+    public void addNewTab(Bundle args) {
+        addNewTab(args, true);
     }
 
     public void addNewTab(boolean isIncognito) {
-        final Bundle args = new Bundle();
-        args.putBoolean(Constants.KEY_IS_INCOGNITO, isIncognito);
-        final TabFragment newTab = new TabFragment();
-        newTab.setArguments(args);
-        mFragmentsList.add(newTab);
-        showTab(mFragmentsList.size()-1);
+        addNewTab(isIncognito, true);
     }
 
     /**
@@ -123,7 +130,7 @@ public class TabsManager {
         reference.mLightningView.onDestroy();
         if (mFragmentsList.size() == 0) {
             currentVisibleTab = -1;
-            bus.post(new Messages.KillApp());
+            addNewTab(false, false);
         } else if (currentVisibleTab == mFragmentsList.size()) {
             currentVisibleTab-=1;
         }
@@ -170,6 +177,5 @@ public class TabsManager {
             }
         }
     }
-
 }
 
