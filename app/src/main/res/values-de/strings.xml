@@ -242,7 +242,7 @@
     <string name="gps_permission">Für bessere Suchergebnisse aktivieren Sie bitte GPS</string>
     <string name="dont_show_again">Nicht mehr zeigen</string>
     <string name="open_in_new_tab">In neuem Tab öffnen</string>
-    <string name="open_in_incognito_tab">In Incognito-Tab öffnen</string>
+    <string name="open_in_incognito_tab">In Neuem Vergessen-Tab öffnen</string>
     <string name="not_shareable">Diese Karte kann nicht geteilt werden.</string>
     <string name="clear_favorites">Favoriten löschen</string>
     <string name="also_clear_queries">Suchanfragen löschen</string>
