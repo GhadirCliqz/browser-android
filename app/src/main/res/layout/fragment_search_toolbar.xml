@@ -19,6 +19,7 @@
             android:layout_height="24dp"
             android:layout_gravity="center"
             android:textColor="@color/black"
+            android:textStyle="bold"
             android:gravity="center"
             android:background="@drawable/tab_counter"/>
     </FrameLayout>
@@ -27,7 +28,6 @@
         android:id="@+id/search_bar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginRight="10dp"
         android:layout_marginEnd="10dp"
         android:layout_centerVertical="true"
         android:layout_toRightOf="@+id/menu_history"

@@ -146,4 +146,7 @@ public final class Messages {
 
     public static class ResetTrackerCount {
     }
+
+    public static class UpdateTabsOverview {
+    }
 }

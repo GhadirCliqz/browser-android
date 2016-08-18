@@ -44,7 +44,6 @@ public class OverviewFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.activity_overview, container, false);
-
         final int themeResId = R.style.Theme_Cliqz_Overview;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             final TypedArray typedArray = getActivity().getTheme().obtainStyledAttributes(themeResId, new int[]{R.attr.colorPrimaryDark});
@@ -55,14 +54,11 @@ public class OverviewFragment extends Fragment {
         mOverviewPagerAdapter = new OverviewPagerAdapter(getChildFragmentManager());
         mViewPager = (ViewPager) view.findViewById(R.id.viewpager);
         mViewPager.setAdapter(mOverviewPagerAdapter);
-
         mToolbar = (Toolbar) view.findViewById(R.id.toolbar);
         ((AppCompatActivity)getActivity()).setSupportActionBar(mToolbar);
         ((AppCompatActivity)getActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         ((AppCompatActivity)getActivity()).getSupportActionBar().setTitle(getContext().getString(R.string.overview));
-
         setHasOptionsMenu(true);
-
         mTabLayout = (TabLayout) view.findViewById(R.id.tabs);
         mTabLayout.setupWithViewPager(mViewPager);
         return view;
