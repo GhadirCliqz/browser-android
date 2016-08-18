@@ -22,7 +22,6 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Patterns;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
@@ -618,9 +617,23 @@ public class TabFragment extends BaseFragment {
         bringWebViewToFront();
     }
 
-    @Subscribe
-    public void notifyQuery(CliqzMessages.NotifyQuery event) {
-        bus.post(new Messages.ShowSearch(event.query));
+    /**
+     * Show the search interface in the current tab fro the given query
+     * @param query the query to display (and search)
+     */
+    public void searchQuery(String query) {
+        searchBar.showSearchEditText();
+        mSearchWebView.bringToFront();
+        inPageSearchBar.setVisibility(View.GONE);
+        mLightningView.findInPage("");
+        mAutocompleteEditText.requestFocus();
+        if (query != null) {
+            mAutocompleteEditText.setText(query);
+            mAutocompleteEditText.setSelection(query.length());
+        }
+        state.setMode(Mode.SEARCH);
+        setAntiTrackingDetailsVisibility(View.GONE);
+        showKeyBoard();
     }
 
     @Subscribe
@@ -706,18 +719,7 @@ public class TabFragment extends BaseFragment {
 
     @Subscribe
     public void showSearch(Messages.ShowSearch event) {
-        searchBar.showSearchEditText();
-        mSearchWebView.bringToFront();
-        inPageSearchBar.setVisibility(View.GONE);
-        mLightningView.findInPage("");
-        mAutocompleteEditText.requestFocus();
-        if (event != null) {
-            mAutocompleteEditText.setText(event.query);
-            mAutocompleteEditText.setSelection(event.query.length());
-        }
-        state.setMode(Mode.SEARCH);
-        setAntiTrackingDetailsVisibility(View.GONE);
-        showKeyBoard();
+        searchQuery(event.query);
     }
 
     @Subscribe

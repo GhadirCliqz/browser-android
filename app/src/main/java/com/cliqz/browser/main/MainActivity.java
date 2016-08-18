@@ -490,8 +490,10 @@ public class MainActivity extends AppCompatActivity implements ActivityComponent
         startActivity(new Intent(this, SettingsActivity.class));
     }
 
+//    @Subscribe
+//    public void goToSearch(Messages.GoToSearch event) {
     @Subscribe
-    public void goToSearch(Messages.GoToSearch event) {
+    public void onQueryNotified(final CliqzMessages.NotifyQuery event) {
         final FragmentManager fm = getSupportFragmentManager();
         fm.popBackStack();
         final String query = event.query;
@@ -500,7 +502,8 @@ public class MainActivity extends AppCompatActivity implements ActivityComponent
                 @Override
                 public void onBackStackChanged() {
                     fm.removeOnBackStackChangedListener(this);
-                    bus.post(new CliqzMessages.NotifyQuery(query));
+                    tabsManager.getCurrentTab().searchQuery(event.query);
+//                    bus.post(new CliqzMessages.NotifyQuery(query));
                 }
             });
         }

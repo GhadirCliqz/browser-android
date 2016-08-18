@@ -27,7 +27,6 @@ public class CliqzMessages {
     /**
      * The extension notify us it want to change the query string in the url bar
      *
-     * TODO Is this still used?
      */
     public static final class NotifyQuery {
         public final String query;
@@ -57,7 +56,7 @@ public class CliqzMessages {
             this(url, false);
         }
     }
-    
+
     public static class CopyData {
         public final String data;
 

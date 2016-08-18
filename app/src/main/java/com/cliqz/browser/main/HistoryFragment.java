@@ -7,10 +7,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 
-import com.cliqz.browser.webview.CliqzMessages;
 import com.cliqz.browser.webview.FavoritesWebView;
 import com.cliqz.browser.webview.HistoryWebView;
-import com.squareup.otto.Subscribe;
 
 import acr.browser.lightning.preference.PreferenceManager;
 
@@ -74,9 +72,9 @@ public class HistoryFragment extends FragmentWithBus {
         }
     }
 
-    @Subscribe
-    public void onNotifyQuery(CliqzMessages.NotifyQuery event) {
-        bus.post(new Messages.GoToSearch(event.query));
-    }
+//    @Subscribe
+//    public void onNotifyQuery(CliqzMessages.NotifyQuery event) {
+//        bus.post(new Messages.GoToSearch(event.query));
+//    }
 
 }
