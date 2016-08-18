@@ -486,20 +486,6 @@ public class MainActivity extends AppCompatActivity implements ActivityComponent
     }
 
     @Subscribe
-    public void goToLink(Messages.GoToLink event) {
-        final FragmentManager fm = getSupportFragmentManager();
-        final String url = event.url;
-        fm.popBackStack();
-        fm.addOnBackStackChangedListener(new FragmentManager.OnBackStackChangedListener() {
-            @Override
-            public void onBackStackChanged() {
-                fm.removeOnBackStackChangedListener(this);
-                bus.post(new CliqzMessages.OpenHistoryLink(url));
-            }
-        });
-    }
-
-    @Subscribe
     public void goToSettings(Messages.GoToSettings event) {
         startActivity(new Intent(this, SettingsActivity.class));
     }

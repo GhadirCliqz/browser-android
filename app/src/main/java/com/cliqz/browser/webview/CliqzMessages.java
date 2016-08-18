@@ -57,15 +57,7 @@ public class CliqzMessages {
             this(url, false);
         }
     }
-
-    public static final class OpenHistoryLink {
-        public final String url;
-
-        public OpenHistoryLink(String url) {
-            this.url = url;
-        }
-    }
-
+    
     public static class CopyData {
         public final String data;
 

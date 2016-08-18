@@ -97,15 +97,6 @@ public class FreshTabFragment extends BaseFragment {
         TabFragment tabFragment = (TabFragment)getActivity()
                 .getSupportFragmentManager()
                 .findFragmentByTag(MainActivity.TAB_FRAGMENT_TAG);
-        if(tabFragment != null) {
-//            final String s = state.getMode() == CliqzBrowserState.Mode.WEBPAGE ? "web" : "cards";
-//            telemetry.sendBackPressedSignal("future", s, tabFragment.mAutocompleteEditText.length());
-        }
         bus.post(new Messages.GoToSearch());
-    }
-
-    @Subscribe
-    public void onOpenLink(CliqzMessages.OpenLink event) {
-        bus.post(new Messages.GoToLink(event.url));
     }
 }

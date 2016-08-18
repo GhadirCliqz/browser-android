@@ -52,18 +52,6 @@ public final class Messages {
      */
     public static class ShowHomePage {}
 
-    /**
-     * This will make the app to transact to the Main fragment, the main fragment then will switch
-     * to browsing mode displaying the relative web page
-     */
-    public static class GoToLink {
-        public final String url;
-
-        public GoToLink(String url) {
-            this.url = url;
-        }
-    }
-
     public static class ReloadPage {}
 
     public static class ShareLink {}
