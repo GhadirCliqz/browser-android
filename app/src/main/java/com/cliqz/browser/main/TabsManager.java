@@ -129,7 +129,7 @@ public class TabsManager {
         mFragmentsList.remove(position);
         reference.mLightningView.onDestroy();
         if (mFragmentsList.size() == 0) {
-            currentVisibleTab = -1;
+            currentVisibleTab = 0;
             addNewTab(false, false);
         } else if (currentVisibleTab == mFragmentsList.size()) {
             currentVisibleTab-=1;

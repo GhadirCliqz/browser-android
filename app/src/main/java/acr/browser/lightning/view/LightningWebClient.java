@@ -84,6 +84,9 @@ class LightningWebClient extends WebViewClient implements AntiPhishing.AntiPhish
     public WebResourceResponse shouldInterceptRequest(WebView view, String url) {
         final Uri uri = Uri.parse(url);
         WebResourceResponse response = handleUrl(view, uri);
+        if (response == null) {
+            response  = lightningView.attrack.shouldInterceptRequest(view, Uri.parse(url));
+        }
         return response;
     }
 
