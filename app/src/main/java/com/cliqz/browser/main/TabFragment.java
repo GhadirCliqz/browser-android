@@ -427,7 +427,11 @@ public class TabFragment extends BaseFragment {
     @OnClick(R.id.anti_tracking_details)
     void showAntiTrackingDialog() {
         final ArrayList<TrackerDetailsModel> details = mLightningView.getTrackerDetails();
-        final int othersCount = mTrackerCount - details.size();
+        int trackerPoints = 0;
+        for (TrackerDetailsModel model: details) {
+            trackerPoints += model.trackerCount;
+        }
+        final int othersCount = mTrackerCount - trackerPoints;
         if (othersCount > 0) {
             final TrackerDetailsModel othersEntry = new TrackerDetailsModel(getString(R.string.others), othersCount);
             details.add(othersEntry);

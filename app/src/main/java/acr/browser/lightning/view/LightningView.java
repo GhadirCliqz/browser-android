@@ -86,10 +86,6 @@ public class LightningView {
     private boolean mToggleDesktop = false;
     private static final int API = android.os.Build.VERSION.SDK_INT;
     private final String mId;
-    //private String mUrl;
-//    // TODO fix so that mWebpageBitmap can be static - static changes the icon when switching from light to dark and then back to light
-//    private Bitmap mWebpageBitmap;
-//    private boolean mTextReflow = false;
     boolean clicked = false;
 
     /**
@@ -687,43 +683,24 @@ public class LightningView {
      */
     private void longClickPage(final String url) {
         final WebView.HitTestResult result = mWebView.getHitTestResult();
-        String currentUrl = mWebView.getUrl();
-//        if (currentUrl != null && currentUrl.startsWith(Constants.FILE)) {
-//            if (currentUrl.endsWith(HistoryPage.FILENAME)) {
-//                if (url != null) {
-//                    bookmarksDialogBuilder.showLongPressedHistoryLinkDialog(activity, url);
-//                } else if (result != null && result.getExtra() != null) {
-//                    final String newUrl = result.getExtra();
-//                    bookmarksDialogBuilder.showLongPressedHistoryLinkDialog(activity, newUrl);
-//                }
-//            } else if (currentUrl.endsWith(Constants.BOOKMARKS_FILENAME)) {
-//                if (url != null) {
-//                    bookmarksDialogBuilder.showLongPressedDialogForBookmarkUrl(activity, url);
-//                } else if (result != null && result.getExtra() != null) {
-//                    final String newUrl = result.getExtra();
-//                    bookmarksDialogBuilder.showLongPressedDialogForBookmarkUrl(activity, newUrl);
-//                }
-//            }
-//        } else {
-            if (url != null) {
-                if (result != null) {
-                    if (result.getType() == WebView.HitTestResult.SRC_IMAGE_ANCHOR_TYPE || result.getType() == WebView.HitTestResult.IMAGE_TYPE) {
-                        bookmarksDialogBuilder.showLongPressImageDialog(activity, url, getUserAgent());
-                    } else {
-                        bookmarksDialogBuilder.showLongPressLinkDialog(activity, url, getUserAgent());
-                    }
+        if (url != null) {
+            if (result != null) {
+                if (result.getType() == WebView.HitTestResult.SRC_IMAGE_ANCHOR_TYPE || result.getType() == WebView.HitTestResult.IMAGE_TYPE) {
+                    bookmarksDialogBuilder.showLongPressImageDialog(activity, url, getUserAgent());
                 } else {
                     bookmarksDialogBuilder.showLongPressLinkDialog(activity, url, getUserAgent());
                 }
-            } else if (result != null && result.getExtra() != null) {
-                final String newUrl = result.getExtra();
-                if (result.getType() == WebView.HitTestResult.SRC_IMAGE_ANCHOR_TYPE || result.getType() == WebView.HitTestResult.IMAGE_TYPE) {
-                    bookmarksDialogBuilder.showLongPressImageDialog(activity, newUrl, getUserAgent());
-                } else {
-                    bookmarksDialogBuilder.showLongPressLinkDialog(activity, newUrl, getUserAgent());
-                }
+            } else {
+                bookmarksDialogBuilder.showLongPressLinkDialog(activity, url, getUserAgent());
             }
-//        }
+        } else if (result != null && result.getExtra() != null) {
+            final String newUrl = result.getExtra();
+            if (result.getType() == WebView.HitTestResult.SRC_IMAGE_ANCHOR_TYPE || result.getType() == WebView.HitTestResult.IMAGE_TYPE) {
+                bookmarksDialogBuilder.showLongPressImageDialog(activity, newUrl, getUserAgent());
+            } else {
+                bookmarksDialogBuilder.showLongPressLinkDialog(activity, newUrl, getUserAgent());
+            }
+        }
     }
 
     public boolean canGoBack() {
