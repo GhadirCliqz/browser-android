@@ -423,6 +423,7 @@ public class TabFragment extends BaseFragment {
         mLightningView.findNext();
     }
 
+    // TODO @Ravjit, please extraxt this as a class, it is too much convoluted
     @Nullable
     @OnClick(R.id.anti_tracking_details)
     void showAntiTrackingDialog() {
@@ -470,7 +471,7 @@ public class TabFragment extends BaseFragment {
         lowerLine.getBackground().setColorFilter(ContextCompat.getColor(getContext(), popupTextColor), PorterDuff.Mode.SRC_ATOP);
         counter.setText(Integer.toString(mTrackerCount));
         trackersList.setLayoutManager(new LinearLayoutManager(getContext()));
-        trackersList.setAdapter(new TrackersListAdapter(details, isIncognito, getContext()));
+        trackersList.setAdapter(new TrackersListAdapter(details, isIncognito, getContext(), bus, antiTrackindDialog));
         antiTrackindDialog.setBackgroundDrawable(new ColorDrawable());
         antiTrackindDialog.setOutsideTouchable(true);
         antiTrackindDialog.setFocusable(true);
