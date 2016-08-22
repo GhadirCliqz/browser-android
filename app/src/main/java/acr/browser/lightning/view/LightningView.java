@@ -864,7 +864,7 @@ public class LightningView {
                 int trackersCount = 0;
                 for (int j = 0; j < domains.length(); j++) {
                     final JSONObject trackers = jsonObject.getJSONObject("trackers").getJSONObject(domains.optString(j));
-                    trackersCount += trackers.optInt("bad_qs",0) + trackers.optInt("adblock_block",0);
+                    trackersCount += trackers.optInt("bad_qs",0); //  + trackers.optInt("adblock_block",0);
                 }
                 if (trackersCount > 0) {
                     trackerDetails.add(new TrackerDetailsModel(key, trackersCount));

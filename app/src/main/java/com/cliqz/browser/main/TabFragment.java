@@ -424,6 +424,7 @@ public class TabFragment extends BaseFragment {
     }
 
     // TODO @Ravjit, please extraxt this as a class, it is too much convoluted
+    // TODO @Ravjit, the dialog should disappear if you pause the app
     @Nullable
     @OnClick(R.id.anti_tracking_details)
     void showAntiTrackingDialog() {
