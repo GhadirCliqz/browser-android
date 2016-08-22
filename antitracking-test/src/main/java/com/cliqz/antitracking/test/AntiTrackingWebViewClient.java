@@ -8,6 +8,7 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
 import com.cliqz.antitracking.AntiTracking;
+import com.cliqz.antitracking.AntiTrackingResponse;
 import com.cliqz.antitracking.AntiTrackingSupport;
 
 import org.json.JSONObject;
@@ -54,7 +55,7 @@ public class AntiTrackingWebViewClient extends TestWebViewClient {
     }
 
     @Override
-    public WebResourceResponse handleRequest(WebView view, WebResourceRequest request) {
+    public AntiTrackingResponse handleRequest(WebView view, WebResourceRequest request) {
         return antiTracking.shouldInterceptRequest(view, request);
     }
 }

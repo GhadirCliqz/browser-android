@@ -43,15 +43,17 @@ public class AntiTracking {
     }
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-    public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
+    public AntiTrackingResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
         return shouldInterceptRequest(view, request.getUrl());
     }
 
-    public WebResourceResponse shouldInterceptRequest(final WebView view, Uri uri) {
+    public AntiTrackingResponse shouldInterceptRequest(final WebView view, Uri uri) {
         if (mAdBlockEnabled && adBlock.isAd(uri)) {
-            return new WebResourceResponse("text/html", "UTF-8", StreamUtils.createEmptyStream());
+            final WebResourceResponse response =
+                    new WebResourceResponse("text/html", "UTF-8", StreamUtils.createEmptyStream());
+            return new AntiTrackingResponse(AntiTrackingResponse.ADBLOCKING_TYPE, response);
         }
-        return null;
+        return new AntiTrackingResponse(-1, null);
     }
 
     //dummy method to suppress the error

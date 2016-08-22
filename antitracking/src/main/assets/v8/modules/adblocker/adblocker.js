@@ -328,7 +328,7 @@ System.register('adblocker/adblocker', ['core/cliqz', 'core/webrequest', 'antitr
             CliqzADB.adBlocker.init();
             CliqzADB.adblockInitialized = true;
             CliqzADB.initPacemaker();
-            WebRequest.onBeforeRequest.addListener(CliqzADB.httpopenObserver.observe, undefined, ['blocking']);
+            WebRequest.onBeforeRequest.addListener(CliqzADB.httpopenObserver.observe, undefined, ['blocking', 'adblocking']);
           };
 
           if (adbEnabled()) {

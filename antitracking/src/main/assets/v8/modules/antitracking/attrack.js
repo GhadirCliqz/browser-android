@@ -1036,8 +1036,8 @@ System.register('antitracking/attrack', ['antitracking/pacemaker', 'antitracking
                     CliqzAttrack.initPacemaker();
                     pacemaker.start();
 
-                    WebRequest.onBeforeRequest.addListener(CliqzAttrack.httpopenObserver.observe, undefined, ['blocking']);
-                    WebRequest.onBeforeSendHeaders.addListener(CliqzAttrack.httpmodObserver.observe, undefined, ['blocking']);
+                    WebRequest.onBeforeRequest.addListener(CliqzAttrack.httpopenObserver.observe, undefined, ['blocking', 'antitracking']);
+                    WebRequest.onBeforeSendHeaders.addListener(CliqzAttrack.httpmodObserver.observe, undefined, ['blocking','antitracking']);
                     WebRequest.onHeadersReceived.addListener(CliqzAttrack.httpResponseObserver.observe);
 
                     try {
