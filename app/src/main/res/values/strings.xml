@@ -245,7 +245,7 @@
     <string name="go">Go</string>
     <string name="show_onboarding_tour">Show tour</string>
     <string name="onboarding" translatable="false">OnBoarding</string>
-    <string name="block_adult_content">Block Adult Content</string>
+    <string name="block_adult_content">Block Explicit Content</string>
     <string name="imprint">Imprint</string>
     <string name="what_is_humanweb">What is Human Web?</string>
     <string name="enable_human_web">Enable Human Web</string>
