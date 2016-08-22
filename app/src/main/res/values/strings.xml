@@ -262,7 +262,7 @@
     <string name="clear_favorites">Clear favorites</string>
     <string name="also_clear_queries">Delete queries</string>
     <string name="deleting_in_progress_message">Deleting...</string>
-    <string name="add_to_favourites">Add to favourites</string>
+    <string name="add_to_favourites">Add to favorites</string>
     <string name="save_link">Save Link</string>
     <string name="device_registered" translatable="false">Device Registered</string>
     <string name="error_registering" translatable="false">Error registering the device</string>
