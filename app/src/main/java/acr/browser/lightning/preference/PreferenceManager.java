@@ -107,8 +107,13 @@ public class PreferenceManager {
         mPrefs = context.getSharedPreferences(PREFERENCES, 0);
     }
 
+    /**
+     * Is adblocking enabled?
+     * !!! As Richard asked on 2016/08/22 we should not enable adblocker by default !!!
+     * @return true if adblocking is enabled, false otherwise
+     */
     public boolean getAdBlockEnabled() {
-        return mPrefs.getBoolean(Name.BLOCK_ADS, true);
+        return mPrefs.getBoolean(Name.BLOCK_ADS, false);
     }
 
     public boolean getOptimizedAdBlockEnabled() {
