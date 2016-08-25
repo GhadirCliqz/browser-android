@@ -430,6 +430,8 @@ public class OverFlowMenu extends FrameLayout {
             switch (tag) {
                 case COPY_LINK:
                     bus.post(new Messages.CopyUrl());
+                    Toast.makeText(context, context.getString(R.string.message_link_copied),
+                            Toast.LENGTH_SHORT).show();
                     break;
                 case SETTINGS:
                     bus.post(new Messages.GoToSettings());
