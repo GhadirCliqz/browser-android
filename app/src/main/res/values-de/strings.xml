@@ -282,4 +282,5 @@
     <string name="loading_screen">Top-News werden geladen</string>
     <string name="others">Andere</string>
     <string name="download_started">Download gestartet</string>
+    <string name="added_to_favorites">Zu Favoriten hinzugefügt</string>
 </resources>

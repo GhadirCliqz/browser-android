@@ -20,6 +20,7 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.cliqz.browser.app.BrowserApp;
 import com.cliqz.browser.di.components.ActivityComponent;
@@ -447,6 +448,8 @@ public class OverFlowMenu extends FrameLayout {
                     break;
                 case ADD_TO_FAVOURITES:
                     bus.post(new Messages.AddToFavourites(mUrl));
+                    Toast.makeText(context, context.getString(R.string.added_to_favorites),
+                            Toast.LENGTH_SHORT).show();
                     break;
                 case SAVE_LINK:
                     bus.post(new Messages.SaveLink());
