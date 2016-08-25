@@ -48,6 +48,7 @@ import com.cliqz.browser.R;
 import com.cliqz.browser.app.BrowserApp;
 import com.cliqz.browser.main.CliqzBrowserState.Mode;
 import com.cliqz.browser.utils.CustomChooserIntent;
+import com.cliqz.browser.utils.TrackerDetailsComparator;
 import com.cliqz.browser.webview.CliqzMessages;
 import com.cliqz.browser.webview.SearchWebView;
 import com.cliqz.browser.widget.AutocompleteEditText;
@@ -58,6 +59,7 @@ import com.squareup.otto.Subscribe;
 import org.json.JSONArray;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Locale;
 
 import acr.browser.lightning.bus.BrowserEvents;
@@ -433,6 +435,7 @@ public class TabFragment extends BaseFragment {
         for (TrackerDetailsModel model: details) {
             trackerPoints += model.trackerCount;
         }
+        Collections.sort(details, new TrackerDetailsComparator());
         final int othersCount = mTrackerCount - trackerPoints;
         if (othersCount > 0) {
             final TrackerDetailsModel othersEntry = new TrackerDetailsModel(getString(R.string.others), othersCount);
