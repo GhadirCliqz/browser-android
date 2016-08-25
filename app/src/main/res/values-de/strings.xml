@@ -281,4 +281,5 @@
     <string name="help">Hilfe</string>
     <string name="loading_screen">Top-News werden geladen</string>
     <string name="others">Andere</string>
+    <string name="download_started">Download gestartet</string>
 </resources>
