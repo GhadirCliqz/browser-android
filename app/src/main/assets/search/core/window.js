@@ -1,7 +1,7 @@
-System.register("core/window", ["core/storage"], function (_export) {
+System.register("core/window", ["core/storage", "core/utils", "core/ab-tests"], function (_export) {
   "use strict";
 
-  var Storage, _default;
+  var Storage, utils, ABTests, _default;
 
   var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
 
@@ -10,6 +10,10 @@ System.register("core/window", ["core/storage"], function (_export) {
   return {
     setters: [function (_coreStorage) {
       Storage = _coreStorage["default"];
+    }, function (_coreUtils) {
+      utils = _coreUtils["default"];
+    }, function (_coreAbTests) {
+      ABTests = _coreAbTests["default"];
     }],
     execute: function () {
       _default = (function () {
@@ -22,7 +26,7 @@ System.register("core/window", ["core/storage"], function (_export) {
         _createClass(_default, [{
           key: "init",
           value: function init() {
-            this.window.CLIQZ.CliqzStorage = new Storage();
+            ABTests.check();
           }
         }, {
           key: "unload",
@@ -36,4 +40,4 @@ System.register("core/window", ["core/storage"], function (_export) {
     }
   };
 });
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbImNvcmUvd2luZG93LmVzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiI7Ozs7Ozs7Ozs7Ozs7OztBQUlhLDBCQUFDLFFBQVEsRUFBRTs7O0FBQ3JCLGNBQUksQ0FBQyxNQUFNLEdBQUcsUUFBUSxDQUFDLE1BQU0sQ0FBQztTQUM5Qjs7OztpQkFFRyxnQkFBRztBQUNOLGdCQUFJLENBQUMsTUFBTSxDQUFDLEtBQUssQ0FBQyxZQUFZLEdBQUcsSUFBSSxPQUFPLEVBQUUsQ0FBQztXQUMvQzs7O2lCQUVLLGtCQUFHLEVBQ1IiLCJmaWxlIjoiY29yZS93aW5kb3cuZXMiLCJzb3VyY2VzQ29udGVudCI6WyJpbXBvcnQgU3RvcmFnZSBmcm9tIFwiY29yZS9zdG9yYWdlXCI7XG5cbmV4cG9ydCBkZWZhdWx0IGNsYXNzIHtcblxuICBjb25zdHJ1Y3RvcihzZXR0aW5ncykge1xuICBcdHRoaXMud2luZG93ID0gc2V0dGluZ3Mud2luZG93O1xuICB9XG5cbiAgaW5pdCgpIHtcbiAgXHR0aGlzLndpbmRvdy5DTElRWi5DbGlxelN0b3JhZ2UgPSBuZXcgU3RvcmFnZSgpO1xuICB9XG5cbiAgdW5sb2FkKCkge1xuICB9XG59XG4iXX0=
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbImNvcmUvd2luZG93LmpzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiI7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7QUFNYSwwQkFBQyxRQUFRLEVBQUU7OztBQUNyQixjQUFJLENBQUMsTUFBTSxHQUFHLFFBQVEsQ0FBQyxNQUFNLENBQUM7U0FDOUI7Ozs7aUJBRUcsZ0JBQUc7QUFDTCxtQkFBTyxDQUFDLEtBQUssRUFBRSxDQUFDO1dBQ2pCOzs7aUJBRUssa0JBQUcsRUFDUiIsImZpbGUiOiJjb3JlL3dpbmRvdy5qcyIsInNvdXJjZXNDb250ZW50IjpbImltcG9ydCBTdG9yYWdlIGZyb20gXCJjb3JlL3N0b3JhZ2VcIjtcbmltcG9ydCB1dGlscyBmcm9tIFwiY29yZS91dGlsc1wiO1xuaW1wb3J0IEFCVGVzdHMgZnJvbSBcImNvcmUvYWItdGVzdHNcIjtcblxuZXhwb3J0IGRlZmF1bHQgY2xhc3Mge1xuXG4gIGNvbnN0cnVjdG9yKHNldHRpbmdzKSB7XG4gIFx0dGhpcy53aW5kb3cgPSBzZXR0aW5ncy53aW5kb3c7XG4gIH1cblxuICBpbml0KCkge1xuICAgIEFCVGVzdHMuY2hlY2soKTtcbiAgfVxuXG4gIHVubG9hZCgpIHtcbiAgfVxufVxuIl19

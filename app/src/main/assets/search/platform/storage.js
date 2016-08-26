@@ -1,4 +1,4 @@
-System.register([], function (_export) {
+System.register("platform/storage", [], function (_export) {
   "use strict";
 
   return {

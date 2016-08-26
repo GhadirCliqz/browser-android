@@ -1,4 +1,4 @@
-System.register([], function (_export) {
+System.register("platform/process-script-manager", [], function (_export) {
   "use strict";
 
   var _default;

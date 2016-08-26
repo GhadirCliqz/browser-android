@@ -20,7 +20,7 @@ body, html {
     left: 60px;
     text-align: left;
     font-size: 0.75rem;
-    color: #999;
+    color: #4A90E2;
     width: 70%;
     height: 32px;
     overflow: hidden;
@@ -168,12 +168,11 @@ body, html {
   text-align: center;
   position: relative;
   font-size: 13px;
-  font-family: 'Roboto';
   font-weight: 300;
   color: #666; }
   .history .dateline span {
     background-color: white;
-    padding: 0 5px;
+    padding: 5px 5px;
     border-radius: 0.3rem; }
 
 /*# sourceMappingURL=tabs.css.map */

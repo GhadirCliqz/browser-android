@@ -1,4 +1,4 @@
-System.register([], function (_export) {
+System.register('platform/fs', [], function (_export) {
   'use strict';
 
   _export('readFile', readFile);
