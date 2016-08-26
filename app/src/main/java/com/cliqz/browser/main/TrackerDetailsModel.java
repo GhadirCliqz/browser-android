@@ -11,4 +11,5 @@ public class TrackerDetailsModel {
         this.companyName = companyName;
         this.trackerCount = trackerCount;
     }
+
 }

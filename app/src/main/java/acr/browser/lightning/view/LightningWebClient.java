@@ -29,7 +29,6 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
-import com.cliqz.antitracking.AntiTrackingResponse;
 import com.cliqz.browser.R;
 import com.cliqz.browser.antiphishing.AntiPhishing;
 import com.cliqz.browser.main.Messages;
@@ -68,10 +67,8 @@ class LightningWebClient extends WebViewClient implements AntiPhishing.AntiPhish
     public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
         WebResourceResponse response = handleUrl(view, request.getUrl());
         if (response == null) {
-            final AntiTrackingResponse atresponse =
-                    lightningView.attrack.shouldInterceptRequest(view, request);
-            response = atresponse != null ? atresponse.response : null;
-            if (atresponse.type == AntiTrackingResponse.ANTITRACKING_TYPE) {
+            response = lightningView.attrack.shouldInterceptRequest(view, request);
+            if (response != null) {
                 view.post(new Runnable() {
                     @Override
                     public void run() {
@@ -88,9 +85,7 @@ class LightningWebClient extends WebViewClient implements AntiPhishing.AntiPhish
         final Uri uri = Uri.parse(url);
         WebResourceResponse response = handleUrl(view, uri);
         if (response == null) {
-            final AntiTrackingResponse atresponse =
-                    lightningView.attrack.shouldInterceptRequest(view, Uri.parse(url));
-            response  = atresponse != null ? atresponse.response : null;
+            response = lightningView.attrack.shouldInterceptRequest(view, Uri.parse(url));
         }
         return response;
     }
