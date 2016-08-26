@@ -1,3 +1,0 @@
-[submodule "external/extension"]
-	path = external/extension
-	url = git@github.com:cliqz/navigation-extension

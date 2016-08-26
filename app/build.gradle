@@ -26,6 +26,8 @@ android {
             shrinkResources false
             proguardFiles 'proguard-project.txt'
             buildConfigField 'String', 'TELEMETRY_CHANNEL', '"MA02"'
+            applicationIdSuffix '.debug'
+            versionNameSuffix '-debug'
         }
 
         release {
@@ -71,7 +73,7 @@ android {
             dimension "api"
             targetSdkVersion 21
             versionCode = 9
-            applicationId "com.cliqz.browser.ut"
+            applicationIdSuffix '.ut'
         }
         x86 {
             dimension "abi"
