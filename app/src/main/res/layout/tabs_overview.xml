@@ -20,6 +20,6 @@
         android:src="@drawable/ic_action_add_white"
         app:layout_anchor="@id/tabs_list_view"
         app:layout_anchorGravity="bottom|right|end"
-        app:backgroundTint="#a2d9e3"
+        app:backgroundTint="#45C2CC"
         android:tint="@color/black"/>
 </android.support.design.widget.CoordinatorLayout>
