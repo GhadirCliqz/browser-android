@@ -605,7 +605,9 @@ public class TabFragment extends BaseFragment {
     }
 
     public void openLink(String eventUrl, boolean reset, boolean fromHistory) {
-        telemetry.resetNavigationVariables(eventUrl.length());
+        if (telemetry != null) {
+            telemetry.resetNavigationVariables(eventUrl.length());
+        }
         new Uri.Builder();
         final Uri.Builder builder = new Uri.Builder();
         builder.scheme(TrampolineConstants.CLIQZ_SCHEME)
