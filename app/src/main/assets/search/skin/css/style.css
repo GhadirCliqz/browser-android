@@ -2225,4 +2225,7 @@ em {
     .bundesliga table tr.cqz-live td {
       background-color: #c7e8ad; }
 
+::-webkit-scrollbar {
+  display: none; }
+
 /*# sourceMappingURL=style.css.map */

@@ -21,6 +21,10 @@ window.Components = {
 
 window.CLIQZ = {};
 
+window.CliqzEvents = {
+  pub: function() {}
+};
+
 System.baseURL = './';
 
 Promise.all([
@@ -28,6 +32,7 @@ Promise.all([
   System.import("core/utils"),
   System.import("core/storage"),
   System.import("core/templates"),
+  System.import("core/events")
 ]).then(function (modules) {
   var environment = modules[0].default;
   var utils = modules[1].default;
@@ -37,6 +42,8 @@ Promise.all([
   window.CLIQZEnvironment = environment;
   window.CliqzUtils = utils;
   window.CliqzHandlebars = handlebars;
+  var events = modules[4].default;
+  window.CliqzEvents  = events;
   utils.initPlatform(System);
 }).then(function () {
   return System.import("core/startup");

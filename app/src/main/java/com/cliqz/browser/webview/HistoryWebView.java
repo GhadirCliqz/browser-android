@@ -37,10 +37,6 @@ public class HistoryWebView extends BaseWebView {
         }
     }
 
-    public void fourceUpdateHistory() {
-        executeJS("osAPI.searchHistory(\"\", \"History.showHistory\")");
-    }
-
     /**
      * Executes a js on the extension to clear the queries
      * @param clearQueriesOption CLEAR_FAVORITES to clear all favorites, CLEAR_HISTORY to clear all
@@ -48,12 +44,12 @@ public class HistoryWebView extends BaseWebView {
      */
     public void cleanupQueries(PreferenceManager.ClearQueriesOptions clearQueriesOption) {
         if (clearQueriesOption == PreferenceManager.ClearQueriesOptions.CLEAR_FAVORITES) {
-            executeJS("jsAPI.clearFavorites()");
+            notifyEvent("clear_favorites");
         } else if (clearQueriesOption == PreferenceManager.ClearQueriesOptions.CLEAR_HISTORY) {
-            executeJS("jsAPI.clearHistory()");
+            notifyEvent("clear_history");
         } else if (clearQueriesOption == PreferenceManager.ClearQueriesOptions.CLEAR_BOTH) {
-            executeJS("jsAPI.clearFavorites()");
-            executeJS("jsAPI.clearHistory()");
+            notifyEvent("clear_favorites");
+            notifyEvent("clear_history");
         }
     }
 }
