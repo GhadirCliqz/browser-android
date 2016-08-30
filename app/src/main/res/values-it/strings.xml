@@ -288,4 +288,5 @@
     <string name="others">Altri</string>
     <string name="download_started">Download Iniziato</string>
     <string name="added_to_favorites">Aggiunto ai favoriti</string>
+    <string name="quit">Esci</string>
 </resources>

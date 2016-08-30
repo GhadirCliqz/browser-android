@@ -10,11 +10,12 @@ public final class Messages {
     // No instances, please
     private Messages() {}
 
-    public static class Exit {}
+    /**
+     * Sent when the user click on the Quit entry in the Overflow Menu
+     */
+    public static class Quit {}
 
     public static class GoToOverview {}
-
-    public static class GoToSuggestions {}
 
     public static class GoToSettings {}
 

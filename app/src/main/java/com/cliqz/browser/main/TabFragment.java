@@ -58,7 +58,6 @@ import com.squareup.otto.Subscribe;
 import org.json.JSONArray;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Locale;
 
 import acr.browser.lightning.bus.BrowserEvents;
@@ -681,7 +680,7 @@ public class TabFragment extends BaseFragment {
         } else if (mode == Mode.SEARCH && mShowWebPageAgain) {
             bringWebViewToFront();
         } else {
-            bus.post(new Messages.Exit());
+            bus.post(new BrowserEvents.CloseTab());
         }
     }
 
@@ -703,7 +702,7 @@ public class TabFragment extends BaseFragment {
             telemetry.showingCards = mode == Mode.SEARCH;
             mLightningView.goBack();
         } else {
-            bus.post(new Messages.Exit());
+            bus.post(new BrowserEvents.CloseTab());
         }
     }
 

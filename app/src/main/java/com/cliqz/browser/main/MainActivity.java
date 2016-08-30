@@ -531,7 +531,7 @@ public class MainActivity extends AppCompatActivity implements ActivityComponent
     }
 
     @Subscribe
-    public void exit(Messages.Exit event) {
+    public void closeTab(BrowserEvents.CloseTab event) {
         if (tabsManager.getTabCount() > 1) {
             tabsManager.deleteTab(tabsManager.getCurrentTabPosition());
             final int currentPos = tabsManager.getCurrentTabPosition();
@@ -546,6 +546,11 @@ public class MainActivity extends AppCompatActivity implements ActivityComponent
     public void nextScreen(View view) {
         final int page = pager.getCurrentItem() + 1;
         pager.setCurrentItem(page);
+    }
+
+    @Subscribe
+    public void quit(Messages.Quit event) {
+        finish();
     }
 
     public void onBoardingDone(View view) {

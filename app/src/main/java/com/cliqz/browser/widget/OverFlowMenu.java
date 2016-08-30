@@ -22,12 +22,11 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.cliqz.browser.R;
 import com.cliqz.browser.app.BrowserApp;
 import com.cliqz.browser.di.components.ActivityComponent;
 import com.cliqz.browser.main.CliqzBrowserState;
 import com.cliqz.browser.main.CliqzBrowserState.Mode;
-import com.cliqz.browser.R;
-import com.cliqz.browser.main.MainActivity;
 import com.cliqz.browser.main.Messages;
 import com.squareup.otto.Bus;
 
@@ -42,7 +41,8 @@ import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
-import static android.view.View.MeasureSpec.*;
+import static android.view.View.MeasureSpec.AT_MOST;
+import static android.view.View.MeasureSpec.EXACTLY;
 import static android.view.View.MeasureSpec.getMode;
 import static android.view.View.MeasureSpec.getSize;
 import static android.view.View.MeasureSpec.makeMeasureSpec;
@@ -64,7 +64,8 @@ public class OverFlowMenu extends FrameLayout {
         SETTINGS(R.id.settings_menu_button, R.string.settings),
         CONTACT_CLIQZ(R.id.contact_cliqz_menu_button, R.string.contact_cliqz),
         SAVE_LINK(R.id.save_link_menu_button, R.string.save_link),
-        DOWNLOAD_YOUTUBE_VIDEO(R.id.download_youtube_video_menu_button, R.string.make_video_available_offline);
+        DOWNLOAD_YOUTUBE_VIDEO(R.id.download_youtube_video_menu_button, R.string.make_video_available_offline),
+        QUIT(R.id.quit_menu_button, R.string.quit);
 
         final int stringID;
         final int id;
@@ -85,7 +86,8 @@ public class OverFlowMenu extends FrameLayout {
             Entries.SEARCH_IN_PAGE,
             Entries.ADD_TO_FAVOURITES,
             Entries.SETTINGS,
-            Entries.CONTACT_CLIQZ
+            Entries.CONTACT_CLIQZ,
+            Entries.QUIT
     };
 
     private static final Entries[] INCOGNITO_ENTRIES = new Entries[] {
@@ -94,7 +96,8 @@ public class OverFlowMenu extends FrameLayout {
             Entries.NEW_INCOGNITO_TAB,
             Entries.SEARCH_IN_PAGE,
             Entries.SETTINGS,
-            Entries.CONTACT_CLIQZ
+            Entries.CONTACT_CLIQZ,
+            Entries.QUIT
     };
 
     private final Context context;
@@ -458,6 +461,9 @@ public class OverFlowMenu extends FrameLayout {
                     break;
                 case DOWNLOAD_YOUTUBE_VIDEO:
                     bus.post(new Messages.DownloadYoutubeVideo("download_page"));
+                    break;
+                case QUIT:
+                    bus.post(new Messages.Quit());
                     break;
                 default:
                     break;

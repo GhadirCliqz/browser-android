@@ -20,7 +20,6 @@ import android.text.method.PasswordTransformationMethod;
 import android.util.Log;
 import android.webkit.HttpAuthHandler;
 import android.webkit.SslErrorHandler;
-import android.webkit.URLUtil;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebResourceResponse;
 import android.webkit.WebView;
@@ -32,7 +31,6 @@ import android.widget.Toast;
 import com.cliqz.browser.R;
 import com.cliqz.browser.antiphishing.AntiPhishing;
 import com.cliqz.browser.main.Messages;
-import com.cliqz.utils.StreamUtils;
 
 import java.io.ByteArrayInputStream;
 import java.net.URISyntaxException;
@@ -119,7 +117,7 @@ class LightningWebClient extends WebViewClient implements AntiPhishing.AntiPhish
                     view.post(new Runnable() {
                         @Override
                         public void run() {
-                            lightningView.eventBus.post(new Messages.Exit());
+                            lightningView.eventBus.post(new BrowserEvents.CloseTab());
                         }
                     });
                 }
