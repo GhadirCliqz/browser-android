@@ -274,10 +274,8 @@ public class MainActivity extends AppCompatActivity implements ActivityComponent
             }
         }
         //The idea is to reset all tabs if the app has been in background for 30mins
-        for (TabFragment tabFragment : tabsManager.getTabsList()) {
-            tabFragment.state.setShouldReset(
-                    System.currentTimeMillis() - timings.getAppStopTime() >= Constants.HOME_RESET_DELAY);
-        }
+        tabsManager.setShouldReset(
+                System.currentTimeMillis() - timings.getAppStopTime() >= Constants.HOME_RESET_DELAY);
         if (preferenceManager.getLocationEnabled()) {
             locationCache.start();
         } else {
@@ -438,6 +436,11 @@ public class MainActivity extends AppCompatActivity implements ActivityComponent
     @Subscribe
     public void createNewTab(BrowserEvents.NewTab event) {
         createTab("", event.isIncognito);
+    }
+
+    @Subscribe
+    public void closeWindow(BrowserEvents.CloseWindow event) {
+        tabsManager.closeTab(event.lightningView);
     }
 
     private void createTab(Message msg, boolean isIncognito) {

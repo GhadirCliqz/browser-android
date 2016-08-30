@@ -17,6 +17,7 @@ import java.util.List;
 import javax.inject.Inject;
 
 import acr.browser.lightning.constant.Constants;
+import acr.browser.lightning.view.LightningView;
 
 /**
  * Created by Ravjit on 21/07/16.
@@ -36,10 +37,6 @@ public class TabsManager {
     public TabsManager(Context context, FragmentManager fragmentManager) {
         mFragmentManager = fragmentManager;
         BrowserApp.getAppComponent().inject(this);
-    }
-
-    public List<TabFragment> getTabsList() {
-        return mFragmentsList;
     }
 
     /**
@@ -113,6 +110,35 @@ public class TabsManager {
     }
 
     /**
+     * It closes the tab associated with the given {@link LightningView}, the method is meant to
+     * close visible tabs and it tries to switch to another tab if the given one is the currently
+     * visible one.
+     * Generally this method is called to handle the
+     * {@link acr.browser.lightning.bus.BrowserEvents.CloseWindow CloseWindow}
+     * message.
+     *
+     * @param view a {@link LightningView} associate with the tab we want to close
+     */
+    public synchronized void closeTab(LightningView view) {
+        int position = -1;
+        final int currentTab = getCurrentTabPosition();
+        for (int i = 0; i < mFragmentsList.size(); i++) {
+            final TabFragment tab = mFragmentsList.get(i);
+            if (tab != null && tab.mLightningView == view) {
+                position = i;
+                break;
+            }
+        }
+
+        if (position > -1) {
+            deleteTab(position);
+            if (currentTab == position) {
+                showTab(getCurrentTabPosition());
+            }
+        }
+    }
+
+    /**
      * Handles deleting Tabs at a given position and switching between Tabs after deleting the current Tab
      * @param position Position of the Tab to be deleted
      */
@@ -177,6 +203,12 @@ public class TabsManager {
             if (webView != null) {
                 webView.onResume();
             }
+        }
+    }
+
+    public void setShouldReset(boolean shouldReset) {
+        for (TabFragment tabFragment : mFragmentsList) {
+            tabFragment.state.setShouldReset(shouldReset);
         }
     }
 }

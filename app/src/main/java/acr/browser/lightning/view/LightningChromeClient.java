@@ -50,6 +50,7 @@ class LightningChromeClient extends WebChromeClient {
     private String mLastUrl = null;
 
     LightningChromeClient(Activity activity, LightningView lightningView) {
+        super();
         this.activity = activity;
         this.lightningView = lightningView;
         eventBus = lightningView.eventBus;
@@ -169,6 +170,7 @@ class LightningChromeClient extends WebChromeClient {
             }
         });
     }
+
 
     @Override
     public boolean onCreateWindow(WebView view, boolean isDialog, boolean isUserGesture,
