@@ -102,7 +102,6 @@ public class TabFragment extends BaseFragment {
     protected boolean isHomePageShown = false;
     private JSONArray videoUrls = null;
     private int mTrackerCount = 0;
-    private View loadingScreen;
 
     String lastQuery = "";
 
@@ -112,14 +111,17 @@ public class TabFragment extends BaseFragment {
     // A flag used to handle back button on old phones
     private boolean mShowWebPageAgain = false;
 
+    @Bind(R.id.loading_screen)
+    View loadingScreen;
+
     @Bind(R.id.local_container)
-    FrameLayout mLocalContainer;
+    FrameLayout localContainer;
 
     @Bind(R.id.progress_view)
-    AnimatedProgressBar mProgressBar;
+    AnimatedProgressBar progressBar;
 
     @Bind(R.id.menu_history)
-    View mMenuHistory;
+    View menuHistory;
 
     @Bind(R.id.search_bar)
     SearchBar searchBar;
@@ -214,8 +216,8 @@ public class TabFragment extends BaseFragment {
             ((ViewGroup) mSearchWebView.getParent()).removeView(mSearchWebView);
         }
         mSearchWebView.setCurrentTabState(state);
-        mLocalContainer.addView(webView);
-        mLocalContainer.addView(mSearchWebView);
+        localContainer.addView(webView);
+        localContainer.addView(mSearchWebView);
         titleBar.setOnTouchListener(onTouchListener);
         mSearchWebView.initExtensionPreferences();
         setTrackerCountText(Integer.toString(mTrackerCount));
@@ -231,9 +233,6 @@ public class TabFragment extends BaseFragment {
         super.onStart();
         telemetry.sendLayerChangeSignal("present");
         if (!mSearchWebView.isExtensionReady()) {
-            final LayoutInflater inflater = LayoutInflater.from(getContext());
-            loadingScreen = inflater.inflate(R.layout.loading_screen, null, false);
-            mLocalContainer.addView(loadingScreen);
             mSearchWebView.setVisibility(View.INVISIBLE);
             mLightningView.getWebView().setVisibility(View.INVISIBLE);
         }
@@ -253,14 +252,22 @@ public class TabFragment extends BaseFragment {
     @Override
     public void onResume() {
         super.onResume();
+        final boolean extReady;
         if (mSearchWebView != null) {
             mSearchWebView.onResume();
+            extReady = mSearchWebView.isExtensionReady();
+            mSearchWebView.setVisibility(extReady ? View.VISIBLE : View.INVISIBLE);
+            loadingScreen.setVisibility(extReady ? View.GONE : View.VISIBLE);
+        } else {
+            // By definition, if mSearchWebView is null the extension can't be ready
+            extReady = false;
         }
         final WebView webView;
         if (mLightningView != null) {
             mLightningView.onResume();
             mLightningView.resumeTimers();
             webView = mLightningView.getWebView();
+            webView.setVisibility(extReady ? View.VISIBLE : View.INVISIBLE);
         } else {
             webView = null;
         }
@@ -534,7 +541,7 @@ public class TabFragment extends BaseFragment {
 
     @Subscribe
     public void updateProgress(BrowserEvents.UpdateProgress event) {
-        mProgressBar.setProgress(event.progress);
+        progressBar.setProgress(event.progress);
         if (!mLightningView.getUrl().contains(TrampolineConstants.CLIQZ_TRAMPOLINE_GOTO)) {
             if (event.progress == 100) {
                 switchIcon(ICON_STATE_NONE);
@@ -820,7 +827,7 @@ public class TabFragment extends BaseFragment {
         if (mStatusBar.getTranslationY() >= 0.0f && !isAnimationInProgress) {
             final int height = mStatusBar.getHeight();
             //Don't hide the status bar if page is not long enough
-            if (((CliqzWebView)mLightningView.getWebView()).getVerticalScrollHeight() - mLocalContainer.getHeight()
+            if (((CliqzWebView)mLightningView.getWebView()).getVerticalScrollHeight() - localContainer.getHeight()
                     < 2*mStatusBar.getHeight()) {
                 return;
             }

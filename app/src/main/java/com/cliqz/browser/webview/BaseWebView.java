@@ -10,8 +10,6 @@ import com.cliqz.browser.di.components.ActivityComponent;
 import com.cliqz.browser.utils.LocationCache;
 import com.cliqz.browser.utils.Telemetry;
 
-import org.json.JSONObject;
-
 import javax.inject.Inject;
 
 import acr.browser.lightning.database.HistoryDatabase;

@@ -15,7 +15,6 @@ import android.widget.EditText;
 
 import com.cliqz.browser.R;
 import com.cliqz.browser.main.OnBoardingActivity;
-import com.cliqz.browser.utils.Telemetry;
 
 import acr.browser.lightning.constant.SearchEngines;
 
@@ -25,13 +24,13 @@ public class GeneralSettingsFragment extends BaseSettingsFragment {
     private static final String SETTINGS_SEARCHENGINE = "search";
     private static final String SETTINGS_SHOWTOUR = "onboarding";
     private static final String SETTINGS_ADULT_CONTENT = "cb_adult_content";
-    private static final String SETTINGS_NEWS_NOTIFICATION = "cb_news_notification";
 
     private Activity mActivity;
 
     private static final int API = Build.VERSION.SDK_INT;
     private Preference searchengine, showTour;
-    private CheckBoxPreference cbNewNotification, cbImages, cbAdultContent;
+    private CheckBoxPreference cbImages;
+    private CheckBoxPreference cbAdultContent;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -45,13 +44,11 @@ public class GeneralSettingsFragment extends BaseSettingsFragment {
     private void initPrefs() {
         searchengine = findPreference(SETTINGS_SEARCHENGINE);
         showTour = findPreference(SETTINGS_SHOWTOUR);
-        cbNewNotification = (CheckBoxPreference) findPreference(SETTINGS_NEWS_NOTIFICATION);
         cbImages = (CheckBoxPreference) findPreference(SETTINGS_IMAGES);
         cbAdultContent = (CheckBoxPreference) findPreference(SETTINGS_ADULT_CONTENT);
 
         searchengine.setOnPreferenceClickListener(this);
         showTour.setOnPreferenceClickListener(this);
-        cbNewNotification.setOnPreferenceChangeListener(this);
         cbImages.setOnPreferenceChangeListener(this);
         cbAdultContent.setOnPreferenceChangeListener(this);
 
@@ -62,7 +59,6 @@ public class GeneralSettingsFragment extends BaseSettingsFragment {
         final boolean imagesBool = mPreferenceManager.getBlockImagesEnabled();
         final boolean adultBool = mPreferenceManager.getBlockAdultContent();
 
-        cbNewNotification.setChecked(mPreferenceManager.getNewsNotificationEnabled());
         cbImages.setChecked(imagesBool);
         cbAdultContent.setChecked(adultBool);
     }
@@ -137,12 +133,6 @@ public class GeneralSettingsFragment extends BaseSettingsFragment {
     public boolean onPreferenceChange(Preference preference, Object newValue) {
         // switch preferences
         switch (preference.getKey()) {
-            case SETTINGS_NEWS_NOTIFICATION:
-                mPreferenceManager.setNewsNotificationEnabled((Boolean) newValue);
-                cbNewNotification.setChecked((Boolean) newValue);
-                final String action = (Boolean) newValue ? Telemetry.Action.ENABLE : Telemetry.Action.DISABLE;
-                mTelemetry.sendNewsNotificationSignal(action);
-                 return true;
             case SETTINGS_IMAGES:
                 mPreferenceManager.setBlockImagesEnabled((Boolean) newValue);
                 cbImages.setChecked((Boolean) newValue);
