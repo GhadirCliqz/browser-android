@@ -79,9 +79,9 @@
     <string name="action_webpage">Webpage</string>
     <string name="title_clear_history">Clear History</string>
     <string name="title_clear_cookies">Clear Cookies</string>
-    <string name="dialog_history">Would you like to clear all browser history?</string>
-    <string name="dialog_cookies">Would you like to clear all browser cookies?</string>
-    <string name="dialog_favorites">Would you like to clear all favorites?</string>
+    <string name="dialog_history">Would you like to clear browser history?</string>
+    <string name="dialog_cookies">Would you like to clear browser cookies?</string>
+    <string name="dialog_favorites">Would you like to clear favorites?</string>
     <string name="action_yes">Yes</string>
     <string name="action_no">No</string>
     <string name="title_text_size">Text Size</string>

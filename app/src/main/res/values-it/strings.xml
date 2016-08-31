@@ -78,9 +78,9 @@
     <string name="action_webpage">Pagina Web</string>
     <string name="title_clear_history">Cancella la cronologia</string>
     <string name="title_clear_cookies">Cancella i cookies</string>
-    <string name="dialog_history">Vorresti cancellare tutta la cronologia?</string>
-    <string name="dialog_cookies">Vorresti cancellare tutti i cookies?</string>
-    <string name="dialog_favorites">Vorresti cancellare tutti i preferiti?</string>
+    <string name="dialog_history">Vorresti cancellare la cronologia?</string>
+    <string name="dialog_cookies">Vorresti cancellare i cookies?</string>
+    <string name="dialog_favorites">Vorresti cancellare i preferiti?</string>
     <string name="action_yes">Si</string>
     <string name="action_no">No</string>
     <string name="title_text_size">Dimensioni carattere</string>

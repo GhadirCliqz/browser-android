@@ -78,9 +78,9 @@
     <string name="action_webpage">Webseite</string>
     <string name="title_clear_history">Verlauf löschen</string>
     <string name="title_clear_cookies">Cookies löschen</string>
-    <string name="dialog_history">Möchten Sie den gesamten Verlauf sicher löschen?</string>
-    <string name="dialog_cookies">Möchten Sie alle Cookies sicher löschen?</string>
-    <string name="dialog_favorites">Möchten Sie alle Favoriten sicher löschen?</string>
+    <string name="dialog_history">Möchten Sie den gesamten Browser-Verlauf sicher löschen?</string>
+    <string name="dialog_cookies">Möchten Sie  Browser-Cookies sicher löschen?</string>
+    <string name="dialog_favorites">Möchten Sie Browser-Favoriten sicher löschen?</string>
     <string name="action_yes">Ja</string>
     <string name="action_no">Nein</string>
     <string name="title_text_size">Textgröße</string>
