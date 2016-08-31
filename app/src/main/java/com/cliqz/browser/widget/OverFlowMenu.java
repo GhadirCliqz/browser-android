@@ -94,6 +94,9 @@ public class OverFlowMenu extends FrameLayout {
             Entries.ACTIONS,
             Entries.NEW_TAB,
             Entries.NEW_INCOGNITO_TAB,
+            Entries.COPY_LINK,
+            Entries.SAVE_LINK,
+            Entries.ADD_TO_FAVOURITES,
             Entries.SEARCH_IN_PAGE,
             Entries.SETTINGS,
             Entries.CONTACT_CLIQZ,
@@ -108,6 +111,7 @@ public class OverFlowMenu extends FrameLayout {
     private boolean mIsYoutubeVideo = false;
 
     private String mUrl;
+    private String mTitle;
 
     public View getAnchorView() {
         return mAnchorView;
@@ -273,6 +277,10 @@ public class OverFlowMenu extends FrameLayout {
 
     public void setUrl(String url) {
         this.mUrl = url;
+    }
+
+    public void setTitle(String title) {
+        this.mTitle = title;
     }
 
     public void setState(CliqzBrowserState state) {
@@ -452,7 +460,7 @@ public class OverFlowMenu extends FrameLayout {
                     bus.post(new BrowserEvents.SearchInPage());
                     break;
                 case ADD_TO_FAVOURITES:
-                    bus.post(new Messages.AddToFavourites(mUrl));
+                    bus.post(new Messages.AddToFavourites(mUrl, mTitle));
                     Toast.makeText(context, context.getString(R.string.added_to_favorites),
                             Toast.LENGTH_SHORT).show();
                     break;
