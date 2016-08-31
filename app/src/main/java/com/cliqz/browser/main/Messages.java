@@ -73,9 +73,11 @@ public final class Messages {
 
     public static class AddToFavourites {
         public final String url;
+        public final String title;
 
-        public AddToFavourites(String url) {
+        public AddToFavourites(String url, String title) {
             this.url = url;
+            this.title = title;
         }
     }
 
