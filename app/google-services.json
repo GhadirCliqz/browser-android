@@ -1,35 +1,55 @@
 {
   "project_info": {
-    "project_id": "cliqz-browser",
-    "project_number": "64765961943",
-    "name": "CLIQZ Browser"
+    "project_number": "744419838561",
+    "project_id": "firebase-cliqz"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:64765961943:android:d50a2d0bef2a4d37",
-        "client_id": "android:com.cliqz.browser",
-        "client_type": 1,
+        "mobilesdk_app_id": "1:744419838561:android:d50a2d0bef2a4d37",
         "android_client_info": {
           "package_name": "com.cliqz.browser"
         }
       },
       "oauth_client": [],
-      "api_key": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBNdl3e47NdM1t50lhT2fVz2qyWMPlsu8E"
+        }
+      ],
       "services": {
         "analytics_service": {
           "status": 1
-        },
-        "cloud_messaging_service": {
-          "status": 2,
-          "apns_config": []
         },
         "appinvite_service": {
           "status": 1,
           "other_platform_oauth_client": []
         },
-        "google_signin_service": {
+        "ads_service": {
           "status": 1
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:744419838561:android:f25974c66ce7c471",
+        "android_client_info": {
+          "package_name": "com.cliqz.browser.debug"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBNdl3e47NdM1t50lhT2fVz2qyWMPlsu8E"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
         },
         "ads_service": {
           "status": 1
@@ -37,6 +57,5 @@
       }
     }
   ],
-  "client_info": [],
-  "ARTIFACT_VERSION": "1"
+  "configuration_version": "1"
 }
