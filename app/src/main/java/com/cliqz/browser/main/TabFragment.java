@@ -390,7 +390,12 @@ public class TabFragment extends BaseFragment {
     void titleClicked() {
         setAntiTrackingDetailsVisibility(View.GONE);
         searchBar.showSearchEditText();
-        mAutocompleteEditText.setText(mLightningView.getUrl());
+        final String url = mLightningView.getUrl();
+        if (url != null && url.toLowerCase().startsWith(TrampolineConstants.CLIQZ_SCHEME)) {
+            mAutocompleteEditText.setText("");
+        } else {
+            mAutocompleteEditText.setText(url);
+        }
         mAutocompleteEditText.requestFocus();
         showKeyBoard();
         mShowWebPageAgain = true;
