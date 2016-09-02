@@ -301,4 +301,6 @@
     <string name="download_started">Download Started</string>
     <string name="added_to_favorites">Added to favorites</string>
     <string name="quit">Quit</string>
+    <string name="view">View</string>
+    <string name="tab_created">Tab created</string>
 </resources>

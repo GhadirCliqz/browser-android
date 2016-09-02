@@ -60,7 +60,7 @@ public class TabsOverviewAdapter extends RecyclerView.Adapter<TabsOverviewAdapte
         if (tabFragment.state.getMode() == CliqzBrowserState.Mode.SEARCH) {
             title = tabFragment.state.getQuery();
         } else {
-            title = tabFragment.getPageTitle();
+            title = tabFragment.state.getTitle();
         }
         holder.title.setText(title.isEmpty() ? context.getString(R.string.home) : title);
         holder.domain.setText(url.isEmpty() ? "Topsites" : url);

@@ -423,7 +423,14 @@ public class MainActivity extends AppCompatActivity implements ActivityComponent
 
     @Subscribe
     public void openLinkInNewTab(BrowserEvents.OpenUrlInNewTab event) {
-        createTab(event.url, event.isIncognito);
+        createTab(event.url, event.isIncognito, false);
+        bus.post(new Messages.UpdateTabCounter(tabsManager.getTabCount()));
+        Utils.showSnackbar(this, getString(R.string.tab_created), getString(R.string.view), new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                tabsManager.showTab(tabsManager.getTabCount() - 1);
+            }
+        });
     }
 
     @Subscribe
@@ -435,7 +442,7 @@ public class MainActivity extends AppCompatActivity implements ActivityComponent
 
     @Subscribe
     public void createNewTab(BrowserEvents.NewTab event) {
-        createTab("", event.isIncognito);
+        createTab("", event.isIncognito, true);
     }
 
     @Subscribe
@@ -452,13 +459,13 @@ public class MainActivity extends AppCompatActivity implements ActivityComponent
         telemetry.sendNewTabSignal(tabsManager.getTabCount(), isIncognito);
     }
 
-    private void createTab(String url, boolean isIncognito) {
+    private void createTab(String url, boolean isIncognito, boolean showImmediately) {
         final Bundle args = new Bundle();
         args.putBoolean(Constants.KEY_IS_INCOGNITO, isIncognito);
         if(url != null && Patterns.WEB_URL.matcher(url).matches()) {
             args.putString(Constants.KEY_URL, url);
         }
-        tabsManager.addNewTab(args);
+        tabsManager.addNewTab(args, showImmediately);
         telemetry.sendNewTabSignal(tabsManager.getTabCount(), isIncognito);
     }
 

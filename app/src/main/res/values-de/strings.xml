@@ -284,4 +284,6 @@
     <string name="download_started">Download gestartet</string>
     <string name="added_to_favorites">Zu Favoriten hinzugefügt</string>
     <string name="quit">Verlassen</string>
+    <string name="view">Zeige</string>
+    <string name="tab_created">Tab erstellt</string>
 </resources>

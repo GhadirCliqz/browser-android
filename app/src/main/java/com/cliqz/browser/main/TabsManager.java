@@ -83,12 +83,19 @@ public class TabsManager {
     }
 
     /**
-     * Create a new Tab and add it to the TabsList and switches the view to it
+     * Create a new Tab and add it to the TabsList
      * @param bundle Arguments for the newly created Tab
+     * @param showImmediately If true the view is switched to the newly created tab
      */
     public void addNewTab(Bundle bundle, boolean showImmediately) {
         final TabFragment newTab = new TabFragment();
         newTab.setArguments(bundle);
+        final String url = bundle.getString(Constants.KEY_URL);
+        if (url != null && !url.isEmpty()) {
+            newTab.state.setUrl(bundle.getString(Constants.KEY_URL));
+            newTab.state.setTitle(bundle.getString(Constants.KEY_URL));
+            newTab.state.setMode(CliqzBrowserState.Mode.WEBPAGE);
+        }
         mFragmentsList.add(newTab);
         if (showImmediately) {
             showTab(mFragmentsList.size()-1);

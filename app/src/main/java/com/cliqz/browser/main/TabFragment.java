@@ -940,6 +940,11 @@ public class TabFragment extends BaseFragment {
         setTrackerCountText(Integer.toString(mTrackerCount));
     }
 
+    @Subscribe
+    public void updateTabCounter(Messages.UpdateTabCounter event) {
+        openTabsCounter.setText(Integer.toString(event.count));
+    }
+
     private void setTrackerCountText(String text) {
         if (trackerCounter != null) {
             trackerCounter.setText(text);

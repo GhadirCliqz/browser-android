@@ -143,4 +143,12 @@ public final class Messages {
 
     public static class HideLoadingScreen {
     }
+
+    public static class UpdateTabCounter {
+        public final int count;
+
+        public UpdateTabCounter(int count) {
+            this.count = count;
+        }
+    }
 }
