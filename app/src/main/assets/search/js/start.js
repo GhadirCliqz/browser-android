@@ -21,10 +21,6 @@ window.Components = {
 
 window.CLIQZ = {};
 
-window.CliqzEvents = {
-  pub: function() {}
-};
-
 System.baseURL = './';
 
 Promise.all([

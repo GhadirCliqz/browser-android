@@ -44,12 +44,12 @@ public class HistoryWebView extends BaseWebView {
      */
     public void cleanupQueries(PreferenceManager.ClearQueriesOptions clearQueriesOption) {
         if (clearQueriesOption == PreferenceManager.ClearQueriesOptions.CLEAR_FAVORITES) {
-            notifyEvent("clear_favorites");
+            notifyEvent(CLIQZ_EVENT_CLEAR_FAVORITES);
         } else if (clearQueriesOption == PreferenceManager.ClearQueriesOptions.CLEAR_HISTORY) {
-            notifyEvent("clear_history");
+            notifyEvent(CLIQZ_EVENT_CLEAR_HISTORY);
         } else if (clearQueriesOption == PreferenceManager.ClearQueriesOptions.CLEAR_BOTH) {
-            notifyEvent("clear_favorites");
-            notifyEvent("clear_history");
+            notifyEvent(CLIQZ_EVENT_CLEAR_FAVORITES);
+            notifyEvent(CLIQZ_EVENT_CLEAR_HISTORY);
         }
     }
 }

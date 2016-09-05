@@ -11,4 +11,3 @@ System.register('mobile-ui/views/entity-generic', ['mobile-ui/views/generic'], f
     }
   };
 });
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIm1vYmlsZS11aS92aWV3cy9lbnRpdHktZ2VuZXJpYy5qcyJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiOzs7Ozs7Ozs7eUJBQ2UsT0FBTyIsImZpbGUiOiJtb2JpbGUtdWkvdmlld3MvZW50aXR5LWdlbmVyaWMuanMiLCJzb3VyY2VzQ29udGVudCI6WyJpbXBvcnQgZ2VuZXJpYyBmcm9tICdtb2JpbGUtdWkvdmlld3MvZ2VuZXJpYyc7XG5leHBvcnQgZGVmYXVsdCBnZW5lcmljO1xuIl19

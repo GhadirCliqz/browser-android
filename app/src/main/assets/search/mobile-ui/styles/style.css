@@ -469,7 +469,7 @@ div#progress {
   clear: both; }
 
 body, html {
-  font-family: -apple-system, "Roboto";
+  font-family: -apple-system, "Roboto", 'HelveticaNeue-Light', 'Helvetica Neue Light', 'Helvetica Neue', Helvetica, Arial, 'Lucida Grande', sans-serif;
   font-size: 16px;
   padding: 0;
   margin: 0;
@@ -1811,6 +1811,8 @@ body {
     color: #0C2B4A; }
   .card .card__meta {
     position: absolute;
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
     top: 0;
     left: 40px;
     text-align: left;
@@ -2227,5 +2229,3 @@ em {
 
 ::-webkit-scrollbar {
   display: none; }
-
-/*# sourceMappingURL=style.css.map */

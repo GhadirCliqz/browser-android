@@ -2376,7 +2376,8 @@
     float: left;
     margin-right: 10px;
     line-height: 26px;
-    color: #999999; }
+    color: #999999;
+    white-space: nowrap; }
   .cqz-popup .cqz-vod .stream_btns {
     white-space: nowrap;
     overflow: hidden; }
@@ -2605,5 +2606,3 @@
 
 .cqz-history-cluster li.cqz-history-query a span {
   max-width: 200px; }
-
-/*# sourceMappingURL=styles.css.map */

@@ -4,7 +4,7 @@
   clear: both; }
 
 body, html {
-  font-family: -apple-system, "Roboto";
+  font-family: -apple-system, "Roboto", 'HelveticaNeue-Light', 'Helvetica Neue Light', 'Helvetica Neue', Helvetica, Arial, 'Lucida Grande', sans-serif;
   background-color: #E8E8E8;
   font-size: 16px;
   padding: 0;
@@ -174,5 +174,3 @@ body, html {
     background-color: white;
     padding: 5px 5px;
     border-radius: 0.3rem; }
-
-/*# sourceMappingURL=tabs.css.map */
