@@ -2,6 +2,7 @@ package com.cliqz.browser.main;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentManager;
 import android.util.Log;
 import android.webkit.WebView;
@@ -87,10 +88,10 @@ public class TabsManager {
      * @param bundle Arguments for the newly created Tab
      * @param showImmediately If true the view is switched to the newly created tab
      */
-    public void addNewTab(Bundle bundle, boolean showImmediately) {
+    public void addNewTab(@Nullable Bundle bundle, boolean showImmediately) {
         final TabFragment newTab = new TabFragment();
         newTab.setArguments(bundle);
-        final String url = bundle.getString(Constants.KEY_URL);
+        final String url = bundle != null ? bundle.getString(Constants.KEY_URL) : null;
         if (url != null && !url.isEmpty()) {
             newTab.state.setUrl(bundle.getString(Constants.KEY_URL));
             newTab.state.setTitle(bundle.getString(Constants.KEY_URL));
