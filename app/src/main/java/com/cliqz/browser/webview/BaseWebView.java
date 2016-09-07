@@ -24,16 +24,6 @@ import acr.browser.lightning.preference.PreferenceManager;
  */
 public abstract class BaseWebView extends AbstractionWebView {
 
-    public static final String CLIQZ_EVENT_SHOW = "mobile-browser:show";
-    public static final String CLIQZ_EVENT_SEARCH = "mobile-browser:search";
-    public static final String CLIQZ_EVENT_NOTIFY_PREFERENCES = "mobile-browser:notify-preferences";
-    public static final String CLIQZ_EVENT_RESTORE_BLOCKED_TOPSITES = "mobile-browser:restore-blocked-topsites";
-    public static final String CLIQZ_EVENT_RESET_STATE = "mobile-browser:reset-state";
-    public static final String CLIQZ_EVENT_SET_SEARCH_ENGINE = "mobile-browser:set-search-engine";
-    public static final String CLIQZ_EVENT_PUBLISH_CARD_URL = "mobile-browser:publish-card-url";
-    public static final String CLIQZ_EVENT_CLEAR_FAVORITES = "mobile-browser:clear-favorites";
-    public static final String CLIQZ_EVENT_CLEAR_HISTORY = "mobile-browser:clear-history";
-
     private static final String CLIQZ_EVENT_FORMAT = "CliqzEvents.pub('%s'%s)";
 
     private boolean mSuperSetupCalled = false;
@@ -152,10 +142,10 @@ public abstract class BaseWebView extends AbstractionWebView {
      * Should be called whenever the Cliqz related webViews become visible
      */
     public void isVisible() {
-        notifyEvent(CLIQZ_EVENT_SHOW);
+        notifyEvent(ExtensionEvents.CLIQZ_EVENT_SHOW);
     }
 
-    protected void notifyEvent(String event, Object... params) {
+    public void notifyEvent(String event, Object... params) {
         if (mJsReady) {
             final StringBuilder builder = new StringBuilder();
             for (Object obj: params) {

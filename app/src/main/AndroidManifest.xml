@@ -109,11 +109,6 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".main.OnBoardingActivity"
-            android:label="@string/onboarding"
-            android:screenOrientation="portrait"
-            android:theme="@style/Theme.LightTheme"/>
-        <activity
             android:name="acr.browser.lightning.activity.ReadingActivity"
             android:configChanges="orientation|screenSize|keyboardHidden|keyboard"
             android:label="@string/reading_mode"

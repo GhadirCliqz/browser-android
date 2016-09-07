@@ -232,7 +232,7 @@
     <string name="search_with_cliqz">Mit CLIQZ suchen</string>
     <string name="settings_adblock">Ad Block Einstellungen</string>
     <string name="block_adult_content">Nicht-jugendfreie Inhalte blockieren</string>
-    <string name="show_onboarding_tour">Einführungstour zeigen</string>
+    <string name="show_onboarding_hints">Tipps anzeigen</string>
     <string name="imprint">Impressum</string>
     <string name="about_humanweb_url">https://cliqz.com/whycliqz/human-web</string>
     <string name="what_is_humanweb">Was ist Human Web?</string>
@@ -283,7 +283,11 @@
     <string name="others">Andere</string>
     <string name="download_started">Download gestartet</string>
     <string name="added_to_favorites">Zu Favoriten hinzugefügt</string>
-    <string name="quit">Verlassen</string>
+    <string name="exit">Verlassen</string>
     <string name="view">Zeige</string>
     <string name="tab_created">Tab erstellt</string>
+    <string name="showcase_antitracking_message">Du hast die Kontrolle: CLIQZ Anti-Tracking schützt deine Privatsphäre</string>
+    <string name="showcase_search_message">Alles sofort im Blick: Die relevantesten Suchergebnisse werden dir auf den intelligenten CLIQZ Ergebniskarten direkt angezeigt</string>
+    <string name="got_it">Verstanden</string>
+    <string name="showcace_search_title">Schnellsuche</string>
 </resources>

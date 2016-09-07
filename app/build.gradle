@@ -133,7 +133,10 @@ dependencies {
     // Anti-tracking
     standardCompile project(':antitracking')
     lookbackCompile project(':antitracking')
+    // Utils library
     compile project(':utils')
+    // On-boarding
+    compile 'com.github.deano2390:MaterialShowcaseView:1.1.0@aar'
     // memory leak analysis
     debugCompile 'com.squareup.leakcanary:leakcanary-android:1.4-beta2'
     releaseCompile 'com.squareup.leakcanary:leakcanary-android-no-op:1.4-beta2'

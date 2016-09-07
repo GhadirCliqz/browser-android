@@ -17,7 +17,6 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
-        android:onClick="nextScreen"
         android:text="@string/next"
         android:background="@drawable/start_now_button_background"
         android:textColor="@color/white"

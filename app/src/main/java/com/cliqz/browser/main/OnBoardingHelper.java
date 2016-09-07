@@ -1,0 +1,219 @@
+package com.cliqz.browser.main;
+
+import android.app.Activity;
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.content.pm.ActivityInfo;
+import android.content.res.Resources;
+import android.support.annotation.IdRes;
+import android.support.annotation.NonNull;
+import android.support.annotation.StringRes;
+import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+
+import com.cliqz.browser.R;
+
+import java.lang.reflect.Field;
+import java.util.HashSet;
+import java.util.Locale;
+import java.util.Set;
+import java.util.concurrent.Callable;
+
+import acr.browser.lightning.utils.Utils;
+import uk.co.deanwild.materialshowcaseview.IShowcaseListener;
+import uk.co.deanwild.materialshowcaseview.MaterialShowcaseView;
+
+/**
+ * @author Stefano Pacifici
+ * @date 2016/09/06
+ */
+public class OnBoardingHelper {
+
+    private static final String TAG = OnBoardingHelper.class.getSimpleName();
+    private static final String ONBOARDING_PREFERENCES_NAME = TAG + ".preferences";
+
+    private enum Names {
+        SHOULD_SHOW_ANTI_TRACKING_DESCRIPTION(TAG + ".should_show_anti_tracking_description"),
+        SHOULD_SHOW_SEARCH_DESCRIPTION(TAG + ".should_show_search_description"),
+        SHOULD_SHOW_ONBOARDING(TAG + ".should_show_onboarding");
+
+        final String preferenceName;
+
+        Names(String preferenceName) {
+            this.preferenceName = preferenceName;
+        }
+    }
+
+    private final Activity activity;
+    private final SharedPreferences manager;
+
+    private View mOnBoarding = null;
+
+    public OnBoardingHelper(Activity activity) {
+        this.activity = activity;
+        this.manager = activity.getSharedPreferences(ONBOARDING_PREFERENCES_NAME,
+                Activity.MODE_PRIVATE);
+    }
+
+    public static void forceHide(Context context) {
+        setAllPreferences(context, false);
+    }
+
+    public static void forceShow(Context context) {
+        setAllPreferences(context, true);
+    }
+
+    private static void setAllPreferences(Context context, boolean value) {
+        final SharedPreferences.Editor editor =
+                context
+                        .getSharedPreferences(ONBOARDING_PREFERENCES_NAME, Activity.MODE_PRIVATE)
+                        .edit();
+        for (Names name: Names.values()) {
+            // You can not reset on boarding
+            if (name != Names.SHOULD_SHOW_ONBOARDING) {
+                editor.putBoolean(name.preferenceName, value);
+            }
+        }
+        editor.apply();
+    }
+
+    public boolean isOnboardingCompleted() {
+        return !manager.getBoolean(Names.SHOULD_SHOW_ONBOARDING.preferenceName, true);
+    }
+
+    public boolean conditionallyShowOnBoarding(final Callable<Void> callback) {
+        final boolean shouldShow = manager.getBoolean(Names.SHOULD_SHOW_ONBOARDING.preferenceName, true);
+        final View decorView = activity.getWindow().getDecorView();
+        final ViewGroup container = ViewGroup.class.isInstance(decorView) ?
+                ViewGroup.class.cast(decorView) : null;
+
+        if (container == null || !shouldShow || mOnBoarding != null) {
+            return false;
+        }
+
+        manager.edit().putBoolean(Names.SHOULD_SHOW_ONBOARDING.preferenceName, false).apply();
+
+        mOnBoarding = LayoutInflater.from(activity)
+                .inflate(R.layout.on_boarding, container, false);
+        mOnBoarding.setTag(container);
+
+        mOnBoarding.findViewById(R.id.next).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                hideOnBoarding();
+            }
+        });
+        mOnBoarding.addOnAttachStateChangeListener(new View.OnAttachStateChangeListener() {
+            @Override
+            public void onViewAttachedToWindow(View view) {}
+
+            @Override
+            public void onViewDetachedFromWindow(View view) {
+                if (callback != null) {
+                    try {
+                        callback.call();
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+            }
+        });
+        
+        container.addView(mOnBoarding);
+        return true;
+    }
+
+    public boolean conditionallyShowAntiTrackingDescription() {
+        return showShowcase(Names.SHOULD_SHOW_ANTI_TRACKING_DESCRIPTION.preferenceName,
+                            R.string.showcase_antitracking_title,R.string.showcase_antitracking_message,
+                            R.id.anti_tracking_details);
+    }
+
+    public boolean conditionallyShowSearchDescription() {
+        return showShowcase(Names.SHOULD_SHOW_SEARCH_DESCRIPTION.preferenceName,
+                            R.string.showcace_search_title,R.string.showcase_search_message,
+                            R.id.onboarding_view_marker);
+    }
+
+    private boolean showShowcase(@NonNull String preference, @StringRes int title,
+                                 @StringRes int message, @IdRes int anchor) {
+        final View anchorView = activity.findViewById(anchor);
+        final boolean shouldShow =
+                manager.getBoolean(preference, true);
+
+        if (anchorView == null || !shouldShow) {
+            return false;
+        }
+
+        activity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+
+        manager.edit().putBoolean(preference, false).apply();
+
+        final Resources resources = activity.getResources();
+        final int backgroundColor = resources.getColor(R.color.showcase_background_color);
+        final int titleColor = resources.getColor(R.color.showcase_title_color);
+        final int messageColor = resources.getColor(R.color.showcase_message_color);
+
+        new MaterialShowcaseView.Builder(activity)
+                .setTarget(anchorView)
+                .setMaskColour(backgroundColor)
+                .setDismissText(activity.getString(R.string.got_it).toUpperCase(Locale.getDefault()))
+                .setDismissTextColor(titleColor)
+                .setContentText(message)
+                .setContentTextColor(messageColor)
+                .setTitleText(title)
+                .setTitleTextColor(titleColor)
+                .setShapePadding(Utils.dpToPx(10))
+                .show()
+                .addShowcaseListener(showcaseListener);
+
+        return true;
+    }
+
+    public boolean close() {
+        return showcaseListener.closeAllShowcases() || hideOnBoarding();
+    }
+
+    private boolean hideOnBoarding() {
+        if (mOnBoarding == null) {
+            return false;
+        }
+
+        final ViewGroup parent = ViewGroup.class.cast(mOnBoarding.getTag());
+        parent.removeView(mOnBoarding);
+        mOnBoarding = null;
+        return true;
+    }
+
+    private final ShowcaseListener showcaseListener = new ShowcaseListener();
+
+    private class ShowcaseListener implements IShowcaseListener {
+        private final Set<MaterialShowcaseView> views = new HashSet<>();
+
+        @Override
+        public void onShowcaseDisplayed(MaterialShowcaseView materialShowcaseView) {
+            views.add(materialShowcaseView);
+        }
+
+        @Override
+        public void onShowcaseDismissed(MaterialShowcaseView materialShowcaseView) {
+            views.remove(materialShowcaseView);
+            activity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
+        }
+
+        boolean closeAllShowcases() {
+            boolean result = false;
+            for (MaterialShowcaseView view: views) {
+                result = true;
+                view.hide();
+            }
+            views.clear();
+            activity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
+            return result;
+        }
+
+    };
+
+}

@@ -129,7 +129,7 @@ public class SearchWebView extends BaseWebView {
             currentTabState.setLatitude(Float.MAX_VALUE);
         }
 
-        notifyEvent(CLIQZ_EVENT_SEARCH, lowerQuery, hasLocation, lat, lon);
+        notifyEvent(ExtensionEvents.CLIQZ_EVENT_SEARCH, lowerQuery, hasLocation, lat, lon);
     }
 
     @Override
@@ -167,11 +167,11 @@ public class SearchWebView extends BaseWebView {
         } catch (JSONException e) {
             e.printStackTrace();
         }
-        notifyEvent(CLIQZ_EVENT_NOTIFY_PREFERENCES, preferences);
+        notifyEvent(ExtensionEvents.CLIQZ_EVENT_NOTIFY_PREFERENCES, preferences);
 
         final boolean shouldRestoreTopSites = preferenceManager.getRestoreTopSites();
         if (shouldRestoreTopSites) {
-            notifyEvent(CLIQZ_EVENT_RESTORE_BLOCKED_TOPSITES);
+            notifyEvent(ExtensionEvents.CLIQZ_EVENT_RESTORE_BLOCKED_TOPSITES);
             preferenceManager.setRestoreTopSites(false);
         }
     }
@@ -194,7 +194,7 @@ public class SearchWebView extends BaseWebView {
                     params.put("title", currentTabState.getTitle());
                     break;
             }
-            notifyEvent(CLIQZ_EVENT_RESET_STATE, params);
+            notifyEvent(ExtensionEvents.CLIQZ_EVENT_RESET_STATE, params);
             bringToFront();
             currentTabState.setTimestamp(System.currentTimeMillis());
             currentTabState.setMode(CliqzBrowserState.Mode.SEARCH);
@@ -205,11 +205,11 @@ public class SearchWebView extends BaseWebView {
 
     private void setDefaultSearchEngine() {
         final SearchEngines engine = preferenceManager.getSearchChoice();
-        notifyEvent(CLIQZ_EVENT_SET_SEARCH_ENGINE, engine.engineName, engine.engineUrl);
+        notifyEvent(ExtensionEvents.CLIQZ_EVENT_SET_SEARCH_ENGINE, engine.engineName, engine.engineUrl);
     }
 
     public void requestCardUrl() {
-        notifyEvent(CLIQZ_EVENT_PUBLISH_CARD_URL);
+        notifyEvent(ExtensionEvents.CLIQZ_EVENT_PUBLISH_CARD_URL);
     }
 
     //Disable scrolling the search web view

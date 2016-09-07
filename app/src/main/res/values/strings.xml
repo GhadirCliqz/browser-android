@@ -243,7 +243,7 @@
     <string name="start_now_bang">Start now!</string>
     <string name="next">Next</string>
     <string name="go">Go</string>
-    <string name="show_onboarding_tour">Show tour</string>
+    <string name="show_onboarding_hints">Show hints</string>
     <string name="onboarding" translatable="false">OnBoarding</string>
     <string name="block_adult_content">Block Explicit Content</string>
     <string name="imprint">Imprint</string>
@@ -300,7 +300,12 @@
     <string name="others">Others</string>
     <string name="download_started">Download Started</string>
     <string name="added_to_favorites">Added to favorites</string>
-    <string name="quit">Quit</string>
+    <string name="exit">Exit</string>
     <string name="view">View</string>
     <string name="tab_created">Tab created</string>
+    <string name="got_it">Got it</string>
+    <string name="showcase_antitracking_message">You are in control: CLIQZ Anti-Tracking protects your privacy</string>
+    <string name="showcase_antitracking_title" translatable="false">Anti-Tracking</string>
+    <string name="showcase_search_message">Everything now. No detours</string>
+    <string name="showcace_search_title">Fast-search</string>
 </resources>

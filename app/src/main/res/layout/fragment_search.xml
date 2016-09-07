@@ -42,8 +42,9 @@
         android:layout_above="@id/in_page_search_bar"
         android:layout_alignParentTop="true">
 
+        <include layout="@layout/onboarding_helper" />
         <include layout="@layout/loading_screen" android:id="@+id/loading_screen" />
-        
+
     </FrameLayout>
 
     <acr.browser.lightning.view.AnimatedProgressBar

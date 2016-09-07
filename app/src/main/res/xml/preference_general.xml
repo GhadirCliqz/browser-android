@@ -26,7 +26,7 @@
         android:title="@string/complementary_search_engine"/>
     <Preference
         android:key="onboarding"
-        android:title="@string/show_onboarding_tour" />
+        android:title="@string/show_onboarding_hints" />
     <!-- <Preference
         android:key="import_browser_bookmark"
         android:title="@string/importbookmarks"

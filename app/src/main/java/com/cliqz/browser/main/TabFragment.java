@@ -46,9 +46,11 @@ import android.widget.Toast;
 import com.cliqz.browser.BuildConfig;
 import com.cliqz.browser.R;
 import com.cliqz.browser.app.BrowserApp;
+import com.cliqz.browser.di.components.ActivityComponent;
 import com.cliqz.browser.main.CliqzBrowserState.Mode;
 import com.cliqz.browser.utils.CustomChooserIntent;
 import com.cliqz.browser.webview.CliqzMessages;
+import com.cliqz.browser.webview.ExtensionEvents;
 import com.cliqz.browser.webview.SearchWebView;
 import com.cliqz.browser.widget.AutocompleteEditText;
 import com.cliqz.browser.widget.OverFlowMenu;
@@ -59,6 +61,8 @@ import org.json.JSONArray;
 
 import java.util.ArrayList;
 import java.util.Locale;
+
+import javax.inject.Inject;
 
 import acr.browser.lightning.bus.BrowserEvents;
 import acr.browser.lightning.constant.Constants;
@@ -102,7 +106,6 @@ public class TabFragment extends BaseFragment {
     protected boolean isHomePageShown = false;
     private JSONArray videoUrls = null;
     private int mTrackerCount = 0;
-
     String lastQuery = "";
 
     SearchWebView mSearchWebView = null;
@@ -151,6 +154,9 @@ public class TabFragment extends BaseFragment {
 
     @Bind(R.id.open_tabs_count)
     TextView openTabsCounter;
+
+    @Inject
+    OnBoardingHelper onBoardingHelper;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -231,6 +237,10 @@ public class TabFragment extends BaseFragment {
     @Override
     public void onStart() {
         super.onStart();
+        final ActivityComponent component = BrowserApp.getActivityComponent(getActivity());
+        if (component != null) {
+            component.inject(this);
+        }
         telemetry.sendLayerChangeSignal("present");
         if (!mSearchWebView.isExtensionReady()) {
             mSearchWebView.setVisibility(View.INVISIBLE);
@@ -500,9 +510,10 @@ public class TabFragment extends BaseFragment {
     @OnEditorAction(R.id.search_edit_text)
     boolean onEditorAction(int actionId) {
         // Navigate to autocomplete url or search otherwise
-        if ((actionId & EditorInfo.IME_MASK_ACTION) == EditorInfo.IME_ACTION_UNSPECIFIED) {
+        if ((actionId & EditorInfo.IME_MASK_ACTION) == EditorInfo.IME_ACTION_GO) {
             final String content = mAutocompleteEditText.getText().toString();
             if (content != null && !content.isEmpty()) {
+                final Object event;
                 if (Patterns.WEB_URL.matcher(content).matches()) {
                     final String guessedUrl = URLUtil.guessUrl(content);
                     if (mAutocompleteEditText.isAutocompleted()) {
@@ -511,12 +522,18 @@ public class TabFragment extends BaseFragment {
                     } else {
                         telemetry.sendResultEnterSignal(false, false, content.length(), -1);
                     }
-                    bus.post(new CliqzMessages.OpenLink(guessedUrl));
+                    event = new CliqzMessages.OpenLink(guessedUrl);
                 } else {
                     telemetry.sendResultEnterSignal(true, false, content.length(), -1);
                     setSearchEngine();
                     String searchUrl = mSearchEngine + UrlUtils.QUERY_PLACE_HOLDER;
-                    bus.post(new CliqzMessages.OpenLink(UrlUtils.smartUrlFilter(content, true, searchUrl)));
+                    event = new CliqzMessages.OpenLink(UrlUtils.smartUrlFilter(content, true, searchUrl));
+                }
+                if (!onBoardingHelper.conditionallyShowSearchDescription()) {
+                    bus.post(event);
+                } else {
+                    hideKeyboard();
+                    mSearchWebView.notifyEvent(ExtensionEvents.CLIQZ_EVENT_PERFORM_SHOWCASE_CARD_SWIPE);
                 }
                 return true;
             }
@@ -688,7 +705,9 @@ public class TabFragment extends BaseFragment {
     private void onBackPressedV16() {
         final String url = mLightningView != null ? mLightningView.getUrl() : "";
         final Mode mode = state.getMode();
-        if (hideOverFlowMenu()) {
+        if (onBoardingHelper.close()) {
+            return;
+        } else if (hideOverFlowMenu()) {
             return;
         } else if (mode == Mode.WEBPAGE && mLightningView.canGoBack()) {
             telemetry.backPressed = true;
@@ -705,7 +724,9 @@ public class TabFragment extends BaseFragment {
     private void onBackPressedV21() {
         final String url = mLightningView != null ? mLightningView.getUrl() : "";
         final Mode mode = state.getMode();
-        if (hideOverFlowMenu()) {
+        if (onBoardingHelper.close()) {
+            return;
+        } else if (hideOverFlowMenu()) {
             return;
         } else if (mode == Mode.SEARCH &&
                 !"".equals(url) &&
@@ -936,6 +957,10 @@ public class TabFragment extends BaseFragment {
     public void updateTrackerCount(Messages.UpdateTrackerCount event) {
         mTrackerCount++;
         setTrackerCountText(Integer.toString(mTrackerCount));
+        if (mTrackerCount > 0) {
+            onBoardingHelper.conditionallyShowAntiTrackingDescription();
+            hideKeyboard();
+        }
     }
 
     @Subscribe

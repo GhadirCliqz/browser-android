@@ -237,7 +237,6 @@
     <string name="start_now_bang">Comincia ora!</string>
     <string name="tabs_in_drawer">Visualizza i tab nel cassetto laterale</string>
     <string name="block_adult_content">Blocca Contenuti Espliciti</string>
-    <string name="show_onboarding_tour">Mostra Tour</string>
     <string name="imprint">Informazioni legali</string>
     <string name="about_humanweb_url">https://cliqz.com/whycliqz/human-web</string>
     <string name="what_is_humanweb">Cos\'é Human Web</string>
@@ -288,7 +287,12 @@
     <string name="others">Altri</string>
     <string name="download_started">Download Iniziato</string>
     <string name="added_to_favorites">Aggiunto ai favoriti</string>
-    <string name="quit">Esci</string>
+    <string name="exit">Esci</string>
     <string name="view">Apri</string>
     <string name="tab_created">Tab creato</string>
+    <string name="showcase_search_message">Con CLIQZ hai tutto sott\'occhio! I migliori risultati per le tue ricerche appariranno subito nelle schede</string>
+    <string name="got_it">Capito</string>
+    <string name="show_onboarding_hints">Mostra suggerimenti</string>
+    <string name="showcase_antitracking_message">Il controllo è nelle tue mani: CLIQZ Anti-Tracking protegge la tua privacy</string>
+    <string name="showcace_search_title">Ricerca rapida</string>
 </resources>

@@ -5,7 +5,6 @@ package com.cliqz.browser.settings;
 
 import android.app.Activity;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.CheckBoxPreference;
@@ -14,8 +13,8 @@ import android.support.v7.app.AlertDialog;
 import android.widget.EditText;
 
 import com.cliqz.browser.R;
-import com.cliqz.browser.main.OnBoardingActivity;
 import com.cliqz.browser.utils.TelemetryKeys;
+import com.cliqz.browser.main.OnBoardingHelper;
 
 import acr.browser.lightning.constant.SearchEngines;
 
@@ -134,8 +133,8 @@ public class GeneralSettingsFragment extends BaseSettingsFragment {
                 return true;
             case SETTINGS_SHOWTOUR:
                 mTelemetry.sendSettingsMenuSignal(TelemetryKeys.SHOW_TOUR, TelemetryKeys.GENERAL);
-                Intent intent = new Intent(getActivity(), OnBoardingActivity.class);
-                startActivity(intent);
+                OnBoardingHelper.forceShow(getActivity());
+                preference.setEnabled(false);
                 return true;
             default:
                 return false;

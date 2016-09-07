@@ -67,7 +67,7 @@ public class OverFlowMenu extends FrameLayout {
         CONTACT_CLIQZ(R.id.contact_cliqz_menu_button, R.string.contact_cliqz),
         SAVE_LINK(R.id.save_link_menu_button, R.string.save_link),
         DOWNLOAD_YOUTUBE_VIDEO(R.id.download_youtube_video_menu_button, R.string.make_video_available_offline),
-        QUIT(R.id.quit_menu_button, R.string.quit);
+        QUIT(R.id.quit_menu_button, R.string.exit);
 
         final int stringID;
         final int id;

@@ -39,9 +39,9 @@
     },
     {
       "client_info": {
-        "mobilesdk_app_id": "1:64765961943:android:7fd1c9a4e5421d88",
+        "mobilesdk_app_id": "1:64765961943:android:fd643440a9eb4c38",
         "android_client_info": {
-          "package_name": "com.cliqz.android.debug"
+          "package_name": "com.cliqz.browser.ut"
         }
       },
       "oauth_client": [
@@ -70,9 +70,9 @@
     },
     {
       "client_info": {
-        "mobilesdk_app_id": "1:64765961943:android:fd643440a9eb4c38",
+        "mobilesdk_app_id": "1:64765961943:android:f25974c66ce7c471",
         "android_client_info": {
-          "package_name": "com.cliqz.browser.ut"
+          "package_name": "com.cliqz.browser.debug"
         }
       },
       "oauth_client": [

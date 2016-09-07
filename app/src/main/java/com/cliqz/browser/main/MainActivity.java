@@ -55,6 +55,7 @@ import com.squareup.otto.Subscribe;
 
 import java.io.File;
 import java.util.HashSet;
+import java.util.concurrent.Callable;
 
 import javax.inject.Inject;
 
@@ -86,7 +87,6 @@ public class MainActivity extends AppCompatActivity implements ActivityComponent
 
     private Bundle firstTabArgs;
     private OverviewFragment mOverViewFragment;
-    private OnBoardingAdapter onBoardingAdapter;
     private ViewPager pager;
     private boolean askedGPSPermission = false;
     private CustomViewHandler mCustomViewHandler;
@@ -122,6 +122,9 @@ public class MainActivity extends AppCompatActivity implements ActivityComponent
 
     @Inject
     ProxyUtils proxyUtils;
+
+    @Inject
+    OnBoardingHelper onBoardingHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -184,23 +187,20 @@ public class MainActivity extends AppCompatActivity implements ActivityComponent
             firstTabArgs.putString(Constants.KEY_QUERY, query);
         }
 
-        // File used to override the onboarding during UIAutomation tests
-        final File onBoardingOverrideFile = new File(Constants.ONBOARDING_OVERRIDE_FILE);
-        final boolean hasAProperOverrideOnBoardingFile =
-                onBoardingOverrideFile.exists() &&
-                onBoardingOverrideFile.length() > 0;
-        final boolean hasBeenLaunchedWithNoOnboarding = intent != null &&
-                intent.getBooleanExtra(Constants.KEY_DO_NOT_SHOW_ONBOARDING, false);
-        final boolean shouldShowOnboarding = !preferenceManager.getOnBoardingComplete() &&
-                !hasAProperOverrideOnBoardingFile && !hasBeenLaunchedWithNoOnboarding;
-        if (shouldShowOnboarding) {
-            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-            setContentView(R.layout.activity_on_boarding);
-            onBoardingAdapter = new OnBoardingAdapter(getSupportFragmentManager(), telemetry);
-            pager = (ViewPager) findViewById(R.id.viewpager);
-            pager.setAdapter(onBoardingAdapter);
-            pager.addOnPageChangeListener(onBoardingAdapter.onPageChangeListener);
-        } else {
+        final boolean onBoardingShown =
+                onBoardingHelper.conditionallyShowOnBoarding(new Callable<Void>() {
+                    final long startTime = System.currentTimeMillis();
+
+                    @Override
+                    public Void call() throws Exception {
+                        final long now = System.currentTimeMillis();
+                        telemetry.sendOnBoardingHideSignal(now - startTime);
+                        setupContentView();
+                        return null;
+                    }
+                });
+
+        if (!onBoardingShown) {
             setupContentView();
         }
 
@@ -225,12 +225,6 @@ public class MainActivity extends AppCompatActivity implements ActivityComponent
     }
 
     private void setupContentView() {
-        //final MainViewContainer content = new MainViewContainer(this);
-        //content.setFitsSystemWindows(true);
-        //content.setBackgroundColor(Color.WHITE);
-        //final LayoutParams params = new LayoutParams(MATCH_PARENT, MATCH_PARENT);
-        //content.setId(CONTENT_VIEW_ID);
-        //setContentView(content, params);
         setContentView(R.layout.activity_main);
         tabsManager.addNewTab(firstTabArgs);
     }
@@ -265,7 +259,7 @@ public class MainActivity extends AppCompatActivity implements ActivityComponent
         //Ask for "Dangerous Permissions" on runtime
         if(Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP_MR1) {
             if(preferenceManager.getLocationEnabled()
-                    && preferenceManager.getOnBoardingComplete()
+                    && onBoardingHelper.isOnboardingCompleted()
                     && !askedGPSPermission
                     && checkSelfPermission(LOCATION_PERMISSION) != PackageManager.PERMISSION_GRANTED) {
                 askedGPSPermission = true;
@@ -556,17 +550,6 @@ public class MainActivity extends AppCompatActivity implements ActivityComponent
     @Subscribe
     public void quit(Messages.Quit event) {
         finish();
-    }
-
-    public void onBoardingDone(View view) {
-        ((ViewGroup)(view.getParent())).removeAllViews();
-        preferenceManager.setOnBoardingComplete(true);
-        long curTime = System.currentTimeMillis();
-        telemetry.sendOnBoardingHideSignal(curTime - onBoardingAdapter.startTime);
-        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_FULL_USER);
-        // Send telemetry "installed" signal
-        // telemetry.sendLifeCycleSignal(Telemetry.Action.INSTALL);
-        setupContentView();
     }
 
     // returns screen that is visible
