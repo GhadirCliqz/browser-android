@@ -28,6 +28,8 @@ import com.cliqz.browser.di.components.ActivityComponent;
 import com.cliqz.browser.main.CliqzBrowserState;
 import com.cliqz.browser.main.CliqzBrowserState.Mode;
 import com.cliqz.browser.main.Messages;
+import com.cliqz.browser.utils.Telemetry;
+import com.cliqz.browser.utils.TelemetryKeys;
 import com.squareup.otto.Bus;
 
 import java.util.ArrayList;
@@ -129,6 +131,9 @@ public class OverFlowMenu extends FrameLayout {
 
     @Inject
     Bus bus;
+
+    @Inject
+    Telemetry telemetry;
 
     @Bind(R.id.action_share)
     ImageView actionShareButton;
@@ -440,37 +445,56 @@ public class OverFlowMenu extends FrameLayout {
             Log.e(TAG, "Entry id: " + tag.id);
             switch (tag) {
                 case COPY_LINK:
+                    telemetry.sendMainMenuSignal(TelemetryKeys.COPY_LINK, isIncognitoMode(),
+                            state.getMode() == Mode.SEARCH ? "cards" : "web");
                     bus.post(new Messages.CopyUrl());
                     Toast.makeText(context, context.getString(R.string.message_link_copied),
                             Toast.LENGTH_SHORT).show();
                     break;
                 case SETTINGS:
+                    telemetry.sendMainMenuSignal(TelemetryKeys.SETTINGS, isIncognitoMode(),
+                            state.getMode() == Mode.SEARCH ? "cards" : "web");
                     bus.post(new Messages.GoToSettings());
                     break;
                 case CONTACT_CLIQZ:
+                    telemetry.sendMainMenuSignal(TelemetryKeys.CONTACT_US, isIncognitoMode(),
+                            state.getMode() == Mode.SEARCH ? "cards" : "web");
                     bus.post(new Messages.ContactCliqz());
                     break;
                 case NEW_INCOGNITO_TAB:
+                    telemetry.sendMainMenuSignal(TelemetryKeys.NEW_FORGET_TAB, isIncognitoMode(),
+                            state.getMode() == Mode.SEARCH ? "cards" : "web");
                     bus.post(new BrowserEvents.NewTab(true));
                     break;
                 case NEW_TAB:
+                    telemetry.sendMainMenuSignal(TelemetryKeys.NEW_TAB, isIncognitoMode(),
+                            state.getMode() == Mode.SEARCH ? "cards" : "web");
                     bus.post(new BrowserEvents.NewTab(false));
                     break;
                 case SEARCH_IN_PAGE:
+                    telemetry.sendMainMenuSignal(TelemetryKeys.PAGE_SEARCH, isIncognitoMode(),
+                            state.getMode() == Mode.SEARCH ? "cards" : "web");
                     bus.post(new BrowserEvents.SearchInPage());
                     break;
                 case ADD_TO_FAVOURITES:
+                    telemetry.sendMainMenuSignal(TelemetryKeys.ADD_FAVORITE, isIncognitoMode(),
+                            state.getMode() == Mode.SEARCH ? "cards" : "web");
                     bus.post(new Messages.AddToFavourites(mUrl, mTitle));
                     Toast.makeText(context, context.getString(R.string.added_to_favorites),
                             Toast.LENGTH_SHORT).show();
                     break;
                 case SAVE_LINK:
+                    telemetry.sendMainMenuSignal(TelemetryKeys.SAVE_LINK, isIncognitoMode(),
+                            state.getMode() == Mode.SEARCH ? "cards" : "web");
                     bus.post(new Messages.SaveLink());
                     break;
                 case DOWNLOAD_YOUTUBE_VIDEO:
+                    telemetry.sendVideoDownloadSignal(mIncognitoMode);
                     bus.post(new Messages.DownloadYoutubeVideo("download_page"));
                     break;
                 case QUIT:
+                    telemetry.sendMainMenuSignal(TelemetryKeys.QUIT, isIncognitoMode(),
+                            state.getMode() == Mode.SEARCH ? "cards" : "web");
                     bus.post(new Messages.Quit());
                     break;
                 default:
@@ -482,18 +506,24 @@ public class OverFlowMenu extends FrameLayout {
 
     @OnClick(R.id.action_forward)
     void onForwardClicked() {
+        telemetry.sendMainMenuSignal(TelemetryKeys.FORWARD, isIncognitoMode(),
+                state.getMode() == Mode.SEARCH ? "cards" : "web");
         bus.post(new Messages.GoForward());
         this.dismiss();
     }
 
     @OnClick(R.id.action_refresh)
     void onRefreshClicked() {
+        telemetry.sendMainMenuSignal(TelemetryKeys.REFRESH, isIncognitoMode(),
+                state.getMode() == Mode.SEARCH ? "cards" : "web");
         bus.post(new Messages.ReloadPage());
         this.dismiss();
     }
 
     @OnClick(R.id.action_share)
     void onShareClicked() {
+        telemetry.sendMainMenuSignal(TelemetryKeys.SHARE, isIncognitoMode(),
+                state.getMode() == Mode.SEARCH ? "cards" : "web");
         bus.post(new Messages.ShareLink());
         this.dismiss();
     }

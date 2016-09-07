@@ -120,7 +120,7 @@ public class TabFragment extends BaseFragment {
     @Bind(R.id.progress_view)
     AnimatedProgressBar progressBar;
 
-    @Bind(R.id.menu_history)
+    @Bind(R.id.menu_overview)
     View menuHistory;
 
     @Bind(R.id.search_bar)
@@ -380,9 +380,11 @@ public class TabFragment extends BaseFragment {
         return inflater.inflate(R.layout.fragment_search_toolbar, container, false);
     }
 
-    @OnClick(R.id.menu_history)
+    @OnClick(R.id.menu_overview)
     void historyClicked() {
         hideKeyboard();
+        telemetry.sendOverViewSignal(Integer.parseInt(openTabsCounter.getText().toString()),
+                isIncognito, state.getMode());
         delayedPostOnBus(new Messages.GoToOverview());
     }
 
@@ -403,6 +405,7 @@ public class TabFragment extends BaseFragment {
 
     @OnClick(R.id.overflow_menu)
     void menuClicked() {
+        telemetry.sendOverflowMenuSignal(isIncognito, state.getMode() == Mode.SEARCH ? "cards" : "web");
         if (mOverFlowMenu != null && mOverFlowMenu.isShown()) {
             mOverFlowMenu.dismiss();
         } else {
@@ -441,6 +444,7 @@ public class TabFragment extends BaseFragment {
     @Nullable
     @OnClick(R.id.anti_tracking_details)
     void showAntiTrackingDialog() {
+        telemetry.sendAntiTrackingOpenSignal(isIncognito, mTrackerCount);
         final ArrayList<TrackerDetailsModel> details = mLightningView.getTrackerDetails();
         int trackerPoints = 0;
         for (TrackerDetailsModel model: details) {
@@ -468,6 +472,7 @@ public class TabFragment extends BaseFragment {
         helpButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                telemetry.sendAntiTrackingHelpSignal();
                 final Bundle args = new Bundle();
                 final String helpUrl = Locale.getDefault().getLanguage().equals("de") ?
                         antiTrackingHelpUrlDe : antiTrackingHelpUrlEn;
@@ -485,7 +490,7 @@ public class TabFragment extends BaseFragment {
         lowerLine.getBackground().setColorFilter(ContextCompat.getColor(getContext(), popupTextColor), PorterDuff.Mode.SRC_ATOP);
         counter.setText(Integer.toString(mTrackerCount));
         trackersList.setLayoutManager(new LinearLayoutManager(getContext()));
-        trackersList.setAdapter(new TrackersListAdapter(details, isIncognito, getContext(), bus, antiTrackindDialog));
+        trackersList.setAdapter(new TrackersListAdapter(details, isIncognito, getContext(), bus, antiTrackindDialog, telemetry));
         antiTrackindDialog.setBackgroundDrawable(new ColorDrawable());
         antiTrackindDialog.setOutsideTouchable(true);
         antiTrackindDialog.setFocusable(true);
@@ -923,8 +928,7 @@ public class TabFragment extends BaseFragment {
     @Subscribe
     public void downloadYoutubeVideo(Messages.DownloadYoutubeVideo event) {
         if (videoUrls != null) {
-            YTDownloadDialog.show(getActivity(), videoUrls);
-            telemetry.sendVideoDownloadSignal(event.targetType);
+            YTDownloadDialog.show(getActivity(), videoUrls, telemetry);
         }
     }
 
@@ -1002,6 +1006,9 @@ public class TabFragment extends BaseFragment {
                 if (event.getX() > (view.getWidth() - view.getPaddingRight()) - width) {
                     switch (currentIcon) {
                         case ICON_STATE_CLEAR:
+                            telemetry.sendCLearUrlBarSignal(isIncognito,
+                                    mAutocompleteEditText.getText().length(),
+                                    state.getMode() == Mode.SEARCH ? "cards" : "web");
                             searchBar.showSearchEditText();
                             mAutocompleteEditText.setText("");
                             break;

@@ -30,6 +30,7 @@ import com.cliqz.browser.R;
 import com.cliqz.browser.app.BrowserApp;
 import com.cliqz.browser.main.MainActivity;
 import com.cliqz.browser.utils.Telemetry;
+import com.cliqz.browser.utils.TelemetryKeys;
 import com.google.android.gms.gcm.GcmListenerService;
 
 import java.util.Locale;
@@ -85,7 +86,7 @@ public class MessageListenerService extends GcmListenerService {
                 break;
             case NEWS_MESSAGE_TYPE:
                 sendNewsNotification(subType, title, url);
-                telemetry.sendNewsNotificationSignal(Telemetry.Action.RECEIVE);
+                telemetry.sendNewsNotificationSignal(TelemetryKeys.RECEIVE);
                 break;
             default:
                 Log.e(TAG, String.format("Unknown message with type %d and sub-type %d", mainType, subType));

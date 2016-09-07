@@ -11,6 +11,7 @@ import android.widget.EditText;
 
 import com.cliqz.browser.app.BrowserApp;
 import com.cliqz.browser.utils.Telemetry;
+import com.cliqz.browser.utils.TelemetryKeys;
 
 import java.util.ArrayList;
 
@@ -139,7 +140,7 @@ public class AutocompleteEditText extends EditText {
             mBefore = str;
 
             if (mDeleting) {
-                mTelemetry.sendTypingSignal(Telemetry.Action.KEYSTROKE_DEL, s.length());
+                mTelemetry.sendTypingSignal(TelemetryKeys.KEYSTROKE_DEL, s.length());
             }
         }
 

@@ -3,10 +3,10 @@ package com.cliqz.browser.gcm;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.util.Log;
 
 import com.cliqz.browser.app.BrowserApp;
 import com.cliqz.browser.utils.Telemetry;
+import com.cliqz.browser.utils.TelemetryKeys;
 
 import javax.inject.Inject;
 
@@ -25,6 +25,6 @@ public class NotificationDismissedReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        telemetry.sendNewsNotificationSignal(Telemetry.Action.DISMISS);
+        telemetry.sendNewsNotificationSignal(TelemetryKeys.DISMISS);
     }
 }

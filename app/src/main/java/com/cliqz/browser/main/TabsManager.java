@@ -156,7 +156,6 @@ public class TabsManager {
         }
 
         TabFragment reference = mFragmentsList.get(position);
-        telemetry.sendTabCloseSignal(mFragmentsList.size() - 1, reference.state.isIncognito());
         if (reference == null) {
             return;
         }

@@ -57,7 +57,7 @@ class LightningWebClient extends WebViewClient implements AntiPhishing.AntiPhish
     LightningWebClient(Context context, LightningView lightningView) {
         this.context = context;
         this.lightningView = lightningView;
-        this.antiPhishingDialog = new AntiPhishingDialog(context, lightningView.eventBus);
+        this.antiPhishingDialog = new AntiPhishingDialog(context, lightningView.eventBus, lightningView.telemetry);
     }
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)

@@ -15,6 +15,7 @@ import android.widget.EditText;
 
 import com.cliqz.browser.R;
 import com.cliqz.browser.main.OnBoardingActivity;
+import com.cliqz.browser.utils.TelemetryKeys;
 
 import acr.browser.lightning.constant.SearchEngines;
 
@@ -24,6 +25,7 @@ public class GeneralSettingsFragment extends BaseSettingsFragment {
     private static final String SETTINGS_SEARCHENGINE = "search";
     private static final String SETTINGS_SHOWTOUR = "onboarding";
     private static final String SETTINGS_ADULT_CONTENT = "cb_adult_content";
+    private long startTime;
 
     private Activity mActivity;
 
@@ -35,6 +37,8 @@ public class GeneralSettingsFragment extends BaseSettingsFragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        startTime = System.currentTimeMillis();
+        mTelemetry.sendSettingsMenuSignal(TelemetryKeys.GENERAL, TelemetryKeys.MAIN);
         // Load the preferences from an XML resource
         addPreferencesFromResource(R.xml.preference_general);
         mActivity = getActivity();
@@ -82,11 +86,18 @@ public class GeneralSettingsFragment extends BaseSettingsFragment {
 
             @Override
             public void onClick(DialogInterface dialog, int which) {
+                mTelemetry.sendSettingsMenuSignal(engines[which].engineName, TelemetryKeys.SELECT_SE);
                 mPreferenceManager.setSearchChoice(engines[which]);
                 setSearchEngineSummary(engines[which]);
             }
         });
-        picker.setNeutralButton(getResources().getString(R.string.action_ok), null);
+        picker.setNeutralButton(getResources().getString(R.string.action_ok), new DialogInterface.OnClickListener() {
+
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                mTelemetry.sendSettingsMenuSignal(TelemetryKeys.CONFIRM, TelemetryKeys.SELECT_SE);
+            }
+        });
         picker.show();
     }
 
@@ -118,9 +129,11 @@ public class GeneralSettingsFragment extends BaseSettingsFragment {
     public boolean onPreferenceClick(Preference preference) {
         switch (preference.getKey()) {
             case SETTINGS_SEARCHENGINE:
+                mTelemetry.sendSettingsMenuSignal(TelemetryKeys.SEARCH_ENGINE, TelemetryKeys.GENERAL);
                 searchDialog();
                 return true;
             case SETTINGS_SHOWTOUR:
+                mTelemetry.sendSettingsMenuSignal(TelemetryKeys.SHOW_TOUR, TelemetryKeys.GENERAL);
                 Intent intent = new Intent(getActivity(), OnBoardingActivity.class);
                 startActivity(intent);
                 return true;
@@ -134,15 +147,25 @@ public class GeneralSettingsFragment extends BaseSettingsFragment {
         // switch preferences
         switch (preference.getKey()) {
             case SETTINGS_IMAGES:
+                mTelemetry.sendSettingsMenuSignal(TelemetryKeys.BLOCK_IMAGES, TelemetryKeys.GENERAL,
+                        !((Boolean) newValue));
                 mPreferenceManager.setBlockImagesEnabled((Boolean) newValue);
                 cbImages.setChecked((Boolean) newValue);
                 return true;
             case SETTINGS_ADULT_CONTENT:
+                mTelemetry.sendSettingsMenuSignal(TelemetryKeys.BLOCK_EXPLICIT, TelemetryKeys.GENERAL,
+                        !((Boolean) newValue));
                 mPreferenceManager.setBlockAdultContent((Boolean) newValue);
                 cbAdultContent.setChecked((Boolean) newValue);
                 return true;
             default:
                 return false;
         }
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        mTelemetry.sendSettingsMenuSignal(TelemetryKeys.GENERAL, System.currentTimeMillis() - startTime);
     }
 }

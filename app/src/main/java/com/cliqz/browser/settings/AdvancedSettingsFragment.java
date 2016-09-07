@@ -22,6 +22,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.cliqz.browser.R;
+import com.cliqz.browser.utils.TelemetryKeys;
 
 import java.util.Arrays;
 import java.util.List;
@@ -48,15 +49,16 @@ public class AdvancedSettingsFragment extends BaseSettingsFragment {
     private CheckBoxPreference cbJsScript; //cbAllowPopups, cbrestoreTabs
     private Preference textEncoding, useragent, downloadloc, proxy; //urlcontent,
     private CharSequence[] mUrlOptions;
+    private long startTime;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        startTime = System.currentTimeMillis();
+        mTelemetry.sendSettingsMenuSignal(TelemetryKeys.ADVANCED, TelemetryKeys.MAIN);
         // Load the preferences from an XML resource
         addPreferencesFromResource(R.xml.preference_advanced);
-
         mActivity = getActivity();
-
         initPrefs();
     }
 
@@ -122,18 +124,22 @@ public class AdvancedSettingsFragment extends BaseSettingsFragment {
     public boolean onPreferenceClick(Preference preference) {
         switch (preference.getKey()) {
             case SETTINGS_PROXY:
+                mTelemetry.sendSettingsMenuSignal(TelemetryKeys.HTTP_PROXY, TelemetryKeys.ADVANCED);
                 proxyChoicePicker();
                 return true;
             case SETTINGS_USERAGENT:
+                mTelemetry.sendSettingsMenuSignal(TelemetryKeys.USER_AGENT, TelemetryKeys.ADVANCED);
                 agentDialog();
                 return true;
             case SETTINGS_DOWNLOAD:
+                mTelemetry.sendSettingsMenuSignal(TelemetryKeys.DOWNLOAD_LOCATION, TelemetryKeys.ADVANCED);
                 downloadLocDialog();
                 return true;
 //            case SETTINGS_URLCONTENT:
 //                urlBoxPicker();
 //                return true;
             case SETTINGS_TEXTENCODING:
+                mTelemetry.sendSettingsMenuSignal(TelemetryKeys.TEXT_ENCODING, TelemetryKeys.ADVANCED);
                 textEncodingPicker();
                 return true;
             default:
@@ -154,6 +160,8 @@ public class AdvancedSettingsFragment extends BaseSettingsFragment {
 //                cbrestoreTabs.setChecked((Boolean) newValue);
 //                return true;
             case SETTINGS_JAVASCRIPT:
+                mTelemetry.sendSettingsMenuSignal(TelemetryKeys.ENABLE_JS, TelemetryKeys.ADVANCED,
+                        !((Boolean) newValue));
                 mPreferenceManager.setJavaScriptEnabled((Boolean) newValue);
                 cbJsScript.setChecked((Boolean) newValue);
                 return true;
@@ -184,13 +192,19 @@ public class AdvancedSettingsFragment extends BaseSettingsFragment {
 
     private void setProxyChoice(int choice) {
         switch (choice) {
+            case Constants.NO_PROXY:
+                mTelemetry.sendSettingsMenuSignal(TelemetryKeys.NONE, TelemetryKeys.HTTP_PROXY);
+                break;
             case Constants.PROXY_ORBOT:
+                mTelemetry.sendSettingsMenuSignal(TelemetryKeys.ORBOT, TelemetryKeys.HTTP_PROXY);
                 choice = mProxyUtils.setProxyChoice(choice, mActivity);
                 break;
             case Constants.PROXY_I2P:
+                mTelemetry.sendSettingsMenuSignal(TelemetryKeys.I2P, TelemetryKeys.HTTP_PROXY);
                 choice = mProxyUtils.setProxyChoice(choice, mActivity);
                 break;
             case Constants.PROXY_MANUAL:
+                mTelemetry.sendSettingsMenuSignal(TelemetryKeys.MANUAL, TelemetryKeys.HTTP_PROXY);
                 manualProxyPicker();
                 break;
         }
@@ -249,15 +263,19 @@ public class AdvancedSettingsFragment extends BaseSettingsFragment {
                         mPreferenceManager.setUserAgentChoice(which + 1);
                         switch (which + 1) {
                             case 1:
+                                mTelemetry.sendSettingsMenuSignal(TelemetryKeys.DEFAULT, TelemetryKeys.USER_AGENT);
                                 useragent.setSummary(getResources().getString(R.string.agent_default));
                                 break;
                             case 2:
+                                mTelemetry.sendSettingsMenuSignal(TelemetryKeys.DESKTOP, TelemetryKeys.USER_AGENT);
                                 useragent.setSummary(getResources().getString(R.string.agent_desktop));
                                 break;
                             case 3:
+                                mTelemetry.sendSettingsMenuSignal(TelemetryKeys.MOBILE, TelemetryKeys.USER_AGENT);
                                 useragent.setSummary(getResources().getString(R.string.agent_mobile));
                                 break;
                             case 4:
+                                mTelemetry.sendSettingsMenuSignal(TelemetryKeys.CUSTOM, TelemetryKeys.USER_AGENT);
                                 useragent.setSummary(getResources().getString(R.string.agent_custom));
                                 agentPicker();
                                 break;
@@ -268,6 +286,7 @@ public class AdvancedSettingsFragment extends BaseSettingsFragment {
                 new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
+                        mTelemetry.sendSettingsMenuSignal(TelemetryKeys.CONFIRM, TelemetryKeys.USER_AGENT);
                     }
                 });
         agentPicker.setOnCancelListener(new DialogInterface.OnCancelListener() {
@@ -423,5 +442,11 @@ public class AdvancedSettingsFragment extends BaseSettingsFragment {
                     }
                 });
         picker.show();
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        mTelemetry.sendSettingsMenuSignal(TelemetryKeys.ADVANCED, System.currentTimeMillis() - startTime);
     }
 }

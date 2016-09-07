@@ -44,6 +44,7 @@ import com.cliqz.browser.overview.OverviewFragment;
 import com.cliqz.browser.utils.LocationCache;
 import com.cliqz.browser.utils.LookbackWrapper;
 import com.cliqz.browser.utils.Telemetry;
+import com.cliqz.browser.utils.TelemetryKeys;
 import com.cliqz.browser.utils.Timings;
 import com.cliqz.browser.webview.CliqzMessages;
 import com.cliqz.browser.webview.SearchWebView;
@@ -168,7 +169,7 @@ public class MainActivity extends AppCompatActivity implements ActivityComponent
             isIncognito = false;
         }
         if(isNotificationClicked) {
-            telemetry.sendNewsNotificationSignal(Telemetry.Action.CLICK);
+            telemetry.sendNewsNotificationSignal(TelemetryKeys.CLICK);
         }
         firstTabArgs = new Bundle();
         firstTabArgs.putBoolean(Constants.KEY_IS_INCOGNITO, isIncognito);
@@ -214,7 +215,7 @@ public class MainActivity extends AppCompatActivity implements ActivityComponent
             preferenceManager.setVersionCode(BuildConfig.VERSION_CODE);
         } else if(currentVersionCode > previousVersionCode) {
             preferenceManager.setVersionCode(currentVersionCode);
-            telemetry.sendLifeCycleSignal(Telemetry.Action.UPDATE);
+            telemetry.sendLifeCycleSignal(TelemetryKeys.UPDATE);
         }
 
         if (checkPlayServices()) {
@@ -317,10 +318,9 @@ public class MainActivity extends AppCompatActivity implements ActivityComponent
             args.putString(Constants.KEY_QUERY, query);
         }
         if(isNotificationClicked) {
-            telemetry.sendNewsNotificationSignal(Telemetry.Action.CLICK);
+            telemetry.sendNewsNotificationSignal(TelemetryKeys.CLICK);
         }
         tabsManager.addNewTab(args);
-        telemetry.sendNewTabSignal(tabsManager.getTabCount(), false);
     }
 
     private void showGPSPermissionDialog() {
@@ -381,7 +381,7 @@ public class MainActivity extends AppCompatActivity implements ActivityComponent
         String context = getCurrentVisibleFragmentName();
         timings.setAppStopTime();
         if(!context.isEmpty()) {
-            telemetry.sendClosingSignals(Telemetry.Action.CLOSE, context);
+            telemetry.sendClosingSignals(TelemetryKeys.CLOSE, context);
         }
         locationCache.stop();
     }
@@ -399,7 +399,7 @@ public class MainActivity extends AppCompatActivity implements ActivityComponent
         bus.unregister(this);
         String context = getCurrentVisibleFragmentName();
         if(!context.isEmpty()) {
-            telemetry.sendClosingSignals(Telemetry.Action.KILL, context);
+            telemetry.sendClosingSignals(TelemetryKeys.KILL, context);
         }
     }
 
@@ -456,7 +456,6 @@ public class MainActivity extends AppCompatActivity implements ActivityComponent
         args.putBoolean(Constants.KEY_NEW_TAB_MESSAGE, true);
         BrowserApp.pushNewTabMessage(msg);
         tabsManager.addNewTab(args);
-        telemetry.sendNewTabSignal(tabsManager.getTabCount(), isIncognito);
     }
 
     private void createTab(String url, boolean isIncognito, boolean showImmediately) {
@@ -466,7 +465,6 @@ public class MainActivity extends AppCompatActivity implements ActivityComponent
             args.putString(Constants.KEY_URL, url);
         }
         tabsManager.addNewTab(args, showImmediately);
-        telemetry.sendNewTabSignal(tabsManager.getTabCount(), isIncognito);
     }
 
     @Subscribe

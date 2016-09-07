@@ -17,6 +17,7 @@ import com.cliqz.browser.widget.AutocompleteEditText;
 import javax.inject.Singleton;
 
 import acr.browser.lightning.activity.OnBoardingActivity;
+import acr.browser.lightning.activity.SettingsActivity;
 import acr.browser.lightning.activity.ThemableBrowserActivity;
 import acr.browser.lightning.database.HistoryDatabase;
 import acr.browser.lightning.preference.PreferenceManager;
@@ -65,4 +66,6 @@ public interface AppComponent {
     void inject(InstallReferrerReceiver installReferrerReceiver);
 
     void inject(TabsManager tabsManager);
+
+    void inject(SettingsActivity settingsActivity);
 }
