@@ -64,8 +64,8 @@ public class TabsOverviewAdapter extends RecyclerView.Adapter<TabsOverviewAdapte
         } else {
             title = tabFragment.state.getTitle();
         }
-        holder.title.setText(title.isEmpty() ? context.getString(R.string.home) : title);
-        holder.domain.setText(url.isEmpty() ? "Topsites" : url);
+        holder.title.setText(title.isEmpty() ? context.getString(R.string.home_title) : title);
+        holder.domain.setText(url.isEmpty() ? context.getString(R.string.action_new_tab) : url);
         final Bitmap favIcon = tabFragment.getFavicon();
         holder.icon.setImageBitmap(favIcon != null ? favIcon : defaultFavicon);
         if (tabFragment.state.isIncognito()) {

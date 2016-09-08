@@ -10,7 +10,6 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.PorterDuff;
-import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
@@ -19,8 +18,6 @@ import android.os.Message;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.util.Patterns;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -28,18 +25,15 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
-import android.view.WindowManager;
 import android.view.animation.AccelerateInterpolator;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.webkit.URLUtil;
 import android.webkit.WebView;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.PopupWindow;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -60,7 +54,6 @@ import com.squareup.otto.Subscribe;
 import org.json.JSONArray;
 
 import java.util.ArrayList;
-import java.util.Locale;
 
 import javax.inject.Inject;
 
@@ -84,8 +77,6 @@ import butterknife.OnEditorAction;
  */
 public class TabFragment extends BaseFragment {
 
-    private static final String antiTrackingHelpUrlDe = "https://cliqz.com/whycliqz/anti-tracking";
-    private static final String antiTrackingHelpUrlEn = "https://cliqz.com/en/whycliqz/anti-tracking";
     private static final String TAG = TabFragment.class.getSimpleName();
     private static final String NAVIGATION_STATE_KEY = TAG + ".NAVIGATION_STATE";
     private static final int ICON_STATE_CLEAR = 0;
@@ -449,62 +440,15 @@ public class TabFragment extends BaseFragment {
         mLightningView.findNext();
     }
 
-    // TODO @Ravjit, please extraxt this as a class, it is too much convoluted
     // TODO @Ravjit, the dialog should disappear if you pause the app
     @Nullable
     @OnClick(R.id.anti_tracking_details)
     void showAntiTrackingDialog() {
         telemetry.sendAntiTrackingOpenSignal(isIncognito, mTrackerCount);
         final ArrayList<TrackerDetailsModel> details = mLightningView.getTrackerDetails();
-        int trackerPoints = 0;
-        for (TrackerDetailsModel model: details) {
-            trackerPoints += model.trackerCount;
-        }
-        final int othersCount = mTrackerCount - trackerPoints;
-        if (othersCount > 0) {
-            final TrackerDetailsModel othersEntry = new TrackerDetailsModel(getString(R.string.others), othersCount);
-            details.add(othersEntry);
-        }
-        final View popupView = getActivity().getLayoutInflater().inflate(R.layout.anti_tracking_dialog, null);
-        final int popupBgColor = isIncognito ? R.color.incognito_tab_primary_color : R.color.normal_tab_primary_color;
-        final int popupTextColor = isIncognito ? R.color.normal_tab_primary_color : R.color.incognito_tab_primary_color;
-        popupView.setBackgroundColor(ContextCompat.getColor(getContext(), popupBgColor));
-        popupView.setAlpha(0.95f);
-        final PopupWindow antiTrackindDialog = new PopupWindow(popupView, WindowManager.LayoutParams.MATCH_PARENT,
-                WindowManager.LayoutParams.MATCH_PARENT);
-        final TextView counter = (TextView) popupView.findViewById(R.id.counter);
-        final RecyclerView trackersList = (RecyclerView) popupView.findViewById(R.id.trackers_list);
-        final Button helpButton = (Button) popupView.findViewById(R.id.help);
-        final TextView companiesHeader = (TextView) popupView.findViewById(R.id.companies_header);
-        final TextView counterHeader = (TextView) popupView.findViewById(R.id.counter_header);
-        final View upperLine = popupView.findViewById(R.id.upperLine);
-        final View lowerLine = popupView.findViewById(R.id.lowerLine);
-        helpButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                telemetry.sendAntiTrackingHelpSignal();
-                final Bundle args = new Bundle();
-                final String helpUrl = Locale.getDefault().getLanguage().equals("de") ?
-                        antiTrackingHelpUrlDe : antiTrackingHelpUrlEn;
-                args.putString(Constants.KEY_URL, helpUrl);
-                ((MainActivity)getActivity()).tabsManager.addNewTab(args);
-                antiTrackindDialog.dismiss();
-            }
-        });
-        companiesHeader.setTextColor(ContextCompat.getColor(getContext(), popupTextColor));
-        counterHeader.setTextColor(ContextCompat.getColor(getContext(), popupTextColor));
-        counter.setTextColor(ContextCompat.getColor(getContext(), popupTextColor));
-        helpButton.setTextColor(ContextCompat.getColor(getContext(), popupBgColor));
-        helpButton.getBackground().setColorFilter(ContextCompat.getColor(getContext(), popupTextColor), PorterDuff.Mode.SRC_ATOP);
-        upperLine.getBackground().setColorFilter(ContextCompat.getColor(getContext(), popupTextColor), PorterDuff.Mode.SRC_ATOP);
-        lowerLine.getBackground().setColorFilter(ContextCompat.getColor(getContext(), popupTextColor), PorterDuff.Mode.SRC_ATOP);
-        counter.setText(Integer.toString(mTrackerCount));
-        trackersList.setLayoutManager(new LinearLayoutManager(getContext()));
-        trackersList.setAdapter(new TrackersListAdapter(details, isIncognito, getContext(), bus, antiTrackindDialog, telemetry));
-        antiTrackindDialog.setBackgroundDrawable(new ColorDrawable());
-        antiTrackindDialog.setOutsideTouchable(true);
-        antiTrackindDialog.setFocusable(true);
-        antiTrackindDialog.showAsDropDown(searchBar);
+        final AntiTrackingDialog antiTrackingDialog = new AntiTrackingDialog(getActivity(), details,
+                mTrackerCount, isIncognito, bus, telemetry);
+        antiTrackingDialog.show(searchBar);
     }
 
     @OnEditorAction(R.id.search_edit_text)

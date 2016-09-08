@@ -286,6 +286,7 @@
     <string name="exit">Verlassen</string>
     <string name="view">Zeige</string>
     <string name="tab_created">Tab erstellt</string>
+    <string name="home_title" >Topseiten und News</string>
     <string name="showcase_antitracking_message">Du hast die Kontrolle: CLIQZ Anti-Tracking schützt deine Privatsphäre</string>
     <string name="showcase_search_message">Alles sofort im Blick: Die relevantesten Suchergebnisse werden dir auf den intelligenten CLIQZ Ergebniskarten direkt angezeigt</string>
     <string name="got_it">Verstanden</string>
