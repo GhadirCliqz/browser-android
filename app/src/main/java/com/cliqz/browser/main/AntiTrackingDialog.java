@@ -79,8 +79,10 @@ public class AntiTrackingDialog {
             public void onClick(View v) {
                 telemetry.sendAntiTrackingHelpSignal();
                 final Bundle args = new Bundle();
-                final String helpUrl = Locale.getDefault().getLanguage().equals("de") ?
-                        antiTrackingHelpUrlDe : antiTrackingHelpUrlEn;
+                //TODO Restore this when english website is launced
+//                final String helpUrl = Locale.getDefault().getLanguage().equals("de") ?
+//                        antiTrackingHelpUrlDe : antiTrackingHelpUrlEn;
+                final String helpUrl = antiTrackingHelpUrlDe;
                 args.putString(Constants.KEY_URL, helpUrl);
                 ((MainActivity)activity).tabsManager.addNewTab(args);
                 dialog.dismiss();
