@@ -80,24 +80,20 @@ public class OnBoardingHelper {
     }
 
     public boolean isOnboardingCompleted() {
-        return !manager.getBoolean(Names.SHOULD_SHOW_ONBOARDING.preferenceName, true);
+        return manager.getBoolean(Names.SHOULD_SHOW_ONBOARDING.preferenceName, true);
     }
 
     public boolean conditionallyShowOnBoarding(final Callable<Void> callback) {
         final boolean shouldShow = manager.getBoolean(Names.SHOULD_SHOW_ONBOARDING.preferenceName, true);
-        final View decorView = activity.getWindow().getDecorView();
-        final ViewGroup container = ViewGroup.class.isInstance(decorView) ?
-                ViewGroup.class.cast(decorView) : null;
 
-        if (container == null || !shouldShow || mOnBoarding != null) {
+        if (!shouldShow || mOnBoarding != null) {
             return false;
         }
 
         manager.edit().putBoolean(Names.SHOULD_SHOW_ONBOARDING.preferenceName, false).apply();
 
         mOnBoarding = LayoutInflater.from(activity)
-                .inflate(R.layout.on_boarding, container, false);
-        mOnBoarding.setTag(container);
+                .inflate(R.layout.on_boarding, null);
 
         mOnBoarding.findViewById(R.id.next).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -105,23 +101,10 @@ public class OnBoardingHelper {
                 hideOnBoarding();
             }
         });
-        mOnBoarding.addOnAttachStateChangeListener(new View.OnAttachStateChangeListener() {
-            @Override
-            public void onViewAttachedToWindow(View view) {}
+        mOnBoarding.setTag(callback);
 
-            @Override
-            public void onViewDetachedFromWindow(View view) {
-                if (callback != null) {
-                    try {
-                        callback.call();
-                    } catch (Exception e) {
-                        throw new RuntimeException(e);
-                    }
-                }
-            }
-        });
-        
-        container.addView(mOnBoarding);
+        activity.setContentView(mOnBoarding);
+
         return true;
     }
 
@@ -180,9 +163,13 @@ public class OnBoardingHelper {
         if (mOnBoarding == null) {
             return false;
         }
-
-        final ViewGroup parent = ViewGroup.class.cast(mOnBoarding.getTag());
-        parent.removeView(mOnBoarding);
+        // Can't be removed from parent (bug on Android 6.0.1?)
+        mOnBoarding.setVisibility(View.GONE);
+        try {
+            Callable.class.cast(mOnBoarding.getTag()).call();
+        } catch (Throwable e) {
+            Log.e(TAG, "This should never happen", e);
+        }
         mOnBoarding = null;
         return true;
     }
