@@ -67,11 +67,12 @@ public class HistoryFragment extends FragmentWithBus {
     public void onStart() {
         super.onStart();
         telemetry.sendLayerChangeSignal("past");
-
-        final PreferenceManager.ClearQueriesOptions clear = preferenceManager.shouldClearQueries();
-        if (clear != PreferenceManager.ClearQueriesOptions.NO) {
-            mHistoryWebView.cleanupQueries(clear);
-            preferenceManager.setShouldClearQueries(PreferenceManager.ClearQueriesOptions.NO);
+        if( mHistoryWebView.isExtensionReady()) {
+            final PreferenceManager.ClearQueriesOptions clear = preferenceManager.shouldClearQueries();
+            if (clear != PreferenceManager.ClearQueriesOptions.NO) {
+                mHistoryWebView.cleanupQueries(clear);
+                preferenceManager.setShouldClearQueries(PreferenceManager.ClearQueriesOptions.NO);
+            }
         }
     }
 

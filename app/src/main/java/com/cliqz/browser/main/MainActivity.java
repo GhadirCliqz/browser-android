@@ -9,7 +9,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.database.Cursor;
@@ -28,7 +27,6 @@ import android.util.Patterns;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
@@ -53,7 +51,6 @@ import com.google.android.gms.common.GoogleApiAvailability;
 import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
 
-import java.io.File;
 import java.util.HashSet;
 import java.util.concurrent.Callable;
 
@@ -149,7 +146,6 @@ public class MainActivity extends AppCompatActivity implements ActivityComponent
         searchWebView = new SearchWebView(this);
         searchWebView.setBackgroundColor(ContextCompat.getColor(this, R.color.normal_tab_primary_color));
         mOverViewFragment = new OverviewFragment();
-        performExitCleanUp();
         // Ignore intent if we are being recreated
         final Intent intent = savedInstanceState == null ? getIntent() : null;
         final String url;
@@ -369,6 +365,7 @@ public class MainActivity extends AppCompatActivity implements ActivityComponent
     @Override
     protected void onPause() {
         super.onPause();
+        performExitCleanUp();
         gcmReceiver.unregister();
         unregisterReceiver(onComplete);
         tabsManager.pauseAllTabs();

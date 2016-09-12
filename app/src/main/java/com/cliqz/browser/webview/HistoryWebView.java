@@ -37,6 +37,17 @@ public class HistoryWebView extends BaseWebView {
         }
     }
 
+    @Override
+    void extensionReady() {
+        super.extensionReady();
+        final PreferenceManager.ClearQueriesOptions clear = preferenceManager.shouldClearQueries();
+        if (clear != PreferenceManager.ClearQueriesOptions.NO) {
+            cleanupQueries(clear);
+            notifyEvent(ExtensionEvents.CLIQZ_EVENT_SHOW);
+            preferenceManager.setShouldClearQueries(PreferenceManager.ClearQueriesOptions.NO);
+        }
+    }
+
     /**
      * Executes a js on the extension to clear the queries
      * @param clearQueriesOption CLEAR_FAVORITES to clear all favorites, CLEAR_HISTORY to clear all
