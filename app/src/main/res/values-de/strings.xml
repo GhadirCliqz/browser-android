@@ -257,7 +257,7 @@
     <string name="download_failed">Download fehlgeschlagen</string>
     <string name="action_search_on_page">Auf Seite suchen</string>
     <string name="app_not_found">Keine passende App gefunden</string>
-    <string name="settings_block_ads">Werbung blockieren</string>
+    <string name="settings_block_ads">Werbung blockieren(Beta)</string>
     <string name="optimized_block_ads">Faires Blockieren</string>
     <string name="what_does_optimized_mean">Was bedeutet \'Faires\'?</string>
     <string name="optimized_block_ads_description">Der Werbeblocker von CLIQZ ist noch in der Entwicklung (Beta). Die Wahlmöglichkeiten der fertigen Version werden sein: Faire Werbung zulassen (Voreinstellung), jegliche Werbung blockieren, jegliche Werbung akzeptieren.\nMehr https://cliqz.com/whycliqz/adblocking</string>
