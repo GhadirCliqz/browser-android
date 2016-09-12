@@ -1,11 +1,13 @@
 package acr.browser.lightning.bus;
 
-import android.net.Uri;
 import android.os.Message;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
 import android.view.View;
 import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
+import android.webkit.WebChromeClient.FileChooserParams;
 
 import acr.browser.lightning.view.LightningView;
 
@@ -139,27 +141,29 @@ public final class BrowserEvents {
     }
 
     /**
-     * Tell the browser to open a file chooser.
-     */
-    public static class OpenFileChooser {
-        public final ValueCallback<Uri> uploadMsg;
-
-        public OpenFileChooser(ValueCallback<Uri> uploadMsg) {
-            this.uploadMsg = uploadMsg;
-        }
-    }
-
-    /**
      * Tell the browser to show a file chooser.
      *
      * This is called to handle HTML forms with 'file' input type, in response to the
      * user pressing the "Select File" button.
      */
     public static class ShowFileChooser {
-        public final ValueCallback<Uri[]> filePathCallBack;
 
-        public ShowFileChooser(ValueCallback<Uri[]> filePathCallBack) {
-            this.filePathCallBack = filePathCallBack;
+        @NonNull
+        public final Class callbackParamType;
+        @NonNull
+        public final ValueCallback valueCallback;
+        @Nullable
+        public final String acceptType;
+        @Nullable
+        public final FileChooserParams fileChooserParams;
+
+        public ShowFileChooser(@NonNull Class callbackParamType,
+                               @NonNull  ValueCallback valueCallback, @Nullable String acceptType,
+                               @Nullable FileChooserParams fileChooserParams) {
+            this.callbackParamType = callbackParamType;
+            this.valueCallback = valueCallback;
+            this.acceptType = acceptType;
+            this.fileChooserParams = fileChooserParams;
         }
     }
 

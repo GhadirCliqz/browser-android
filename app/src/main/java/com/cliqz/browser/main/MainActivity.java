@@ -1,6 +1,7 @@
 package com.cliqz.browser.main;
 
 import android.Manifest;
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.DownloadManager;
 import android.app.SearchManager;
@@ -21,7 +22,6 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
-import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Patterns;
 import android.view.LayoutInflater;
@@ -76,6 +76,8 @@ public class MainActivity extends AppCompatActivity implements ActivityComponent
     private final static String TAG = MainActivity.class.getSimpleName();
     private static final int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
 
+    public static final int FILE_UPLOAD_REQUEST_CODE = 1000;
+
     private ActivityComponent mActivityComponent;
 
     private static final String OVERVIEW_FRAGMENT_TAG = "overview_fragment";
@@ -84,7 +86,6 @@ public class MainActivity extends AppCompatActivity implements ActivityComponent
 
     private Bundle firstTabArgs;
     private OverviewFragment mOverViewFragment;
-    private ViewPager pager;
     private boolean askedGPSPermission = false;
     private CustomViewHandler mCustomViewHandler;
     protected SearchWebView searchWebView;
@@ -92,6 +93,7 @@ public class MainActivity extends AppCompatActivity implements ActivityComponent
     private boolean mIsColdStart = true;
     private boolean mShouldShowLookbackDialog = true;
     private final HashSet<Long> downloadIds = new HashSet<>();
+    private final FileChooserHelper fileChooserHelper = new FileChooserHelper(this);
 
     @Inject
     Bus bus;
@@ -441,6 +443,11 @@ public class MainActivity extends AppCompatActivity implements ActivityComponent
         tabsManager.closeTab(event.lightningView);
     }
 
+    @Subscribe
+    public void showFileChooser(BrowserEvents.ShowFileChooser event) {
+        fileChooserHelper.showFileChooser(event);
+    }
+
     private void createTab(Message msg, boolean isIncognito) {
         final Bundle args = new Bundle();
         args.putBoolean(Constants.KEY_IS_INCOGNITO, isIncognito);
@@ -539,11 +546,6 @@ public class MainActivity extends AppCompatActivity implements ActivityComponent
         }
     }
 
-    public void nextScreen(View view) {
-        final int page = pager.getCurrentItem() + 1;
-        pager.setCurrentItem(page);
-    }
-
     @Subscribe
     public void quit(Messages.Quit event) {
         finish();
@@ -625,6 +627,20 @@ public class MainActivity extends AppCompatActivity implements ActivityComponent
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == FILE_UPLOAD_REQUEST_CODE) {
+            if (resultCode != Activity.RESULT_OK) {
+                fileChooserHelper.notifyResultCancel();
+                return;
+            }
+
+            fileChooserHelper.notifyResultOk(data);
+        } else {
+            super.onActivityResult(requestCode, resultCode, data);
         }
     }
 

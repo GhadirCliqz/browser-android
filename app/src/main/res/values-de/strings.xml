@@ -291,4 +291,5 @@
     <string name="showcase_search_message">Alles sofort im Blick: Die relevantesten Suchergebnisse werden dir auf den intelligenten CLIQZ Ergebniskarten direkt angezeigt</string>
     <string name="got_it">Verstanden</string>
     <string name="showcace_search_title">Schnellsuche</string>
+    <string name="upload_file_title">Datei hochladen</string>
 </resources>

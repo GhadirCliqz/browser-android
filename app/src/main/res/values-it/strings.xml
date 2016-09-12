@@ -296,4 +296,5 @@
     <string name="show_onboarding_hints">Mostra suggerimenti</string>
     <string name="showcase_antitracking_message">Il controllo è nelle tue mani: CLIQZ Anti-Tracking protegge la tua privacy</string>
     <string name="showcace_search_title">Ricerca rapida</string>
+    <string name="upload_file_title">Carica file</string>
 </resources>
