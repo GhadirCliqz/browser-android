@@ -4,6 +4,7 @@ System.register("core/fs", ["core/platform", "platform/fs"], function (_export) 
    * read file from default location
    *
    * @param {string|Array} path
+    * @param {Object} options - {bool} isText: decodes data before returning
    * @returns {Promise}
    */
   "use strict";
@@ -25,6 +26,7 @@ System.register("core/fs", ["core/platform", "platform/fs"], function (_export) 
        *
        * @param {string|Array} path
        * @param {data} data - in a format accepted by the platform
+       * @param {Object} options - {bool} isText: encodes data before writing
        * @returns {Promise}
        */
       writeFile = fs.writeFile || notImplemented;

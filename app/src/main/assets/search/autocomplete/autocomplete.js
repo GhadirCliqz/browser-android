@@ -29,7 +29,6 @@ System.register("autocomplete/autocomplete", ["core/cliqz", "autocomplete/histor
         execute: function () {
             CliqzAutocomplete = {
                 LOG_KEY: 'CliqzAutocomplete',
-                TIMEOUT: 1000,
                 HISTORY_TIMEOUT: 200,
                 SCROLL_SIGNAL_MIN_TIME: 500,
                 lastPattern: null,
@@ -384,8 +383,7 @@ System.register("autocomplete/autocomplete", ["core/cliqz", "autocomplete/histor
                                 // be sure this is not a delayed result
                                 var now = Date.now();
 
-                                if (now > this.startTime + CliqzAutocomplete.TIMEOUT || // 1s timeout
-                                (this.isHistoryReady() || this.historyTimeout) && // history is ready or timed out
+                                if (now > this.startTime + utils.RESULTS_TIMEOUT || (this.isHistoryReady() || this.historyTimeout) && // history is ready or timed out
                                 this.cliqzResults) {
                                     // all results are ready
                                     /// Push full result
@@ -634,7 +632,7 @@ System.register("autocomplete/autocomplete", ["core/cliqz", "autocomplete/histor
                                     //utils.getSuggestions(searchString, this.cliqzSuggestionFetcher);
                                 }
                                 utils.clearTimeout(this.resultsTimer);
-                                this.resultsTimer = utils.setTimeout(this.pushTimeoutCallback, CliqzAutocomplete.TIMEOUT, this.searchString);
+                                this.resultsTimer = utils.setTimeout(this.pushTimeoutCallback, utils.RESULTS_TIMEOUT, this.searchString);
                             } else {
                                 this.cliqzResults = [];
                                 this.cliqzResultsExtra = [];

@@ -1743,7 +1743,8 @@ body {
   margin-bottom: 4rem;
   box-shadow: 0 0 0.25rem rgba(0, 0, 0, 0.12);
   border-radius: 0.25rem;
-  width: 96%; }
+  width: 96%;
+  word-break: break-word; }
   .card.last-card #googleThisAnim h3 {
     color: #fff;
     font-size: 1rem;
@@ -1976,14 +1977,11 @@ body {
     background: #FFF;
     border-top: 1px #EDECEC solid; }
   .card .third {
-    background-color: #EDECEC;
     padding: 0; }
     .card .third .cards__item {
       position: relative;
       padding: 0.5rem 1rem;
-      border-top: 1px #FFF solid; }
-      .card .third .cards__item.ez-category {
-        background-color: #EDECEC; }
+      border-top: 1px #EDECEC solid; }
   .card .share {
     border-top: 1px #EDECEC solid;
     text-align: center;

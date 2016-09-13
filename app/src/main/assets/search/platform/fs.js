@@ -11,11 +11,11 @@ System.register('platform/fs', [], function (_export) {
     return Promise.reject('not implemented');
   }
 
-  function writeFile(filePath, data) {
+  function writeFile(filePath, data, options) {
     return Promise.reject('not implemented');
   }
 
-  function mkdir(dirPath) {
+  function mkdir(dirPath, options) {
     return Promise.reject('not implemented');
   }
 

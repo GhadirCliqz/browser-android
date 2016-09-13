@@ -41,6 +41,7 @@ System.register('core/utils', ['platform/environment'], function (_export) {
         FEEDBACK: 'https://cliqz.com/feedback/',
         SYSTEM_BASE_URL: CLIQZEnvironment.SYSTEM_BASE_URL,
         PREFERRED_LANGUAGE: null,
+        RESULTS_TIMEOUT: CLIQZEnvironment.RESULTS_TIMEOUT,
 
         BRANDS_DATABASE: BRANDS_DATABASE,
 
@@ -65,6 +66,8 @@ System.register('core/utils', ['platform/environment'], function (_export) {
         LOCALE_PATH: CLIQZEnvironment.LOCALE_PATH,
         RERANKERS: CLIQZEnvironment.RERANKERS,
         MIN_QUERY_LENGHT_FOR_EZ: CLIQZEnvironment.MIN_QUERY_LENGHT_FOR_EZ,
+
+        telemetryHandlers: [CLIQZEnvironment.telemetry],
 
         init: function init(options) {
           options = options || {};
@@ -134,6 +137,12 @@ System.register('core/utils', ['platform/environment'], function (_export) {
         callAction: function callAction(moduleName, actionName, args) {
           var module = CliqzUtils.System.get(moduleName + "/background");
           var action = module['default'].actions[actionName];
+          return action.apply(null, args);
+        },
+
+        callWindowAction: function callWindowAction(win, moduleName, actionName, args) {
+          var module = win.CLIQZ.Core.windowModules[moduleName];
+          var action = module.actions[actionName];
           return action.apply(null, args);
         },
 
@@ -733,8 +742,8 @@ System.register('core/utils', ['platform/environment'], function (_export) {
         encodeLocation: function encodeLocation(specifySource, lat, lng) {
           var qs = ['&loc_pref=', CliqzUtils.getPref('share_location', 'ask')].join('');
 
-          if (CLIQZEnvironment.USER_LAT && CLIQZEnvironment.USER_LNG || lat && lng) {
-            qs += ['&loc=', lat || CLIQZEnvironment.USER_LAT, ',', lng || CLIQZEnvironment.USER_LNG, specifySource ? ',U' : ''].join('');
+          if (CliqzUtils.USER_LAT && CliqzUtils.USER_LNG || lat && lng) {
+            qs += ['&loc=', lat || CliqzUtils.USER_LAT, ',', lng || CliqzUtils.USER_LNG, specifySource ? ',U' : ''].join('');
           }
 
           return qs;
@@ -746,7 +755,12 @@ System.register('core/utils', ['platform/environment'], function (_export) {
           });
         },
         isPrivate: CLIQZEnvironment.isPrivate,
-        telemetry: CLIQZEnvironment.telemetry,
+        telemetry: function telemetry() {
+          var args = arguments;
+          CliqzUtils.telemetryHandlers.forEach(function (handler) {
+            return handler.apply(null, args);
+          });
+        },
         resultTelemetry: function resultTelemetry(query, queryAutocompleted, resultIndex, resultUrl, resultOrder, extra) {
           CliqzUtils.setResultOrder(resultOrder);
           var params = encodeURIComponent(query) + (queryAutocompleted ? '&a=' + encodeURIComponent(queryAutocompleted) : '') + '&i=' + resultIndex + (resultUrl ? '&u=' + encodeURIComponent(resultUrl) : '') + CliqzUtils.encodeSessionParams() + CliqzUtils.encodeResultOrder() + (extra ? '&e=' + extra : '');
@@ -1004,8 +1018,8 @@ System.register('core/utils', ['platform/environment'], function (_export) {
         addEventListenerToElements: CLIQZEnvironment.addEventListenerToElements,
         search: CLIQZEnvironment.search,
         distance: function distance(lon1, lat1) {
-          var lon2 = arguments.length <= 2 || arguments[2] === undefined ? CLIQZEnvironment.USER_LNG : arguments[2];
-          var lat2 = arguments.length <= 3 || arguments[3] === undefined ? CLIQZEnvironment.USER_LAT : arguments[3];
+          var lon2 = arguments.length <= 2 || arguments[2] === undefined ? CliqzUtils.USER_LNG : arguments[2];
+          var lat2 = arguments.length <= 3 || arguments[3] === undefined ? CliqzUtils.USER_LAT : arguments[3];
 
           /** Converts numeric degrees to radians */
           function degreesToRad(degree) {
