@@ -18,6 +18,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.util.Patterns;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -404,9 +405,10 @@ public class TabFragment extends BaseFragment {
     }
 
     @OnEditorAction(R.id.search_edit_text)
-    boolean onEditorAction(int actionId) {
+    boolean onEditorAction(EditText editText, int actionId, KeyEvent keyEvent) {
         // Navigate to autocomplete url or search otherwise
-        if ((actionId & EditorInfo.IME_MASK_ACTION) == EditorInfo.IME_ACTION_GO) {
+        if ( keyEvent != null && keyEvent.getKeyCode() == KeyEvent.KEYCODE_ENTER
+                && keyEvent.getAction() == KeyEvent.ACTION_DOWN) {
             final String content = searchBar.getSearchText();
             if (content != null && !content.isEmpty()) {
                 final Object event;
