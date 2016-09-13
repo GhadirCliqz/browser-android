@@ -255,8 +255,8 @@
     <string name="add_to_favourites">Aggiungi ai favoriti</string>
     <string name="save_link">Salva destinazione</string>
     <string name="news_notification">Notifica Notizie</string>
-    <string name="restore_top_sites">Resetta siti bloccati</string>
-    <string name="message_restore_top_sites">I siti precedentemente bloccati verrano visualizzati in home page.</string>
+    <string name="restore_top_sites">Ripristina i siti più visitati </string>
+    <string name="message_restore_top_sites"> Nella pagina iniziale vengono di nuovo mostrati i siti più visitati</string>
     <string name="download_successful">Download completato</string>
     <string name="download_failed">Download non riuscito</string>
     <string name="action_search_on_page">Cerca nella pagina</string>

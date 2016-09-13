@@ -251,8 +251,8 @@
     <string name="add_to_favourites">Zu Favoriten hinzufügen</string>
     <string name="save_link">Link speichern</string>
     <string name="news_notification">Schlagzeilen Benachrichtigungen</string>
-    <string name="restore_top_sites">Entfernte Topseiten wiederherstellen</string>
-    <string name="message_restore_top_sites">Entfernte Topseiten werden wieder auf der Startseite angezeigt.</string>
+    <string name="restore_top_sites">Meist-besuchte Seiten wiederherstellen</string>
+    <string name="message_restore_top_sites">Startseite zeigt wieder deine meist-besuchten Seiten</string>
     <string name="download_successful">Download erfolgreich</string>
     <string name="download_failed">Download fehlgeschlagen</string>
     <string name="action_search_on_page">Auf Seite suchen</string>
@@ -286,7 +286,7 @@
     <string name="exit">Verlassen</string>
     <string name="view">Zeige</string>
     <string name="tab_created">Tab erstellt</string>
-    <string name="home_title" >Topseiten und News</string>
+    <string name="home_title" >Meist-besuchte Seiten und Nachrichten</string>
     <string name="showcase_antitracking_message">Du hast die Kontrolle: CLIQZ Anti-Tracking schützt deine Privatsphäre</string>
     <string name="showcase_search_message">Alles sofort im Blick: Die relevantesten Suchergebnisse werden dir auf den intelligenten CLIQZ Ergebniskarten direkt angezeigt</string>
     <string name="got_it">Verstanden</string>
