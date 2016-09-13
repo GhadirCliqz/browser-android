@@ -10,10 +10,12 @@ import android.net.NetworkInfo;
 import android.os.BatteryManager;
 import android.os.Build;
 import android.os.Debug;
+import android.util.Log;
 
 import com.cliqz.browser.BuildConfig;
 import com.cliqz.browser.app.BrowserApp;
 import com.cliqz.browser.main.CliqzBrowserState;
+import com.cliqz.browser.main.OnBoardingHelper;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -40,7 +42,6 @@ public class Telemetry {
 
     private static final int BATCH_SIZE = 50;
     private JSONArray mSignalCache = new JSONArray();
-
 
     @Inject
     PreferenceManager mPreferenceManager;
@@ -235,14 +236,15 @@ public class Telemetry {
         JSONObject signal = new JSONObject(); ;
         try {
             signal.put(TelemetryKeys.TYPE, TelemetryKeys.ONBOARDING);
-            signal.put(TelemetryKeys.ACTION, TelemetryKeys.HIDE);
-            signal.put(TelemetryKeys.ACTION_TARGET, previousPage);
-            signal.put(TelemetryKeys.DISPLAY_TIME,time);
-            signal.put(TelemetryKeys.PRODUCT, TelemetryKeys.ANDROID);
-            signal.put(TelemetryKeys.VERSION, BuildConfig.VERSION_NAME);
+            signal.put(TelemetryKeys.VIEW, TelemetryKeys.INTRO);
+            signal.put(TelemetryKeys.VERSION, OnBoardingHelper.ONBOARDING_VERSION);
+            signal.put(TelemetryKeys.ACTION, TelemetryKeys.CLICK);
+            signal.put(TelemetryKeys.TARGET, TelemetryKeys.NEXT);
+            signal.put(TelemetryKeys.SHOW_DURATION, time);
         } catch (JSONException e) {
             e.printStackTrace();
         }
+        Log.d("Onboarding", signal.toString());
         saveSignal(signal, false);
     }
 
@@ -755,7 +757,7 @@ public class Telemetry {
     public void sendAntiPhisingShowSignal() {
         JSONObject signal = new JSONObject();
         try {
-            signal.put(TelemetryKeys.TYPE, TelemetryKeys.ANTI_PHISING);
+            signal.put(TelemetryKeys.TYPE, TelemetryKeys.ANTI_PHISHING);
             signal.put(TelemetryKeys.ACTION, TelemetryKeys.SHOW);
         } catch (JSONException e) {
             e.printStackTrace();
@@ -766,7 +768,7 @@ public class Telemetry {
     public void sendAntiPhisingSignal(String target) {
         JSONObject signal = new JSONObject();
         try {
-            signal.put(TelemetryKeys.TYPE, TelemetryKeys.ANTI_PHISING);
+            signal.put(TelemetryKeys.TYPE, TelemetryKeys.ANTI_PHISHING);
             signal.put(TelemetryKeys.ACTION, TelemetryKeys.CLICK);
             signal.put(TelemetryKeys.TARGET, target);
         } catch (JSONException e) {
@@ -793,6 +795,49 @@ public class Telemetry {
             signal.put(TelemetryKeys.TYPE, type);
             signal.put(TelemetryKeys.ACTION, TelemetryKeys.HIDE);
             signal.put(TelemetryKeys.SHOW_DURATION, time);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        saveSignal(signal, false);
+    }
+
+    public void sendAttrackShowCaseSignal() {
+        JSONObject signal = new JSONObject();
+        try {
+            signal.put(TelemetryKeys.TYPE, TelemetryKeys.ONBOARDING);
+            signal.put(TelemetryKeys.VIEW, TelemetryKeys.ATTRACK);
+            signal.put(TelemetryKeys.VERSION, OnBoardingHelper.ONBOARDING_VERSION);
+            signal.put(TelemetryKeys.ACTION, TelemetryKeys.SHOW);
+            signal.put(TelemetryKeys.SHOW_COUNT, "1");
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        saveSignal(signal, false);
+    }
+
+    public void sendCardsShowCaseSignal() {
+        JSONObject signal = new JSONObject();
+        try {
+            signal.put(TelemetryKeys.TYPE, TelemetryKeys.ONBOARDING);
+            signal.put(TelemetryKeys.VIEW, TelemetryKeys.CARDS);
+            signal.put(TelemetryKeys.VERSION, OnBoardingHelper.ONBOARDING_VERSION);
+            signal.put(TelemetryKeys.ACTION, TelemetryKeys.SHOW);
+            signal.put(TelemetryKeys.SHOW_COUNT, "1");
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        saveSignal(signal, false);
+    }
+
+    public void sendShowCaseDoneSignal(String view, long duration) {
+        JSONObject signal = new JSONObject();
+        try {
+            signal.put(TelemetryKeys.TYPE, TelemetryKeys.ONBOARDING);
+            signal.put(TelemetryKeys.VIEW, view);
+            signal.put(TelemetryKeys.VERSION, OnBoardingHelper.ONBOARDING_VERSION);
+            signal.put(TelemetryKeys.ACTION, TelemetryKeys.CLICK);
+            signal.put(TelemetryKeys.TARGET, TelemetryKeys.CONFIRM);
+            signal.put(TelemetryKeys.SHOW_DURATION, duration);
         } catch (JSONException e) {
             e.printStackTrace();
         }

@@ -4,6 +4,7 @@ import com.cliqz.browser.di.modules.AppModule;
 import com.cliqz.browser.di.modules.MainActivityModule;
 import com.cliqz.browser.gcm.NotificationDismissedReceiver;
 import com.cliqz.browser.gcm.RegistrationIntentService;
+import com.cliqz.browser.main.OnBoardingHelper;
 import com.cliqz.browser.main.TabsManager;
 import com.cliqz.browser.settings.BaseSettingsFragment;
 import com.cliqz.browser.utils.HistoryCleaner;

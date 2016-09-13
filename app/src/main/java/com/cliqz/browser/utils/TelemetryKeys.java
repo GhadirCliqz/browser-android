@@ -178,7 +178,7 @@ public final class TelemetryKeys {
     public static final String HELP = "help";
     public static final String INFO_COMPANY = "info_company";
     public static final String INDEX = "index";
-    public static final String ANTI_PHISING = "anti_phising";
+    public static final String ANTI_PHISHING = "anti_phishing";
     public static final String CONTINUE = "continue";
     public static final String TAB = "tab";
     public static final String SWIPE_LEFT = "swipe_left";
@@ -188,4 +188,7 @@ public final class TelemetryKeys {
     public static final String HISTORY = "history";
     public static final String FAVORITES = "favorites";
     public static final String SHOW_DURATION = "show_duration";
+    public static final String INTRO = "intro";
+    public static final String NEXT = "next";
+    public static final String SHOW_COUNT = "show_count";
 }

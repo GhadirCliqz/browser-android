@@ -11,11 +11,10 @@ import android.support.annotation.StringRes;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 
 import com.cliqz.browser.R;
+import com.cliqz.browser.utils.TelemetryKeys;
 
-import java.lang.reflect.Field;
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
@@ -31,8 +30,11 @@ import uk.co.deanwild.materialshowcaseview.MaterialShowcaseView;
  */
 public class OnBoardingHelper {
 
+    public static final String ONBOARDING_VERSION = "1.2";
     private static final String TAG = OnBoardingHelper.class.getSimpleName();
     private static final String ONBOARDING_PREFERENCES_NAME = TAG + ".preferences";
+    private String currentView;
+    private long startTime;
 
     private enum Names {
         SHOULD_SHOW_ANTI_TRACKING_DESCRIPTION(TAG + ".should_show_anti_tracking_description"),
@@ -46,14 +48,14 @@ public class OnBoardingHelper {
         }
     }
 
-    private final Activity activity;
+    private final MainActivity mainActivity;
     private final SharedPreferences manager;
 
     private View mOnBoarding = null;
 
-    public OnBoardingHelper(Activity activity) {
-        this.activity = activity;
-        this.manager = activity.getSharedPreferences(ONBOARDING_PREFERENCES_NAME,
+    public OnBoardingHelper(MainActivity mainActivity) {
+        this.mainActivity = mainActivity;
+        this.manager = mainActivity.getSharedPreferences(ONBOARDING_PREFERENCES_NAME,
                 Activity.MODE_PRIVATE);
     }
 
@@ -89,10 +91,9 @@ public class OnBoardingHelper {
         if (!shouldShow || mOnBoarding != null) {
             return false;
         }
-
         manager.edit().putBoolean(Names.SHOULD_SHOW_ONBOARDING.preferenceName, false).apply();
 
-        mOnBoarding = LayoutInflater.from(activity)
+        mOnBoarding = LayoutInflater.from(mainActivity)
                 .inflate(R.layout.on_boarding, null);
 
         mOnBoarding.findViewById(R.id.next).setOnClickListener(new View.OnClickListener() {
@@ -103,7 +104,7 @@ public class OnBoardingHelper {
         });
         mOnBoarding.setTag(callback);
 
-        activity.setContentView(mOnBoarding);
+        mainActivity.setContentView(mOnBoarding);
 
         return true;
     }
@@ -122,7 +123,7 @@ public class OnBoardingHelper {
 
     private boolean showShowcase(@NonNull String preference, @StringRes int title,
                                  @StringRes int message, @IdRes int anchor) {
-        final View anchorView = activity.findViewById(anchor);
+        final View anchorView = mainActivity.findViewById(anchor);
         final boolean shouldShow =
                 manager.getBoolean(preference, true);
 
@@ -130,19 +131,28 @@ public class OnBoardingHelper {
             return false;
         }
 
-        activity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+        if (preference.equals(Names.SHOULD_SHOW_ANTI_TRACKING_DESCRIPTION.preferenceName)) {
+            mainActivity.telemetry.sendAttrackShowCaseSignal();
+        } else if (preference.equals(Names.SHOULD_SHOW_SEARCH_DESCRIPTION.preferenceName)) {
+            mainActivity.telemetry.sendCardsShowCaseSignal();
+        }
+
+        currentView = preference;
+        startTime = System.currentTimeMillis();
+
+        mainActivity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
         manager.edit().putBoolean(preference, false).apply();
 
-        final Resources resources = activity.getResources();
+        final Resources resources = mainActivity.getResources();
         final int backgroundColor = resources.getColor(R.color.showcase_background_color);
         final int titleColor = resources.getColor(R.color.showcase_title_color);
         final int messageColor = resources.getColor(R.color.showcase_message_color);
 
-        new MaterialShowcaseView.Builder(activity)
+        new MaterialShowcaseView.Builder(mainActivity)
                 .setTarget(anchorView)
                 .setMaskColour(backgroundColor)
-                .setDismissText(activity.getString(R.string.got_it).toUpperCase(Locale.getDefault()))
+                .setDismissText(mainActivity.getString(R.string.got_it).toUpperCase(Locale.getDefault()))
                 .setDismissTextColor(titleColor)
                 .setContentText(message)
                 .setContentTextColor(messageColor)
@@ -186,8 +196,10 @@ public class OnBoardingHelper {
 
         @Override
         public void onShowcaseDismissed(MaterialShowcaseView materialShowcaseView) {
+            mainActivity.telemetry.sendShowCaseDoneSignal(currentView.equals(Names.SHOULD_SHOW_SEARCH_DESCRIPTION.preferenceName)
+            ? TelemetryKeys.CARDS : TelemetryKeys.ATTRACK, System.currentTimeMillis() - startTime);
             views.remove(materialShowcaseView);
-            activity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
+            mainActivity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
         }
 
         boolean closeAllShowcases() {
@@ -197,7 +209,7 @@ public class OnBoardingHelper {
                 view.hide();
             }
             views.clear();
-            activity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
+            mainActivity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
             return result;
         }
 
