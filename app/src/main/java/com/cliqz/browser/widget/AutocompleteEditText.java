@@ -30,9 +30,7 @@ public class AutocompleteEditText extends EditText {
     @Inject
     Telemetry mTelemetry;
 
-    private final ArrayList<TextWatcher> listeners = new ArrayList<>();
-    private final int clearIconWidth;
-
+    private final ArrayList<TextWatcher> mListeners = new ArrayList<>();
     private boolean mIsAutocompleting;
     private boolean mDeleting = false;
 
@@ -40,7 +38,7 @@ public class AutocompleteEditText extends EditText {
 
     private boolean mIsAutocompleted;
     private boolean mIsTyping = false;
-    private AutocompleteRunnable mAutocompleteRunnable = null;
+    private AutocompleteRunnable autocompleteRunnable = null;
 
     public AutocompleteEditText(Context context) {
         this(context, null);
@@ -57,7 +55,6 @@ public class AutocompleteEditText extends EditText {
         setImeOptions(imeOptions);
         mIsAutocompleting = false;
         mIsAutocompleted = false;
-        clearIconWidth = getCompoundDrawables()[2].getIntrinsicWidth();
         // mAutocompleteService = AutocompleteService.createInstance(context);
         BrowserApp.getAppComponent().inject(this);
     }
@@ -68,17 +65,17 @@ public class AutocompleteEditText extends EditText {
 
     @Override
     public void addTextChangedListener(TextWatcher watcher) {
-        final int index = listeners.indexOf(watcher);
+        final int index = mListeners.indexOf(watcher);
         if (index < 0) {
-            listeners.add(watcher);
+            mListeners.add(watcher);
         }
     }
 
     @Override
     public void removeTextChangedListener(TextWatcher watcher) {
-        final int index = listeners.indexOf(watcher);
+        final int index = mListeners.indexOf(watcher);
         if (index >= 0) {
-            listeners.remove(index);
+            mListeners.remove(index);
         }
     }
 
@@ -86,14 +83,28 @@ public class AutocompleteEditText extends EditText {
         return getText().toString().substring(0, getSelectionStart());
     }
 
+    /*
+    @Override
+    public boolean onKeyPreIme (int keyCode, KeyEvent event) {
+        if(keyCode == KeyEvent.KEYCODE_BACK && this.hasFocus()) {
+            this.clearFocus();
+            return true;
+        }
+        return super.onKeyPreIme(keyCode, event);
+    }*/
+
     public void setAutocompleteText(CharSequence text) {
         final String autocompletion = text.toString();
-        if (mAutocompleteRunnable != null) {
-            mAutocompleteRunnable.cancel();
+        if (autocompleteRunnable != null) {
+            autocompleteRunnable.cancel();
         }
-        mAutocompleteRunnable = new AutocompleteRunnable(autocompletion);
-        postDelayed(mAutocompleteRunnable, 200);
+        autocompleteRunnable = new AutocompleteRunnable(autocompletion);
+        postDelayed(autocompleteRunnable, 200);
     }
+
+//    public AutocompleteService getAutocompleteService() {
+//        return mAutocompleteService;
+//    }
 
     private class DefaultTextWatcher implements TextWatcher {
 
@@ -104,13 +115,13 @@ public class AutocompleteEditText extends EditText {
             if (mIsAutocompleting) {
                 return;
             }
-            if (mAutocompleteRunnable != null) {
-                mAutocompleteRunnable.cancel();
+            if (autocompleteRunnable != null) {
+                autocompleteRunnable.cancel();
             }
 
             mIsTyping = true;
 
-            for (TextWatcher watcher: listeners) {
+            for (TextWatcher watcher: mListeners) {
                 watcher.beforeTextChanged(s, start, count, after);
             }
         }
@@ -120,7 +131,7 @@ public class AutocompleteEditText extends EditText {
             if (mIsAutocompleting) {
                 return;
             }
-            for (TextWatcher watcher: listeners) {
+            for (TextWatcher watcher: mListeners) {
                 watcher.onTextChanged(s, start, before, count);
             }
 
@@ -139,10 +150,17 @@ public class AutocompleteEditText extends EditText {
                 return;
             }
             mIsAutocompleted = false;
-            for (TextWatcher watcher: listeners) {
+            for (TextWatcher watcher: mListeners) {
                 watcher.afterTextChanged(s);
             }
             mIsTyping = false;
+
+//            if (!mDeleting) {
+//                final String autocompletion = mAutocompleteService.autocomplete(s.toString());
+//                if (autocompletion != null) {
+//                    setAutocompleteText(autocompletion);
+//                }
+//            }
         }
     }
 

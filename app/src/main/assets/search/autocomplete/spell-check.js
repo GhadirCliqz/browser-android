@@ -1,14 +1,12 @@
-System.register("autocomplete/spell-check", ["autocomplete/autocomplete", "core/cliqz", "core/platform"], function (_export) {
+System.register("autocomplete/spell-check", ["autocomplete/autocomplete", "core/cliqz"], function (_export) {
     "use strict";
 
-    var autocomplete, utils, isFirefox, CliqzSpellCheck;
+    var autocomplete, utils, CliqzSpellCheck;
     return {
         setters: [function (_autocompleteAutocomplete) {
             autocomplete = _autocompleteAutocomplete["default"];
         }, function (_coreCliqz) {
             utils = _coreCliqz.utils;
-        }, function (_corePlatform) {
-            isFirefox = _corePlatform.isFirefox;
         }],
         execute: function () {
             CliqzSpellCheck = {
@@ -39,7 +37,7 @@ System.register("autocomplete/spell-check", ["autocomplete/autocomplete", "core/
                     }
                 },
                 init: function init() {
-                    if (isFirefox && utils.getPref("config_location", "") == "de" && Object.keys(autocomplete.spellCorrectionDict).length == 0) {
+                    if (utils.getPref("config_location", "") == "de" && Object.keys(autocomplete.spellCorrectionDict).length == 0) {
                         utils.log('loading dict', 'spellcorr');
                         utils.loadResource('chrome://cliqz/content/spell_check.list', CliqzSpellCheck.loadRecords);
                     }

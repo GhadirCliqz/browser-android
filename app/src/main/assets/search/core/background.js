@@ -1,12 +1,11 @@
 System.register("core/background", ["core/cliqz", "platform/language", "core/config", "platform/process-script-manager"], function (_export) {
   "use strict";
 
-  var utils, events, Promise, language, config, ProcessScriptManager, lastRequestId, callbacks;
+  var utils, events, language, config, ProcessScriptManager, lastRequestId, callbacks;
   return {
     setters: [function (_coreCliqz) {
       utils = _coreCliqz.utils;
       events = _coreCliqz.events;
-      Promise = _coreCliqz.Promise;
     }, function (_platformLanguage) {
       language = _platformLanguage["default"];
     }, function (_coreConfig) {
@@ -125,6 +124,7 @@ System.register("core/background", ["core/cliqz", "platform/language", "core/con
           var args = _msg$data$payload.args;
           var requestId = _msg$data$payload.requestId;
           var windowId = msg.data.windowId;
+
           utils.importModule(module + "/background").then(function (module) {
             var background = module["default"];
             return background.actions[action].apply(null, args);
@@ -143,25 +143,7 @@ System.register("core/background", ["core/cliqz", "platform/language", "core/con
           callbacks[msg.data.requestId].apply(null, [msg.data.payload]);
         },
 
-        getWindowStatusFromModules: function getWindowStatusFromModules(win) {
-          return config.modules.map(function (moduleName) {
-            var module = win.CLIQZ.Core.windowModules[moduleName];
-            return module.status ? module.status() : {};
-          });
-        },
-
         actions: {
-          getWindowStatus: function getWindowStatus(win) {
-            return Promise.all(this.getWindowStatusFromModules(win)).then(function (allStatus) {
-              var result = {};
-
-              allStatus.forEach(function (status, moduleIdx) {
-                result[config.modules[moduleIdx]] = status || null;
-              });
-
-              return result;
-            });
-          },
           sendTelemetry: function sendTelemetry(msg) {
             utils.telemetry(msg);
             return Promise.resolve();

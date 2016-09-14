@@ -234,6 +234,12 @@ System.register("core/ab-tests", ["core/utils"], function (_export) {
                         case "1067_B":
                             CliqzUtils.setPref("attrackProxyTrackers", true);
                             break;
+                        case "1068_A":
+                            CliqzUtils.setPref("languageDedup", false);
+                            break;
+                        case "1068_B":
+                            CliqzUtils.setPref("languageDedup", true);
+                            break;
                         case "1069_A":
                             CliqzUtils.setPref("grOfferSwitchFlag", false);
                             break;
@@ -259,7 +265,6 @@ System.register("core/ab-tests", ["core/utils"], function (_export) {
                             break;
                         case "1072_B":
                             CliqzUtils.setPref("grFeatureEnabled", true);
-                            break;
                         case "1074_A":
                             CliqzUtils.setPref("cliqz-adb-abtest", false);
                             break;
@@ -277,18 +282,6 @@ System.register("core/ab-tests", ["core/utils"], function (_export) {
                             break;
                         case "1076_B":
                             CliqzUtils.setPref("history.timeouts", true);
-                            break;
-                        case "1077_A":
-                            CliqzUtils.setPref("languageDedup", false);
-                            break;
-                        case "1077_B":
-                            CliqzUtils.setPref("languageDedup", true);
-                            break;
-                        case "1078_A":
-                            CliqzUtils.setPref("telemetryNoSession", false);
-                            break;
-                        case "1078_B":
-                            CliqzUtils.setPref("telemetryNoSession", true);
                             break;
                         default:
                             rule_executed = false;
@@ -445,15 +438,6 @@ System.register("core/ab-tests", ["core/utils"], function (_export) {
                         case "1076_B":
                             CliqzUtils.clearPref('history.timeouts');
                             break;
-                        case "1077_A":
-                        case "1077_B":
-                            CliqzUtils.clearPref("languageDedup");
-                            break;
-                        case "1078_A":
-                        case "1078_B":
-                            CliqzUtils.clearPref("telemetryNoSession");
-                            break;
-
                         default:
                             rule_executed = false;
                     }

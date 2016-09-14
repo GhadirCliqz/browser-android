@@ -1,19 +1,17 @@
 package com.cliqz.browser.main;
 
 import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.View;
 
 import com.cliqz.browser.main.CliqzBrowserState.Mode;
 import com.cliqz.browser.webview.SearchWebView;
-import com.cliqz.browser.widget.SearchBar;
-
-import acr.browser.lightning.view.TrampolineConstants;
 
 /**
  * @author Stefano Pacifici
  * @date 2015/11/24
  */
-class TabFragmentListener implements SearchBar.Listener {
+class TabFragmentListener implements View.OnFocusChangeListener, TextWatcher {
     private final TabFragment fragment;
     private int queryLength;
 
@@ -23,7 +21,8 @@ class TabFragmentListener implements SearchBar.Listener {
 
     private TabFragmentListener(TabFragment fragment) {
         this.fragment = fragment;
-        fragment.searchBar.setListener(this);
+        fragment.mAutocompleteEditText.setOnFocusChangeListener(this);
+        fragment.mAutocompleteEditText.addTextChangedListener(this);
     }
 
     @Override
@@ -34,6 +33,9 @@ class TabFragmentListener implements SearchBar.Listener {
             fragment.hideKeyboard();
             if(mode == Mode.WEBPAGE) {
                 fragment.searchBar.showTitleBar();
+                if (fragment.antiTrackingDetails != null) {
+                    fragment.antiTrackingDetails.setVisibility(View.VISIBLE);
+                }
             }
         } else {
             fragment.bus.post(new Messages.AdjustPan());
@@ -54,7 +56,7 @@ class TabFragmentListener implements SearchBar.Listener {
 
     @Override
     public void onTextChanged(CharSequence s, int start, int before, int count) {
-        if (!fragment.searchBar.hasSearchFocus()) {
+        if (!fragment.mAutocompleteEditText.hasFocus()) {
             return;
         }
 
@@ -79,30 +81,5 @@ class TabFragmentListener implements SearchBar.Listener {
         if (fragment.timings != null) {
             fragment.timings.setLastTypedTime();
         }
-    }
-
-
-    @Override
-    public void onTitleClicked(SearchBar searchBar) {
-        final String url = fragment.mLightningView.getUrl();
-        if (url != null && url.toLowerCase().startsWith(TrampolineConstants.CLIQZ_SCHEME)) {
-            searchBar.setSearchText("");
-        } else {
-            searchBar.setSearchText(url);
-        }
-        fragment.mShowWebPageAgain = true;
-    }
-
-    @Override
-    public void onStopClicked(SearchBar searchBar) {
-        fragment.mLightningView.getWebView().stopLoading();
-    }
-
-    @Override
-    public void onQueryCleared(SearchBar searchBar) {
-        fragment.telemetry
-                .sendCLearUrlBarSignal(fragment.isIncognito(),
-                        searchBar.getSearchText().length(),
-                        fragment.state.getMode() == Mode.SEARCH ? "cards" : "web");
     }
 }

@@ -6,8 +6,7 @@ System.register("platform/platform", [], function (_export) {
     execute: function () {
       _export("default", {
         isMobile: true,
-        isFirefox: false,
-        isChromium: false
+        isFirefox: false
       });
     }
   };

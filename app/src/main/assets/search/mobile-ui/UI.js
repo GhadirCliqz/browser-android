@@ -377,6 +377,10 @@ System.register('mobile-ui/UI', ['mobile-ui/DelayedImageLoader', 'core/templates
           UI.DelayedImageLoader = System.get('mobile-ui/DelayedImageLoader')['default'];
           loadViews();
         },
+        onboardingSwipe: function onboardingSwipe() {
+          viewPager.goToIndex(1, 1000);
+          setTimeout(viewPager.goToIndex, 600, 0, 1000);
+        },
         setDimensions: function setDimensions() {
           UI.CARD_WIDTH = window.innerWidth - 2 * PEEK;
           UI.CARD_WIDTH /= UI.nCardsPerPage;
@@ -474,7 +478,7 @@ System.register('mobile-ui/UI', ['mobile-ui/DelayedImageLoader', 'core/templates
         },
         VIEWS: {},
         initViewpager: function initViewpager() {
-          var views = {},
+          var views = { 0: 1 },
               pageShowTs = Date.now(),
               innerWidth = window.innerWidth,
               offset = 0;
@@ -496,15 +500,15 @@ System.register('mobile-ui/UI', ['mobile-ui/DelayedImageLoader', 'core/templates
               if (page === UI.currentPage || !UI.isSearch()) return;
 
               views[page] = (views[page] || 0) + 1;
+              var direction = page > UI.currentPage ? 'right' : 'left';
 
               CliqzUtils.telemetry({
-                type: 'activity',
-                action: 'swipe',
-                swipe_direction: page > UI.currentPage ? 'right' : 'left',
-                current_position: page,
-                views: views[page],
-                prev_position: UI.currentPage,
-                prev_display_time: Date.now() - pageShowTs
+                type: 'cards',
+                action: 'swipe_' + direction,
+                index: page,
+                show_count: views[page],
+                show_duration: Date.now() - pageShowTs,
+                count: currentResultsCount
               });
 
               pageShowTs = Date.now();

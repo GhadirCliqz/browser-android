@@ -99,13 +99,13 @@ System.register("autocomplete/background", ["core/cliqz", "core/platform", "auto
               _this.autocompleteComponent = new AutocompleteComponent();
               _this.autocompleteComponent.unregister();
               _this.autocompleteComponent.register();
+
               utils.RERANKERS.push(WikipediaDeduplication);
             } else {
               Mixer.init();
             }
             autocomplete.Mixer = Mixer;
 
-            utils.getBackendResults = utils.getCliqzResults;
             // glueing stuff
             autocomplete.spellCheck = SpellCheck;
             utils.autocomplete = autocomplete;

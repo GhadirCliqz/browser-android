@@ -24,7 +24,8 @@ System.register('mobile-ui/background', ['core/base/background'], function (_exp
           'mobile-browser:restore-blocked-topsites': jsAPI.restoreBlockedTopSites,
           'mobile-browser:reset-state': jsAPI.resetState,
           'mobile-browser:set-search-engine': jsAPI.setDefaultSearchEngine,
-          'mobile-browser:publish-card-url': jsAPI.getCardUrl
+          'mobile-browser:publish-card-url': jsAPI.getCardUrl,
+          'mobile-browser:showcase-swipe-card': jsAPI.onboardingSwipe
         }
       }));
     }

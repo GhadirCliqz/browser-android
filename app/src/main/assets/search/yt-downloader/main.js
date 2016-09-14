@@ -15,8 +15,20 @@ System.register('yt-downloader/main', [], function (_export) {
     return matches ? matches[1] : null;
   }
 
-  function findVideoLinks(youtubePageContent) {
-    osAPI.notifyYoutubeVideoUrls(get_links(youtubePageContent));
+  function fetch_yt_url(youtube_url, callback) {
+    if (!callback) {
+      callback = osAPI.notifyYoutubeVideoUrls;
+    }
+    var req = new XMLHttpRequest();
+    req.open('GET', youtube_url, true);
+    req.onreadystatechange = function () {
+      if (req.readyState === 4 && req.status === 200) {
+        callback(get_links(req.responseText));
+      } else if (req.readyState === 4) {
+        callback([]);
+      }
+    };
+    req.send(null);
   }
 
   function getSeparators(videoFormats) {
@@ -49,7 +61,7 @@ System.register('yt-downloader/main', [], function (_export) {
     }
 
     var videoTitle = findMatch(bodyContent, TITLE_REGEX);
-    videoTitle = videoTitle ? videoTitle : 'Youtube Video';
+    videoTitle = videoTitle ? escape(videoTitle) : escape('Youtube Video');
 
     // parse the formats map
 
@@ -140,7 +152,7 @@ System.register('yt-downloader/main', [], function (_export) {
         continue;
       }
       if (videoURL[format] !== undefined && FORMAT_LABEL[format] !== undefined && showFormat[format]) {
-        downloadCodeList.push({ url: encodeURIComponent(videoURL[format]), sig: videoSignature[format], format: format, label: FORMAT_LABEL[format] });
+        downloadCodeList.push({ url: videoURL[format], sig: videoSignature[format], format: format, label: FORMAT_LABEL[format] });
         console.log('DYVAM - Info: itag' + format + ' url:' + videoURL[format]);
       }
     }
@@ -164,7 +176,7 @@ System.register('yt-downloader/main', [], function (_export) {
       // the default settings show all MP4 videos, the highest quality FLV and no WebM
       SHOW_DASH_FORMATS = false;
 
-      _export('findVideoLinks', findVideoLinks);
+      _export('getUrls', fetch_yt_url);
     }
   };
 });

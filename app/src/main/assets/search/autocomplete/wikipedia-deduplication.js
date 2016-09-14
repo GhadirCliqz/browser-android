@@ -1,15 +1,14 @@
-System.register("autocomplete/wikipedia-deduplication", ["core/cliqz", "platform/language"], function (_export) {
+System.register('autocomplete/wikipedia-deduplication', ['core/cliqz'], function (_export) {
     /**
      * This modules implements reranking of results using user specific data
      */
-    "use strict";
+    'use strict';
 
     var utils, language, CliqzWikipediaDeduplication;
     return {
         setters: [function (_coreCliqz) {
             utils = _coreCliqz.utils;
-        }, function (_platformLanguage) {
-            language = _platformLanguage["default"];
+            language = _coreCliqz.language;
         }],
         execute: function () {
             CliqzWikipediaDeduplication = {
@@ -184,7 +183,7 @@ System.register("autocomplete/wikipedia-deduplication", ["core/cliqz", "platform
 
             };
 
-            _export("default", CliqzWikipediaDeduplication);
+            _export('default', CliqzWikipediaDeduplication);
         }
     };
 });

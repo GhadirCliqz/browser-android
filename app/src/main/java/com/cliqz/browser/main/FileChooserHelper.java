@@ -2,6 +2,7 @@ package com.cliqz.browser.main;
 
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Build;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.webkit.ValueCallback;
@@ -45,6 +46,7 @@ public class FileChooserHelper {
     void showFileChooser(BrowserEvents.ShowFileChooser event) {
         final MainActivity mainActivity = mainActivityWeakReference.get();
         if (mCallback != null) {
+            //noinspection unchecked
             mCallback.onReceiveValue(null);
         }
         if (mainActivity == null) {
@@ -58,7 +60,7 @@ public class FileChooserHelper {
         final boolean captureEnabled;
         final String title;
         final WebChromeClient.FileChooserParams params = event.fileChooserParams;
-        if (params != null) {
+        if (params != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             acceptTypes = params.getAcceptTypes();
             captureEnabled = params.isCaptureEnabled();
             final CharSequence t = params.getTitle();
@@ -91,6 +93,7 @@ public class FileChooserHelper {
         mCallback = null;
         mCallbackType = null;
         if (callback != null && callIt) {
+            //noinspection unchecked
             callback.onReceiveValue(null);
         }
     }
@@ -160,10 +163,13 @@ public class FileChooserHelper {
         final Uri result = data == null ? null : data.getData();
         if (callback != null) {
             if (callbackType == Uri.class) {
+                //noinspection unchecked
                 callback.onReceiveValue(result);
             } else if (callbackType == Uri[].class) {
+                //noinspection unchecked
                 callback.onReceiveValue(new Uri[] { result });
             } else {
+                //noinspection unchecked
                 callback.onReceiveValue(null);
             }
             mCallback = null;
@@ -188,11 +194,7 @@ public class FileChooserHelper {
 
         @Override
         public void onDenied(String permission) {
-            final ValueCallback callback = mCallback;
-            if (callback != null) {
-                callback.onReceiveValue(null);
-                mCallback = null;
-            }
+            resetCallback(true);
         }
     }
 }

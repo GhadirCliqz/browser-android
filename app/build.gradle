@@ -9,8 +9,11 @@ android {
     defaultConfig {
         targetSdkVersion 24
         minSdkVersion 21
-        versionCode 5
-        versionName "1.0.1r1"
+        versionCode 6
+        versionName "1.0.1r2"
+
+        multiDexEnabled true
+
         buildConfigField 'String', 'LIGHTNING_VERSION_NAME', '"4.2.3.1"'
         buildConfigField "boolean", "FULL_VERSION", "true"
 
@@ -92,9 +95,6 @@ android {
             versionCode 1
         }
     }
-    dexOptions {
-        jumboMode = true
-    }
 }
 
 dexcount {
@@ -115,6 +115,7 @@ dependencies {
     // support libraries
     compile 'com.android.support:appcompat-v7:24.2.0'
     compile 'com.android.support:design:24.2.0'
+    xwalkCompile 'com.android.support:multidex:1.0.1'
     // Gson
     compile 'com.google.code.gson:gson:2.6.1'
     // html parsing fo reading mode
@@ -133,8 +134,9 @@ dependencies {
     // Anti-tracking
     standardCompile project(':antitracking')
     lookbackCompile project(':antitracking')
-    // Utils library
+    // Utils libraries
     compile project(':utils')
+    compile project(':android_utils')
     // On-boarding
     compile 'com.github.deano2390:MaterialShowcaseView:1.1.0@aar'
     // memory leak analysis

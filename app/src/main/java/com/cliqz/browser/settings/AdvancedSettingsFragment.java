@@ -5,6 +5,7 @@ package com.cliqz.browser.settings;
 
 import android.app.Activity;
 import android.content.DialogInterface;
+import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
@@ -12,6 +13,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.preference.CheckBoxPreference;
 import android.preference.Preference;
+import android.support.v4.view.ViewCompat;
 import android.support.v7.app.AlertDialog;
 import android.text.InputFilter;
 import android.util.Log;
@@ -23,6 +25,7 @@ import android.widget.TextView;
 
 import com.cliqz.browser.R;
 import com.cliqz.browser.utils.TelemetryKeys;
+import com.cliqz.utils.ViewUtils;
 
 import java.util.Arrays;
 import java.util.List;
@@ -360,28 +363,15 @@ public class AdvancedSettingsFragment extends BaseSettingsFragment {
 
         int padding = Utils.dpToPx(10);
 
-        TextView v = new TextView(mActivity);
+        final TextView v = new TextView(mActivity);
         v.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18);
         v.setTextColor(Color.DKGRAY);
         v.setText(Constants.EXTERNAL_STORAGE + '/');
         v.setPadding(padding, padding, 0, padding);
         layout.addView(v);
         layout.addView(getDownload);
-        if (API < Build.VERSION_CODES.JELLY_BEAN) {
-            layout.setBackgroundDrawable(getResources().getDrawable(android.R.drawable.edit_text));
-        } else {
-            Drawable drawable;
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                drawable = getResources().getDrawable(android.R.drawable.edit_text, getActivity().getTheme());
-            } else {
-                drawable = getResources().getDrawable(android.R.drawable.edit_text);
-            }
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-                layout.setBackground(drawable);
-            } else {
-                layout.setBackgroundDrawable(drawable);
-            }
-        }
+        final Resources.Theme theme = getActivity().getTheme();
+        ViewUtils.setThemedBackgroundDrawable(layout, android.R.drawable.edit_text, theme);
         downLocationPicker.setView(layout);
         downLocationPicker.setPositiveButton(getResources().getString(R.string.action_ok),
                 new DialogInterface.OnClickListener() {

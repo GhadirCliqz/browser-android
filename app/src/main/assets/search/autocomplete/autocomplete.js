@@ -609,10 +609,13 @@ System.register("autocomplete/autocomplete", ["core/cliqz", "autocomplete/histor
                             this.pushTimeoutCallback = this.pushTimeoutCallback.bind(this);
                             this.historyPatternCallback = this.historyPatternCallback.bind(this);
                             this.createInstantResultCallback = this.createInstantResultCallback.bind(this);
+
                             historyCluster.historyCallback = this.historyPatternCallback;
+
                             if (searchString.trim().length) {
                                 // start fetching results
-                                utils.getBackendResults(searchString, this.cliqzResultFetcher);
+                                utils.getCliqzResults(searchString, this.cliqzResultFetcher);
+
                                 // if spell correction, no suggestions
                                 if (CliqzAutocomplete.spellCorr.on && !CliqzAutocomplete.spellCorr.override) {
                                     this.suggestionsRecieved = true;

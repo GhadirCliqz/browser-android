@@ -83,5 +83,8 @@ var jsAPI = {
     } else { // history view
       History.update();
     }
+  },
+  onboardingSwipe: function () {
+    CLIQZ.UI.onboardingSwipe();
   }
 }
