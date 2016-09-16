@@ -274,6 +274,9 @@ public class TabFragment extends BaseFragment {
             webView = null;
         }
 
+        mAutocompleteEditText
+                .setIsAutocompletionEnabled(preferenceManager.isAutocompletionEnebled());
+
         if (state.shouldReset()) {
             isHomePageShown = true;
             searchBar.showSearchEditText();

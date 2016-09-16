@@ -293,4 +293,5 @@
     <string name="showcace_search_title">Schnellsuche</string>
     <string name="upload_file_title">Datei hochladen</string>
     <string name="rate_us">CLIQZ Browser bewerten</string>
+    <string name="autocompletion_enabled">Auto-Vervollständigung aktivieren</string>
 </resources>

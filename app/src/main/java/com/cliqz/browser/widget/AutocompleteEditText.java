@@ -38,6 +38,8 @@ public class AutocompleteEditText extends EditText {
 
     private boolean mIsAutocompleted;
     private boolean mIsTyping = false;
+    private boolean mIsAutocompletionEnabled = true;
+
     private AutocompleteRunnable autocompleteRunnable = null;
 
     public AutocompleteEditText(Context context) {
@@ -55,12 +57,19 @@ public class AutocompleteEditText extends EditText {
         setImeOptions(imeOptions);
         mIsAutocompleting = false;
         mIsAutocompleted = false;
-        // mAutocompleteService = AutocompleteService.createInstance(context);
         BrowserApp.getAppComponent().inject(this);
     }
 
     public boolean isAutocompleted() {
         return mIsAutocompleted;
+    }
+
+    public void setIsAutocompletionEnabled(boolean value) {
+        mIsAutocompletionEnabled = value;
+    }
+
+    public boolean isAutocompletionEnabled() {
+        return mIsAutocompletionEnabled;
     }
 
     @Override
@@ -83,17 +92,10 @@ public class AutocompleteEditText extends EditText {
         return getText().toString().substring(0, getSelectionStart());
     }
 
-    /*
-    @Override
-    public boolean onKeyPreIme (int keyCode, KeyEvent event) {
-        if(keyCode == KeyEvent.KEYCODE_BACK && this.hasFocus()) {
-            this.clearFocus();
-            return true;
-        }
-        return super.onKeyPreIme(keyCode, event);
-    }*/
-
     public void setAutocompleteText(CharSequence text) {
+        if (!mIsAutocompletionEnabled) {
+            return;
+        }
         final String autocompletion = text.toString();
         if (autocompleteRunnable != null) {
             autocompleteRunnable.cancel();
@@ -101,10 +103,6 @@ public class AutocompleteEditText extends EditText {
         autocompleteRunnable = new AutocompleteRunnable(autocompletion);
         postDelayed(autocompleteRunnable, 200);
     }
-
-//    public AutocompleteService getAutocompleteService() {
-//        return mAutocompleteService;
-//    }
 
     private class DefaultTextWatcher implements TextWatcher {
 
@@ -154,13 +152,6 @@ public class AutocompleteEditText extends EditText {
                 watcher.afterTextChanged(s);
             }
             mIsTyping = false;
-
-//            if (!mDeleting) {
-//                final String autocompletion = mAutocompleteService.autocomplete(s.toString());
-//                if (autocompletion != null) {
-//                    setAutocompleteText(autocompletion);
-//                }
-//            }
         }
     }
 

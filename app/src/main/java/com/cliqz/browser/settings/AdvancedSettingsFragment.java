@@ -42,6 +42,7 @@ public class AdvancedSettingsFragment extends BaseSettingsFragment {
     private static final String SETTINGS_USERAGENT = "agent";
     private static final String SETTINGS_DOWNLOAD = "download";
     private static final String SETTINGS_PROXY = "proxy";
+    private static final String SETTINGS_AUTOCOMPLETION = "cb_autocompletion";
     private static final String SETTINGS_JAVASCRIPT = "cb_javascript";
 
     private Activity mActivity;
@@ -49,7 +50,7 @@ public class AdvancedSettingsFragment extends BaseSettingsFragment {
     private CharSequence[] mProxyChoices;
     private int mAgentChoice;
     private String mDownloadLocation;
-    private CheckBoxPreference cbJsScript; //cbAllowPopups, cbrestoreTabs
+    private CheckBoxPreference cbAutocompletionEnabled, cbJsScript; //cbAllowPopups, cbrestoreTabs
     private Preference textEncoding, useragent, downloadloc, proxy; //urlcontent,
     private CharSequence[] mUrlOptions;
     private long startTime;
@@ -71,6 +72,7 @@ public class AdvancedSettingsFragment extends BaseSettingsFragment {
         // urlcontent = findPreference(SETTINGS_URLCONTENT);
         // cbAllowPopups = (CheckBoxPreference) findPreference(SETTINGS_NEWWINDOW);
         // cbrestoreTabs = (CheckBoxPreference) findPreference(SETTINGS_RESTORETABS);
+        cbAutocompletionEnabled = (CheckBoxPreference) findPreference(SETTINGS_AUTOCOMPLETION);
         cbJsScript = (CheckBoxPreference) findPreference(SETTINGS_JAVASCRIPT);
         proxy = findPreference(SETTINGS_PROXY);
         useragent = findPreference(SETTINGS_USERAGENT);
@@ -83,6 +85,7 @@ public class AdvancedSettingsFragment extends BaseSettingsFragment {
         downloadloc.setOnPreferenceClickListener(this);
         // cbAllowPopups.setOnPreferenceChangeListener(this);
         // cbrestoreTabs.setOnPreferenceChangeListener(this);
+        cbAutocompletionEnabled.setOnPreferenceChangeListener(this);
         cbJsScript.setOnPreferenceChangeListener(this);
 
         textEncoding.setSummary(mPreferenceManager.getTextEncoding());
@@ -93,6 +96,7 @@ public class AdvancedSettingsFragment extends BaseSettingsFragment {
 
         // cbAllowPopups.setChecked(mPreferenceManager.getPopupsEnabled());
         // cbrestoreTabs.setChecked(mPreferenceManager.getRestoreLostTabsEnabled());
+        cbAutocompletionEnabled.setChecked(mPreferenceManager.isAutocompletionEnebled());
         cbJsScript.setChecked(mPreferenceManager.getJavaScriptEnabled());
 
         mProxyChoices = getResources().getStringArray(R.array.proxy_choices_array);
@@ -162,6 +166,10 @@ public class AdvancedSettingsFragment extends BaseSettingsFragment {
 //                mPreferenceManager.setRestoreLostTabsEnabled((Boolean) newValue);
 //                cbrestoreTabs.setChecked((Boolean) newValue);
 //                return true;
+            case SETTINGS_AUTOCOMPLETION:
+                mPreferenceManager.setAutocompletionEnabled((Boolean) newValue);
+                cbAutocompletionEnabled.setChecked((Boolean) newValue);
+                return true;
             case SETTINGS_JAVASCRIPT:
                 mTelemetry.sendSettingsMenuSignal(TelemetryKeys.ENABLE_JS, TelemetryKeys.ADVANCED,
                         !((Boolean) newValue));

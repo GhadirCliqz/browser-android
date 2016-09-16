@@ -298,4 +298,5 @@
     <string name="showcace_search_title">Ricerca rapida</string>
     <string name="upload_file_title">Carica file</string>
     <string name="rate_us">Valuta CLIQZ Browser</string>
+    <string name="autocompletion_enabled">Abilita l\'autocompletamento</string>
 </resources>
