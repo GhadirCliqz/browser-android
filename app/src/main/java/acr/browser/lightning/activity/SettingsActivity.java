@@ -118,6 +118,8 @@ public class SettingsActivity extends ThemableSettingsActivity {
             Intent customChooserIntent = CustomChooserIntent.create(this.getPackageManager(),
                     intent, getString(R.string.contact_cliqz), blackList);
             startActivity(customChooserIntent);
+        } else if (info.id == R.id.rate_us) {
+            startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=com.cliqz.browser")));
         } else {
             super.onListItemClick(l, v, position, id);
         }
