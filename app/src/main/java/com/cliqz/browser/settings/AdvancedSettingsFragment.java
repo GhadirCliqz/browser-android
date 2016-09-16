@@ -167,6 +167,8 @@ public class AdvancedSettingsFragment extends BaseSettingsFragment {
 //                cbrestoreTabs.setChecked((Boolean) newValue);
 //                return true;
             case SETTINGS_AUTOCOMPLETION:
+                mTelemetry.sendSettingsMenuSignal(TelemetryKeys.ENABLE_AUTOCOMPLETE, TelemetryKeys.ADVANCED,
+                        !((Boolean) newValue));
                 mPreferenceManager.setAutocompletionEnabled((Boolean) newValue);
                 cbAutocompletionEnabled.setChecked((Boolean) newValue);
                 return true;

@@ -191,4 +191,6 @@ public final class TelemetryKeys {
     public static final String INTRO = "intro";
     public static final String NEXT = "next";
     public static final String SHOW_COUNT = "show_count";
+    public static final String ENABLE_AUTOCOMPLETE = "enable_autocomplete";
+    public static final String VERSION_OS = "version_os";
 }

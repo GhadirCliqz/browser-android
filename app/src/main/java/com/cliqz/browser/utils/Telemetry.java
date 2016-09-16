@@ -296,6 +296,7 @@ public class Telemetry {
             signal.put(TelemetryKeys.VERSION, mExtensionVersion);
             signal.put(TelemetryKeys.VERSION_DIST, BuildConfig.VERSION_NAME);
             signal.put(TelemetryKeys.VERSION_HOST, BuildConfig.LIGHTNING_VERSION_NAME);
+            signal.put(TelemetryKeys.VERSION_OS, Build.VERSION.SDK_INT);
             signal.put(TelemetryKeys.OS_VERSION, Integer.toString(Build.VERSION.SDK_INT));
             signal.put(TelemetryKeys.DEFAULT_SEARCH_ENGINE, getDefaultSearchEngine());
             signal.put(TelemetryKeys.HISTORY_URLS, historySize);
