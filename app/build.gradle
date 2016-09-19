@@ -10,7 +10,7 @@ android {
         targetSdkVersion 24
         minSdkVersion 21
         versionCode 7
-        versionName "1.0.1r2"
+        versionName "1.0.1r3"
 
         multiDexEnabled true
 
