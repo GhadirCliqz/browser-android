@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.content.res.Resources;
+import android.graphics.Rect;
 import android.support.annotation.IdRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.StringRes;
@@ -126,8 +127,9 @@ public class OnBoardingHelper {
         final View anchorView = mainActivity.findViewById(anchor);
         final boolean shouldShow =
                 manager.getBoolean(preference, true);
+        final boolean anchorIsVisible = checkAnchorVisibility(anchorView);
 
-        if (anchorView == null || !shouldShow) {
+        if (anchorView == null || !shouldShow || !anchorIsVisible) {
             return false;
         }
 
@@ -163,6 +165,12 @@ public class OnBoardingHelper {
                 .addShowcaseListener(showcaseListener);
 
         return true;
+    }
+
+    private boolean checkAnchorVisibility(View anchorView) {
+        final Rect rect = new Rect();
+        final boolean visible = anchorView.getGlobalVisibleRect(rect);
+        return visible;
     }
 
     public boolean close() {
