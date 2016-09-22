@@ -17,6 +17,7 @@ import android.widget.TextView;
 import com.cliqz.browser.R;
 import com.cliqz.browser.utils.Telemetry;
 import com.squareup.otto.Bus;
+import com.squareup.otto.Subscribe;
 
 import java.util.ArrayList;
 import java.util.Locale;
@@ -38,6 +39,8 @@ public class AntiTrackingDialog {
     private final Bus bus;
     private final Telemetry telemetry;
     private PopupWindow dialog;
+    private TextView counter;
+    private TrackersListAdapter trackersListAdapter;
 
     public AntiTrackingDialog(Activity activity, ArrayList<TrackerDetailsModel> details,
                               int trackerCount, boolean isIncognito, Bus bus, Telemetry telemetry) {
@@ -47,6 +50,7 @@ public class AntiTrackingDialog {
         this.isIncognito = isIncognito;
         this.bus = bus;
         this.telemetry = telemetry;
+        bus.register(this);
         setup();
     }
 
@@ -67,7 +71,7 @@ public class AntiTrackingDialog {
         popupView.setAlpha(0.95f);
         dialog = new PopupWindow(popupView, WindowManager.LayoutParams.MATCH_PARENT,
                 WindowManager.LayoutParams.MATCH_PARENT);
-        final TextView counter = (TextView) popupView.findViewById(R.id.counter);
+        counter = (TextView) popupView.findViewById(R.id.counter);
         final RecyclerView trackersList = (RecyclerView) popupView.findViewById(R.id.trackers_list);
         final Button helpButton = (Button) popupView.findViewById(R.id.help);
         final TextView companiesHeader = (TextView) popupView.findViewById(R.id.companies_header);
@@ -97,7 +101,8 @@ public class AntiTrackingDialog {
         lowerLine.getBackground().setColorFilter(ContextCompat.getColor(activity, popupTextColor), PorterDuff.Mode.SRC_ATOP);
         counter.setText(Integer.toString(trackerCount));
         trackersList.setLayoutManager(new LinearLayoutManager(activity));
-        trackersList.setAdapter(new TrackersListAdapter(details, isIncognito, activity, bus, dialog, telemetry));
+        trackersListAdapter = new TrackersListAdapter(details, isIncognito, activity, bus, dialog, telemetry);
+        trackersList.setAdapter(trackersListAdapter);
         dialog.setBackgroundDrawable(new ColorDrawable());
         dialog.setOutsideTouchable(true);
         dialog.setFocusable(true);
@@ -105,5 +110,13 @@ public class AntiTrackingDialog {
 
     public void show(View anchor) {
         dialog.showAsDropDown(anchor);
+    }
+
+    @Subscribe
+    public void updateList(Messages.UpdateAttrackList event) {
+        counter.setText(Integer.toString(event.trackerCount));
+        if (trackersListAdapter != null) {
+            trackersListAdapter.updateList(event.trackerDetails);
+        }
     }
 }

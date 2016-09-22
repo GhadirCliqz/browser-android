@@ -2,6 +2,8 @@ package com.cliqz.browser.main;
 
 import org.json.JSONArray;
 
+import java.util.ArrayList;
+
 /**
  * @author Stefano Pacifici
  * @date 2015/11/24
@@ -149,6 +151,16 @@ public final class Messages {
 
         public UpdateTabCounter(int count) {
             this.count = count;
+        }
+    }
+
+    public static class UpdateAttrackList {
+        public final ArrayList<TrackerDetailsModel> trackerDetails;
+        public final int trackerCount;
+
+        public UpdateAttrackList(ArrayList<TrackerDetailsModel> trackerDetails, int trackerCount) {
+            this.trackerDetails = trackerDetails;
+            this.trackerCount = trackerCount;
         }
     }
 }

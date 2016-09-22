@@ -916,6 +916,9 @@ public class TabFragment extends BaseFragment {
     private void setTrackerCountText(String text) {
         if (trackerCounter != null) {
             trackerCounter.setText(text);
+            if (bus != null) {
+                bus.post(new Messages.UpdateAttrackList(mLightningView.getTrackerDetails(), mTrackerCount));
+            }
         }
     }
 

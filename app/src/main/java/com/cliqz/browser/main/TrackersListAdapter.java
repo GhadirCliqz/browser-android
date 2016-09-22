@@ -7,7 +7,6 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.webkit.URLUtil;
 import android.widget.ImageView;
 import android.widget.PopupWindow;
 import android.widget.TextView;
@@ -16,19 +15,16 @@ import com.cliqz.browser.R;
 import com.cliqz.browser.utils.Telemetry;
 import com.squareup.otto.Bus;
 
-import java.net.URL;
-import java.net.URLEncoder;
 import java.util.ArrayList;
 
 import acr.browser.lightning.bus.BrowserEvents;
-import acr.browser.lightning.utils.UrlUtils;
 
 /**
  * Created by Ravjit on 02/08/16.
  */
 public class TrackersListAdapter extends RecyclerView.Adapter<TrackersListAdapter.ViewHolder> {
 
-    private final ArrayList<TrackerDetailsModel> trackerDetails;
+    private ArrayList<TrackerDetailsModel> trackerDetails;
     private final boolean isIncognito;
     private final Context context;
     private final PopupWindow popup;
@@ -92,5 +88,9 @@ public class TrackersListAdapter extends RecyclerView.Adapter<TrackersListAdapte
             trackerCount = (TextView) view.findViewById(R.id.tracker_count);
             infoImage = (ImageView) view.findViewById(R.id.info);
         }
+    }
+    public void updateList(ArrayList<TrackerDetailsModel> trackerDetails) {
+        this.trackerDetails = trackerDetails;
+        notifyDataSetChanged();
     }
 }

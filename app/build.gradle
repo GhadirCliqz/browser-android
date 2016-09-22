@@ -113,8 +113,8 @@ repositories {
 
 dependencies {
     // support libraries
-    compile 'com.android.support:appcompat-v7:24.2.0'
-    compile 'com.android.support:design:24.2.0'
+    compile 'com.android.support:appcompat-v7:24.2.1'
+    compile 'com.android.support:design:24.2.1'
     xwalkCompile 'com.android.support:multidex:1.0.1'
     // Gson
     compile 'com.google.code.gson:gson:2.6.1'
@@ -167,7 +167,7 @@ dependencies {
     testCompile 'org.mockito:mockito-core:1.10.19'
     testCompile 'org.eclipse.jetty:jetty-server:9.2.17.v20160517'
     // Forcing version
-    androidTestCompile 'com.android.support:support-annotations:24.2.0'
+    androidTestCompile 'com.android.support:support-annotations:24.2.1'
     androidTestCompile 'com.android.support.test:runner:0.5'
     androidTestCompile 'com.android.support.test:rules:0.5'
     androidTestCompile 'com.android.support.test.espresso:espresso-core:2.2.2'
