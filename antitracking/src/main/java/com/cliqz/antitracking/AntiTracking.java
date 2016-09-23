@@ -4,6 +4,7 @@ import android.content.Context;
 import android.net.Uri;
 import android.util.Log;
 import android.util.Pair;
+import android.webkit.MimeTypeMap;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebResourceResponse;
 import android.webkit.WebView;
@@ -38,6 +39,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
+import java.util.regex.*;
 
 /**
  * Created by sammacbeth on 18/05/16.
@@ -128,7 +130,7 @@ public class AntiTracking {
                     }
 
                     // create legacy CliqzUtils global
-                    runtime.executeVoidScript("var CliqzUtils = {}; System.import(\"core/utils\").then(function(mod) { CliqzUtils = mod.default; });");
+                    runtime.executeVoidScript("var CliqzUtils = {}; System.import(\"core/utils\").then(function(mod) { CliqzUtils = mod.default; }).catch(function(e) { logDebug(e, 'xxx') });");
 
                     // pref config
                     setPref(runtime, "antiTrackTest", support.isAntiTrackTestEnabled());
@@ -249,13 +251,60 @@ public class AntiTracking {
                     requestInfo.add("isPrivate", false);
                     requestInfo.add("originUrl", isMainDocument ? requestUrl.toString() : tabs.get(view.hashCode()).first.toString());
 
-                    // simple content type detection
-                    int contentPolicyType = 11; // default is XMLHttpRequest
+
+                    final Pattern RE_JS = Pattern.compile("\\.js($|\\|?)",   Pattern.CASE_INSENSITIVE);
+                    final Pattern RE_CSS = Pattern.compile("\\.css($|\\|?)", Pattern.CASE_INSENSITIVE);
+                    final Pattern RE_IMAGE = Pattern.compile("\\.(?:gif|png|jpe?g|bmp|ico)($|\\|?)", Pattern.CASE_INSENSITIVE);
+                    final Pattern RE_FONT = Pattern.compile("\\.(?:ttf|woff)($|\\|?)", Pattern.CASE_INSENSITIVE);
+                    final Pattern RE_HTML = Pattern.compile("\\.html?", Pattern.CASE_INSENSITIVE);
+                    final Pattern RE_JSON = Pattern.compile("\\.json($|\\|?)",   Pattern.CASE_INSENSITIVE);
+
+                    final int NUM_OTHER = 1;
+                    final int NUM_SCRIPT = 2;
+                    final int NUM_IMAGE = 3;
+                    final int NUM_STYLESHEET = 4;
+                    final int NUM_OBJECT = 5;
+                    final int NUM_DOCUMENT = 6;
+                    final int NUM_SUBDOCUMENT = 7;
+                    final int NUM_XMLHttpRequest = 11;
+                    final int NUM_FONT = 14;
+
+
+                    String headers_accept = request.getRequestHeaders().get("Accept").toString();
+
+                    int contentPolicyType = NUM_XMLHttpRequest;
+
                     if (isMainDocument) {
-                        contentPolicyType = 6;
-                    } else if (requestUrl.toString().endsWith(".js")) {
-                        contentPolicyType = 2;
+                        contentPolicyType = NUM_DOCUMENT;
                     }
+
+                    if (contentPolicyType == NUM_XMLHttpRequest){
+                        if (headers_accept != null)
+                        {
+                            if (headers_accept.contains("text/css"))
+                                contentPolicyType = NUM_STYLESHEET;
+                            else if (headers_accept.contains("image/*") || headers_accept.contains("image/webp"))
+                                contentPolicyType = NUM_IMAGE;
+                            else if (headers_accept.contains("text/html"))
+                                contentPolicyType = NUM_SUBDOCUMENT;
+                        }
+                    }
+                    if (contentPolicyType == NUM_XMLHttpRequest){
+                        if (RE_JSON.matcher(requestUrl.toString()).find()) {
+                            contentPolicyType = NUM_OTHER;
+                        } else if (RE_JS.matcher(requestUrl.toString()).find()) {
+                            contentPolicyType = NUM_SCRIPT;
+                        } else if (RE_CSS.matcher(requestUrl.toString()).find()) {
+                            contentPolicyType = NUM_STYLESHEET;
+                        } else if (RE_IMAGE.matcher(requestUrl.toString()).find()) {
+                            contentPolicyType = NUM_IMAGE;
+                        } else if (RE_FONT.matcher(requestUrl.toString()).find()) {
+                            contentPolicyType = NUM_FONT;
+                        } else if (RE_HTML.matcher(requestUrl.toString()).find()) {
+                            contentPolicyType = NUM_SUBDOCUMENT;
+                        }
+                    }
+
 
                     requestInfo.add("type", contentPolicyType);
 

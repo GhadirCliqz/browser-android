@@ -7,6 +7,8 @@ System.register("platform/browser", [], function (_export) {
 
   _export("isWindowActive", isWindowActive);
 
+  _export("forEachWindow", forEachWindow);
+
   function currentURI() {}
 
   function contextFromEvent() {
@@ -17,6 +19,10 @@ System.register("platform/browser", [], function (_export) {
     return _nativeIsWindowActive(windowID);
   }
 
+  function forEachWindow(fn) {
+    return;
+  }
+
   return {
     setters: [],
     execute: function () {
@@ -24,4 +30,4 @@ System.register("platform/browser", [], function (_export) {
     }
   };
 });
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbImJyb3dzZXIuZXMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6Ijs7Ozs7Ozs7O0FBQ08sV0FBUyxVQUFVLEdBQUcsRUFBRTs7QUFFeEIsV0FBUyxnQkFBZ0IsR0FBRztBQUNqQyxXQUFPLElBQUksQ0FBQTtHQUNaOztBQUVNLFdBQVMsY0FBYyxDQUFDLFFBQVEsRUFBRTtBQUN2QyxXQUFPLHFCQUFxQixDQUFDLFFBQVEsQ0FBQyxDQUFDO0dBQ3hDOzs7OztBQVI4QixPQUFDIiwiZmlsZSI6ImJyb3dzZXIuZXMiLCJzb3VyY2VzQ29udGVudCI6WyJcbmV4cG9ydCBmdW5jdGlvbiBjdXJyZW50VVJJKCkge307XG5cbmV4cG9ydCBmdW5jdGlvbiBjb250ZXh0RnJvbUV2ZW50KCkge1xuICByZXR1cm4gbnVsbFxufVxuXG5leHBvcnQgZnVuY3Rpb24gaXNXaW5kb3dBY3RpdmUod2luZG93SUQpIHtcbiAgcmV0dXJuIF9uYXRpdmVJc1dpbmRvd0FjdGl2ZSh3aW5kb3dJRCk7XG59XG4iXX0=
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbImJyb3dzZXIuZXMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6Ijs7Ozs7Ozs7Ozs7QUFDTyxXQUFTLFVBQVUsR0FBRyxFQUFFOztBQUV4QixXQUFTLGdCQUFnQixHQUFHO0FBQ2pDLFdBQU8sSUFBSSxDQUFBO0dBQ1o7O0FBRU0sV0FBUyxjQUFjLENBQUMsUUFBUSxFQUFFO0FBQ3ZDLFdBQU8scUJBQXFCLENBQUMsUUFBUSxDQUFDLENBQUM7R0FDeEM7O0FBRU0sV0FBUyxhQUFhLENBQUMsRUFBRSxFQUFFO0FBQ2hDLFdBQU07R0FDUDs7Ozs7QUFaOEIsT0FBQyIsImZpbGUiOiJicm93c2VyLmVzIiwic291cmNlc0NvbnRlbnQiOlsiXG5leHBvcnQgZnVuY3Rpb24gY3VycmVudFVSSSgpIHt9O1xuXG5leHBvcnQgZnVuY3Rpb24gY29udGV4dEZyb21FdmVudCgpIHtcbiAgcmV0dXJuIG51bGxcbn1cblxuZXhwb3J0IGZ1bmN0aW9uIGlzV2luZG93QWN0aXZlKHdpbmRvd0lEKSB7XG4gIHJldHVybiBfbmF0aXZlSXNXaW5kb3dBY3RpdmUod2luZG93SUQpO1xufVxuXG5leHBvcnQgZnVuY3Rpb24gZm9yRWFjaFdpbmRvdyhmbikge1xuICByZXR1cm5cbn1cbiJdfQ==
