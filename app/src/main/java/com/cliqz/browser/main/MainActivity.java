@@ -506,6 +506,7 @@ public class MainActivity extends AppCompatActivity implements ActivityComponent
         final FragmentManager fm = getSupportFragmentManager();
         fm.popBackStack();
         final String query = event.query;
+        tabsManager.getCurrentTab().state.setQuery(event.query);
         if (event.query != null) {
             fm.addOnBackStackChangedListener(new FragmentManager.OnBackStackChangedListener() {
                 @Override

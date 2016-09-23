@@ -214,6 +214,8 @@ public class TabFragment extends BaseFragment {
             ((ViewGroup) mSearchWebView.getParent()).removeView(mSearchWebView);
         }
         mSearchWebView.setCurrentTabState(state);
+        webView.setId(R.id.cliqz_web_view);
+        mSearchWebView.setId(R.id.search_web_view);
         localContainer.addView(webView);
         localContainer.addView(mSearchWebView);
         titleBar.setOnTouchListener(onTouchListener);

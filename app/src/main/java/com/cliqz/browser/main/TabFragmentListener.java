@@ -68,8 +68,8 @@ class TabFragmentListener implements View.OnFocusChangeListener, TextWatcher {
 
         final String q = s.toString();
         final SearchWebView searchWebView = fragment.mSearchWebView;
-        final boolean shouldSend = ((start + count) != before) ||
-                !q.equalsIgnoreCase(fragment.lastQuery);
+        final boolean shouldSend = (((start + count) != before) ||
+                !q.equalsIgnoreCase(fragment.lastQuery)) && !q.equals(fragment.state.getQuery());
         if (searchWebView != null && shouldSend) {
             fragment.lastQuery = q;
             searchWebView.onQueryChanged(q);
